@@ -1317,6 +1317,62 @@ header {
 .login-twitch-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #6120c0; }
 .login-twitch-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #6120c0; }
 
+/* A little garden gate: styles stay scoped to the welcome screen. */
+.login-overlay {
+  overflow-y: auto; padding: 32px 20px;
+  background: radial-gradient(ellipse at 18% 20%, #f9ecd5 0, transparent 48%),
+    radial-gradient(ellipse at 90% 85%, #dce4cf 0, transparent 50%), #f5f1e7;
+  color: #414b39;
+}
+.login-overlay::before {
+  content: ''; position: fixed; inset: 12px; border: 1px solid #7d896d30;
+  border-radius: 22px; pointer-events: none;
+}
+.login-box {
+  position: relative; width: 100%; max-width: 920px; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  background: #fffdf7; border: 1px solid #e1dfcf; border-radius: 28px;
+  box-shadow: 0 18px 70px #4b573318; overflow: hidden; margin: auto;
+}
+.login-art {
+  align-self: stretch; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 32px; background: #e5ebd9; position: relative; min-height: 550px;
+}
+.login-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: 2.3px; text-transform: uppercase; color: #546448; }
+.login-garden { width: 100%; height: auto; margin: 18px 0 8px; }
+.login-art-caption { text-align: center; font-size: 12px; line-height: 1.8; color: #5a674e; }
+.login-art-caption span { display: block; font-family: Georgia, serif; font-style: italic; font-size: 21px; margin-bottom: 5px; }
+.login-content { padding: 48px 38px 30px; text-align: center; }
+.login-welcome { display: inline-block; border: 1px solid #dedfcf; border-radius: 30px; padding: 7px 13px; color: #6a755d; font-size: 11px; margin-bottom: 24px; }
+.login-content h1 { font: 400 45px/1.08 Georgia, 'Times New Roman', serif; letter-spacing: -1.5px; color: #414f38; }
+.login-content h1 em { font-weight: 400; color: #778359; }
+.login-description { margin: 20px auto 27px; max-width: 265px; font-size: 14px; line-height: 1.8; color: #707565; }
+.login-twitch-btn { justify-content: center; width: 100%; padding: 15px 14px; margin: 0; border-radius: 12px; background: #80629c; box-shadow: 0 3px 0 #64497e; font-size: 14px; }
+.login-twitch-btn:hover { background: #72548f; box-shadow: 0 5px 0 #64497e; }
+.login-twitch-btn:active { box-shadow: 0 1px 0 #64497e; }
+.login-twitch-btn:focus-visible, .login-footer a:focus-visible { outline: 3px solid #94774d; outline-offset: 5px; }
+.login-note { margin-top: 13px; font-size: 11px; color: #77766b; line-height: 1.6; }
+#login-status { font-size: 12px; color: #675578; min-height: 18px; margin-top: 10px; }
+.login-rituals { display: flex; justify-content: center; gap: 18px; padding: 18px 0 24px; color: #67745a; font-size: 11px; border-bottom: 1px solid #e9e6dc; }
+.login-rituals span { display: flex; flex-direction: column; gap: 7px; }
+.login-rituals b { font-size: 18px; font-weight: 400; }
+.login-footer { padding-top: 20px; font-size: 10px; line-height: 1.9; color: #797c6f; }
+.login-footer a { color: #596b48; text-underline-offset: 3px; }
+@media (max-width: 680px) {
+  .login-overlay { padding: 22px 16px; align-items: flex-start; }
+  .login-box { max-width: 420px; grid-template-columns: 1fr; border-radius: 22px; }
+  .login-art { min-height: 0; padding: 20px 24px 14px; }
+  .login-garden { height: 160px; margin: 0; }
+  .login-art-caption { display: none; }
+  .login-eyebrow { text-align: center; font-size: 9px; }
+  .login-content { padding: 24px 27px; }
+  .login-welcome { margin-bottom: 17px; }
+  .login-content h1 { font-size: 38px; }
+  .login-description { margin: 14px auto 21px; font-size: 13px; }
+  .login-rituals { padding: 12px 0 18px; }
+  .login-footer { padding-top: 15px; }
+}
+
 /* ─── PROFILE ─────────────────────────────── */
 .profile-overlay {
   position: fixed; inset: 0;
@@ -2043,18 +2099,52 @@ header {
 <!-- LOGIN SCREEN -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
-    <div style="font-size:52px;line-height:1">🌱</div>
-    <div style="font-size:20px;font-weight:800;color:var(--soil2);margin-top:8px">Jardim da Mistty</div>
-    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-top:4px;text-align:center;line-height:1.5">Entre com sua conta Twitch<br>para começar a plantar!</div>
+    <div class="login-art" aria-hidden="true">
+      <div class="login-eyebrow">✳ Um cantinho para florescer</div>
+      <svg class="login-garden" viewBox="0 0 400 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M61 282V158a139 139 0 0 1 278 0v124Z" fill="#f5f0dc"/>
+        <circle cx="276" cy="95" r="32" fill="#edcc88"/>
+        <path d="M75 220q65-67 137-5t113-8v76H75Z" fill="#ced7b3"/>
+        <path d="M60 259q85-67 173-16t107-1v41H60Z" fill="#b5c59b"/>
+        <ellipse cx="202" cy="304" rx="160" ry="20" fill="#82926b" opacity=".16"/>
+        <path d="M143 272h110l-14 47h-80Z" fill="#bd8064"/>
+        <rect x="137" y="266" width="122" height="15" rx="5" fill="#d39b78"/>
+        <path d="M165 286l5 21m21-21v24m26-24-3 23m22-23-5 19" stroke="#e4b28b" stroke-width="3" stroke-linecap="round"/>
+        <path d="M196 267v-95m0 55-34-29m34 12 34-28" stroke="#6c8256" stroke-width="6" stroke-linecap="round"/>
+        <path d="M194 216c-43 5-53-21-51-38 28-1 50 11 51 38Z" fill="#91a478"/>
+        <path d="M199 198c0-38 28-49 48-45 1 27-20 46-48 45Z" fill="#718958"/>
+        <path d="M195 178c-25-18-29-43-17-61 25 10 35 36 17 61Z" fill="#9cac78"/>
+        <path d="M108 284v-57m0 37-15-14" stroke="#758657" stroke-width="4" stroke-linecap="round"/>
+        <path d="M86 274h44l-6 30H92Z" fill="#d3b17e"/>
+        <g fill="#f7faf0"><ellipse cx="108" cy="222" rx="8" ry="16"/><ellipse cx="108" cy="222" rx="8" ry="16" transform="rotate(60 108 222)"/><ellipse cx="108" cy="222" rx="8" ry="16" transform="rotate(120 108 222)"/></g>
+        <circle cx="108" cy="222" r="7" fill="#d6ad5d"/>
+        <path d="M291 286v-66m0 42 20-17" stroke="#6c8256" stroke-width="4" stroke-linecap="round"/>
+        <path d="M270 276h44l-7 29h-29Z" fill="#9da789"/>
+        <path d="M291 252c-24 0-30-18-24-30 21 4 26 14 24 30Zm1-13c-1-21 11-32 27-30 0 18-10 29-27 30Z" fill="#8c9d71"/>
+        <g fill="#c59aab"><circle cx="292" cy="213" r="10"/><circle cx="282" cy="204" r="10"/><circle cx="294" cy="195" r="10"/><circle cx="304" cy="205" r="10"/></g><circle cx="293" cy="205" r="6" fill="#f5df9e"/>
+        <path d="m98 116 4-9 4 9 9 4-9 4-4 9-4-9-9-4Z" fill="#bdab75"/>
+        <path d="M248 139q-15-19-19-8t19 8q13-22 20-13t-20 13" fill="#c298a2"/>
+        <path d="M246 142q-5 11-15 15" stroke="#b79c84" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 5"/>
+        <path d="M48 303h22m261 0h22" stroke="#98a582" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="login-art-caption"><span>As coisas boas crescem aos pouquinhos.</span>Uma sementinha, um carinho, um dia de cada vez.</div>
+    </div>
+    <div class="login-content">
+    <div class="login-welcome">🌿 Que bom ter você por aqui</div>
+    <h1>Cantinho<br>da <em>Mistty</em></h1>
+    <p class="login-description">A comunidade da live tem um cantinho aqui.<br>Entre, crie seu próprio jardim e cuide dele do seu jeitinho e aumente seus pontos da live.</p>
     <button class="login-twitch-btn" onclick="loginWithTwitch()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
       Entrar com Twitch
     </button>
-    <div id="login-status" style="font-size:11px;color:var(--text2);margin-top:8px;min-height:16px;text-align:center"></div>
-    <div style="font-size:11px;font-weight:700;color:var(--text2);opacity:.5;margin-top:12px;text-align:center;line-height:1.6">
+    <p class="login-note">Use sua conta Twitch para entrar no jardim.</p>
+    <div id="login-status" role="status" aria-live="polite"></div>
+    <div class="login-rituals"><span><b>🌱</b>Plante sonhos</span><span><b>☀️</b>Cuide com calma</span><span><b>🌷</b>Veja florescer</span></div>
+    <div class="login-footer">
       Criado com 💚 por <strong>Vitória Paula</strong><br>
       <a href="https://www.twitch.tv/misttylol" target="_blank"
-         style="color:var(--grass2);text-decoration:none;font-weight:800">twitch.tv/misttylol</a>
+         rel="noopener noreferrer">twitch.tv/misttylol</a>
+    </div>
     </div>
   </div>
 </div>

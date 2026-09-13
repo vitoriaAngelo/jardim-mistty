@@ -1353,6 +1353,18 @@ header {
 .login-twitch-btn:focus-visible, .login-footer a:focus-visible { outline: 3px solid #94774d; outline-offset: 5px; }
 .login-note { margin-top: 13px; font-size: 11px; color: #77766b; line-height: 1.6; }
 #login-status { font-size: 12px; color: #675578; min-height: 18px; margin-top: 10px; }
+.login-loading { display: none; min-height: 100%; padding: 48px 38px 30px; text-align: center; align-items: center; justify-content: center; flex-direction: column; }
+.login-overlay.is-loading .login-content { display: none; }
+.login-overlay.is-loading .login-loading { display: flex; }
+.login-loader-icon { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50% 50% 46% 54%; color: #fffdf7; background: #7e9666; box-shadow: 0 0 0 11px #eef3e8; font-size: 28px; animation: login-loader-breathe 1.8s ease-in-out infinite; }
+.login-loading h2 { margin: 29px 0 10px; color: #414f38; font: 400 35px/1.1 Georgia, 'Times New Roman', serif; letter-spacing: -1px; }
+.login-loading p { max-width: 290px; margin: 0; color: #6e7864; font-size: 14px; line-height: 1.7; }
+.login-loader-track { width: min(100%, 285px); height: 7px; margin-top: 30px; overflow: hidden; border-radius: 99px; background: #e8ede1; }
+.login-loader-track span { display: block; width: 42%; height: 100%; border-radius: inherit; background: #7e9666; animation: login-loader-progress 2.4s ease-in-out infinite; }
+#login-loading-status { min-height: 21px; margin-top: 13px; color: #75846a; font-size: 12px; }
+@keyframes login-loader-breathe { 50% { transform: translateY(-5px) rotate(4deg); box-shadow: 0 0 0 14px #eef3e8; } }
+@keyframes login-loader-progress { 0% { transform: translateX(-80%); } 48% { transform: translateX(135%); } 100% { transform: translateX(135%); } }
+@media (prefers-reduced-motion: reduce) { .login-loader-icon, .login-loader-track span { animation: none; } }
 .login-rituals { display: flex; justify-content: center; gap: 18px; padding: 18px 0 24px; color: #67745a; font-size: 11px; border-bottom: 1px solid #e9e6dc; }
 .login-rituals span { display: flex; flex-direction: column; gap: 7px; }
 .login-rituals b { font-size: 18px; font-weight: 400; }
@@ -1366,6 +1378,8 @@ header {
   .login-art-caption { display: none; }
   .login-eyebrow { text-align: center; font-size: 9px; }
   .login-content { padding: 24px 27px; }
+  .login-loading { min-height: 330px; padding: 34px 27px; }
+  .login-loading h2 { font-size: 31px; }
   .login-welcome { margin-bottom: 17px; }
   .login-content h1 { font-size: 38px; }
   .login-description { margin: 14px auto 21px; font-size: 13px; }
@@ -2162,6 +2176,13 @@ header {
       <a href="https://www.twitch.tv/misttylol" target="_blank"
          rel="noopener noreferrer">twitch.tv/misttylol</a>
     </div>
+    </div>
+    <div class="login-loading" role="status" aria-live="polite">
+      <div class="login-loader-icon" aria-hidden="true">🌱</div>
+      <h2>Preparando seu jardim…</h2>
+      <p>Estamos carregando seus pontos, canteiros e sementinhas.</p>
+      <div class="login-loader-track" aria-hidden="true"><span></span></div>
+      <div id="login-loading-status">Conectando com a Twitch…</div>
     </div>
   </div>
 </div>
@@ -4375,8 +4396,16 @@ let seSocket  = null;
 let seUser    = null;
 let saveTimer = null;
 
+function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
+  const overlay = document.getElementById('login-overlay');
+  const loadingStatus = document.getElementById('login-loading-status');
+  if (overlay) overlay.classList.toggle('is-loading', loading);
+  if (loadingStatus) loadingStatus.textContent = message;
+}
+
 // ── Twitch OAuth ───────────────────────────────────────────
 function loginWithTwitch() {
+  setLoginLoading(true, 'Abrindo a Twitch para você entrar…');
   const url = `https://id.twitch.tv/oauth2/authorize`
     + `?client_id=${TWITCH_CLIENT_ID}`
     + `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`
@@ -4398,8 +4427,9 @@ async function handleTwitchCallback() {
   // Clean URL
   history.replaceState(null, '', window.location.pathname);
 
+  setLoginLoading(true, 'Identificando sua conta…');
   const status = document.getElementById('login-status');
-  status.textContent = '🔄 Identificando usuário…';
+  status.textContent = '';
 
   try {
     // Get Twitch username
@@ -4417,6 +4447,7 @@ async function handleTwitchCallback() {
     return true;
 
   } catch(e) {
+    setLoginLoading(false);
     const status = document.getElementById('login-status');
     status.textContent = `❌ Erro: ${e.message}`;
     console.error('Twitch callback error:', e);
@@ -4428,6 +4459,7 @@ async function handleTwitchCallback() {
 async function initSEUser(username, displayName) {
   const status = document.getElementById('login-status');
   if (status) status.textContent = '';
+  setLoginLoading(true, 'Carregando seus pontos e seu jardim…');
 
   try {
     const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}`, {
@@ -4494,6 +4526,7 @@ async function initSEUser(username, displayName) {
     }, 60000); // sync a cada 1 minuto
 
   } catch(e) {
+    setLoginLoading(false);
     const status = document.getElementById('login-status');
     status.textContent = `❌ ${e.message}`;
     console.error('initSEUser error:', e);
@@ -4781,6 +4814,7 @@ function logout() {
     document.getElementById('user-menu').classList.add('hidden');
     // Show login screen
     document.getElementById('login-overlay').classList.remove('hidden');
+    setLoginLoading(false);
     document.getElementById('login-status').textContent = '';
     document.getElementById('garden-name').textContent = 'Jardim da Mistty';
     toast('👋 Sessão encerrada!', 2500);

@@ -4,11 +4,10 @@ exports.handler = async () => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json',
-    'Cache-Control': 'max-age=30',
+    'Cache-Control': 'max-age=60',
   };
 
   try {
-    // Query direta sem persistedQuery
     const res = await fetch('https://gql.twitch.tv/gql', {
       method: 'POST',
       headers: {
@@ -29,21 +28,16 @@ exports.handler = async () => {
       }),
     });
 
-    const text = await res.text();
-    console.log('GQL raw:', text);
-
-    const data = JSON.parse(text);
+    const data = await res.json();
     const stream = data?.data?.user?.stream;
-    const isLive = !!stream;
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        live: isLive,
+        live: !!stream,
         title: stream?.title || '',
         viewers: stream?.viewersCount || 0,
-        raw: text, // debug
       }),
     };
   } catch (e) {

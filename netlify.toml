@@ -1,0 +1,23 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/se-proxy"
+  to = "/.netlify/functions/se-proxy"
+  status = 200
+
+[[redirects]]
+  from = "/garden-save"
+  to = "/.netlify/functions/garden-save"
+  status = 200
+
+[[redirects]]
+  from = "/garden-load"
+  to = "/.netlify/functions/garden-load"
+  status = 200
+
+[[redirects]]
+  from = "/live-status"
+  to = "/.netlify/functions/live-status"
+  status = 200

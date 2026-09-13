@@ -2430,18 +2430,17 @@ function updatePts() {
 async function spendSEPoints(amount) {
   if (!seUser || amount <= 0) return;
   try {
-    await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${amount}`, {
+    await fetch(`/se-proxy?path=/points/${SE_CHANNEL}/${seUser.username}/${amount}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${SE_JWT}` }
     });
   } catch(e) { console.warn('spendSEPoints failed:', e); }
 }
 
-// Give points back to SE when player earns (sells)
 async function giveSEPoints(amount) {
   if (!seUser || amount <= 0) return;
   try {
-    await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${amount}`, {
+    await fetch(`/se-proxy?path=/points/${SE_CHANNEL}/${seUser.username}/${amount}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${SE_JWT}` }
     });

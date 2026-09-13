@@ -1,0 +1,145 @@
+/* Shared garden surfaces, using the approved welcome-screen palette. */
+.tools-panel .cozy-tool-art { width: 56px; height: 56px; flex-shrink: 0; filter: none; }
+.tools-panel .achiev-tool-btn { min-height: 116px; gap: 7px; }
+@media (max-width: 650px) {
+  .tools-panel .cozy-tool-art { width: 44px; height: 44px; }
+}
+:root {
+  --cream: #fffdf7;
+  --cream2: #f5f1e7;
+  --text: #414f38;
+  --text2: #707565;
+  --grass: #778b64;
+  --grass2: #586e47;
+  --soil2: #414f38;
+  --cozy-lavender: #80629c;
+  --cozy-lavender-dark: #64497e;
+  --cozy-leaf: #e5ebd9;
+}
+body {
+  color: var(--text);
+  background: radial-gradient(ellipse at 18% 20%, #f9ecd5 0, transparent 48%), radial-gradient(ellipse at 90% 85%, #dce4cf 0, transparent 50%), #f5f1e7;
+  background-attachment: fixed;
+  gap: 20px;
+  padding-top: 26px;
+}
+header, .card {
+  background: var(--cream);
+  border: 1px solid var(--cozy-line);
+  box-shadow: 0 8px 28px #4b573312;
+  border-radius: 24px;
+}
+header { gap: 16px; padding: 18px 20px; }
+.game-wrap { gap: 18px; }
+.garden-section { gap: 18px; min-width: 0; }
+.card { padding: 22px; }
+.card-title {
+  font: 400 23px/1.3 Georgia, 'Times New Roman', serif;
+  color: var(--text); gap: 9px; margin-bottom: 18px;
+}
+.card-title svg { opacity: .75; }
+.level-widget { background: var(--cream2); border: 1px solid var(--cozy-line); padding: 11px; min-width: 180px; }
+.level-badge { background: var(--cozy-leaf) !important; box-shadow: none; border: 1px solid var(--cozy-line); }
+.level-badge .lv-num { background: var(--cream); border-color: var(--cozy-line); }
+.xp-bar-wrap, .season-bar-wrap { background: var(--cozy-leaf); }
+.xp-bar-fill, .season-bar-fill { background: var(--grass) !important; }
+.pts-badge { background: var(--cozy-leaf); color: var(--text); border: 1px solid var(--cozy-line); box-shadow: none; padding: 9px 12px; }
+.season-widget { padding: 4px 3px 0; }
+.inv-empty, .market-empty { opacity: 1; padding: 12px 0; line-height: 1.7; }
+.shop-tabs { background: var(--cream2); padding: 5px; border-radius: 16px; gap: 4px; margin-bottom: 16px; }
+.shop-tab { min-height: 44px; border: 1px solid transparent; border-radius: 12px; font-size: 11px; background: transparent; }
+.shop-tab:hover { border-color: var(--cozy-line); }
+.shop-tab.active, .shop-tab.upgrades-tab.active, .shop-tab.flowers-tab.active, .shop-tab.fertilizer-tab.active {
+  background: var(--grass); border-color: var(--grass); color: var(--cream); box-shadow: 0 2px 0 var(--grass2);
+}
+.shop-sort-bar { gap: 7px; margin-bottom: 16px; }
+.shop-season-select, .shop-sort-btn { min-height: 34px; border: 1px solid var(--cozy-line); background: var(--cream); box-shadow: none; font-weight: 600; padding: 7px 10px; }
+.shop-season-select { appearance: auto; }
+.shop-sort-btn.active { background: var(--cozy-leaf); color: var(--text); border-color: var(--grass); box-shadow: none; }
+.shop-season-select:focus-visible { outline: 3px solid #94774d; outline-offset: 3px; }
+[tabindex]:focus-visible { outline: 3px solid #94774d; outline-offset: 3px; }
+.shop-grid-inner { gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.shop-item, .plot-shop-item, .fertilizer-item, .upgrade-item.available, .upgrade-item.cant-afford,
+.inv-slot, .fert-inv-slot, .market-slot, .sell-row, .season-shop-banner {
+  background: var(--cream2); border: 1px solid var(--cozy-line); box-shadow: none; border-radius: 16px;
+}
+.shop-item { padding: 16px 8px; gap: 8px; }
+.shop-item:hover, .plot-shop-item:hover, .fertilizer-item:hover, .upgrade-item.available:hover,
+.inv-slot:hover, .fert-inv-slot:hover, .market-slot:hover {
+  border-color: var(--grass); box-shadow: 0 5px 16px #4b573318; transform: translateY(-2px);
+}
+.shop-item.cant-afford, .plot-shop-item.cant-afford, .fertilizer-item.cant-afford, .upgrade-item.cant-afford { opacity: .6; }
+.shop-item-name { text-align: center; }
+.shop-item-price, .plot-shop-price, .upgrade-price, .sell-value-num, .sell-total-pts, .market-total-pts {
+  background: var(--cozy-leaf); color: var(--text); border: 1px solid var(--cozy-line); box-shadow: none;
+}
+.upgrade-item.owned, .plot-shop-item.owned, .inv-slot.selected, .market-slot.selected,
+.fert-inv-slot.selected-quick, .fert-inv-slot.selected-golden {
+  background: var(--cozy-leaf); border: 1px solid var(--grass); box-shadow: 0 0 0 3px #778b6418;
+}
+.upgrade-item.owned .upgrade-icon { filter: none; }
+.fertilizer-icon { background: var(--cozy-leaf) !important; border-color: var(--cozy-line) !important; }
+.fert-inv-slots { border-top: 1px solid var(--cozy-line); padding-top: 14px; margin-top: 14px; }
+.inv-slot-count, .fert-inv-count, .market-slot-stock { background: var(--grass); box-shadow: none; border-color: var(--cream); }
+.fertilizer-buy-btn, .sell-btn { min-height: 40px; border-radius: 12px; background: var(--grass) !important; box-shadow: 0 2px 0 var(--grass2) !important; color: var(--cream); }
+.fertilizer-buy-btn:hover, .sell-btn:hover { background: var(--grass2) !important; transform: translateY(-1px); }
+.qty-btn, .market-qty-btn { width: 32px; height: 32px; border: 1px solid var(--cozy-line); background: var(--cream); color: var(--text); box-shadow: none; }
+.qty-btn:hover, .market-qty-btn:hover { background: var(--cozy-leaf); box-shadow: none; }
+.sell-footer, .market-footer { flex-wrap: wrap; gap: 12px; }
+.inv-chip, .harvest-chip { background: var(--cream2); border: 1px solid var(--cozy-line); box-shadow: none; }
+.plot:not(.locked), .plot:not(.locked):hover { background: var(--cream2); border-color: var(--cozy-line); box-shadow: 0 3px 0 #e1dfcf, 0 6px 18px #4b573312; }
+.plot:not(.locked) .plot-inner { background: radial-gradient(ellipse at 50% 80%, #e5ebd9, transparent 75%); }
+.plot::after, .plot:not(.locked)::after { background: var(--cozy-leaf); }
+.plot.locked, .plot.locked:hover { background: var(--cream2); border: 1px dashed var(--cozy-line); box-shadow: none; opacity: .75; }
+.plot-label, .plot-label span { color: var(--text) !important; text-shadow: none; }
+.lock-hint span { color: var(--text2); }
+.empty-slot-hint svg { color: var(--grass); }
+.empty-slot-hint svg * { stroke: currentColor; }
+.plot-water-fill[style*="background"] { background: var(--grass) !important; }
+.plot.ready-to-plant, .plot.ready-to-harvest, .plot.fertilizer-ready,
+.plot.ready-quick-grow, .plot.ready-golden-soil { border-color: var(--grass) !important; box-shadow: 0 0 0 3px #778b6426 !important; }
+.plot.ready-quick-grow, .plot.ready-golden-soil { animation: none; }
+.cozy-level-chip { background: var(--cozy-lavender) !important; color: var(--cream) !important; }
+.cozy-season-chip { background: var(--cozy-leaf) !important; color: var(--text) !important; }
+.cozy-profit { color: var(--grass2) !important; }
+.cozy-loss { color: var(--cozy-lavender-dark) !important; }
+#live-status-btn, #live-tool-btn { background: var(--cozy-lavender) !important; color: var(--cream) !important; border: 1px solid var(--cozy-lavender); border-radius: 13px !important; box-shadow: 0 2px 0 var(--cozy-lavender-dark) !important; padding: 11px 18px !important; }
+/* All four tooltip sources share one surface and one positioning system. */
+.header-btn-tip, .plot-tooltip, .inv-slot .inv-tip, .fert-inv-slot .fert-tip, .cozy-tooltip {
+  background: var(--cream); color: var(--text); border: 1px solid var(--cozy-line);
+  border-radius: 14px; padding: 12px 15px; box-shadow: 0 8px 26px #4b573326;
+  font: 600 12px/1.6 'Nunito', sans-serif; text-align: left;
+  white-space: normal; width: 220px; max-width: calc(100vw - 24px);
+}
+.header-btn-tip::after, .plot-tooltip::after, .inv-slot .inv-tip::after, .fert-inv-slot .fert-tip::after { border-top-color: var(--cream); }
+.cozy-tooltip { position: fixed; margin: 0; z-index: 10001; pointer-events: none; overflow-wrap: anywhere; }
+.cozy-tooltip[hidden] { display: none; }
+.cozy-tooltip span { color: var(--text2); opacity: 1; }
+.cozy-tooltip strong { color: var(--text); font-weight: 800; }
+.cozy-tooltip::after { content: ''; position: absolute; left: var(--tip-arrow, 50%); top: 100%; border: 6px solid transparent; border-top-color: var(--cream); transform: translateX(-50%); }
+.cozy-tooltip.below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--cream); }
+.cozy-tooltips-ready .header-btn-tip, .cozy-tooltips-ready .plot-tooltip,
+.cozy-tooltips-ready .inv-slot .inv-tip, .cozy-tooltips-ready .fert-inv-slot .fert-tip { display: none !important; }
+@media (max-width: 850px) {
+  header { grid-template-columns: 1fr auto; }
+  .header-right { grid-column: 1 / -1; justify-content: space-between; }
+}
+@media (max-width: 650px) {
+  body { padding: 14px 12px 24px; gap: 14px; }
+  header { grid-template-columns: 1fr; padding: 14px; gap: 12px; }
+  .level-widget { min-width: 0; max-width: none; width: 100%; }
+  .level-xp-row { flex-wrap: wrap; }
+  .xp-bar-wrap { min-width: 50px; }
+  .header-right { gap: 8px; }
+  .card { padding: 18px 14px; }
+  .card-title { font-size: 22px; }
+  .plots-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .shop-grid-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .shop-tabs { flex-wrap: wrap; }
+  .shop-tab { flex: 1 1 28%; }
+  .fertilizer-item, .upgrade-item, .plot-shop-item { flex-wrap: wrap; gap: 10px; }
+  .sell-row { flex-wrap: wrap; }
+  .market-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 360px) { header { grid-template-columns: 1fr; } .level-widget { max-width: none; } }
+@media (prefers-reduced-motion: reduce) { .shop-item, .inv-slot, .fert-inv-slot, .market-slot, .plot { transition: none; } }

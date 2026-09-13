@@ -1836,7 +1836,7 @@ header {
         <div class="help-section">
           <div class="help-section-title">📊 Barras dos Canteiros</div>
           <div class="help-tip"><div class="help-tip-icon">💧</div><div><strong>Barra azul</strong> — progresso da rega. Quando cheia, o crescimento automático começa a cada 30 min.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌱</div><div><strong>Barra verde</strong> — estágios de crescimento. Avança sozinha a cada <strong>5 minutos</strong> quando o regador está cheio.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🌱</div><div><strong>Barra verde</strong> — estágios de crescimento. Avança sozinha a cada <strong>2 minutos</strong> quando o regador está cheio.</div></div>
           <div class="help-tip"><div class="help-tip-icon">⚡</div><div>Ícone <strong>⚡</strong> no canteiro = Adubo Rápido ativo (cresce 2× mais rápido).</div></div>
           <div class="help-tip"><div class="help-tip-icon">✨</div><div>Ícone <strong>✨</strong> no canteiro = Terra Dourada ativa (próxima colheita vale 2 unidades).</div></div>
         </div>
@@ -2417,8 +2417,8 @@ function effectiveSellValue(type) {
   const base = SELL_VALUE[type];
   return hasUpgrade('merchant') ? Math.round(base * 1.5) : base;
 }
-// 5 min real = 1 grow tick.
-const GROW_INTERVAL_MS = 300000;
+// 2 min real = 1 grow tick.
+const GROW_INTERVAL_MS = 120000;
 
 function renderUpgradeShop() {
   const grid = document.getElementById('upgrade-grid');

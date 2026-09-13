@@ -318,7 +318,7 @@ header {
   position: relative;
   border: 2.5px solid #b8884a;
   user-select: none;
-  overflow: hidden;
+  overflow: visible;
 }
 /* subtle linen texture */
 .plot::before {
@@ -329,6 +329,7 @@ header {
   );
   border-radius: 16px;
   pointer-events: none;
+  clip-path: inset(0 round 16px);
 }
 .plot:hover { transform: translateY(-3px); box-shadow: 0 7px 0 #9a6a3a, 0 10px 20px rgba(80,40,0,.15); }
 .plot.empty { cursor: default; }
@@ -353,6 +354,26 @@ header {
   text-shadow: 0 1px 3px rgba(0,0,0,.35);
   letter-spacing: .2px;
 }
+/* ─── PLOT TOOLTIP ───────────────────────── */
+.plot-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%; transform: translateX(-50%);
+  background: #2a1a08; color: #fdf6e3;
+  border-radius: 12px; padding: 8px 13px;
+  font-size: 11px; font-weight: 700; line-height: 1.6;
+  white-space: nowrap; text-align: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  z-index: 100; pointer-events: none;
+}
+.plot-tooltip::after {
+  content: '';
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: #2a1a08;
+}
+.plot:hover .plot-tooltip { display: block; }
+
 .plot-water-bar {
   width: 90%; height: 2.5px;
   background: rgba(0,0,0,.15); border-radius: 99px;
@@ -1651,10 +1672,13 @@ header {
 <header>
   <!-- LEFT: Logo + Season -->
   <div class="header-left">
-    <div class="logo" title="Ver perfil do fazendeiro" onclick="openProfile()">
-      <span id="logo-level-icon">🌱</span>
-      <span id="garden-name">Jardim da Mistty</span>
-      <span class="logo-profile-icon">👤</span>
+    <div class="header-icon-wrap">
+      <div class="logo" title="" onclick="openProfile()">
+        <span id="logo-level-icon">🌱</span>
+        <span id="garden-name">Jardim da Mistty</span>
+        <span class="logo-profile-icon">👤</span>
+      </div>
+      <div class="header-btn-tip">Seu perfil<br><span>Clique para editar o nome da fazenda</span></div>
     </div>
     <div class="season-widget" id="season-widget">
       <span id="season-icon">🌸</span>
@@ -1802,70 +1826,62 @@ header {
 
   <!-- TOOLS -->
   <div class="tools-panel">
-    <div class="tool-card" id="tool-water" onclick="selectTool('water')">
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-        <!-- corpo principal -->
-        <path d="M10 20 Q10 10 22 10 Q34 10 34 20 L34 36 Q34 44 22 44 Q10 44 10 36 Z"
-          fill="#7dd4f8" stroke="#3a8fc0" stroke-width="1.8"/>
-        <!-- reflexo lateral -->
-        <path d="M14 14 Q13 20 14 28" stroke="rgba(255,255,255,.6)" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- tampa -->
-        <rect x="14" y="7" width="16" height="5" rx="2.5" fill="#a0dff8" stroke="#3a8fc0" stroke-width="1.5"/>
-        <!-- cabo (alça) -->
-        <path d="M10 18 Q2 18 2 27 Q2 36 10 36"
-          stroke="#3a8fc0" stroke-width="3" stroke-linecap="round" fill="none"/>
-        <path d="M10 18 Q2 18 2 27 Q2 36 10 36"
-          stroke="#a0dff8" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-        <!-- bico -->
-        <path d="M34 22 Q42 18 48 20 Q50 21 48 24 Q42 26 34 26"
-          fill="#5bbce8" stroke="#3a8fc0" stroke-width="1.5"/>
-        <!-- roseta do bico -->
-        <circle cx="48.5" cy="22" r="4" fill="#3a8fc0"/>
-        <circle cx="48.5" cy="22" r="2.5" fill="#5bbce8"/>
-        <circle cx="47.5" cy="21" r=".8" fill="rgba(255,255,255,.7)"/>
-        <!-- gotas de água -->
-        <line x1="50" y1="26" x2="49" y2="33" stroke="#60b8e8" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="53" y1="25" x2="52" y2="32" stroke="#60b8e8" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
-        <line x1="55" y1="23" x2="55" y2="30" stroke="#60b8e8" stroke-width="1.5" stroke-linecap="round" opacity=".45"/>
-      </svg>
-      <div class="tool-label">Regador</div>
-      <div class="tool-cost">🌟 6 pts</div>
+    <div class="header-icon-wrap" style="width:100%">
+      <div class="tool-card" id="tool-water" onclick="selectTool('water')">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <path d="M10 20 Q10 10 22 10 Q34 10 34 20 L34 36 Q34 44 22 44 Q10 44 10 36 Z" fill="#7dd4f8" stroke="#3a8fc0" stroke-width="1.8"/>
+          <path d="M14 14 Q13 20 14 28" stroke="rgba(255,255,255,.6)" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="14" y="7" width="16" height="5" rx="2.5" fill="#a0dff8" stroke="#3a8fc0" stroke-width="1.5"/>
+          <path d="M10 18 Q2 18 2 27 Q2 36 10 36" stroke="#3a8fc0" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <path d="M10 18 Q2 18 2 27 Q2 36 10 36" stroke="#a0dff8" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+          <path d="M34 22 Q42 18 48 20 Q50 21 48 24 Q42 26 34 26" fill="#5bbce8" stroke="#3a8fc0" stroke-width="1.5"/>
+          <circle cx="48.5" cy="22" r="4" fill="#3a8fc0"/>
+          <circle cx="48.5" cy="22" r="2.5" fill="#5bbce8"/>
+          <circle cx="47.5" cy="21" r=".8" fill="rgba(255,255,255,.7)"/>
+          <line x1="50" y1="26" x2="49" y2="33" stroke="#60b8e8" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="53" y1="25" x2="52" y2="32" stroke="#60b8e8" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+          <line x1="55" y1="23" x2="55" y2="30" stroke="#60b8e8" stroke-width="1.5" stroke-linecap="round" opacity=".45"/>
+        </svg>
+        <div class="tool-label">Regador</div>
+        <div class="tool-cost">🌟 6 pts</div>
+      </div>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Regador<br><span>Clique na planta para regar — 6 pts</span></div>
     </div>
 
-    <div class="tool-card disabled" id="tool-shovel" onclick="selectTool('shovel')">
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-        <!-- handle top grip -->
-        <rect x="24" y="4" width="9" height="6" rx="3" fill="#c8905a" stroke="#8c5e38" stroke-width="1.2"/>
-        <!-- handle shaft -->
-        <rect x="26" y="9" width="5" height="24" rx="2.5" fill="#d4a070" stroke="#8c5e38" stroke-width="1.2"/>
-        <!-- wood grain lines -->
-        <line x1="27.5" y1="11" x2="27" y2="30" stroke="#b07848" stroke-width=".8" stroke-linecap="round" opacity=".6"/>
-        <line x1="29.5" y1="11" x2="30" y2="30" stroke="#b07848" stroke-width=".8" stroke-linecap="round" opacity=".4"/>
-        <!-- blade socket -->
-        <path d="M24 32 Q24 35 28 35 Q32 35 32 32 L31 29 L25 29 Z" fill="#a07848" stroke="#7a5830" stroke-width="1.2"/>
-        <!-- blade -->
-        <path d="M20 34 Q18 40 20 46 Q24 52 28 52 Q32 52 36 46 Q38 40 36 34 Q34 30 28 30 Q22 30 20 34Z"
-          fill="#c8c0b0" stroke="#908878" stroke-width="1.5"/>
-        <!-- blade highlight -->
-        <path d="M23 35 Q22 40 23 45" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"/>
-        <!-- blade edge shine -->
-        <path d="M20 44 Q24 52 28 52 Q32 52 36 46" stroke="rgba(255,255,255,.3)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-        <!-- dirt on blade -->
-        <ellipse cx="30" cy="48" rx="3" ry="1.5" fill="#9b6840" opacity=".5"/>
-        <ellipse cx="25" cy="46" rx="2" ry="1" fill="#9b6840" opacity=".4"/>
-      </svg>
-      <div class="tool-label">Pá</div>
-      <div class="tool-cost">🌟 10 pts</div>
+    <div class="header-icon-wrap" style="width:100%">
+      <div class="tool-card disabled" id="tool-shovel" onclick="selectTool('shovel')">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <rect x="24" y="4" width="9" height="6" rx="3" fill="#c8905a" stroke="#8c5e38" stroke-width="1.2"/>
+          <rect x="26" y="9" width="5" height="24" rx="2.5" fill="#d4a070" stroke="#8c5e38" stroke-width="1.2"/>
+          <line x1="27.5" y1="11" x2="27" y2="30" stroke="#b07848" stroke-width=".8" stroke-linecap="round" opacity=".6"/>
+          <line x1="29.5" y1="11" x2="30" y2="30" stroke="#b07848" stroke-width=".8" stroke-linecap="round" opacity=".4"/>
+          <path d="M24 32 Q24 35 28 35 Q32 35 32 32 L31 29 L25 29 Z" fill="#a07848" stroke="#7a5830" stroke-width="1.2"/>
+          <path d="M20 34 Q18 40 20 46 Q24 52 28 52 Q32 52 36 46 Q38 40 36 34 Q34 30 28 30 Q22 30 20 34Z" fill="#c8c0b0" stroke="#908878" stroke-width="1.5"/>
+          <path d="M23 35 Q22 40 23 45" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M20 44 Q24 52 28 52 Q32 52 36 46" stroke="rgba(255,255,255,.3)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <ellipse cx="30" cy="48" rx="3" ry="1.5" fill="#9b6840" opacity=".5"/>
+          <ellipse cx="25" cy="46" rx="2" ry="1" fill="#9b6840" opacity=".4"/>
+        </svg>
+        <div class="tool-label">Pá</div>
+        <div class="tool-cost">🌟 10 pts</div>
+      </div>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Pá<br><span>Planta pronta? Clique para colher — 10 pts</span></div>
     </div>
 
-    <button class="achiev-tool-btn" onclick="openAchievements()">
-      🏆 Conquistas
-      <span class="achiev-tool-badge hidden" id="achiev-tool-badge">0</span>
-    </button>
+    <div class="header-icon-wrap" style="width:100%">
+      <button class="achiev-tool-btn" onclick="openAchievements()">
+        🏆 Conquistas
+        <span class="achiev-tool-badge hidden" id="achiev-tool-badge">0</span>
+      </button>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Conquistas<br><span>Complete metas e desbloqueie badges</span></div>
+    </div>
 
-    <button class="achiev-tool-btn" onclick="openRanking()" style="border-color:#f0c030;color:#8a5a00">
-      🥇 Ranking
-    </button>
+    <div class="header-icon-wrap" style="width:100%">
+      <button class="achiev-tool-btn" onclick="openRanking()" style="border-color:#f0c030;color:#8a5a00">
+        🥇 Ranking
+      </button>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Ranking<br><span>Top 25 espectadores do canal</span></div>
+    </div>
   </div>
 </div>
 
@@ -1898,162 +1914,100 @@ header {
     <div class="help-header">
       <div class="help-title">💡 Como Jogar</div>
       <div class="help-tabs">
-        <button class="help-tab active" id="htab-inicio"    onclick="switchHelpTab('inicio')"><span class="tab-icon">🌱</span>Início</button>
-        <button class="help-tab" id="htab-plantas"          onclick="switchHelpTab('plantas')"><span class="tab-icon">🪴</span>Plantas</button>
-        <button class="help-tab" id="htab-estacoes"         onclick="switchHelpTab('estacoes')"><span class="tab-icon">🌸</span>Estações</button>
-        <button class="help-tab" id="htab-loja"             onclick="switchHelpTab('loja')"><span class="tab-icon">🛒</span>Loja</button>
-        <button class="help-tab" id="htab-extras"           onclick="switchHelpTab('extras')"><span class="tab-icon">⭐</span>Extras</button>
+        <button class="help-tab active" id="htab-inicio"   onclick="switchHelpTab('inicio')"><span class="tab-icon">🌱</span>Início</button>
+        <button class="help-tab" id="htab-plantar"         onclick="switchHelpTab('plantar')"><span class="tab-icon">🪴</span>Plantar</button>
+        <button class="help-tab" id="htab-estacoes"        onclick="switchHelpTab('estacoes')"><span class="tab-icon">🌸</span>Estações</button>
+        <button class="help-tab" id="htab-extras"          onclick="switchHelpTab('extras')"><span class="tab-icon">⭐</span>Extras</button>
       </div>
     </div>
 
     <div class="help-body">
 
-      <!-- INÍCIO -->
       <div class="help-panel visible" id="hpanel-inicio">
         <div class="help-section">
-          <div class="help-section-title">👋 Bem-vinda ao Jardim da Mistty!</div>
+          <div class="help-section-title">👋 Seja bem-vinda!</div>
+          <p style="font-size:13px;color:var(--text2);line-height:1.7;margin:0">Use seus <strong>pontos do canal</strong> para plantar, colher e vender no seu jardim!</p>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title">🔄 O ciclo do jogo</div>
           <div class="help-steps">
-            <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">Seus <strong>pontos do canal</strong> são carregados automaticamente ao logar. A cada 10 minutos de live assistida os pontos atualizam.</div></div>
-            <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">Compre <strong>sementes de vegetais ou flores</strong> na loja e clique num canteiro vazio para plantar.</div></div>
-            <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text"><strong>Regue</strong> a planta clicando nela com o regador selecionado. Quando o regador encher, ela começa a crescer sozinha.</div></div>
-            <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text">Quando florescer, <strong>clique na planta</strong> para colher automaticamente. Vai direto para o mercado.</div></div>
-            <div class="help-step"><div class="help-step-num">5</div><div class="help-step-text">No <strong>Mercado</strong>, selecione os itens e clique em Vender para converter colhidos em pontos do canal.</div></div>
+            <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">🛒 <strong>Compre</strong> uma semente na loja</div></div>
+            <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">🪴 <strong>Clique num canteiro vazio</strong> para plantar</div></div>
+            <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">💧 <strong>Regue</strong> até a barra azul encher</div></div>
+            <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text">⏳ <strong>Espere</strong> — a barra verde enche a cada 2 minutos!</div></div>
+            <div class="help-step"><div class="help-step-num">5</div><div class="help-step-text">🌸 Apareceu <strong>"pronto!"</strong>? Clique para colher</div></div>
+            <div class="help-step"><div class="help-step-num">6</div><div class="help-step-text">💰 Vá ao <strong>Mercado</strong> e venda para ganhar pontos</div></div>
           </div>
         </div>
         <div class="help-section">
-          <div class="help-section-title">📊 Barras dos Canteiros</div>
-          <div class="help-tip"><div class="help-tip-icon">💧</div><div><strong>Barra azul</strong> — progresso da rega. Quando cheia, o crescimento automático começa a cada 30 min.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌱</div><div><strong>Barra verde</strong> — estágios de crescimento. Avança sozinha a cada <strong>2 minutos</strong> quando o regador está cheio.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">⚡</div><div>Ícone <strong>⚡</strong> no canteiro = Adubo Rápido ativo (cresce 2× mais rápido).</div></div>
-          <div class="help-tip"><div class="help-tip-icon">✨</div><div>Ícone <strong>✨</strong> no canteiro = Terra Dourada ativa (próxima colheita vale 2 unidades).</div></div>
-        </div>
-        <div class="help-section">
-          <div class="help-section-title">🧰 Ferramentas</div>
-          <div class="help-tip"><div class="help-tip-icon">💧</div><div><strong>Regador</strong> — custa 6 pts por uso. Selecione e clique numa planta para regar.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🪴</div><div><strong>Pá</strong> — custa 10 pts. Mas você não precisa selecioná-la: <strong>clique direto numa planta pronta</strong> para colher!</div></div>
+          <div class="help-section-title">🌟 Seus pontos</div>
+          <div class="help-tip"><div class="help-tip-icon">📺</div><div>Ganhe pontos <strong>assistindo a live</strong> — atualizam no jogo a cada 1 minuto.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">💰</div><div>Vendendo colhidos você <strong>recupera pontos</strong> no canal da Twitch!</div></div>
         </div>
       </div>
 
-      <!-- PLANTAS -->
-      <div class="help-panel" id="hpanel-plantas">
+      <div class="help-panel" id="hpanel-plantar">
         <div class="help-section">
-          <div class="help-section-title">🥦 Vegetais</div>
-          <div class="help-tip"><div class="help-tip-icon">🥔</div><div><strong>Batata</strong> — 30 pts · 3 regas · 6 estágios. Disponível no Inverno e Primavera.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🥬</div><div><strong>Alface</strong> — 50 pts · 4 regas · 8 estágios. Primavera.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🥕</div><div><strong>Cenoura</strong> — 45 pts · 5 regas · 10 estágios. Primavera.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🍅</div><div><strong>Tomate</strong> — 60 pts · 7 regas · 15 estágios. Verão.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌽</div><div><strong>Milho</strong> — 55 pts · 6 regas · 12 estágios. Verão.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🫑</div><div><strong>Pimentão</strong> — 70 pts · 8 regas · 16 estágios. Verão.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🍆</div><div><strong>Berinjela</strong> — 65 pts · 7 regas · 14 estágios. Verão.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🎃</div><div><strong>Abóbora</strong> — 75 pts · 9 regas · 18 estágios. Outono.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🫚</div><div><strong>Beterraba</strong> — 80 pts · 8 regas · 18 estágios. Outono.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🥦</div><div><strong>Brócolis</strong> — 85 pts · 9 regas · 20 estágios. Outono e Inverno.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🟫</div><div><strong>Mandioca</strong> — 100 pts · 10 regas · 24 estágios. Outono.</div></div>
-        </div>
-        <div class="help-section">
-          <div class="help-section-title">🌸 Flores</div>
-          <div class="help-tip"><div class="help-tip-icon">🌼</div><div><strong>Margarida</strong> — 25 pts. Primavera.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌷</div><div><strong>Tulipa</strong> — 50 pts. Primavera.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌸</div><div><strong>Cerejeira</strong> — 100 pts. Primavera.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌻</div><div><strong>Girassol</strong> — 70 pts. Verão.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌺</div><div><strong>Hibisco</strong> — 85 pts. Verão.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌹</div><div><strong>Rosa</strong> — 60 pts. Outono.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">💜</div><div><strong>Lavanda</strong> — 80 pts. Outono.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🪷</div><div><strong>Orquídea</strong> — 90 pts. Outono.</div></div>
-        </div>
-        <div class="help-section">
-          <div class="help-section-title">⚠️ Planta fora de estação</div>
-          <div class="help-tip"><div class="help-tip-icon">🥀</div><div>Se uma planta florescer numa estação errada, ela pode ser colhida mas <strong>não vai ao mercado</strong> — é perdida!</div></div>
-        </div>
-      </div>
-
-      <!-- ESTAÇÕES -->
-      <div class="help-panel" id="hpanel-estacoes">
-        <div class="help-section">
-          <div class="help-section-title">🌸 Sistema de Estações</div>
-          <div class="help-tip"><div class="help-tip-icon">📅</div><div>Cada estação dura <strong>24 dias</strong>. O widget abaixo do nome do jardim mostra a estação atual e o dia.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🔒</div><div>Plantas <strong>fora de estação</strong> aparecem na loja com badge laranja e não podem ser compradas.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🔍</div><div>Use o <strong>filtro de estação</strong> na loja para ver o que estará disponível em cada época.</div></div>
-        </div>
-        <div class="help-section">
-          <div class="help-section-title">🌸 Primavera</div>
-          <div class="help-tip"><div class="help-tip-icon">🥬</div><div>Vegetais: Alface, Cenoura, Batata</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌼</div><div>Flores: Margarida, Tulipa, Cerejeira, Jasmim</div></div>
-        </div>
-        <div class="help-section">
-          <div class="help-section-title">☀️ Verão</div>
-          <div class="help-tip"><div class="help-tip-icon">🍅</div><div>Vegetais: Tomate, Milho, Pimentão, Berinjela</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌻</div><div>Flores: Girassol, Hibisco, Campainha, Papoula</div></div>
-        </div>
-        <div class="help-section">
-          <div class="help-section-title">🍂 Outono</div>
-          <div class="help-tip"><div class="help-tip-icon">🎃</div><div>Vegetais: Abóbora, Beterraba, Brócolis, Mandioca</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌹</div><div>Flores: Rosa, Lavanda, Orquídea</div></div>
-        </div>
-        <div class="help-section">
-          <div class="help-section-title">❄️ Inverno</div>
-          <div class="help-tip"><div class="help-tip-icon">🥔</div><div>Vegetais: Batata, Brócolis</div></div>
-          <div class="help-tip"><div class="help-tip-icon">❌</div><div>Flores: nenhuma disponível no inverno</div></div>
-        </div>
-      </div>
-
-      <!-- LOJA -->
-      <div class="help-panel" id="hpanel-loja">
-        <div class="help-section">
-          <div class="help-section-title">🛒 Abas da Loja</div>
-          <div class="help-tip"><div class="help-tip-icon">🥦</div><div><strong>Vegetais & Flores</strong> — compre sementes. Use o filtro de estação para ver o que está disponível agora.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🧪</div><div><strong>Adubos</strong> — 3 tipos com efeitos especiais (veja abaixo).</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🪵</div><div><strong>Canteiros</strong> — começa com 2, compre até 6. Cada novo canteiro exige nível mínimo.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">⚗️</div><div><strong>Melhorias</strong> — upgrades permanentes. Compre uma vez e fica ativo para sempre.</div></div>
+          <div class="help-section-title">🌱 Como funcionam as plantas</div>
+          <div class="help-tip"><div class="help-tip-icon">💧</div><div><strong>Barra azul</strong> = rega. Quando cheia, a planta começa a crescer.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🌱</div><div><strong>Barra verde</strong> = crescimento. Avança a cada <strong>2 minutos</strong> quando regada.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🌸</div><div>Apareceu <strong>"pronto!"</strong>? Clique para colher!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🥀</div><div>Planta fora da estação? Pode colher, mas <strong>não vende</strong>.</div></div>
         </div>
         <div class="help-section">
           <div class="help-section-title">🧪 Adubos</div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">⚡</div><div class="help-upgrade-info"><div class="help-upgrade-name">Adubo Rápido — 80 pts</div><div class="help-upgrade-desc">Aplique num canteiro VAZIO antes de plantar. A planta seguinte cresce 2× mais rápido.</div></div></div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">✨</div><div class="help-upgrade-info"><div class="help-upgrade-name">Terra Dourada — 150 pts</div><div class="help-upgrade-desc">Aplique num canteiro VAZIO. A próxima colheita rende 2 unidades em vez de 1.</div></div></div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">💧</div><div class="help-upgrade-info"><div class="help-upgrade-name">Hidratante — 60 pts</div><div class="help-upgrade-desc">Ao comprar, rega completamente todos os canteiros com plantas de uma só vez.</div></div></div>
+          <div class="help-tip"><div class="help-tip-icon">⚡</div><div><strong>Adubo Rápido</strong> — canteiro vazio antes de plantar. Cresce 2× mais rápido!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">✨</div><div><strong>Terra Dourada</strong> — canteiro vazio antes de plantar. Colheita rende 2 unidades!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">💧</div><div><strong>Hidratante</strong> — ao comprar, rega todos os canteiros de uma vez!</div></div>
         </div>
         <div class="help-section">
-          <div class="help-section-title">⚗️ Melhorias Permanentes</div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">🪣</div><div class="help-upgrade-info"><div class="help-upgrade-name">Regador Turbo — 500 pts (nv3)</div><div class="help-upgrade-desc">Cada clique enche 2 etapas de rega de uma vez.</div></div></div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">🌿</div><div class="help-upgrade-info"><div class="help-upgrade-name">Vaso Especial — 600 pts (nv4)</div><div class="help-upgrade-desc">Reduz em 30% a quantidade de regas necessárias.</div></div></div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">⚡</div><div class="help-upgrade-info"><div class="help-upgrade-name">Mãos Ágeis — 700 pts (nv5)</div><div class="help-upgrade-desc">Regar e colher não custam nenhum ponto.</div></div></div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">⏱️</div><div class="help-upgrade-info"><div class="help-upgrade-name">Crescimento Acelerado — 800 pts (nv6)</div><div class="help-upgrade-desc">A planta avança 2 estágios por tick em vez de 1.</div></div></div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">🌞</div><div class="help-upgrade-info"><div class="help-upgrade-name">Sol Dourado — 900 pts (nv7)</div><div class="help-upgrade-desc">+1 ponto extra a cada tick passivo do canal.</div></div></div>
-          <div class="help-upgrade-row"><div class="help-upgrade-icon">💰</div><div class="help-upgrade-info"><div class="help-upgrade-name">Mercador Amigo — 1200 pts (nv9)</div><div class="help-upgrade-desc">Valor de venda de todos os colhidos +50%.</div></div></div>
+          <div class="help-section-title">🪵 Canteiros e melhorias</div>
+          <div class="help-tip"><div class="help-tip-icon">🪵</div><div>Começa com <strong>2 canteiros</strong>. Compre mais na loja (até 6).</div></div>
+          <div class="help-tip"><div class="help-tip-icon">⚗️</div><div><strong>Melhorias permanentes</strong> — rega mais rápida, colheita grátis e mais!</div></div>
         </div>
       </div>
 
-      <!-- EXTRAS -->
+      <div class="help-panel" id="hpanel-estacoes">
+        <div class="help-section">
+          <div class="help-section-title">📅 Como funcionam as estações</div>
+          <p style="font-size:13px;color:var(--text2);line-height:1.7;margin:0">Cada estação dura <strong>24 dias</strong>. Só certas plantas crescem em cada época — plante fora e a planta será perdida!</p>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title" style="color:#e060a0">🌸 Primavera</div>
+          <div class="help-tip" style="font-size:16px">🥬🥕🥔 · 🌼🌷🌸💐</div>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title" style="color:#e08000">☀️ Verão</div>
+          <div class="help-tip" style="font-size:16px">🍅🌽🫑🍆 · 🌻🌺🌸🌺</div>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title" style="color:#c04000">🍂 Outono</div>
+          <div class="help-tip" style="font-size:16px">🎃🫚🥦🟫 · 🌹💜🪷</div>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title" style="color:#2060a0">❄️ Inverno</div>
+          <div class="help-tip" style="font-size:16px">🥔🥦 · ❄️ Sem flores</div>
+        </div>
+        <div class="help-tip"><div class="help-tip-icon">💡</div><div>Use o <strong>filtro de estação</strong> na loja para ver o que está disponível!</div></div>
+      </div>
+
       <div class="help-panel" id="hpanel-extras">
         <div class="help-section">
-          <div class="help-section-title">📋 Missões Diárias</div>
-          <div class="help-tip"><div class="help-tip-icon">🌱</div><div><strong>Plantador</strong> — plante 3 vegetais ou flores → +50 pts +30 xp</div></div>
-          <div class="help-tip"><div class="help-tip-icon">💧</div><div><strong>Regador</strong> — regue 5 vezes → +30 pts +20 xp</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🧺</div><div><strong>Colheita</strong> — colha 2 plantas → +80 pts +50 xp</div></div>
-          <div class="help-tip"><div class="help-tip-icon">💰</div><div><strong>Mercador</strong> — venda no mercado → +60 pts +40 xp</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🛒</div><div><strong>Comprador</strong> — compre 2 itens na loja → +40 pts +25 xp</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🔄</div><div>As missões renovam todo dia. Clique no ícone <strong>📋</strong> no topo para acompanhar o progresso.</div></div>
+          <div class="help-section-title">📋 Missões diárias</div>
+          <div class="help-tip"><div class="help-tip-icon">📋</div><div>5 missões por dia — plantar, regar, colher, comprar e vender. Cada uma dá pts e XP!</div></div>
         </div>
         <div class="help-section">
           <div class="help-section-title">✉️ Correio</div>
-          <div class="help-tip"><div class="help-tip-icon">🎁</div><div>Ao <strong>subir de nível</strong>, uma carta chega no correio com recompensa de pontos. Quanto maior o nível, mais pontos!</div></div>
-          <div class="help-tip"><div class="help-tip-icon">✉️</div><div>Clique no ícone <strong>✉️</strong> no topo para abrir as cartas e coletar as recompensas.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🎁</div><div>Ao <strong>subir de nível</strong>, uma carta chega com pontos de recompensa!</div></div>
         </div>
         <div class="help-section">
-          <div class="help-section-title">🏆 Conquistas</div>
-          <div class="help-tip"><div class="help-tip-icon">🌱</div><div><strong>Jardineiro Iniciante</strong> — primeiros passos no jardim (5 conquistas).</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🌻</div><div><strong>Fazendeiro Dedicado</strong> — evolua e expanda seu jardim (5 conquistas).</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🏆</div><div><strong>Mestre da Colheita</strong> — alcance os marcos mais difíceis (5 conquistas).</div></div>
-          <div class="help-tip"><div class="help-tip-icon">👤</div><div>Os badges desbloqueados aparecem no seu <strong>perfil</strong> (clique no nome do jardim).</div></div>
+          <div class="help-section-title">🏆 Conquistas e Ranking</div>
+          <div class="help-tip"><div class="help-tip-icon">🏆</div><div>Complete conquistas para desbloquear <strong>badges</strong> no seu perfil!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🥇</div><div>O <strong>Ranking</strong> mostra os top 25 espectadores por pontos.</div></div>
         </div>
         <div class="help-section">
-          <div class="help-section-title">🥇 Ranking</div>
-          <div class="help-tip"><div class="help-tip-icon">📊</div><div>Veja o <strong>Top 25</strong> espectadores do canal por pontos. Clique em <strong>🥇 Ranking</strong> nas ferramentas.</div></div>
-        </div>
-        <div class="help-section">
-          <div class="help-section-title">💾 Progresso Salvo</div>
-          <div class="help-tip"><div class="help-tip-icon">✅</div><div>Tudo é salvo automaticamente: plantas, inventário, pontos, conquistas, missões e nome da fazenda.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🔄</div><div>Ao fechar e abrir o jogo, seu jardim estará exatamente como deixou.</div></div>
+          <div class="help-section-title">💾 Progresso</div>
+          <div class="help-tip"><div class="help-tip-icon">✅</div><div>Tudo é <strong>salvo automaticamente</strong> — pode fechar e voltar quando quiser!</div></div>
         </div>
       </div>
 
@@ -2432,7 +2386,6 @@ async function spendSEPoints(amount) {
   try {
     await fetch(`/se-proxy?path=/points/${SE_CHANNEL}/${seUser.username}/${amount}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${SE_JWT}` }
     });
   } catch(e) { console.warn('spendSEPoints failed:', e); }
 }
@@ -2442,7 +2395,6 @@ async function giveSEPoints(amount) {
   try {
     await fetch(`/se-proxy?path=/points/${SE_CHANNEL}/${seUser.username}/${amount}`, {
       method: 'PUT',
-      headers: { Authorization: `Bearer ${SE_JWT}` }
     });
   } catch(e) { console.warn('giveSEPoints failed:', e); }
 }
@@ -2916,7 +2868,7 @@ async function openRanking() {
     // Fetch top 25 from SE loyalty leaderboard
     const res  = await fetch(
       `${SE_API}/points/${SE_CHANNEL}/top%3Flimit%3D25`,
-      { headers: { Authorization: `Bearer ${SE_JWT}` } }
+      {}
     );
     if (!res.ok) throw new Error(`SE API ${res.status}`);
     const data = await res.json();
@@ -3616,6 +3568,26 @@ function buyPlant(type, el) {
 }
 
 // ─── PLOTS ───────────────────────────────────────────────
+function updatePlotTooltip(idx) {
+  const plot = G.plots[idx];
+  if (!plot) return;
+  const el = document.querySelector(`[data-idx="${idx}"] .plot-tooltip`);
+  if (!el) return;
+  const p = getPlantable(plot.type);
+  const maxW = effectiveMaxWater(plot.type);
+  const maxG = effectiveMaxGrow(plot.type);
+  const ready = plot.growCount >= maxG;
+  el.innerHTML = `
+    <strong>${p.emoji} ${p.name}</strong><br>
+    ${ready
+      ? '🌸 Pronta para colher!'
+      : `💧 ${plot.waterCount}/${maxW} regas · 🌱 ${plot.growCount}/${maxG} estágios`
+    }
+    ${plot.quickGrow ? '<br>⚡ Adubo Rápido ativo' : ''}
+    ${plot.goldenSoil ? '<br>✨ Terra Dourada ativa' : ''}
+  `;
+}
+
 function renderPlots() {
   const grid = document.getElementById('plots-grid');
   grid.innerHTML = '';
@@ -3680,6 +3652,22 @@ function buildPlotEl(plot, idx) {
     plantEl.id = `plant-${idx}`;
     plantEl.innerHTML = plantSVG(plot.type, growProgress);
     inner.appendChild(plantEl);
+
+    // Tooltip
+    const p = getPlantable(plot.type);
+    const isReady = plot.growCount >= maxG;
+    const tooltip = document.createElement('div');
+    tooltip.className = 'plot-tooltip';
+    tooltip.innerHTML = `
+      <strong>${p.emoji} ${p.name}</strong><br>
+      ${isReady
+        ? '🌸 Pronta para colher!'
+        : `💧 ${plot.waterCount}/${maxW} regas · 🌱 ${plot.growCount}/${maxG} estágios`
+      }
+      ${plot.quickGrow ? '<br>⚡ Adubo Rápido ativo' : ''}
+      ${plot.goldenSoil ? '<br>✨ Terra Dourada ativa' : ''}
+    `;
+    div.appendChild(tooltip);
 
     // Show fertilizer badge on growing plant
     if (plot.quickGrow || plot.goldenSoil) {
@@ -3892,6 +3880,7 @@ function onPlotClick(idx) {
     gainXP('water', plotEl);
     missionProgress('water5');
     initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + 1; checkAchievements();
+    updatePlotTooltip(idx);
 
     if (justFull) {
       toast(`✅ Regador cheio! A ${getPlantable(plot.type).name} começa a crescer agora 🌱`);
@@ -4378,7 +4367,7 @@ function openHelp()  { document.getElementById('help-overlay').classList.remove(
 function closeHelp() { document.getElementById('help-overlay').classList.add('hidden'); }
 
 function switchHelpTab(tab) {
-  ['inicio','plantas','estacoes','loja','extras'].forEach(t => {
+  ['inicio','plantar','estacoes','extras'].forEach(t => {
     document.getElementById(`htab-${t}`)?.classList.toggle('active', t === tab);
     document.getElementById(`hpanel-${t}`)?.classList.toggle('visible', t === tab);
   });
@@ -4461,9 +4450,7 @@ async function initSEUser(username, displayName) {
   setLoginLoading(true, 'Carregando seus pontos e seu jardim…');
 
   try {
-    const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}`, {
-      headers: { Authorization: `Bearer ${SE_JWT}` }
-    });
+    const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}`, {});
 
     if (res.status === 404) {
       // New viewer — start with 0 pts, garden will be created fresh
@@ -4509,9 +4496,7 @@ async function initSEUser(username, displayName) {
     setInterval(async () => {
       if (!seUser) return;
       try {
-        const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {
-          headers: { Authorization: `Bearer ${SE_JWT}` }
-        });
+        const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {});
         if (!res.ok) return;
         const data = await res.json();
         const live = data.points || 0;
@@ -4571,9 +4556,7 @@ async function syncPtsToSE() {
   if (!seUser) return;
   try {
     // Fetch current SE points
-    const res     = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {
-      headers: { Authorization: `Bearer ${SE_JWT}` }
-    });
+    const res     = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {});
     if (!res.ok) return;
     const data    = await res.json();
     const current = data.points || 0;
@@ -4584,15 +4567,11 @@ async function syncPtsToSE() {
     if (diff > 0) {
       // Player gained points — add to SE
       await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
-        method:  'PUT',
-        headers: { Authorization: `Bearer ${SE_JWT}` }
-      });
+        method:  'PUT'});
     } else {
       // Player spent points — remove from SE
       await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${Math.abs(diff)}`, {
-        method:  'DELETE',
-        headers: { Authorization: `Bearer ${SE_JWT}` }
-      });
+        method:  'DELETE'});
     }
     console.log(`💰 Pontos SE sincronizados: ${current} → ${G.pts} (diff: ${diff > 0 ? '+' : ''}${diff})`);
   } catch(e) {
@@ -4731,9 +4710,7 @@ async function spendSEPoints(username, amount, reason) {
   if (!seUser || amount <= 0) return true;
   try {
     const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}/${amount}`, {
-      method:  'DELETE',
-      headers: { Authorization: `Bearer ${SE_JWT}` }
-    });
+      method:  'DELETE'});
     return res.ok;
   } catch(e) {
     console.warn('spendPoints failed:', e);
@@ -4746,9 +4723,7 @@ async function giveSEPoints(username, amount, reason) {
   if (!seUser || amount <= 0) return;
   try {
     await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}/${amount}`, {
-      method:  'PUT',
-      headers: { Authorization: `Bearer ${SE_JWT}` }
-    });
+      method:  'PUT'});
   } catch(e) {
     console.warn('givePoints failed:', e);
   }
@@ -4937,6 +4912,7 @@ function growTick() {
       toast(`🌸 ${getPlantable(plot.type).name} floresceu!${plot.goldenSoil ? ' ✨ Terra Dourada ativa!' : ''}`);
       gainXP('bloom', document.querySelector(`[data-idx="${idx}"]`));
     }
+    updatePlotTooltip(idx);
   });
 
   if (anyGrew) renderPlots();

@@ -1612,6 +1612,23 @@ header {
   border-radius: 50%; animation: pulse 1.4s ease infinite; margin-right: 4px;
 }
 @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.7); } }
+
+/* Cozy plant beds */
+.plot:not(.locked) { background: #eee8d8; border: 1.5px solid #d6cbb5; box-shadow: 0 3px 0 #c6b496, 0 7px 18px #66553912; border-radius: 20px; }
+.plot:not(.locked):hover { box-shadow: 0 5px 0 #c6b496, 0 10px 22px #66553918; }
+.plot:not(.locked)::after { background: #a58969; height: 25px; }
+.plot:not(.locked) .plot-inner { background: radial-gradient(ellipse at 50% 80%, #d6dfc1 0, #e8eddb 60%, transparent 72%); border-radius: 48% 48% 15px 15px; }
+.plot-water-bar { height: 4px; background: #d7cfbb; }
+.plot-water-fill { background: #8fb8c3; box-shadow: none; }
+.plot-grow-label { color: #597346 !important; }
+.plot-label { text-shadow: none; }
+.plot-label span { color: #f8f1e2 !important; }
+.empty-slot-hint { opacity: .75; }
+.empty-slot-hint span { color: #6d7c59; }
+.cozy-growing { transform-origin: 50% 94%; animation: cozy-sway 5s ease-in-out infinite; }
+@keyframes cozy-sway { 0%,100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
+@media (prefers-reduced-motion: reduce) { .plant-svg, .cozy-growing, .bloom-anim { animation: none !important; } }
+
 </style>
 </head>
 <body>
@@ -3891,136 +3908,43 @@ function lerp(a, b, t) { return a + (b - a) * t; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; } // ease in-out
 
+function cozyPlantPalette(svg) {
+  const colors = {'#2a5c10':'#5e7451','#1a4a08':'#667753','#1a3a08':'#687b52','#8b0000':'#aa6258','#5a0a3a':'#885773','#1a5a10':'#64835c'};
+  return svg.replace(/#[0-9a-f]{6}/gi, hex => {
+    if (colors[hex.toLowerCase()]) return colors[hex.toLowerCase()];
+    const n = parseInt(hex.slice(1),16);
+    return '#' + [n >> 16, (n >> 8) & 255, n & 255].map((c,i)=>Math.round(c*.7+[239,228,204][i]*.3).toString(16).padStart(2,'0')).join('');
+  });
+}
+
 function plantSVG(type, progress) {
-  const p  = getPlantable(type);
-  const lc = p.leafColor;
-  const pc = p.color;
-  const t  = clamp(progress, 0, 1);
-
-  if (t >= 1) return bloomSVG(type, lc, pc);
-
-  const et = ease(t);
-
-  // ── SOIL MOUND ──────────────────────────────────────────
-  const soilSVG = `<ellipse cx="40" cy="100" rx="28" ry="8" fill="#a07848" opacity=".5"/>`;
-
-  // ── SEED (stage 0) ──────────────────────────────────────
-  if (t === 0) return `<svg class="plant-svg" width="80" height="110" viewBox="0 0 80 110">
-    ${soilSVG}
-    <ellipse cx="40" cy="98" rx="9" ry="5" fill="${lc}" opacity=".5"/>
-    <ellipse cx="40" cy="95" rx="6" ry="4" fill="${lc}" opacity=".8"/>
-  </svg>`;
-
-  // ── STEM ────────────────────────────────────────────────
-  const maxStemH = 72;
-  const stemH    = lerp(4, maxStemH, et);
-  const stemTop  = 98 - stemH;
-  const stemW    = lerp(2.5, 5, et);
-
-  // Stem outline for readability
-  const stemSVG = `
-    <line x1="40" y1="100" x2="40" y2="${stemTop.toFixed(1)}"
-      stroke="#2a5c10" stroke-width="${(stemW + 2).toFixed(1)}" stroke-linecap="round"/>
-    <line x1="40" y1="100" x2="40" y2="${stemTop.toFixed(1)}"
-      stroke="${lc}" stroke-width="${stemW.toFixed(1)}" stroke-linecap="round"/>`;
-
-  // ── LEAVES ──────────────────────────────────────────────
-  function leaf(cx, cy, rx, ry, angle, alpha) {
-    if (rx < 0.5) return '';
-    return `
-      <ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}"
-        rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}"
-        fill="#1a4a08" opacity="${(alpha*0.6).toFixed(2)}"
-        transform="rotate(${angle} ${cx.toFixed(1)} ${cy.toFixed(1)})"/>
-      <ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}"
-        rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}"
-        fill="${lc}" opacity="${alpha.toFixed(2)}"
-        transform="rotate(${angle} ${cx.toFixed(1)} ${cy.toFixed(1)})"/>`;
-  }
-
-  // pair 1 — appears at t>0.10
-  const l1t  = clamp((t - 0.10) / 0.25, 0, 1);
-  const l1rx = lerp(0, 14, ease(l1t));
-  const l1ry = lerp(0, 7,  ease(l1t));
-  const l1y  = lerp(98, stemTop + stemH * 0.75, et);
-  const leaves1 = leaf(40-16, l1y, l1rx, l1ry, -32, l1t)
-                + leaf(40+16, l1y+4, l1rx, l1ry, 32, l1t);
-
-  // pair 2 — appears at t>0.35
-  const l2t  = clamp((t - 0.35) / 0.28, 0, 1);
-  const l2rx = lerp(0, 16, ease(l2t));
-  const l2ry = lerp(0, 8,  ease(l2t));
-  const l2y  = lerp(98, stemTop + stemH * 0.48, et);
-  const leaves2 = leaf(40-18, l2y, l2rx, l2ry, -36, l2t)
-                + leaf(40+18, l2y+5, l2rx, l2ry, 36, l2t);
-
-  // pair 3 — appears at t>0.60
-  const l3t  = clamp((t - 0.60) / 0.28, 0, 1);
-  const l3rx = lerp(0, 13, ease(l3t));
-  const l3ry = lerp(0, 6.5, ease(l3t));
-  const l3y  = lerp(98, stemTop + stemH * 0.22, et);
-  const leaves3 = leaf(40-14, l3y, l3rx, l3ry, -24, l3t)
-                + leaf(40+14, l3y+3, l3rx, l3ry, 24, l3t);
-
-  // ── FRUIT BUD (t > 0.75) ────────────────────────────────
-  const budT = clamp((t - 0.75) / 0.25, 0, 1);
-  let budSVG = '';
-  if (budT > 0) {
-    const by = stemTop + 1;
-    if (type === 'tomato') {
-      const r = lerp(0, 10, budT);
-      budSVG = `
-        <circle cx="40" cy="${by}" r="${(r+2).toFixed(1)}" fill="#8b0000" opacity="${(budT*0.5).toFixed(2)}"/>
-        <circle cx="40" cy="${by}" r="${r.toFixed(1)}" fill="${pc}" opacity="${(budT*0.9).toFixed(2)}"/>
-        <circle cx="40" cy="${by}" r="${(r*0.45).toFixed(1)}" fill="#ff8080" opacity="${(budT*0.7).toFixed(2)}"/>`;
-    } else if (type === 'carrot') {
-      const bh = lerp(0, 16, budT), bw = lerp(0, 9, budT);
-      budSVG = `
-        <path d="M${40-bw/2} ${by+2} Q${40} ${by-bh+2} ${40+bw/2} ${by+2}" fill="${pc}" opacity="${(budT*0.85).toFixed(2)}" stroke="#a04010" stroke-width="1"/>
-        <line x1="${40-3}" y1="${by-bh+2}" x2="${40-5}" y2="${by-bh-4}" stroke="${lc}" stroke-width="2" stroke-linecap="round" opacity="${budT.toFixed(2)}"/>
-        <line x1="${40}" y1="${by-bh}" x2="${40}" y2="${by-bh-6}" stroke="${lc}" stroke-width="2" stroke-linecap="round" opacity="${budT.toFixed(2)}"/>
-        <line x1="${40+3}" y1="${by-bh+2}" x2="${40+5}" y2="${by-bh-4}" stroke="${lc}" stroke-width="2" stroke-linecap="round" opacity="${budT.toFixed(2)}"/>`;
-    } else if (type === 'potato') {
-      const rx = lerp(0, 12, budT), ry = lerp(0, 9, budT);
-      budSVG = `
-        <ellipse cx="40" cy="${by}" rx="${(rx+2).toFixed(1)}" ry="${(ry+2).toFixed(1)}" fill="#5c3820" opacity="${(budT*0.4).toFixed(2)}"/>
-        <ellipse cx="40" cy="${by}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="${pc}" opacity="${(budT*0.9).toFixed(2)}"/>
-        <ellipse cx="40" cy="${by}" rx="${(rx*0.55).toFixed(1)}" ry="${(ry*0.55).toFixed(1)}" fill="#d8b070" opacity="${(budT*0.7).toFixed(2)}"/>
-        <circle cx="${(40-rx*0.3).toFixed(1)}" cy="${(by-ry*0.2).toFixed(1)}" r="1.5" fill="#9a7040" opacity="${(budT*0.8).toFixed(2)}"/>`;
-    } else if (type === 'beetroot') {
-      const r = lerp(0, 11, budT);
-      budSVG = `
-        <circle cx="40" cy="${by+2}" r="${(r+2).toFixed(1)}" fill="#5a0a3a" opacity="${(budT*0.4).toFixed(2)}"/>
-        <circle cx="40" cy="${by+2}" r="${r.toFixed(1)}" fill="${pc}" opacity="${(budT*0.9).toFixed(2)}"/>
-        <circle cx="40" cy="${by+2}" r="${(r*0.45).toFixed(1)}" fill="#c060a0" opacity="${(budT*0.6).toFixed(2)}"/>
-        <line x1="37" y1="${by-4}" x2="35" y2="${by-10}" stroke="${lc}" stroke-width="2" stroke-linecap="round" opacity="${budT.toFixed(2)}"/>
-        <line x1="40" y1="${by-5}" x2="40" y2="${by-12}" stroke="${lc}" stroke-width="2" stroke-linecap="round" opacity="${budT.toFixed(2)}"/>
-        <line x1="43" y1="${by-4}" x2="45" y2="${by-10}" stroke="${lc}" stroke-width="2" stroke-linecap="round" opacity="${budT.toFixed(2)}"/>`;
-    } else if (type === 'lettuce') {
-      // lettuce: wide ruffled head growing at top
-      const rs = lerp(0, 18, budT);
-      budSVG = `
-        <ellipse cx="40" cy="${by+2}" rx="${(rs+2).toFixed(1)}" ry="${(rs*0.7+1).toFixed(1)}" fill="#1a5a10" opacity="${(budT*0.4).toFixed(2)}"/>
-        <ellipse cx="40" cy="${by+2}" rx="${rs.toFixed(1)}" ry="${(rs*0.7).toFixed(1)}" fill="${pc}" opacity="${(budT*0.85).toFixed(2)}"/>
-        <ellipse cx="40" cy="${by+4}" rx="${(rs*0.7).toFixed(1)}" ry="${(rs*0.5).toFixed(1)}" fill="#6ad848" opacity="${(budT*0.7).toFixed(2)}"/>
-        <ellipse cx="40" cy="${by+6}" rx="${(rs*0.4).toFixed(1)}" ry="${(rs*0.3).toFixed(1)}" fill="#a0f060" opacity="${(budT*0.6).toFixed(2)}"/>`;
-    } else { // all other types: generic color bud
-      const r = lerp(0, 11, budT);
-      budSVG = `
-        <circle cx="40" cy="${by}" r="${(r+2).toFixed(1)}" fill="#1a3a08" opacity="${(budT*0.35).toFixed(2)}"/>
-        <circle cx="40" cy="${by}" r="${r.toFixed(1)}" fill="${pc}" opacity="${(budT*0.9).toFixed(2)}"/>
-        <circle cx="40" cy="${by}" r="${(r*0.5).toFixed(1)}" fill="rgba(255,255,255,.4)" opacity="${(budT*0.6).toFixed(2)}"/>`;
+  const plant = getPlantable(type);
+  const t = clamp(progress, 0, 1);
+  if (t >= 1) return cozyPlantPalette(bloomSVG(type, plant.leafColor, plant.color));
+  const isFlower = !!FLOWERS[type];
+  const top = 93 - 62 * Math.sqrt(t);
+  const wrap = body => '<svg class="plant-svg cozy-growing" width="80" height="110" viewBox="0 0 80 110" role="img" aria-label="' + plant.name + ' em crescimento">' + body + '</svg>';
+  const soil = '<ellipse cx="40" cy="101" rx="27" ry="6" fill="#b49a78" opacity=".35"/><path d="M20 100q20-12 40 0" fill="#c3a27e"/><path d="M28 100h4m13-2h3m6 3h2" stroke="#e9d4af" stroke-width="2" stroke-linecap="round"/>';
+  if(t === 0) return wrap(soil + '<ellipse cx="40" cy="95" rx="5" ry="7" transform="rotate(28 40 95)" fill="#ad805a"/><path d="m39 98 2-6" stroke="#e7c69a" stroke-width="1.5" stroke-linecap="round"/>');
+  let body = '<path d="M40 99Q35 78 40 ' + top + '" stroke="#6f865b" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+  for(let i=0;i<3;i++) {
+    const k=clamp((t-i*.22)/.28,0,1);
+    if(!k) continue;
+    const y=92-(92-top)*(.25+i*.26);
+    for(const direction of [-1,1]) {
+      body += '<g transform="translate(40 '+y+') scale('+(direction*k)+' '+k+')"><path d="M0 0C-4-17-18-23-26-21C-25-7-15 4 0 0Z" fill="'+(direction===1?'#91a778':'#789264')+'"/><path d="M-2-1Q-13-8-22-17" stroke="#c4cda8" stroke-width="1" fill="none" opacity=".7"/></g>';
     }
   }
-
-  return `<svg class="plant-svg" width="80" height="110" viewBox="0 0 80 110">
-    ${soilSVG}
-    ${stemSVG}
-    ${leaves1}
-    ${leaves2}
-    ${leaves3}
-    ${budSVG}
-  </svg>`;
+  const bud = clamp((t-.58)/.42,0,1);
+  if(bud>0) {
+    if(isFlower) {
+      const petal = {daisy:'#f2e8bb',rose:'#c78291',tulip:'#ce9ab0',sunflower:'#ddba70',lavender:'#a69ac1',orchid:'#bd98bb',hibiscus:'#d89280',bluebell:'#94a9cb',cherry:'#dfb2bc',poppy:'#d18b74',jasmine:'#faf4de'}[type];
+      body += '<g transform="translate(40 '+top+') scale('+(.35+bud*.65)+')"><path d="M0 8C-17 2-14-15-7-19L0-14L7-19C15-10 16 2 0 8Z" fill="'+petal+'"/><path d="M0 8Q-5-3 0-14" stroke="#fff9e4" stroke-width="1.3" opacity=".55" fill="none"/><path d="M-9 3 0 11 9 3" stroke="#758a5a" stroke-width="3" stroke-linecap="round" fill="none"/></g>';
+    } else {
+      body += '<g transform="translate(40 '+(top+8)+') scale('+bud+')"><ellipse rx="10" ry="9" fill="'+plant.color+'"/><path d="M-6-7 0-4 5-8" stroke="#7c945f" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="-3" cy="-2" rx="2" ry="3" fill="#fff4cf" opacity=".4"/></g>';
+    }
+  }
+  return wrap(soil+body);
 }
 
 function bloomSVG(type, lc, pc) {

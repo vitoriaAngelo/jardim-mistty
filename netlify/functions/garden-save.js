@@ -34,6 +34,47 @@ exports.handler = async (event) => {
       'premiumFertilizersClaimed',
       'premiumSpecialPlotClaimed',
     ];
+    
+    // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
+    const GROW_INTERVAL_MS = 120000; // 2 minutos
+    const maxGrowthPerTick = 1;
+    const validationRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,
+      {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      }
+    );
+    
+    if (validationRes.ok) {
+      const rows = await validationRes.json();
+      if (rows.length > 0) {
+        const oldData = rows[0].data || {};
+        const lastSaveTime = new Date(rows[0].updated_at).getTime();
+        const elapsedMs = (data.savedAt || Date.now()) - lastSaveTime;
+        const maxPossibleGrowth = Math.floor(elapsedMs / GROW_INTERVAL_MS) * maxGrowthPerTick;
+        
+        if (oldData.plots && safeData.plots) {
+          let fraudDetected = false;
+          const fraudLog = [];
+          
+          safeData.plots.forEach((p, i) => {
+            const old = oldData.plots[i];
+            if (!old) return;
+            const growDiff = (p.growCount || 0) - (old.growCount || 0);
+            if (growDiff > maxPossibleGrowth + 3) {
+              fraudDetected = true;
+              fraudLog.push({ plot: i, type: p.type, diff: growDiff, max: maxPossibleGrowth, time: elapsedMs });
+            }
+          });
+          
+          if (fraudDetected) {
+            console.error(`🚨 FRAUDE - ${username}:`, fraudLog);
+            return { statusCode: 400, headers, body: JSON.stringify({ error: 'Crescimento impossível detectado', fraudLog }) };
+          }
+        }
+      }
+    }
+    
     const existingRes = await fetch(
       `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data&order=updated_at.desc&limit=1`,
       {

@@ -4141,7 +4141,11 @@ function closePremium() {
   document.getElementById('premium-overlay')?.classList.add('hidden');
 }
 function openMascotShop() { renderMascotShop(); const levelup=document.getElementById('levelup-overlay'); levelup?.classList.remove('show'); levelup?.classList.add('hidden'); document.getElementById('mascot-overlay')?.classList.remove('hidden'); if (typeof window.mascotNotify === 'function') window.mascotNotify('Vamos escolher um amiguinho para o jardim? 🐾', 4000); }
-function closeMascotShop() { document.getElementById('mascot-overlay')?.classList.add('hidden'); }
+function closeMascotShop() {
+  document.getElementById('mascot-overlay')?.classList.add('hidden');
+  // A prévia é apenas visual: ao fechar, restaura o mascote realmente selecionado.
+  applySelectedMascotAppearance();
+}
 const UPDATE_NEWS_VERSION = 'garden-update-2026-09-mascots';
 function closeUpdateNews() { document.getElementById('update-news-overlay')?.classList.add('hidden'); }
 function maybeShowUpdateNews(hadSave) {

@@ -3077,6 +3077,16 @@ async function refreshPoints() {
       const synced = await syncPtsToSE();
       if (!synced) throw new Error('Falha ao sincronizar alterações locais');
       const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`);
+      if (res.status === 404) {
+        // Usuários sem registro de pontos ainda começam com saldo zero.
+        G.pts = 0;
+        lastKnownSEPoints = 0;
+        if (seUser) seUser.points = 0;
+        updatePts();
+        await saveGardenToSE();
+        toast('🌟 Pontos atualizados!', 1600);
+        return;
+      }
       if (!res.ok) throw new Error('Falha ao atualizar');
       const data = await res.json();
       G.pts = data.points || 0;
@@ -4175,13 +4185,14 @@ function openRankingProfile(index) {
   const level = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
   const profilePhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
   const stats = u.stats || {};
+  const ownStats = isMe ? (G.achievStats || {}) : {};
   const statItems = [
-    ['✨', stats.xp ?? (isMe ? G.xp : 0), 'XP acumulado'],
-    ['🧺', stats.harvested ?? (isMe ? Object.values(G.harvested || {}).reduce((a, b) => a + Number(b || 0), 0) : 0), 'Itens colhidos'],
-    ['🛍️', stats.purchased ?? (isMe ? G.achievStats?.totalBuy : 0) ?? 0, 'Itens comprados'],
-    ['💧', stats.watered ?? (isMe ? G.achievStats?.totalWater : 0) ?? 0, 'Regas realizadas'],
-    ['🪙', stats.soldPoints ?? (isMe ? G.achievStats?.totalSellPts : 0) ?? 0, 'Pontos em vendas'],
-    ['🔥', stats.presence ?? (isMe ? G.presenceStreak : 0) ?? 0, 'Dias de presença']
+    ['✨', isMe ? G.xp : (stats.xp ?? 0), 'XP acumulado'],
+    ['🧺', isMe ? (ownStats.totalHarvest || 0) : (stats.harvested ?? 0), 'Itens colhidos'],
+    ['🛍️', isMe ? (ownStats.totalBuy || 0) : (stats.purchased ?? 0), 'Itens comprados'],
+    ['💧', isMe ? (ownStats.totalWater || 0) : (stats.watered ?? 0), 'Regas realizadas'],
+    ['🪙', isMe ? (ownStats.totalSellPts || 0) : (stats.soldPoints ?? 0), 'Pontos em vendas'],
+    ['🔥', isMe ? (G.presenceStreak || 0) : (stats.presence ?? 0), 'Dias de presença']
   ];
   const statsHtml = statItems.map(([icon, value, label]) => `<div class="ranking-profile-stat">${icon} ${Number(value || 0).toLocaleString('pt-BR')}<small>${label}</small></div>`).join('');
   const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
@@ -5800,9 +5811,9 @@ async function syncPtsToSEOnce() {
     await sePointsMutationQueue;
     // Fetch current SE points
     const res     = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {});
-    if (!res.ok) return false;
-    const data    = await res.json();
-    const current = data.points || 0;
+    if (res.status !== 404 && !res.ok) return false;
+    const data    = res.status === 404 ? { points: 0 } : await res.json();
+    const current = Number(data.points) || 0;
     // Mantém os pontos que chegaram diretamente pelo StreamElements e aplica
     // somente o que mudou dentro do jogo desde a última leitura conhecida.
     const baseline = lastKnownSEPoints ?? current;
@@ -5816,15 +5827,11 @@ async function syncPtsToSEOnce() {
     }
 
     let syncRes;
-    if (diff > 0) {
-      // Player gained points — add to SE
-      syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
-        method:  'PUT'});
-    } else {
-      // Player spent points — remove from SE
-      syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${Math.abs(diff)}`, {
-        method:  'DELETE'});
-    }
+    // StreamElements altera o saldo com PUT: valores positivos adicionam
+    // pontos e valores negativos descontam pontos.
+    syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
+      method: 'PUT'
+    });
     if (!syncRes.ok) return false;
     const merged = current + diff;
     G.pts = merged;
@@ -6014,11 +6021,12 @@ function connectSESocket() {
 // ── Queue point mutations so rapid purchases cannot race ──
 function queueSEPointsMutation(amount, method) {
   if (!seUser || amount <= 0) return Promise.resolve(true);
+  const seDelta = method === 'DELETE' ? -amount : amount;
   const operation = sePointsMutationQueue.then(async () => {
-    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${amount}`, { method });
+    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${seDelta}`, { method: 'PUT' });
     if (!res.ok) throw new Error(`Points update failed: ${res.status}`);
     if (lastKnownSEPoints !== null) {
-      lastKnownSEPoints += method === 'PUT' ? amount : -amount;
+      lastKnownSEPoints += seDelta;
       seUser.points = lastKnownSEPoints;
     }
     return true;

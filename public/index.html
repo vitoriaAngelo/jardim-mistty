@@ -3822,7 +3822,7 @@ async function openRanking() {
             badges: save.achievements || user.badges,
             stats: {
               xp: Number(save.stats?.xp ?? save.xp ?? savedStats.xp ?? savedXp ?? user.stats?.xp ?? 0),
-              harvested: Number(save.stats?.harvested ?? savedStats.totalHarvest ?? savedStats.harvested ?? user.stats?.harvested ?? 0),
+              harvested: Number(savedStats.totalHarvest ?? save.stats?.harvested ?? savedStats.harvested ?? user.stats?.harvested ?? 0),
               purchased: Number(save.stats?.purchased ?? savedStats.totalBuy ?? savedStats.purchased ?? user.stats?.purchased ?? 0),
               watered: Number(save.stats?.watered ?? savedStats.totalWater ?? savedStats.watered ?? user.stats?.watered ?? 0),
               soldPoints: Number(save.stats?.soldPoints ?? savedStats.totalSellPts ?? savedStats.soldPoints ?? user.stats?.soldPoints ?? 0),
@@ -5782,7 +5782,7 @@ async function saveGardenToSE() {
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
     stats: {
       xp:          G.xp,
-      harvested:   Object.values(G.harvested || {}).reduce((a, b) => a + Number(b || 0), 0),
+      harvested:   G.achievStats?.totalHarvest || 0,
       purchased:   G.achievStats?.totalBuy    || 0,
       watered:     G.achievStats?.totalWater  || 0,
       soldPoints:  G.achievStats?.totalSellPts|| 0,
@@ -5885,6 +5885,14 @@ window.addEventListener('beforeunload', () => {
     dailyPhrase: G.dailyPhrase || '',
     isSubscriber: hasSubscriberBadge(),
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
+    stats: {
+      xp: G.xp,
+      harvested: G.achievStats?.totalHarvest || 0,
+      purchased: G.achievStats?.totalBuy || 0,
+      watered: G.achievStats?.totalWater || 0,
+      soldPoints: G.achievStats?.totalSellPts || 0,
+      presence: G.presenceStreak || 0,
+    },
     shopCart: SHOP_CART,
     mail: G_MAIL,
     savedAt: Date.now(),

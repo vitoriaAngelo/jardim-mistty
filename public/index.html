@@ -61,6 +61,7 @@ header {
 header::before { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.7; background:radial-gradient(circle at 12% 110%,#dcebc8 0 24%,transparent 25%),linear-gradient(120deg,#fffaf0,#edf3e5 58%,#f6eadf); }
 header::after { display:none; }
 header > * { position:relative; z-index:1; }
+.header-left { z-index: 2; }
 header.season-spring::before { background:radial-gradient(circle at 8% 120%,#dcecc8 0 25%,transparent 26%),linear-gradient(120deg,#fffaf0,#edf5e7 58%,#fae8eb); }
 header.season-summer::before { background:radial-gradient(circle at 8% 120%,#e5e9ba 0 25%,transparent 26%),linear-gradient(120deg,#fffaf0,#f7efcf 58%,#eef2cf); }
 header.season-autumn::before { background:radial-gradient(circle at 8% 120%,#ead3b5 0 25%,transparent 26%),linear-gradient(120deg,#fffaf1,#f4e5d2 58%,#efd7c5); }
@@ -2203,7 +2204,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
         <span id="garden-name">Jardim da Mistty</span>
         <span class="logo-profile-icon" aria-hidden="true">✎</span>
       </div>
-      <div class="header-btn-tip">Seu perfil<br><span>Clique para editar o nome da fazenda</span></div>
+      <div class="header-btn-tip"><strong>Seu perfil</strong><br><span>Clique para editar o nome da fazenda</span></div>
     </div>
     <div class="season-widget" id="season-widget">
       <span id="season-icon">🌸</span>
@@ -2608,7 +2609,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
     <div class="profile-section">
       <div class="profile-label">Nome da Fazenda</div>
       <div class="profile-field-row">
-        <input id="profile-farm-name" type="text" maxlength="10" placeholder="Meu Jardim"
+        <input id="profile-farm-name" type="text" maxlength="20" placeholder="Meu Jardim"
           class="profile-input"/>
         <button class="profile-save-btn" onclick="saveProfileName()">Salvar</button>
       </div>
@@ -5648,8 +5649,9 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
 
     document.getElementById('login-overlay').classList.add('hidden');
     // Only set default name if no saved farm name was loaded
-    const savedName = document.getElementById('garden-name').textContent;
-    if (!savedName || savedName === 'Jardim da Mistty') {
+    const savedName = document.getElementById('garden-name').textContent.trim();
+    const isDefault = !savedName || savedName === 'Jardim da Mistty' || savedName === 'Jardim de Mistty';
+    if (isDefault) {
       document.getElementById('garden-name').textContent = `Jardim de ${displayName}`;
     }
     document.getElementById('twitch-btn').innerHTML =

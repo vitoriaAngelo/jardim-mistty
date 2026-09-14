@@ -5796,6 +5796,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     sessionStorage.setItem('se_display',  displayName);
 
     const hadSave = await loadGardenFromSE(username);
+    if (hadSave === null) throw new Error('Não foi possível carregar seu jardim salvo. Tente novamente sem perder seu progresso.');
 
     // Points ALWAYS come from StreamElements
     G.pts = seUser.points;
@@ -5858,6 +5859,17 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
 }
 
 // ── Save garden state to SE custom store ──────────────────
+function gardenCacheKey(username) { return `mistty-garden-cache:${String(username || '').toLowerCase()}`; }
+function writeGardenCache(username, data) {
+  try { localStorage.setItem(gardenCacheKey(username), JSON.stringify(data)); } catch (e) { console.warn('Cache local indisponível:', e); }
+}
+function readGardenCache(username) {
+  try {
+    const raw = localStorage.getItem(gardenCacheKey(username));
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
 async function saveGardenToSE() {
   if (!seUser || !gardenHydrated) return;
   const saveData = {
@@ -5900,6 +5912,7 @@ async function saveGardenToSE() {
     mail:             G_MAIL,
     savedAt:          Date.now(),
   };
+  writeGardenCache(seUser.username, saveData);
   try {
     const response = await fetch('/garden-save', {
       method: 'POST',
@@ -5907,6 +5920,7 @@ async function saveGardenToSE() {
       body: JSON.stringify({ username: seUser.username, data: saveData }),
     });
     if (!response.ok) throw new Error(`Save failed: ${response.status}`);
+    writeGardenCache(seUser.username, saveData);
     console.log('💾 Jardim salvo no Supabase!');
   } catch(e) {
     console.warn('Save failed:', e);
@@ -6006,6 +6020,7 @@ window.addEventListener('beforeunload', () => {
     savedAt: Date.now(),
   };
   const blob = new Blob([JSON.stringify({ username: seUser.username, data: saveData })], { type: 'application/json' });
+  writeGardenCache(seUser.username, saveData);
   navigator.sendBeacon('/garden-save', blob);
 });
 
@@ -6019,13 +6034,21 @@ document.addEventListener('visibilitychange', () => {
 async function loadGardenFromSE(username) {
   let hadSave = false;
   try {
-    const res  = await fetch(`/garden-load?username=${encodeURIComponent(username)}`);
-    if (!res.ok) return hadSave;
-    const json = await res.json();
-    if (!json.data) return hadSave;
+    let json = null;
+    let loadFailed = false;
+    try {
+      const res = await fetch(`/garden-load?username=${encodeURIComponent(username)}`, { cache: 'no-store' });
+      if (res.ok) json = await res.json();
+      else { json = { data: readGardenCache(username) }; loadFailed = res.status !== 404; }
+    } catch (networkError) {
+      json = { data: readGardenCache(username) };
+      loadFailed = true;
+    }
+    if (!json?.data) return loadFailed ? null : false;
     hadSave = true;
 
     const save = json.data;
+    writeGardenCache(username, save);
 
     // Restore all state — pts always comes from SE, not from save
     G.xp              = save.xp             || 0;

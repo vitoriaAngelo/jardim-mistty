@@ -1,0 +1,20 @@
+/* Native cursors retain precise hotspots and do not add mouse-following lag. */
+:root {
+  --cozy-cursor: url('cursor-cozy.svg') 4 3, default;
+  --cozy-click-cursor: url('cursor-cozy-click.svg') 13 3, pointer;
+  --cozy-locked-cursor: url('cursor-cozy-locked.svg') 3 3, not-allowed;
+}
+@media (hover: hover) and (pointer: fine) {
+  html body, body * { cursor: var(--cozy-cursor); }
+  body :is(button, a[href], select, summary, [role="button"], [onclick], input[type="checkbox"], input[type="radio"], input[type="range"], .plot, .inv-slot, .fert-inv-slot),
+  body :is(button, a[href], select, summary, [role="button"], [onclick], .plot, .inv-slot, .fert-inv-slot) * {
+    cursor: var(--cozy-click-cursor) !important;
+  }
+  body :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]), textarea, [contenteditable="true"]) {
+    cursor: text !important;
+  }
+  body :is(:disabled, [aria-disabled="true"], .locked, .cant-afford, .tool-card.disabled),
+  body :is(:disabled, [aria-disabled="true"], .locked, .cant-afford, .tool-card.disabled) * {
+    cursor: var(--cozy-locked-cursor) !important;
+  }
+}

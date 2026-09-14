@@ -1472,6 +1472,12 @@ body.dark-mode .ranking-pagination button { border-color:#52624d; background:#30
 .achiev-item-info { flex: 1; }
 .achiev-item-name { font-size: 12px; font-weight: 800; color: var(--text); }
 .achiev-item-desc { font-size: 11px; font-weight: 600; color: var(--text2); margin-top: 1px; }
+.achiev-item-progress-copy { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:7px; color:var(--text2); font-size:9px; font-weight:700; }
+.achiev-item-progress-copy strong { color:var(--grass2); font-size:10px; }
+.achiev-item-progress-copy span { text-align:right; }
+.achiev-item-bar { width:100%; height:6px; margin-top:4px; overflow:hidden; border-radius:99px; background:#dedfd3; box-shadow:inset 0 1px 2px #56604a18; }
+.achiev-item-bar span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#829b69,#a9bd8f); transition:width .45s ease; }
+.achiev-item.done .achiev-item-bar span { background:linear-gradient(90deg,#779760,#b2ca91); }
 .achiev-item-check { font-size: 16px; flex-shrink: 0; }
 
 /* Profile badges */
@@ -2201,6 +2207,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
 
 </style>
 <link rel="stylesheet" href="cozy-garden.css">
+<link rel="stylesheet" href="cozy-cursors.css">
 <script defer src="cozy-tooltips.js"></script>
 </head>
 <body>
@@ -2303,6 +2310,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
         </svg>
         Inventário
       </div>
+      <div id="inventory-filter"></div>
       <div id="inventory-bar"></div>
       <div id="fertilizer-inv-bar"></div>
     </div>
@@ -2506,8 +2514,9 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
         </div>
         <div class="help-section">
           <div class="help-section-title">🌟 Seus pontos</div>
-          <div class="help-tip"><div class="help-tip-icon">📺</div><div>Ganhe pontos <strong>assistindo a live</strong> — atualizam no jogo a cada 1 minuto.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">📺</div><div>Ganhe pontos <strong>assistindo a live</strong> — o jogo verifica seu saldo automaticamente a cada 5 minutos.</div></div>
           <div class="help-tip"><div class="help-tip-icon">💰</div><div>Vendendo colhidos você <strong>recupera pontos</strong> no canal da Twitch!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🔄</div><div>Use o botão de <strong>sincronizar</strong> quando quiser atualizar o saldo imediatamente.</div></div>
         </div>
       </div>
 
@@ -2517,7 +2526,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
           <div class="help-tip"><div class="help-tip-icon">💧</div><div><strong>Barra azul</strong> = rega. Quando cheia, a planta começa a crescer.</div></div>
           <div class="help-tip"><div class="help-tip-icon">🌱</div><div><strong>Barra verde</strong> = crescimento. Avança a cada <strong>2 minutos</strong> quando regada.</div></div>
           <div class="help-tip"><div class="help-tip-icon">🌸</div><div>Apareceu <strong>"pronto!"</strong>? Clique para colher!</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🥀</div><div>Planta fora da estação? Pode colher, mas <strong>não vende</strong>.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🗓️</div><div>Mudas fora da estação ficam guardadas no inventário e <strong>não podem ser plantadas</strong> até a época correta.</div></div>
         </div>
         <div class="help-section">
           <div class="help-section-title">🧪 Adubos</div>
@@ -2534,7 +2543,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
       <div class="help-panel" id="hpanel-estacoes">
         <div class="help-section">
           <div class="help-section-title">📅 Como funcionam as estações</div>
-          <p style="font-size:13px;color:var(--text2);line-height:1.7;margin:0">Cada estação dura <strong>3 horas</strong>, divididas em 24 dias. Só certas plantas crescem em cada época — plante fora e a planta será perdida!</p>
+          <p style="font-size:13px;color:var(--text2);line-height:1.7;margin:0">Cada estação dura <strong>3 horas</strong>, divididas em 24 dias. Cada vegetal e flor só pode ser plantado durante sua época.</p>
         </div>
         <div class="help-section">
           <div class="help-section-title" style="color:#e060a0">🌸 Primavera</div>
@@ -2553,16 +2562,27 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
           <div class="help-tip" style="font-size:16px">🥔🥦 · ❄️ Sem flores</div>
         </div>
         <div class="help-tip"><div class="help-tip-icon">💡</div><div>Use o <strong>filtro de estação</strong> na loja para ver o que está disponível!</div></div>
+        <div class="help-section">
+          <div class="help-section-title">🏷️ Promoções da estação</div>
+          <div class="help-tip"><div class="help-tip-icon">🌸</div><div>Itens fora da estação podem ser comprados com descontos variados de <strong>10% a 35%</strong>.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🛍️</div><div>O botão <strong>Promoção</strong> mostra todas as ofertas. Guarde as mudas até chegar a estação certa para plantar.</div></div>
+        </div>
       </div>
 
       <div class="help-panel" id="hpanel-extras">
         <div class="help-section">
+          <div class="help-section-title">🌱 Brotinho</div>
+          <div class="help-tip"><div class="help-tip-icon">💬</div><div>Seu mascote avisa quando é hora de plantar, regar, colher, sincronizar pontos ou se preparar para a próxima estação.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">💚</div><div>Passe o mouse para ele reagir e <strong>clique no Brotinho</strong> para receber uma mensagem carinhosa.</div></div>
+        </div>
+        <div class="help-section">
           <div class="help-section-title">📋 Missões diárias</div>
           <div class="help-tip"><div class="help-tip-icon">📋</div><div>5 missões por dia — plantar, regar, colher, comprar e vender. Cada uma dá pts e XP!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🔥</div><div>Marque presença todos os dias. Se esquecer, seu ciclo <strong>recomeça no Dia 01</strong>.</div></div>
         </div>
         <div class="help-section">
           <div class="help-section-title">✉️ Correio</div>
-          <div class="help-tip"><div class="help-tip-icon">🎁</div><div>Ao <strong>subir de nível</strong>, uma carta chega com pontos de recompensa!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🎁</div><div>Ao <strong>subir de nível</strong>, uma carta chega com pontos. Clique nela para ler e receber a recompensa!</div></div>
         </div>
         <div class="help-section">
           <div class="help-section-title">🏆 Conquistas e Ranking</div>
@@ -2572,6 +2592,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
         <div class="help-section">
           <div class="help-section-title">💾 Progresso</div>
           <div class="help-tip"><div class="help-tip-icon">✅</div><div>Tudo é <strong>salvo automaticamente</strong> — pode fechar e voltar quando quiser!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🌿</div><div>Os cursores personalizados ajudam a identificar itens clicáveis e bloqueados.</div></div>
         </div>
       </div>
 
@@ -3329,11 +3350,34 @@ function selectSeed(type) {
   }
 }
 
+let inventorySeasonFilter = 'all';
+function setInventorySeasonFilter(value) {
+  inventorySeasonFilter = value;
+  if (G.selectedSeed && value !== 'all') {
+    const season = SEASONS.find(item => item.id === value);
+    const visibleTypes = season ? [...season.vegetables, ...season.flowers] : [];
+    if (!visibleTypes.includes(G.selectedSeed)) G.selectedSeed = null;
+  }
+  renderInventory();
+  document.querySelectorAll('.plot.empty').forEach(el => el.classList.toggle('ready-to-plant', G.selectedSeed !== null));
+}
+
 function renderInventory() {
   const bar = document.getElementById('inventory-bar');
-  const entries = Object.entries(G.inventory).filter(([,v]) => v > 0);
+  const filter = document.getElementById('inventory-filter');
+  if (filter) filter.innerHTML = `<div class="inventory-filter-label"><span>Filtrar:</span><div class="inventory-filter-buttons">
+    <button class="inventory-filter-btn ${inventorySeasonFilter === 'all' ? 'active' : ''}" onclick="setInventorySeasonFilter('all')">🗓️ Todas</button>
+    ${SEASONS.map(season => `<button class="inventory-filter-btn ${inventorySeasonFilter === season.id ? 'active' : ''}" onclick="setInventorySeasonFilter('${season.id}')">${season.icon} ${season.name}</button>`).join('')}
+  </div></div>`;
+  const allEntries = Object.entries(G.inventory).filter(([,v]) => v > 0);
+  let entries = allEntries;
+  if (inventorySeasonFilter !== 'all') {
+    const season = SEASONS.find(item => item.id === inventorySeasonFilter);
+    const seasonTypes = season ? [...season.vegetables, ...season.flowers] : [];
+    entries = allEntries.filter(([type]) => seasonTypes.includes(type));
+  }
 
-  if (!entries.length) {
+  if (!allEntries.length) {
     G.selectedSeed = null;
     bar.innerHTML = `<div class="inv-empty">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -3342,6 +3386,11 @@ function renderInventory() {
       </svg>
       Vazio — compre vegetais na loja!
     </div>`;
+    return;
+  }
+
+  if (!entries.length) {
+    bar.innerHTML = `<div class="inv-empty">🌿 Nenhuma muda desta estação no inventário.</div>`;
     return;
   }
 
@@ -3390,7 +3439,7 @@ function cartProduct(type) { return getPlantable(type) || (typeof FERTILIZERS !=
 function cartUnitCost(type) {
   const p = cartProduct(type); if (!p) return 0;
   if (typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type]) return p.cost + (type === 'golden_soil' ? upgradeLevel('golden_soil_plus') * 100 : type === 'quick_grow' ? upgradeLevel('quick_grow_plus') * 100 : 0);
-  return p.cost;
+  return seasonPrice(type);
 }
 function addToShopCart(type, sourceEvent) {
   const qty = SHOP_QTY[type] || 1;
@@ -3439,7 +3488,7 @@ function buyShopCart() {
   for (const [type, qty] of entries) {
     const p = cartProduct(type);
     const fertilizer = typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type];
-    if (!p || (!fertilizer && !isInSeason(type)) || (!previewAccess() && currentLevel() < p.minLevel)) { toast('🌱 Remova da sacola os itens indisponíveis nesta estação ou nível.'); return; }
+    if (!p || (!previewAccess() && currentLevel() < p.minLevel)) { toast('🌱 Remova da sacola os itens indisponíveis nesta estação ou nível.'); return; }
     total += cartUnitCost(type) * qty;
   }
   if (G.pts < total) { toast('✨ Pontos insuficientes para concluir a compra!'); return; }
@@ -3490,7 +3539,9 @@ function renderFlowerShop() {
   ];
 
   let entries = Object.entries(FLOWERS);
-  if (shopSeasonFilter !== 'all') {
+  if (shopSeasonFilter === 'promo') {
+    entries = entries.filter(([type]) => isOutOfSeason(type));
+  } else if (shopSeasonFilter !== 'all') {
     const fs = SEASONS.find(s => s.id === shopSeasonFilter);
     if (fs) entries = entries.filter(([type]) => fs.flowers.includes(type));
   }
@@ -3506,6 +3557,7 @@ function renderFlowerShop() {
 
   const sortBar = `<div class="shop-sort-bar">
     ${seasonSelect}
+    <button class="shop-sort-btn promo-filter-btn ${shopSeasonFilter === 'promo' ? 'active' : ''}" onclick="setShopSeasonFilter(shopSeasonFilter === 'promo' ? 'all' : 'promo')">🏷️ Promoção</button>
     ${sorts.map(s => `<button class="shop-sort-btn ${shopSort === s.key ? 'active' : ''}" onclick="setShopSort('${s.key}')">${s.label}</button>`).join('')}
   </div>`;
 
@@ -3513,7 +3565,7 @@ function renderFlowerShop() {
     const lv = currentLevel();
     const locked = !previewAccess() && lv < p.minLevel;
     const outOfSeason = !isInSeason(type);
-    const canAfford = G.pts >= p.cost * (SHOP_QTY[type] || 1);
+    const canAfford = G.pts >= seasonPrice(type) * (SHOP_QTY[type] || 1);
     const sellVal = SELL_VALUE[type];
     const profit = sellVal - cultivationCost(type);
     const profitLabel = profit >= 0
@@ -3526,18 +3578,12 @@ function renderFlowerShop() {
       <div class="cozy-level-chip" style="font-size:10px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:2px 8px;margin-top:2px">🔒 Nível ${p.minLevel}</div>
     </div>`;
 
-    if (outOfSeason) return `<div class="shop-item cant-afford season-tooltip-wrap" tabindex="0">
-      ${seedBagSVG(type, true)}
-      <div class="shop-item-name" style="opacity:.5">${p.name}</div>
-      <div class="cozy-season-chip" style="font-size:10px;font-weight:800;background:#a06020;color:#fff;border-radius:99px;padding:2px 8px;margin-top:2px">${currentSeason().icon} Fora de estação</div>
-      <div class="header-btn-tip">Item fora de estação<br><span>Espere a estação correta para a compra.</span></div>
-    </div>`;
-
-    return `<div class="shop-item shop-add-tooltip ${canAfford ? '' : 'cant-afford'}" onclick="addToShopCart('${type}', event)">
+    return `<div class="shop-item shop-add-tooltip ${canAfford ? '' : 'cant-afford'} ${outOfSeason ? 'promo-item' : ''}" onclick="addToShopCart('${type}', event)">
       ${seedBagSVG(type)}
+      ${outOfSeason ? '<span class="promo-corner">Promoção</span>' : ''}
       <div class="shop-item-name">${p.name}</div>
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${p.maxGrow}</div>
-      <div class="shop-item-price">🌟 ${p.cost * (SHOP_QTY[type] || 1)}</div>
+      <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
         venda <span style="color:var(--soil2);font-weight:800;margin:0 2px">🌟 ${sellVal}</span>(${profitLabel})
@@ -3551,10 +3597,9 @@ function renderFlowerShop() {
 function buyFlower(type, el) {
   const p = FLOWERS[type];
   const qty = SHOP_QTY[type] || 1;
-  const total = p.cost * qty;
+  const total = seasonPrice(type) * qty;
   if (!p) return;
   if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para esta flor!`); return; }
-  if (!isInSeason(type)) { toast(`${currentSeason().icon} Esta flor não cresce nesta estação!`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
   G.pts -= total;
   G.inventory[type] = (G.inventory[type] || 0) + qty;
@@ -3942,6 +3987,36 @@ function updateAchievBadge() {
   badge.classList.toggle('hidden', unseen === 0);
 }
 
+function achievementProgress(id) {
+  initAchievements();
+  const stats = G.achievStats || {};
+  const completed = G.achievements.has(id);
+  const claimedMissions = G.missions
+    ? MISSION_DEFS.filter(mission => G.missions.claimed?.[mission.id]).length
+    : 0;
+  const definitions = {
+    first_plant:   [completed ? 1 : 0, 1, 'plantio'],
+    first_harvest: [stats.totalHarvest || 0, 1, 'colheita'],
+    buy5:          [stats.totalBuy || 0, 5, 'compras'],
+    water10:       [stats.totalWater || 0, 10, 'regas'],
+    first_mission: [completed ? 1 : Math.min(claimedMissions, 1), 1, 'missão'],
+    harvest10:     [stats.totalHarvest || 0, 10, 'colheitas'],
+    sell500:       [stats.totalSellPts || 0, 500, 'pts em vendas'],
+    unlock_plot:   [Math.max(0, (G.unlockedPlots || 2) - 2), 1, 'canteiro'],
+    use_fert:      [completed ? 1 : 0, 1, 'adubo'],
+    level5:        [currentLevel(), 5, 'níveis'],
+    all_missions:  [completed ? 5 : claimedMissions, 5, 'missões'],
+    harvest25:     [stats.totalHarvest || 0, 25, 'colheitas'],
+    buy_upgrade:   [completed ? 1 : 0, 1, 'melhoria'],
+    sell_flowers:  [stats.totalFlowerSell || 0, 1, 'venda de flor'],
+    level10:       [currentLevel(), 10, 'níveis'],
+  };
+  const [rawCurrent, target, unit] = definitions[id] || [completed ? 1 : 0, 1, 'etapa'];
+  const current = Math.max(0, Number(rawCurrent) || 0);
+  const missing = Math.max(0, target - current);
+  return { current, target, missing, unit, pct: Math.min(100, (current / target) * 100) };
+}
+
 function openAchievements() {
   initAchievements();
 
@@ -3969,11 +4044,14 @@ function openAchievements() {
       </div>
       ${g.achievements.map(a => {
         const isDone = G.achievements.has(a.id);
+        const progress = achievementProgress(a.id);
         return `<div class="achiev-item ${isDone ? 'done' : ''}">
           <div class="achiev-item-icon">${a.icon}</div>
           <div class="achiev-item-info">
             <div class="achiev-item-name">${a.name}</div>
             <div class="achiev-item-desc">${a.desc}</div>
+            <div class="achiev-item-progress-copy"><strong>${progress.current}/${progress.target}</strong><span>${progress.missing ? `Faltam: ${progress.missing}` : 'Meta concluída!'}</span></div>
+            <div class="achiev-item-bar" aria-label="${progress.current} de ${progress.target}"><span style="width:${progress.pct}%"></span></div>
           </div>
           <div class="achiev-item-check">${isDone ? '✅' : '🔒'}</div>
         </div>`;
@@ -4135,6 +4213,8 @@ const SEASONS = [
 const SEASON_TOTAL_MS = 3 * 60 * 60 * 1000;
 const SEASON_DAY_MS   = SEASON_TOTAL_MS / 24;
 const SEASON_DAYS_LEN = 24;     // dias por estação
+let seasonDayEndsAt = Date.now() + SEASON_DAY_MS;
+let seasonDayTimer = null;
 
 // Season state (persisted in G)
 // G.seasonIdx  = índice da estação atual (0-3)
@@ -4252,8 +4332,16 @@ function checkOutOfSeasonPlants() {
   renderPlots();
 }
 
-// Start season tick
-setInterval(advanceSeasonDay, SEASON_DAY_MS);
+// Start season tick and expose the next change time to the garden companion.
+function scheduleSeasonDayTick(delay = SEASON_DAY_MS) {
+  clearTimeout(seasonDayTimer);
+  seasonDayEndsAt = Date.now() + delay;
+  seasonDayTimer = setTimeout(() => {
+    advanceSeasonDay();
+    scheduleSeasonDayTick();
+  }, delay);
+}
+scheduleSeasonDayTick();
 
 // ─── FERTILIZERS ─────────────────────────────────────────
 const FERTILIZERS = {
@@ -4435,6 +4523,8 @@ function applyOfflineProgress(savedAt) {
 
   // Avança a estação pelo tempo real decorrido, mesmo com a página fechada.
   const seasonDays = Math.floor(elapsed / SEASON_DAY_MS);
+  const elapsedInDay = elapsed % SEASON_DAY_MS;
+  scheduleSeasonDayTick(elapsedInDay ? SEASON_DAY_MS - elapsedInDay : SEASON_DAY_MS);
   G.dayChangedWhileAway = seasonDays > 0;
   for (let i = 0; i < seasonDays; i++) {
     G.seasonDay++;
@@ -4513,7 +4603,7 @@ function changeMarketQty(type, delta) {
 
 // ─── SHOP ────────────────────────────────────────────────
 let shopSort = 'default';
-let shopSeasonFilter = 'all'; // 'all' | 'spring' | 'summer' | 'autumn' | 'winter'
+let shopSeasonFilter = 'all'; // 'all' | 'promo' | 'spring' | 'summer' | 'autumn' | 'winter'
 
 function setShopSort(s) {
   shopSort = s;
@@ -4530,6 +4620,24 @@ function setShopSeasonFilter(v) {
 // Returns plant data from either PLANTS or FLOWERS
 function getPlantable(type) {
   return PLANTS[type] || FLOWERS[type] || null;
+}
+
+function isOutOfSeason(type) { return !isInSeason(type); }
+function seasonDiscountRate(type) {
+  const choices = [0.10, 0.15, 0.20, 0.25, 0.30, 0.35];
+  const seed = [...type].reduce((sum, char) => sum + char.charCodeAt(0), G.seasonIdx * 17);
+  return choices[seed % choices.length];
+}
+function seasonPrice(type) {
+  const p = getPlantable(type);
+  if (!p) return 0;
+  return isOutOfSeason(type) ? Math.max(1, Math.floor(p.cost * (1 - seasonDiscountRate(type)))) : p.cost;
+}
+function seasonPriceLabel(type, qty = 1) {
+  const p = getPlantable(type);
+  const price = seasonPrice(type) * qty;
+  if (!p || !isOutOfSeason(type)) return `🌟 ${price}`;
+  return `<s style="opacity:.55">🌟 ${p.cost * qty}</s> <strong style="color:#6f8e55">🌟 ${price}</strong> <span class="cozy-promo-chip">-${Math.round(seasonDiscountRate(type) * 100)}%</span>`;
 }
 
 // ─── SEED BAG SVG ────────────────────────────────────────
@@ -4559,7 +4667,9 @@ function renderShop() {
 
   // season filter
   let entries = Object.entries(PLANTS);
-  if (shopSeasonFilter !== 'all') {
+  if (shopSeasonFilter === 'promo') {
+    entries = entries.filter(([type]) => isOutOfSeason(type));
+  } else if (shopSeasonFilter !== 'all') {
     const fs = SEASONS.find(s => s.id === shopSeasonFilter);
     if (fs) entries = entries.filter(([type]) => fs.vegetables.includes(type));
   }
@@ -4584,6 +4694,7 @@ function renderShop() {
 
   const sortBar = `<div class="shop-sort-bar">
     ${seasonSelect}
+    <button class="shop-sort-btn promo-filter-btn ${shopSeasonFilter === 'promo' ? 'active' : ''}" onclick="setShopSeasonFilter(shopSeasonFilter === 'promo' ? 'all' : 'promo')">🏷️ Promoção</button>
     ${sorts.map(s => `<button class="shop-sort-btn ${shopSort === s.key ? 'active' : ''}" onclick="setShopSort('${s.key}')">${s.label}</button>`).join('')}
   </div>`;
 
@@ -4591,7 +4702,7 @@ function renderShop() {
     const lv = currentLevel();
     const locked = !previewAccess() && lv < p.minLevel;
     const outOfSeason = !isInSeason(type);
-    const canAfford = G.pts >= p.cost * (SHOP_QTY[type] || 1);
+    const canAfford = G.pts >= seasonPrice(type) * (SHOP_QTY[type] || 1);
     const sellVal = effectiveSellValue(type);
     const profit = sellVal - cultivationCost(type);
     const profitLabel = profit >= 0
@@ -4604,18 +4715,12 @@ function renderShop() {
       <div class="cozy-level-chip" style="font-size:10px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:2px 8px;margin-top:2px">🔒 Nível ${p.minLevel}</div>
     </div>`;
 
-    if (outOfSeason) return `<div class="shop-item cant-afford season-tooltip-wrap" tabindex="0" style="position:relative">
-      ${seedBagSVG(type, true)}
-      <div class="shop-item-name" style="opacity:.5">${p.name}</div>
-      <div class="cozy-season-chip" style="font-size:10px;font-weight:800;background:#a06020;color:#fff;border-radius:99px;padding:2px 8px;margin-top:2px">${currentSeason().icon} Fora de estação</div>
-      <div class="header-btn-tip">Item fora de estação<br><span>Espere a estação correta para a compra.</span></div>
-    </div>`;
-
-    return `<div class="shop-item shop-add-tooltip ${canAfford ? '' : 'cant-afford'}" onclick="addToShopCart('${type}', event)">
+    return `<div class="shop-item shop-add-tooltip ${canAfford ? '' : 'cant-afford'} ${outOfSeason ? 'promo-item' : ''}" onclick="addToShopCart('${type}', event)">
       ${seedBagSVG(type)}
+      ${outOfSeason ? '<span class="promo-corner">Promoção</span>' : ''}
       <div class="shop-item-name">${p.name}</div>
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${p.maxGrow}</div>
-      <div class="shop-item-price">🌟 ${p.cost * (SHOP_QTY[type] || 1)}</div>
+      <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
         venda <span style="color:var(--soil2);font-weight:800;margin:0 2px">🌟 ${sellVal}</span>(${profitLabel})
@@ -4628,9 +4733,8 @@ function renderShop() {
 function buyPlant(type, el) {
   const p = getPlantable(type);
   const qty = SHOP_QTY[type] || 1;
-  const total = p.cost * qty;
+  const total = seasonPrice(type) * qty;
   if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para comprar!`); return; }
-  if (!isInSeason(type)) { toast(`${currentSeason().icon} Fora de estação! Disponível na próxima ${currentSeason().name === 'Inverno' ? 'Primavera' : 'estação correta'}.`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
   G.pts -= total;
   G.inventory[type] = (G.inventory[type] || 0) + qty;
@@ -4894,6 +4998,10 @@ function onPlotClick(idx) {
       return;
     }
     const type = G.selectedSeed;
+    if (isOutOfSeason(type)) {
+      toast(`${currentSeason().icon} ${getPlantable(type).name} está fora de estação. Você pode guardar a muda, mas só poderá plantá-la quando a estação voltar.`, 4200);
+      return;
+    }
     G.inventory[type]--;
     if (G.inventory[type] <= 0) G.selectedSeed = null;
     const newPlot = { type, waterCount: 0, growCount: 0, goldenPlot: G.specialPlot === idx };
@@ -6370,5 +6478,6 @@ G.growTimer = setInterval(growTick, GROW_INTERVAL_MS);
     document.getElementById('login-overlay')?.classList.add('hidden');
   }
 </script>
+<script src="garden-mascot.js"></script>
 </body>
 </html>

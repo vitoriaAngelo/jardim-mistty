@@ -144,3 +144,19 @@ body:has(#user-menu:not(.hidden)) #cozy-tooltip { display: none !important; }
 }
 @media (max-width: 360px) { header { grid-template-columns: 1fr; } .level-widget { max-width: none; } }
 @media (prefers-reduced-motion: reduce) { .shop-item, .inv-slot, .fert-inv-slot, .market-slot, .plot { transition: none; } }
+ .cozy-promo-chip{display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;background:#e5f0d8;color:#5f7f4d;font-size:11px;font-weight:900;line-height:1.2;white-space:nowrap;letter-spacing:-.1px}
+ .promo-chip{display:inline-block!important;padding:3px 7px!important;background:#e5f0d8!important;color:#5f7f4d!important;border-color:#b8cf9f!important;font-size:11px!important;line-height:1.2!important}
+ body.dark-mode .cozy-promo-chip,body.dark-mode .promo-chip{background:#3f573d!important;color:#d5e8bf!important;border-color:#66845b!important}
+ .promo-item{position:relative}
+ .promo-corner{position:absolute;top:19px;right:8px;padding:3px 8px 3px 15px;border:1px dashed #f0a0ba;border-radius:7px 10px 10px 7px;background:linear-gradient(135deg,#d83f78,#bd285f);color:#dff3c8;font:900 10px/1.15 'Nunito',sans-serif;letter-spacing:.1px;box-shadow:0 2px 0 #9f204d,0 5px 12px #8f244033;transform:rotate(4deg);z-index:2}
+ .promo-corner::before{content:'✿';position:absolute;left:4px;top:50%;color:#c9eca8;font-size:8px;transform:translateY(-52%)}
+ body.dark-mode .promo-corner{background:linear-gradient(135deg,#cf3a70,#a92052);color:#dff3c8;border-color:#eb8ead;box-shadow:0 2px 0 #731737,0 5px 12px #0003}
+ body.dark-mode .achiev-item-bar{background:#20281f;box-shadow:inset 0 1px 2px #0005}
+ body.dark-mode .achiev-item-progress-copy strong{color:#bdd4a7}
+ .inventory-filter-label{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:var(--text2);font-size:10px;font-weight:800}
+ .inventory-filter-buttons{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+ .inventory-filter-btn{padding:6px 9px;border:1px solid var(--cozy-line,#d8c9ac);border-radius:9px;background:var(--cream2);color:var(--text2);font:800 10px 'Nunito',sans-serif;box-shadow:0 2px 0 #d8c8a0;transition:transform .12s,background .15s,border-color .15s}
+ .inventory-filter-btn:hover{transform:translateY(-1px);border-color:var(--grass)}
+ .inventory-filter-btn.active{background:var(--grass);border-color:var(--grass2);color:#fff;box-shadow:0 2px 0 var(--grass2)}
+ body.dark-mode .inventory-filter-btn{background:#30392d;color:#dce8d4;border-color:#53604f;box-shadow:0 2px 0 #1b241b}
+ body.dark-mode .inventory-filter-btn.active{background:#526747;color:#f2f6ed;border-color:#78906a;box-shadow:0 2px 0 #263426}

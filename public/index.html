@@ -3665,6 +3665,13 @@ function normalizeBadgeId(value) {
     .toLowerCase();
 }
 
+const VALID_BADGE_IDS = new Set(['beginner', 'dedicated', 'master', 'subscriber']);
+
+function validBadgeIds(values) {
+  if (!Array.isArray(values)) return [];
+  return [...new Set(values.map(normalizeBadgeId).filter(id => VALID_BADGE_IDS.has(id)))];
+}
+
 function renderRankingPage() {
   const users = rankingUsers;
   const pageSize = 5;
@@ -3684,10 +3691,10 @@ function renderRankingPage() {
     const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
     const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : (isMe ? (G.profileFrame || 'red') : 'red');
     const unlockedBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : (u.badges || u.unlockedBadges || u.achievements || []);
-    const badgeIds = Array.isArray(unlockedBadges) ? unlockedBadges.map(normalizeBadgeId).filter(Boolean) : [];
+    const badgeIds = validBadgeIds(unlockedBadges);
     const badges = badgeIds.slice(0, 4).map(id => {
       const badgeName = id === 'subscriber' ? 'Subscriber' : (ACHIEV_GROUPS.find(g => g.id === id)?.name || 'Badge desbloqueado');
-      return `<span class="ranking-badge-wrap"><img src="badge-${id}.svg" alt="${badgeName}" aria-label="${badgeName}" onerror="this.parentElement.remove()"><span class="ranking-badge-tip">${badgeName}</span></span>`;
+      return `<span class="ranking-badge-wrap"><img src="/badge-${id}.svg" alt="${badgeName}" aria-label="${badgeName}" onerror="this.style.display='none'"><span class="ranking-badge-tip">${badgeName}</span></span>`;
     }).join('');
     const medal = pos <= 3
       ? `<span class="ranking-place ranking-place-${pos}" aria-label="${pos}º lugar"><span>${pos}</span></span>`
@@ -4121,11 +4128,10 @@ function openRankingProfile(index) {
   ];
   const statsHtml = statItems.map(([icon, value, label]) => `<div class="ranking-profile-stat">${icon} ${Number(value || 0).toLocaleString('pt-BR')}<small>${label}</small></div>`).join('');
   const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
-  const badgeIds = (isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : (u.badges || u.unlockedBadges || u.achievements || []))
-    .map(normalizeBadgeId).filter(Boolean).slice(0, 4);
+  const badgeIds = validBadgeIds(isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : (u.badges || u.unlockedBadges || u.achievements || [])).slice(0, 4);
   const badgeHtml = badgeIds.length ? badgeIds.map(id => {
     const name = id === 'subscriber' ? 'Subscriber' : (ACHIEV_GROUPS.find(g => g.id === id)?.name || 'Badge desbloqueado');
-    return `<span class="ranking-badge-wrap"><img src="badge-${id}.svg" alt="${name}"><span class="ranking-badge-tip">${name}</span></span>`;
+    return `<span class="ranking-badge-wrap"><img src="/badge-${id}.svg" alt="${name}" onerror="this.style.display='none'"><span class="ranking-badge-tip">${name}</span></span>`;
   }).join('') : '<span style="color:var(--text2);font-size:12px">Nenhum badge desbloqueado</span>';
   const overlay = document.createElement('div');
   overlay.className = 'mail-overlay';

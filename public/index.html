@@ -3809,17 +3809,17 @@ const SELL = { potato: 0, carrot: 0, tomato: 0, beetroot: 0, lettuce: 0, cassava
                rose: 0, sunflower: 0, lavender: 0, daisy: 0, tulip: 0,
                orchid: 0, hibiscus: 0, bluebell: 0, cherry: 0, poppy: 0, jasmine: 0 };
 
-// Venda base já cobre: semente + todas as regas + colheita (10 pts),
-// mantendo uma margem cozy de lucro para cada cultivo.
-const SELL_VALUE = { potato: 70, carrot: 100, tomato: 130, beetroot: 160, lettuce: 100, cassava: 200,
-                     corn: 120, pumpkin: 150, eggplant: 130, pepper: 145, broccoli: 165,
-                     rose: 115, sunflower: 135, lavender: 155, daisy: 55, tulip: 100,
-                     orchid: 175, hibiscus: 160, bluebell: 125, cherry: 190, poppy: 105, jasmine: 140,
-                     ruby_kale: 920, star_radish: 980, moon_lily: 1050, royal_dahlia: 1120 };
+// Venda base já cobre: semente + colheita (10 pts),
+// mantendo uma margem cozy de lucro para cada cultivo. (rega não tem custo)
+const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce: 76, cassava: 140,
+                     corn: 84, pumpkin: 108, eggplant: 94, pepper: 103, broccoli: 117,
+                     rose: 85, sunflower: 99, lavender: 113, daisy: 43, tulip: 76,
+                     orchid: 127, hibiscus: 118, bluebell: 95, cherry: 136, poppy: 81, jasmine: 104,
+                     ruby_kale: 335, star_radish: 338, moon_lily: 355, royal_dahlia: 383 };
 
 function cultivationCost(type) {
   const item = getPlantable(type);
-  return item.cost + (item.maxWater * 6) + 10;
+  return item.cost + 10;
 }
 const SHOP_QTY = {};
 const SHOP_CART = {};
@@ -7354,6 +7354,9 @@ G.growTimer = setInterval(() => {
     document.getElementById('login-overlay')?.classList.add('hidden');
   }
 </script>
+
+<!-- ── ANTI-FRAUDE: Proteção via servidor (garden-save.js) ── -->
+
 <script src="garden-mascot.js?v=9"></script>
 </body>
 </html>

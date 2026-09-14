@@ -56,7 +56,32 @@ header {
   padding: 14px 20px;
   box-shadow: 0 4px 0 #c8a878, 0 8px 28px rgba(90,50,10,.13);
   border: 2.5px solid var(--cream2);
+  position: relative; overflow: visible;
 }
+header::before { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.7; background:radial-gradient(circle at 12% 110%,#dcebc8 0 24%,transparent 25%),linear-gradient(120deg,#fffaf0,#edf3e5 58%,#f6eadf); }
+header::after { display:none; }
+header > * { position:relative; z-index:1; }
+header.season-spring::before { background:radial-gradient(circle at 8% 120%,#dcecc8 0 25%,transparent 26%),linear-gradient(120deg,#fffaf0,#edf5e7 58%,#fae8eb); }
+header.season-summer::before { background:radial-gradient(circle at 8% 120%,#e5e9ba 0 25%,transparent 26%),linear-gradient(120deg,#fffaf0,#f7efcf 58%,#eef2cf); }
+header.season-autumn::before { background:radial-gradient(circle at 8% 120%,#ead3b5 0 25%,transparent 26%),linear-gradient(120deg,#fffaf1,#f4e5d2 58%,#efd7c5); }
+header.season-winter::before { background:radial-gradient(circle at 8% 120%,#d9e7e4 0 25%,transparent 26%),linear-gradient(120deg,#f9fbf8,#e8f0ed 58%,#ece9f2); }
+.season-header-art { position:absolute; z-index:0; right:22px; bottom:5px; font-size:20px; letter-spacing:8px; opacity:.28; filter:saturate(.75); pointer-events:none; white-space:nowrap; }
+.season-showcase { width:100%; max-width:900px; display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.season-showcase-card { position:relative; overflow:hidden; padding:16px 18px; border:2px solid #e1dfcf; border-radius:20px; color:#414f38; box-shadow:0 4px 0 #c8d1b9; }
+.season-showcase-card::before { content:''; position:absolute; inset:0; opacity:.72; pointer-events:none; }
+.season-showcase-card > * { position:relative; z-index:1; }
+.season-showcase-card.spring::before { background:linear-gradient(120deg,#fff8e8,#e5f1d9 55%,#f8dfe3); }
+.season-showcase-card.summer::before { background:linear-gradient(120deg,#fff5d5,#f5e9bd 55%,#dce8bd); }
+.season-showcase-card.autumn::before { background:linear-gradient(120deg,#fff0dc,#eed9b9 55%,#e6c2a7); }
+.season-showcase-card.winter::before { background:linear-gradient(120deg,#edf5f4,#dce8e5 55%,#e5e0ee); }
+.season-showcase-card .showcase-decor { position:absolute; right:16px; bottom:8px; font-size:17px; opacity:.5; }
+body.dark-mode .season-showcase-card { color:#edf2e6; border-color:#485644; box-shadow:0 4px 0 #151d16; }
+body.dark-mode .season-showcase-card::before { opacity:.45; }
+body.dark-mode .season-showcase-card.spring::before { background:linear-gradient(120deg,#304532,#273c2c 55%,#3d3338); }
+body.dark-mode .season-showcase-card.summer::before { background:linear-gradient(120deg,#3d432b,#303b29 55%,#4a3d28); }
+body.dark-mode .season-showcase-card.autumn::before { background:linear-gradient(120deg,#45352b,#3a3028 55%,#49312d); }
+body.dark-mode .season-showcase-card.winter::before { background:linear-gradient(120deg,#2c3d3d,#293735 55%,#353245); }
+@media (max-width:560px) { .season-showcase { grid-template-columns:1fr; } }
 
 /* LEFT */
 .header-left { display: flex; flex-direction: column; gap: 5px; }
@@ -83,6 +108,13 @@ header {
 .season-bar-wrap { width: 48px; height: 4px; background: rgba(0,0,0,.1); border-radius: 99px; overflow: hidden; }
 .season-bar-fill { height: 100%; border-radius: 99px; transition: width .5s; }
 #season-days { opacity: .6; font-size: 10px; }
+@keyframes season-day-pop {
+  0% { transform: scale(1); filter: brightness(1); }
+  35% { transform: scale(1.12); filter: brightness(1.22); }
+  70% { transform: scale(.98); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+.season-widget.day-changed { animation: season-day-pop .8s ease-out; }
 
 /* RIGHT */
 .header-right { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
@@ -212,6 +244,7 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
   display: flex; align-items: center; justify-content: center;
   font-size: 9px; font-weight: 800; padding: 0 4px;
   border: 2px solid var(--cream);
+  font-family: 'Nunito', sans-serif; cursor: pointer;
 }
 .mail-badge.hidden { display: none; }
 
@@ -1299,19 +1332,41 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
 /* ─── RANKING ────────────────────────────── */
 .ranking-item {
   display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border-radius: 14px;
+  padding: 12px 12px; border-radius: 14px;
   background: var(--cream2); border: 2px solid #e0cfb0;
   margin-bottom: 7px; transition: all .15s;
 }
 .ranking-item.me { background: #f0ffe8; border-color: var(--grass); }
+.ranking-item[role="button"] { position:relative; cursor:pointer; }
+.ranking-item[role="button"]::after { content:'Clique para ver o perfil'; display:none; position:absolute; z-index:35; left:50%; bottom:calc(100% + 7px); transform:translateX(-50%); padding:7px 10px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:11px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 7px 20px #4b573326; font:700 11px/1.2 'Nunito',sans-serif; white-space:nowrap; pointer-events:none; }
+.ranking-item[role="button"]:hover::after, .ranking-item[role="button"]:focus-visible::after { display:block; }
+.ranking-item[role="button"]:hover { transform:translateY(-1px); }
 .ranking-item.top1 { background: #fffbe0; border-color: #f0c030; }
 .ranking-item.top2 { background: #f8f8f8; border-color: #b0b8c0; }
 .ranking-item.top3 { background: #fff4ee; border-color: #d08060; }
 .ranking-pos {
-  font-size: 16px; font-weight: 800; min-width: 32px;
+  font-size: 20px; font-weight: 800; min-width: 38px;
   text-align: center; flex-shrink: 0;
 }
+.ranking-place { position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:13px 13px 15px 15px; border:2px solid #fff4c7; color:#6b5730; font-size:17px; line-height:1; background:linear-gradient(145deg,#fff0a8,#e4b84f); box-shadow:0 3px 0 #b5832d,0 0 0 1px #f2d98b; }
+.ranking-place::before,
+.ranking-place::after { content:none; }
+.ranking-place span { position:static; font:900 17px/1 'Nunito',sans-serif; }
+.ranking-place-2 { background:linear-gradient(145deg,#f4f6f2,#bfc9c4); border-color:#fff; color:#59635f; box-shadow:0 3px 0 #8e9b95,0 0 0 1px #cbd5d0; }
+.ranking-place-3 { background:linear-gradient(145deg,#f1c19b,#bd7953); border-color:#fff0e4; color:#6a3e2a; box-shadow:0 3px 0 #925138,0 0 0 1px #d99a72; }
 .ranking-name { flex: 1; font-size: 13px; font-weight: 800; color: var(--text); }
+.ranking-farm-name { font-size:13px; font-weight:800; color:var(--text); line-height:1.15; }
+.ranking-twitch-name { margin-top:2px; font-size:10px; font-weight:700; color:var(--text2); opacity:.8; line-height:1.1; }
+.ranking-daily-phrase { margin-top:3px; font-size:10px; font-style:italic; font-weight:700; color:var(--grass2); line-height:1.1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ranking-frame { position:relative; width:50px; height:50px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:18px; border:3px solid #f6d5d1; background:linear-gradient(145deg,#f6d5d1,#e5a29d 55%,#be706e); box-shadow:0 3px 0 #914d4c,0 0 0 1px #fbe5e2; font-size:24px; }
+.ranking-frame::before { content:'✦'; position:absolute; right:-7px; top:-9px; color:#f2d98b; font-size:9px; text-shadow:0 1px 0 #68418c; }
+.ranking-frame::after { content:'✿'; position:absolute; left:-7px; bottom:-8px; color:#d9baf2; font-size:8px; transform:rotate(-18deg); }
+.ranking-frame[data-frame="purple"] { border-color:#b88bd3; background:linear-gradient(145deg,#ead8f7,#c39be2 55%,#9b72c0); box-shadow:0 2px 0 #77539a; }
+.ranking-frame[data-frame="pink"] { border-color:#d98caf; background:linear-gradient(145deg,#f8d8e7,#e9a9c7 55%,#c97da6); box-shadow:0 2px 0 #a76186; }
+.ranking-frame[data-frame="blue"] { border-color:#82b0cb; background:linear-gradient(145deg,#d8ecf7,#a9cce2 55%,#78a6c5); box-shadow:0 2px 0 #557f9d; }
+.ranking-frame[data-frame="red"] { border-color:#c87d79; background:linear-gradient(145deg,#f6d5d1,#e5a29d 55%,#be706e); box-shadow:0 2px 0 #914d4c; }
+body.dark-mode .ranking-frame { filter:saturate(.9); }
+body.dark-mode .ranking-item[role="button"]::after { background:#303a30; border-color:#53604f; color:#edf2e6; }
 .ranking-pts {
   font-size: 13px; font-weight: 800; color: var(--soil2);
   white-space: nowrap;
@@ -1357,6 +1412,36 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
   filter: grayscale(1) opacity(.35);
   transition: filter .4s;
 }
+.ranking-badges { display:flex; align-items:center; gap:2px; margin-top:4px; min-height:18px; }
+.ranking-badge-wrap { position:relative; display:inline-flex; align-items:center; }
+.ranking-badges img { width:22px; height:25px; object-fit:contain; }
+.ranking-badge-tip { display:none; position:absolute; z-index:40; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); min-width:150px; padding:8px 10px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:12px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 8px 24px #4b573326; font:700 11px/1.35 'Nunito',sans-serif; text-align:center; white-space:nowrap; pointer-events:none; }
+.ranking-badge-tip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--cozy-paper,#fffdf7); }
+.ranking-badge-wrap:hover .ranking-badge-tip, .ranking-badge-wrap:focus-within .ranking-badge-tip { display:block; }
+.ranking-profile-badges .ranking-badge-tip { left:0; transform:none; }
+.ranking-profile-badges .ranking-badge-tip::after { left:17px; transform:none; }
+.ranking-profile-info { display:flex; align-items:center; gap:14px; margin:10px 0 16px; padding:12px; border:1px solid var(--cozy-line); border-radius:15px; background:var(--cream2); }
+.ranking-profile-frame { width:64px; height:64px; font-size:30px; }
+.ranking-profile-main { min-width:0; }
+.ranking-profile-main strong { display:block; font-size:18px; color:var(--text); }
+.ranking-profile-main small { display:block; margin-top:3px; color:var(--text2); font-weight:700; }
+.ranking-profile-user-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.ranking-profile-user-row small { margin-top:3px; }
+.ranking-profile-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:4px; }
+.ranking-profile-meta small { margin-top:0; }
+.ranking-profile-points { display:inline-flex !important; align-items:center; gap:4px; width:max-content; margin-top:6px !important; padding:4px 8px; border:1px solid #d3b765; border-radius:999px; background:#fff3c7; color:#6f5730 !important; font-size:12px; font-weight:900 !important; }
+.ranking-profile-points img { width:17px; height:17px; }
+body.dark-mode .ranking-profile-points { border-color:#b99b4f; background:#4b4228; color:#ffe7a1 !important; }
+.ranking-profile-badges { display:flex; gap:5px; flex-wrap:wrap; margin:6px 0 14px; }
+.ranking-profile-badges img { width:34px; height:38px; object-fit:contain; }
+.ranking-profile-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0 14px; }
+.ranking-profile-stat { padding:7px 8px; border:1px solid var(--cozy-line); border-radius:10px; background:var(--cream2); color:var(--text); font-size:12px; font-weight:800; }
+.ranking-profile-stat small { display:block; margin-top:2px; color:var(--text2); font-size:9px; font-weight:700; }
+.ranking-badges img.locked { filter:grayscale(1) opacity(.38); }
+.ranking-pagination { display:flex; justify-content:space-between; gap:8px; margin-top:10px; }
+.ranking-pagination button { flex:1; padding:8px 10px; border:1px solid #d7dccb; border-radius:10px; background:var(--cream2); color:var(--text); font:800 11px 'Nunito',sans-serif; cursor:pointer; }
+.ranking-pagination button:disabled { opacity:.45; cursor:not-allowed; }
+body.dark-mode .ranking-pagination button { border-color:#52624d; background:#30392d; color:#edf2e6; }
 .achiev-group-badge img { width:100%; height:100%; object-fit:contain; }
 .achiev-group-badge.unlocked { filter: none; }
 .achiev-group-info { flex: 1; }
@@ -1504,6 +1589,7 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
 .profile-overlay.hidden { display: none; }
 
 .profile-modal {
+  position:relative; overflow:visible;
   background: var(--cream); border-radius: 28px;
   padding: 24px 22px 20px;
   max-width: 360px; width: calc(100% - 32px);
@@ -1513,8 +1599,9 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
 }
 
 .profile-header {
-  display: flex; align-items: center; gap: 16px;
+  display: flex; align-items: center; gap: 16px; position:static;
 }
+.profile-modal > .profile-header { position:static; z-index:10; }
 .profile-avatar {
   width: 64px; height: 64px; border-radius: 99px;
   background: var(--cream2); border: 3px solid var(--grass);
@@ -1522,6 +1609,46 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
   font-size: 32px; flex-shrink: 0;
   box-shadow: 0 4px 0 var(--grass2);
 }
+.subscriber-frame { position:relative; display:inline-flex; padding:5px; border-radius:24px; background:linear-gradient(145deg,#ead8f7,#c39be2 55%,#9b72c0); box-shadow:0 4px 0 #77539a, 0 0 0 2px #f2e7fb; }
+.subscriber-frame::before { content:'✦'; position:absolute; top:-9px; right:-7px; color:#f2d98b; font-size:16px; text-shadow:0 1px 0 #68418c; }
+.subscriber-frame::after { content:'✿'; position:absolute; bottom:-8px; left:-7px; color:#d9baf2; font-size:13px; transform:rotate(-18deg); }
+.subscriber-frame[data-frame="pink"] { background:linear-gradient(145deg,#f8d8e7,#e9a9c7 55%,#c97da6); box-shadow:0 4px 0 #a76186,0 0 0 2px #fde8f1; }
+.subscriber-frame[data-frame="blue"] { background:linear-gradient(145deg,#d8ecf7,#a9cce2 55%,#78a6c5); box-shadow:0 4px 0 #557f9d,0 0 0 2px #e3f4fc; }
+.subscriber-frame[data-frame="red"] { background:linear-gradient(145deg,#f6d5d1,#e5a29d 55%,#be706e); box-shadow:0 4px 0 #914d4c,0 0 0 2px #fbe5e2; }
+.frame-edit-btn { position:absolute; right:-4px; bottom:-4px; z-index:2; width:18px; height:18px; padding:0; border:2px solid #fffdf7; border-radius:50%; background:#8b5bb5; color:#fff; font:700 11px/14px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #68418c; }
+.frame-edit-btn:hover { background:#9d70c2; transform:none; }
+.frame-edit-btn { transition:background .2s ease, transform .22s ease, box-shadow .22s ease; }
+.frame-edit-btn.is-open { background:#b989d4; transform:rotate(-8deg) scale(1.06); }
+.frame-edit-btn:hover { background:#9d70c2; transform:none; }
+.subscriber-frame.hidden { display:none; }
+.subscriber-label { display:none; margin-top:4px; color:#8b5bb5; font-size:10px; font-weight:800; }
+.subscriber-label.visible { display:block; }
+body.dark-mode .subscriber-frame { box-shadow:0 4px 0 #151d16, 0 5px 14px #0005; }
+body.dark-mode .subscriber-label { color:#d9baf2; }
+.frame-picker-toggle { display:none !important; }
+.frame-picker { display:flex; opacity:0; visibility:hidden; pointer-events:none; position:absolute; left:14px; top:26px; z-index:20; width:34px; padding:5px 4px; gap:6px; flex-direction:column; align-items:center; border:1px solid #e2ccec; border-radius:18px; background:#fffaff; box-shadow:0 6px 18px #4b315226; transform:translateX(14px) scale(.86); transform-origin:top right; transition:opacity .34s ease, transform .38s cubic-bezier(.2,.8,.2,1), visibility .34s ease; }
+.frame-picker.visible { opacity:1; visibility:visible; pointer-events:auto; transform:translateX(0) scale(1); }
+.frame-picker-btn { transition:transform .24s ease, box-shadow .2s ease; }
+.frame-picker.visible .frame-picker-btn { animation:frame-choice-in .32s ease both; }
+.frame-picker.visible .frame-picker-btn:nth-child(2) { animation-delay:.04s; }
+.frame-picker.visible .frame-picker-btn:nth-child(3) { animation-delay:.08s; }
+.frame-picker.visible .frame-picker-btn:nth-child(4) { animation-delay:.12s; }
+@keyframes frame-choice-in { from { opacity:0; transform:scale(.65) translateX(5px); } to { opacity:1; transform:scale(1) translateX(0); } }
+.frame-picker-btn { width:22px; height:22px; padding:0; border:2px solid #fff; border-radius:50%; background:#c39be2; color:transparent; font-size:0; cursor:pointer; box-shadow:0 0 0 1px #b88bd3; }
+.frame-picker-btn[data-frame="pink"] { background:#e9a9c7; box-shadow:0 0 0 1px #d98caf; }
+.frame-picker-btn[data-frame="blue"] { background:#a9cce2; box-shadow:0 0 0 1px #82b0cb; }
+.frame-picker-btn[data-frame="red"] { background:#e5a29d; box-shadow:0 0 0 1px #c87d79; }
+.frame-picker-btn[data-frame="purple"] { background:#c39be2; }
+.frame-picker-btn.selected { box-shadow:0 0 0 2px #a779c9; }
+.frame-picker-btn.locked { opacity:.52; cursor:not-allowed; filter:grayscale(.35); }
+.frame-picker.has-locked-purple { position:absolute; left:0; top:48px; }
+.frame-option { position:relative; display:flex; align-items:center; justify-content:center; width:24px; height:24px; }
+.frame-option::after { content:attr(data-tooltip); position:absolute; left:calc(100% + 12px); top:50%; z-index:40; width:154px; padding:8px 10px; border:1px solid #dbc8a7; border-radius:10px; background:#fffdf4; color:#596149; font:700 11px/1.3 'Nunito',sans-serif; text-align:center; opacity:0; visibility:hidden; pointer-events:none; transform:translate(-5px,-50%) scale(.96); transition:opacity .18s ease, transform .2s ease, visibility .18s ease; box-shadow:0 5px 14px #4b315226; }
+.frame-option::before { content:''; position:absolute; left:calc(100% + 7px); top:50%; z-index:41; width:9px; height:9px; border-left:1px solid #dbc8a7; border-bottom:1px solid #dbc8a7; background:#fffdf4; opacity:0; visibility:hidden; pointer-events:none; transform:translateY(-50%) rotate(45deg); transition:opacity .18s ease, visibility .18s ease; }
+.frame-option:hover::after, .frame-option:hover::before, .frame-option:focus-within::after, .frame-option:focus-within::before { opacity:1; visibility:visible; }
+.frame-option:hover::after, .frame-option:focus-within::after { transform:translate(0,-50%) scale(1); }
+body.dark-mode .frame-option::after, body.dark-mode .frame-option::before { border-color:#596956; background:#30392d; color:#edf2e6; }
+body.dark-mode .frame-picker-toggle, body.dark-mode .frame-picker-btn { background:#3b3043; border-color:#73558d; color:#f0dcff; }
 .profile-info { flex: 1; }
 .profile-level-badge {
   display: inline-block;
@@ -1574,6 +1701,13 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
 .profile-stat-lbl {
   font-size: 10px; font-weight: 700; color: var(--text2); opacity: .7;
 }
+.profile-current-info { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.profile-current-card { background:var(--cream2); border:2px solid #e0cfb0; border-radius:12px; padding:10px 12px; min-height:52px; }
+.profile-current-label { font-size:10px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:.4px; }
+.profile-current-value { margin-top:4px; font-size:14px; font-weight:800; color:var(--text); }
+body.dark-mode .profile-current-card { border-color:#52624d; background:#30392d; }
+body.dark-mode .profile-current-label { color:#c7d3be; opacity:.9; }
+body.dark-mode .profile-current-value { color:#f1f5e9; }
 
 .profile-close-btn {
   width: 100%; padding: 11px; border-radius: 14px; border: none;
@@ -1782,6 +1916,8 @@ body.dark-mode .shop-cart-row-controls button { background:#252b24; border-color
 .sell-confirm-items .shop-cart-row { font-size:12px; }
 #sell-all-confirm-overlay { z-index:1200; }
 #sell-all-confirm-overlay .modal-actions button { position:relative; z-index:1; pointer-events:auto; }
+#first-login-bonus-overlay { z-index:1200; }
+#first-login-bonus-overlay .modal, #first-login-bonus-start { position:relative; z-index:1; pointer-events:auto; }
 body.dark-mode .sell-confirm-items { background:#30392d; border-color:#53604f; }
 body.dark-mode .sell-confirm-items .shop-cart-row { color:#e1ecd9; }
 .shop-qty-controls { display:flex; align-items:center; gap:3px; margin-top:3px; }
@@ -1876,6 +2012,12 @@ body.dark-mode {
 }
 body.dark-mode header, body.dark-mode .card, body.dark-mode .modal, body.dark-mode .mail-modal,
 body.dark-mode .profile-modal, body.dark-mode .help-modal, body.dark-mode .levelup-card { background: #252b24; border-color: #485644; box-shadow: 0 4px 0 #151d16, 0 8px 28px #0006; }
+body.dark-mode header::before { opacity:.45; }
+body.dark-mode header.season-spring::before { background:linear-gradient(120deg,#304532,#273c2c 55%,#3d3338); }
+body.dark-mode header.season-summer::before { background:linear-gradient(120deg,#3d432b,#303b29 55%,#4a3d28); }
+body.dark-mode header.season-autumn::before { background:linear-gradient(120deg,#45352b,#3a3028 55%,#49312d); }
+body.dark-mode header.season-winter::before { background:linear-gradient(120deg,#2c3d3d,#293735 55%,#353245); }
+body.dark-mode .season-header-art { opacity:.22; filter:saturate(.7) brightness(1.18); }
 body.dark-mode .logo, body.dark-mode .season-widget, body.dark-mode .level-widget,
 body.dark-mode .shop-item, body.dark-mode .fertilizer-item, body.dark-mode .plot-shop-item,
 body.dark-mode .tool-card, body.dark-mode .achiev-tool-btn, body.dark-mode .header-icon-btn { background: #30392d; border-color: #485644; color: var(--text); box-shadow: 0 3px 0 #1b241b; }
@@ -1934,6 +2076,9 @@ body.dark-mode .profile-stat-lbl { color:#59694b !important; opacity:1; }
 }
 .profile-modal, .modal { overflow-y: auto; }
 .mail-modal, .profile-modal { padding: 26px; }
+.profile-modal { max-width:410px; max-height:96dvh; padding:20px 22px 16px; gap:12px; }
+.profile-daily-phrase { display:none; margin-top:5px; color:var(--grass2); font-size:12px; font-style:italic; font-weight:800; }
+.profile-daily-phrase.visible { display:block; }
 .mail-modal-title, .help-title, .modal h2, .levelup-title { font: 400 27px/1.2 Georgia, 'Times New Roman', serif; color: var(--cozy-ink); letter-spacing: -.5px; }
 .mail-modal-title { padding-bottom: 16px; border-bottom: 1px solid var(--cozy-line); gap: 10px; flex-wrap: wrap; }
 .help-header { padding: 24px 24px 18px; border-bottom: 0; }
@@ -1967,6 +2112,39 @@ body.dark-mode .profile-stat-lbl { color:#59694b !important; opacity:1; }
 .levelup-new-name { background: #778b64 !important; box-shadow: none; }
 .toast, .toast.mission { background: #fffdf7; color: #414f38; border: 1px solid #d9dfcc; border-radius: 16px; box-shadow: 0 8px 28px #4b573326; white-space: normal; max-width: calc(100vw - 32px); line-height: 1.6; padding: 13px 20px; }
 body.dark-mode .help-modal { --cream: #252b24; --cream2: #30392d; --text: #edf2e6; --text2: #c7d3be; --soil2: #c7d3be; --grass: #879b72; --grass2: #a9bd93; }
+body.dark-mode .profile-modal {
+  --cream:#252b24; --cream2:#30392d; --text:#edf2e6; --text2:#c7d3be;
+  --soil2:#c7d3be; --grass:#879b72; --grass2:#586e47;
+  color:#edf2e6; scrollbar-color:#6f8068 transparent;
+}
+body.dark-mode .profile-level-name { color:#f1f5e9; }
+body.dark-mode .profile-label { color:#c7d3be; opacity:1; }
+body.dark-mode .profile-input { background:#30392d; border-color:#52624d; color:#edf2e6; }
+body.dark-mode .profile-input:focus { border-color:#91a77b; box-shadow:0 0 0 3px #91a77b33; }
+body.dark-mode .profile-stat { background:#30392d; border-color:#52624d; }
+body.dark-mode .profile-stat-val { color:#f1f5e9; }
+body.dark-mode .profile-stat-lbl { color:#c7d3be !important; }
+body.dark-mode .profile-close-btn { background:#30392d; color:#edf2e6; border-color:#52624d; box-shadow:0 2px 0 #1b241b; }
+body.dark-mode .frame-picker { background:#2d342c; border-color:#596956; box-shadow:0 7px 20px #0007; }
+body.dark-mode .frame-picker-btn[data-frame="purple"] { background:#c39be2; border-color:#f4e9fb; box-shadow:0 0 0 1px #b88bd3; }
+body.dark-mode .frame-picker-btn[data-frame="pink"] { background:#e9a9c7; border-color:#fff0f6; box-shadow:0 0 0 1px #d98caf; }
+body.dark-mode .frame-picker-btn[data-frame="blue"] { background:#a9cce2; border-color:#edf8ff; box-shadow:0 0 0 1px #82b0cb; }
+body.dark-mode .frame-picker-btn[data-frame="red"] { background:#e5a29d; border-color:#fff0ed; box-shadow:0 0 0 1px #c87d79; }
+body.season-spring .profile-modal { background:radial-gradient(circle at 100% 0,#f5dce455 0 20%,transparent 21%),linear-gradient(135deg,#fffdf7,#edf5e7 62%,#fae8eb) !important; }
+body.season-summer .profile-modal { background:radial-gradient(circle at 100% 0,#f2d98a55 0 20%,transparent 21%),linear-gradient(135deg,#fffdf7,#f8efcf 62%,#eef2cf) !important; }
+body.season-autumn .profile-modal { background:radial-gradient(circle at 100% 0,#dda87a55 0 20%,transparent 21%),linear-gradient(135deg,#fffdf7,#f4e5d2 62%,#efd7c5) !important; }
+body.season-winter .profile-modal { background:radial-gradient(circle at 100% 0,#b6d6df55 0 20%,transparent 21%),linear-gradient(135deg,#fffdf7,#e8f0ed 62%,#ece9f2) !important; }
+body.dark-mode.season-spring .profile-modal { background:radial-gradient(circle at 100% 0,#724c6333 0 20%,transparent 21%),linear-gradient(135deg,#252b24,#293228 62%,#342d32) !important; }
+body.dark-mode.season-summer .profile-modal { background:radial-gradient(circle at 100% 0,#8a6d3533 0 20%,transparent 21%),linear-gradient(135deg,#252b24,#303126 62%,#393225) !important; }
+body.dark-mode.season-autumn .profile-modal { background:radial-gradient(circle at 100% 0,#85513b33 0 20%,transparent 21%),linear-gradient(135deg,#252b24,#302b25 62%,#382925) !important; }
+body.dark-mode.season-winter .profile-modal { background:radial-gradient(circle at 100% 0,#57798633 0 20%,transparent 21%),linear-gradient(135deg,#252b24,#272e30 62%,#302e3a) !important; }
+.profile-season-art { position:absolute; z-index:0; pointer-events:none; user-select:none; white-space:nowrap; opacity:.22; filter:saturate(.8); }
+.profile-season-art.top { top:18px; right:48px; font-size:20px; letter-spacing:7px; transform:rotate(2deg); }
+.profile-season-art.bottom { right:20px; bottom:14px; font-size:17px; letter-spacing:6px; transform:rotate(-2deg); opacity:.16; }
+.profile-modal > :not(.profile-season-art):not(.popup-close-x) { position:relative; z-index:1; }
+#profile-overlay .profile-modal > .profile-header { position:static; z-index:20; }
+body.dark-mode .profile-season-art { opacity:.18; filter:saturate(.75) brightness(1.2); }
+body.dark-mode .profile-season-art.bottom { opacity:.13; }
 body.dark-mode .help-tabs { background: #30392d; }
 body.dark-mode .help-tab, body.dark-mode .help-section-title, body.dark-mode .help-step-text,
 body.dark-mode .help-tip, body.dark-mode .help-upgrade-name, body.dark-mode .help-upgrade-desc { color: #c7d3be !important; }
@@ -2016,6 +2194,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
 
 <!-- HEADER -->
 <header>
+  <span class="season-header-art" id="season-header-art" aria-hidden="true">🌱 🌸 🦋</span>
   <!-- LEFT: Logo + Season -->
   <div class="header-left">
     <div class="header-icon-wrap">
@@ -2088,7 +2267,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
         <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
         Conectar
       </button>
-      <span class="mail-badge hidden" id="mail-badge">0</span>
+        <button class="mail-badge hidden" id="mail-badge" type="button" aria-label="Abrir notificações do Correio" title="Nova mensagem no Correio" onclick="event.stopPropagation(); openMailbox(); document.getElementById('user-menu').classList.add('hidden');">0</button>
       <div class="user-menu hidden" id="user-menu">
         <button class="user-menu-item" onclick="openProfile(); document.getElementById('user-menu').classList.add('hidden');">👤 Abrir perfil</button>
         <button class="user-menu-item" onclick="openMailbox(); document.getElementById('user-menu').classList.add('hidden');">✉️ Correio</button>
@@ -2262,7 +2441,6 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
     <button class="popup-close-x" aria-label="Fechar ranking" onclick="closeRanking()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between">
       <span>🥇 Ranking Global</span>
-      <span id="ranking-subtitle" style="font-size:11px;font-weight:600;color:var(--text2);opacity:.6"></span>
     </div>
     <div id="ranking-list">
       <div style="text-align:center;padding:20px;font-size:13px;color:var(--text2)">🔄 Carregando...</div>
@@ -2407,12 +2585,23 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
 <!-- PROFILE MODAL -->
 <div class="profile-overlay hidden" id="profile-overlay">
   <div class="profile-modal">
+    <span class="profile-season-art top" aria-hidden="true">🌱 🌸 🦋</span>
+    <span class="profile-season-art bottom" aria-hidden="true">🌱 🌸 🦋</span>
     <button class="popup-close-x" aria-label="Fechar perfil" onclick="closeProfile()">×</button>
     <div class="profile-header">
-      <div class="profile-avatar" id="profile-avatar">🌱</div>
+      <div class="subscriber-frame hidden" id="subscriber-frame"><div class="profile-avatar" id="profile-avatar">🌱</div><button class="frame-edit-btn" type="button" aria-label="Alterar moldura" onclick="toggleFramePicker()">✎</button></div>
       <div class="profile-info">
         <div class="profile-level-badge" id="profile-level-badge">Nível 1</div>
         <div class="profile-level-name" id="profile-level-name">Sementinha</div>
+        <div class="subscriber-label" id="subscriber-label">✦ Subscriber</div>
+        <div class="profile-daily-phrase" id="profile-daily-phrase-display"></div>
+      </div>
+      <button class="frame-picker-toggle" id="frame-picker-toggle" type="button" aria-label="Editar moldura" title="Clique para editar a moldura" onclick="toggleFramePicker()">✎ Editar moldura</button>
+      <div class="frame-picker" id="frame-picker">
+          <span class="frame-option" data-tooltip="Moldura roxa · apenas para subscribers"><button class="frame-picker-btn" data-frame="purple" id="frame-purple-btn" aria-label="Moldura roxa" onclick="selectProfileFrame('purple')"></button></span>
+          <span class="frame-option" data-tooltip="Moldura rosa"><button class="frame-picker-btn" data-frame="pink" aria-label="Moldura rosa" onclick="selectProfileFrame('pink')"></button></span>
+          <span class="frame-option" data-tooltip="Moldura azul"><button class="frame-picker-btn" data-frame="blue" aria-label="Moldura azul" onclick="selectProfileFrame('blue')"></button></span>
+          <span class="frame-option" data-tooltip="Moldura vermelha"><button class="frame-picker-btn" data-frame="red" aria-label="Moldura vermelha" onclick="selectProfileFrame('red')"></button></span>
       </div>
     </div>
 
@@ -2423,11 +2612,21 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
           class="profile-input"/>
         <button class="profile-save-btn" onclick="saveProfileName()">Salvar</button>
       </div>
+      <div class="profile-label" style="margin-top:14px">Frase do dia</div>
+      <div class="profile-field-row"><input id="profile-daily-phrase" type="text" maxlength="15" placeholder="Ex.: Bora plantar!" class="profile-input"/><button class="profile-save-btn" onclick="saveDailyPhrase()">Salvar</button></div>
     </div>
 
     <div class="profile-section">
       <div class="profile-label">Estatísticas da Fazenda</div>
       <div class="profile-stats" id="profile-stats"></div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-label">Agora</div>
+      <div class="profile-current-info">
+        <div class="profile-current-card"><div class="profile-current-label">Estação atual</div><div class="profile-current-value" id="profile-current-season">🌸 Primavera</div></div>
+        <div class="profile-current-card"><div class="profile-current-label">Ranking atual</div><div class="profile-current-value" id="profile-current-ranking">🔄 Carregando...</div></div>
+      </div>
     </div>
 
     <div class="profile-section">
@@ -2722,6 +2921,9 @@ const G = {
   presenceDays: [],
   specialPlot: null,
   specialPlotPending: false,
+  profileFrame: 'red',
+  dailyPhrase: '',
+  welcomeBonusClaimed: false,
   previewUnlocks: false,
 };
 
@@ -2764,6 +2966,9 @@ function toast(msg, dur=2400, isMission=false) {
   start();
 }
 let lastDisplayedPts = null;
+// Último saldo do StreamElements conhecido pelo jogo. Alterações locais são
+// calculadas em relação a esta base para preservar ganhos feitos no canal.
+let lastKnownSEPoints = null;
 let pointsFeedbackTimer = null;
 function showPointsFeedback(delta) {
   const feedback = document.getElementById('pts-feedback');
@@ -2839,16 +3044,20 @@ async function refreshPoints() {
   button?.classList.add('loading');
   try {
     if (seUser && !isLocalPreview) {
+      // Primeiro envia ao StreamElements qualquer ganho ou gasto feito no jogo.
+      // Só depois consulta novamente o saldo confirmado, evitando sobrescrever
+      // alterações locais com um valor antigo do canal.
+      const synced = await syncPtsToSE();
+      if (!synced) throw new Error('Falha ao sincronizar alterações locais');
       const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`);
       if (!res.ok) throw new Error('Falha ao atualizar');
       const data = await res.json();
       G.pts = data.points || 0;
+      lastKnownSEPoints = G.pts;
       seUser.points = G.pts;
       updatePts();
     }
-    // Confirm the refreshed balance in StreamElements and persist the garden
-    // snapshot in the database before reporting success.
-    await syncPtsToSE();
+    // Persiste no banco o mesmo estado que acabou de ser confirmado no canal.
     await saveGardenToSE();
     toast('🌟 Pontos atualizados!', 1600);
   } catch (e) {
@@ -2960,7 +3169,10 @@ const UPGRADES = [
 function hasUpgrade(id) { return G.upgrades.has(id); }
 function upgradeLevel(id) { return Number(G.upgradeLevels?.[id] || (hasUpgrade(id) ? 1 : 0)); }
 function currentLevel() { return getLevelData(G.xp).current.lv; }
-function previewAccess() { return false; }
+function previewAccess() {
+  return G.previewUnlocks || (['localhost', '127.0.0.1'].includes(window.location.hostname)
+    && new URLSearchParams(window.location.search).has('preview'));
+}
 
 function effectiveWaterCost()  { return hasUpgrade('nimble') ? 0 : 6; }
 function effectiveShovelCost() { return hasUpgrade('nimble') ? 0 : 10; }
@@ -3436,43 +3648,80 @@ function renderHarvested() {
 }
 
 // ─── RANKING ─────────────────────────────────────────────
+let rankingUsers = [];
+let rankingPage = 0;
+
+function renderRankingPage() {
+  const users = rankingUsers;
+  const pageSize = 5;
+  const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
+  rankingPage = Math.min(rankingPage, totalPages - 1);
+  const pageUsers = users.slice(rankingPage * pageSize, rankingPage * pageSize + pageSize);
+  const myUser = seUser?.username?.toLowerCase();
+  const rows = pageUsers.map((u, i) => {
+    const pos = rankingPage * pageSize + i + 1;
+    const username = u.username || u._id || '?';
+    const pts = u.points || 0;
+    const isMe = myUser && username.toLowerCase() === myUser;
+    const displayName = isMe && seUser?.displayName ? seUser.displayName : username;
+    const farmName = u.farmName || (isMe ? document.getElementById('garden-name')?.textContent : 'Fazenda não informada') || 'Fazenda não informada';
+    const userLevel = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
+    const dailyPhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
+    const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
+    const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : (isMe ? (G.profileFrame || 'red') : 'red');
+    const unlockedBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : (u.badges || u.unlockedBadges || u.achievements || []);
+    const badgeIds = Array.isArray(unlockedBadges) ? unlockedBadges.map(b => typeof b === 'string' ? b.replace(/^badge_/, '') : b?.id).filter(Boolean) : [];
+    const badges = badgeIds.slice(0, 4).map(id => {
+      const badgeName = id === 'subscriber' ? 'Subscriber' : (ACHIEV_GROUPS.find(g => g.id === id)?.name || 'Badge desbloqueado');
+      return `<span class="ranking-badge-wrap"><img src="badge-${id}.svg" alt="${badgeName}" aria-label="${badgeName}" onerror="this.parentElement.remove()"><span class="ranking-badge-tip">${badgeName}</span></span>`;
+    }).join('');
+    const medal = pos <= 3
+      ? `<span class="ranking-place ranking-place-${pos}" aria-label="${pos}º lugar"><span>${pos}</span></span>`
+      : `<span style="font-size:20px;font-weight:800;color:var(--text2)">${pos}</span>`;
+    return `<div class="ranking-item ${topClass} ${isMe ? 'me' : ''}" role="button" tabindex="0" aria-label="Abrir perfil de ${farmName}" onclick="openRankingProfile(${rankingPage * pageSize + i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRankingProfile(${rankingPage * pageSize + i})}">
+      <div class="ranking-pos">${medal}</div><div class="ranking-frame" data-frame="${frame}" aria-hidden="true">🌱</div>
+      <div class="ranking-name"><div class="ranking-farm-name">${farmName}</div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
+      <div class="ranking-pts"><img class="points-token" src="points-sprout.svg" width="20" height="20" alt="" aria-hidden="true"> ${pts.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('ranking-list').innerHTML = `${rows || '<div style="text-align:center;padding:20px;color:var(--text2)">Nenhum dado encontrado.</div>'}
+    <div class="ranking-pagination"><button onclick="rankingPage--;renderRankingPage()" ${rankingPage === 0 ? 'disabled' : ''}>← Anterior</button><button onclick="rankingPage++;renderRankingPage()" ${rankingPage >= totalPages - 1 ? 'disabled' : ''}>Próxima →</button></div>`;
+}
+
 async function openRanking() {
   document.getElementById('ranking-overlay').classList.remove('hidden');
   document.getElementById('ranking-list').innerHTML =
     `<div style="text-align:center;padding:20px;font-size:13px;color:var(--text2)">🔄 Carregando...</div>`;
 
   try {
-    // Fetch top 25 from SE loyalty leaderboard
-    const res  = await fetch(
-      `${SE_API}/points/${SE_CHANNEL}/top%3Flimit%3D25`,
-      {}
-    );
-    if (!res.ok) throw new Error(`SE API ${res.status}`);
-    const data = await res.json();
-    const users = data.users || data || [];
+    let users;
+    if (isLocalPreview) {
+      users = [
+        { username:'preview', farmName:'Jardim da Mistty', dailyPhrase:'Bora plantar!', points:100000, level:12, profileFrame:'red', badges:['beginner','dedicated','master','subscriber'], stats:{xp:1840,harvested:76,purchased:42,watered:128,soldPoints:920,presence:18} },
+        { username:'Florzinha', farmName:'Cantinho das Flores', dailyPhrase:'Flores para todos', points:980, level:8, profileFrame:'pink', badges:['beginner','dedicated'], stats:{xp:1120,harvested:54,purchased:31,watered:88,soldPoints:680,presence:12} },
+        { username:'ColheitaFeliz', farmName:'Sítio Girassol', dailyPhrase:'Hora da colheita', points:760, level:6, profileFrame:'blue', badges:['beginner'], stats:{xp:760,harvested:32,purchased:20,watered:61,soldPoints:510,presence:9} },
+        { username:'JardineiroLuna', farmName:'Jardim da Lua', dailyPhrase:'Cultive seus sonhos', points:640, level:5, profileFrame:'red', badges:['beginner','subscriber'], stats:{xp:590,harvested:28,purchased:17,watered:49,soldPoints:430,presence:7} },
+        { username:'Abelhinha', farmName:'Fazenda Doce Mel', dailyPhrase:'Um dia de cada vez', points:520, level:4, profileFrame:'pink', badges:['beginner'], stats:{xp:420,harvested:21,purchased:12,watered:35,soldPoints:300,presence:5} },
+        { username:'MatoVerde', farmName:'Recanto Verde', points:410, profileFrame:'blue' },
+        { username:'Sementinha', farmName:'Horta da Sementinha', points:335, profileFrame:'red' },
+        { username:'RosaDoCampo', farmName:'Vale das Rosas', points:280, profileFrame:'pink' },
+        { username:'PezinhoDeFeijao', farmName:'Pequeno Pé de Feijão', points:190, profileFrame:'blue' },
+        { username:'CantinhoCozy', farmName:'Cantinho Cozy', points:120, profileFrame:'red' },
+      ];
+    } else {
+      // Fetch only the top 10 from the SE loyalty leaderboard
+      const res  = await fetch(
+        `${SE_API}/points/${SE_CHANNEL}/top%3Flimit%3D10`,
+        {}
+      );
+      if (!res.ok) throw new Error(`SE API ${res.status}`);
+      const data = await res.json();
+      users = (data.users || data || []).slice(0, 10);
+    }
 
-    document.getElementById('ranking-subtitle').textContent = `Top ${users.length} espectadores`;
-
-    const medals = ['🥇','🥈','🥉'];
-    const myUser = seUser?.username?.toLowerCase();
-
-    document.getElementById('ranking-list').innerHTML = users.map((u, i) => {
-      const pos      = i + 1;
-      const username = u.username || u._id || '?';
-      const pts      = u.points   || 0;
-      const isMe     = myUser && username.toLowerCase() === myUser;
-      const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
-      const meClass  = isMe ? 'me' : '';
-      const medal    = medals[i] || `<span style="font-size:12px;font-weight:800;color:var(--text2)">${pos}</span>`;
-
-      return `<div class="ranking-item ${topClass} ${meClass}">
-        <div class="ranking-pos">${medal}</div>
-        <div class="ranking-name">
-          ${username}${isMe ? '<span class="ranking-me-chip">você</span>' : ''}
-        </div>
-        <div class="ranking-pts">🌟 ${pts.toLocaleString()}</div>
-      </div>`;
-    }).join('') || `<div style="text-align:center;padding:20px;color:var(--text2)">Nenhum dado encontrado.</div>`;
+    rankingUsers = users;
+    rankingPage = 0;
+    renderRankingPage();
 
   } catch(e) {
     document.getElementById('ranking-list').innerHTML =
@@ -3612,6 +3861,12 @@ function openAchievements() {
       }).join('')}
     </div>`;
   }).join('');
+  const subscriberUnlocked = hasSubscriberBadge();
+  list.innerHTML += `<div class="achiev-group"><div class="achiev-group-header">
+    <div class="achiev-group-badge ${subscriberUnlocked ? 'unlocked' : ''}"><img src="badge-subscriber.svg" alt="Subscriber" width="52" height="58"></div>
+    <div class="achiev-group-info"><div class="achiev-group-name">Subscriber</div><div class="achiev-group-prog">Inscrição ativa no canal misttylol</div></div>
+    <div class="achiev-unlocked-chip">${subscriberUnlocked ? '✅ Desbloqueado' : '🔒 Bloqueado'}</div>
+  </div></div>`;
   document.getElementById('achiev-overlay').classList.remove('hidden');
 }
 
@@ -3757,8 +4012,9 @@ const SEASONS = [
   },
 ];
 
-// 1 season day = 1 real day
-const SEASON_DAY_MS   = 86400000;
+// Uma estação completa dura 30 minutos (24 dias de 75 segundos).
+const SEASON_TOTAL_MS = 30 * 60 * 1000;
+const SEASON_DAY_MS   = SEASON_TOTAL_MS / 24;
 const SEASON_DAYS_LEN = 24;     // dias por estação
 
 // Season state (persisted in G)
@@ -3774,12 +4030,75 @@ function isInSeason(type) {
 
 function renderSeasonWidget() {
   const s = currentSeason();
+  document.body.classList.remove('season-spring', 'season-summer', 'season-autumn', 'season-winter');
+  document.body.classList.add('season-' + s.id);
+  const header = document.querySelector('header');
+  if (header) {
+    header.classList.remove('season-spring', 'season-summer', 'season-autumn', 'season-winter');
+    header.classList.add('season-' + s.id);
+  }
+  const seasonalArt = {
+    spring: '🌱  🌸  🦋',
+    summer: '🌻  ☀️  🐝',
+    autumn: '🍄  🍂  🐿️',
+    winter: '🌲  ❄️  ☕',
+  };
+  const art = document.getElementById('season-header-art');
+  if (art) art.textContent = seasonalArt[s.id];
+  document.querySelectorAll('.profile-season-art').forEach((profileArt, index) => {
+    const icons = seasonalArt[s.id].split('  ');
+    profileArt.textContent = index % 2 ? icons.slice().reverse().join('  ') : icons.join('  ');
+  });
   document.getElementById('season-icon').textContent = s.icon;
   document.getElementById('season-name').textContent = s.name;
   document.getElementById('season-days').textContent = `Dia ${G.seasonDay}/${SEASON_DAYS_LEN}`;
   const fill = document.getElementById('season-bar-fill');
   fill.style.width = ((G.seasonDay / SEASON_DAYS_LEN) * 100) + '%';
   fill.style.background = s.barColor;
+}
+
+function openRankingProfile(index) {
+  const u = rankingUsers[index];
+  if (!u) return;
+  const username = u.username || u._id || '?';
+  const isMe = seUser?.username && username.toLowerCase() === seUser.username.toLowerCase();
+  const farmName = u.farmName || (isMe ? document.getElementById('garden-name')?.textContent : 'Fazenda não informada') || 'Fazenda não informada';
+  const level = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
+  const profilePhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
+  const stats = u.stats || {};
+  const statItems = [
+    ['✨', stats.xp ?? (isMe ? G.xp : 0), 'XP acumulado'],
+    ['🧺', stats.harvested ?? (isMe ? Object.values(G.harvested || {}).reduce((a, b) => a + Number(b || 0), 0) : 0), 'Itens colhidos'],
+    ['🛍️', stats.purchased ?? (isMe ? G.stats?.purchased : 0) ?? 0, 'Itens comprados'],
+    ['💧', stats.watered ?? (isMe ? G.stats?.watered : 0) ?? 0, 'Regas realizadas'],
+    ['🪙', stats.soldPoints ?? (isMe ? G.stats?.soldPoints : 0) ?? 0, 'Pontos em vendas'],
+    ['🔥', stats.presence ?? (isMe ? G.presenceStreak : 0) ?? 0, 'Dias de presença']
+  ];
+  const statsHtml = statItems.map(([icon, value, label]) => `<div class="ranking-profile-stat">${icon} ${Number(value || 0).toLocaleString('pt-BR')}<small>${label}</small></div>`).join('');
+  const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
+  const badgeIds = (isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : (u.badges || u.unlockedBadges || u.achievements || []))
+    .map(b => typeof b === 'string' ? b.replace(/^badge_/, '') : b?.id).filter(Boolean).slice(0, 4);
+  const badgeHtml = badgeIds.length ? badgeIds.map(id => {
+    const name = id === 'subscriber' ? 'Subscriber' : (ACHIEV_GROUPS.find(g => g.id === id)?.name || 'Badge desbloqueado');
+    return `<span class="ranking-badge-wrap"><img src="badge-${id}.svg" alt="${name}"><span class="ranking-badge-tip">${name}</span></span>`;
+  }).join('') : '<span style="color:var(--text2);font-size:12px">Nenhum badge desbloqueado</span>';
+  const overlay = document.createElement('div');
+  overlay.className = 'mail-overlay';
+  overlay.id = 'ranking-profile-overlay';
+  overlay.innerHTML = `<div class="mail-modal" style="max-width:360px"><button class="popup-close-x" aria-label="Fechar perfil" onclick="this.closest('#ranking-profile-overlay').remove()">×</button>
+    <div class="mail-modal-title">🌱 Perfil do fazendeiro</div>
+    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-hidden="true">🌱</div><div class="ranking-profile-main"><strong>${farmName}</strong><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
+    <div class="profile-label">Estatísticas da fazenda</div><div class="ranking-profile-stats">${statsHtml}</div><div class="profile-label">Badges desbloqueados</div><div class="ranking-profile-badges">${badgeHtml}</div><button class="mail-close-btn" onclick="this.closest('#ranking-profile-overlay').remove()">Fechar</button></div>`;
+  document.body.appendChild(overlay);
+}
+
+function animateSeasonDay() {
+  const widget = document.getElementById('season-widget');
+  if (!widget) return;
+  widget.classList.remove('day-changed');
+  void widget.offsetWidth;
+  widget.classList.add('day-changed');
+  setTimeout(() => widget.classList.remove('day-changed'), 850);
 }
 
 function advanceSeasonDay() {
@@ -3796,6 +4115,7 @@ function advanceSeasonDay() {
     checkOutOfSeasonPlants();
   }
   renderSeasonWidget();
+  animateSeasonDay();
 }
 
 function checkOutOfSeasonPlants() {
@@ -3985,6 +4305,36 @@ function sellAll() {
   if (!hasAny) return;
   allTypes.forEach(type => { SELL[type] = G.harvested[type] || 0; });
   renderSellAllConfirm();
+}
+
+function applyOfflineProgress(savedAt) {
+  if (!savedAt || !Number.isFinite(Number(savedAt))) return;
+  const elapsed = Math.max(0, Math.min(Date.now() - Number(savedAt), 7 * 86400000));
+  if (elapsed < 1000) return;
+
+  // Avança a estação pelo tempo real decorrido, mesmo com a página fechada.
+  const seasonDays = Math.floor(elapsed / SEASON_DAY_MS);
+  G.dayChangedWhileAway = seasonDays > 0;
+  for (let i = 0; i < seasonDays; i++) {
+    G.seasonDay++;
+    if (G.seasonDay > SEASON_DAYS_LEN) {
+      G.seasonDay = 1;
+      G.seasonIdx = (G.seasonIdx + 1) % SEASONS.length;
+    }
+  }
+
+  // Cada planta usa seu próprio maxGrow, então plantas com mais estágios
+  // continuam levando mais tempo para ficarem prontas.
+  const growTicks = Math.floor(elapsed / GROW_INTERVAL_MS);
+  if (growTicks <= 0) return;
+  G.plots.forEach(plot => {
+    if (!plot || plot.waterCount < effectiveMaxWater(plot.type) || plot.growCount >= effectiveMaxGrow(plot.type)) return;
+    const maxG = effectiveMaxGrow(plot.type);
+    const bonus = plot.quickGrow ? 1 + upgradeLevel('quick_grow_plus') : 0;
+    const steps = growTicks * (effectiveGrowStep() + bonus);
+    plot.growCount = Math.min(maxG, plot.growCount + steps);
+  });
+  checkOutOfSeasonPlants();
 }
 
 function renderSellAllConfirm() {
@@ -4870,16 +5220,49 @@ function closeModal() { document.getElementById('modal').classList.add('hidden')
 
 // ─── PROFILE ─────────────────────────────────────────────
 function openProfile() {
+  document.getElementById('frame-picker')?.classList.remove('visible');
+  document.querySelector('.frame-edit-btn')?.classList.remove('is-open');
   const { current } = getLevelData(G.xp);
+  const season = currentSeason();
   initAchievements();
   const stats = G.achievStats;
 
   document.getElementById('profile-avatar').textContent = current.emoji;
+  const subscriber = Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
+  const frame = document.getElementById('subscriber-frame');
+  frame.classList.remove('hidden');
+  const displayedFrame = !subscriber && G.profileFrame === 'purple' ? 'red' : (G.profileFrame || 'red');
+  frame.dataset.frame = displayedFrame;
+  const purpleBtn = document.getElementById('frame-purple-btn');
+  purpleBtn.disabled = !subscriber;
+  purpleBtn.classList.toggle('locked', !subscriber);
+  purpleBtn.setAttribute('aria-label', subscriber ? 'Moldura roxa' : 'Moldura roxa bloqueada para subscribers');
+  purpleBtn.removeAttribute('title');
+  document.getElementById('frame-picker')?.classList.toggle('has-locked-purple', !subscriber);
+  document.querySelectorAll('.frame-picker-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.frame === displayedFrame));
+  document.getElementById('subscriber-label').classList.toggle('visible', subscriber);
   document.getElementById('profile-level-badge').textContent = `Nível ${current.lv}`;
   document.getElementById('profile-level-name').textContent = current.name;
 
   document.getElementById('profile-farm-name').value =
     document.getElementById('garden-name').textContent;
+  document.getElementById('profile-daily-phrase').value = G.dailyPhrase || '';
+  const phraseDisplay = document.getElementById('profile-daily-phrase-display');
+  phraseDisplay.textContent = G.dailyPhrase ? `“${G.dailyPhrase}”` : '';
+  phraseDisplay.classList.toggle('visible', Boolean(G.dailyPhrase));
+  document.getElementById('profile-current-season').textContent = `${season.icon} ${season.name}`;
+  const rankingEl = document.getElementById('profile-current-ranking');
+  rankingEl.textContent = seUser?.username ? '🔄 Carregando...' : '👤 Conecte a Twitch';
+  if (seUser?.username) {
+    fetch(`${SE_API}/points/${SE_CHANNEL}/top%3Flimit%3D25`)
+      .then(r => { if (!r.ok) throw new Error('ranking'); return r.json(); })
+      .then(data => {
+        const users = data.users || data || [];
+        const idx = users.findIndex(u => (u.username || u._id || '').toLowerCase() === seUser.username.toLowerCase());
+        rankingEl.textContent = idx >= 0 ? `🏆 #${idx + 1}` : '🌱 Fora do top 25';
+      })
+      .catch(() => { rankingEl.textContent = '— Indisponível'; });
+  }
 
   document.getElementById('profile-stats').innerHTML = [
     ['✨', G.xp || 0, 'XP acumulado'],
@@ -4892,6 +5275,11 @@ function openProfile() {
 
   document.getElementById('profile-overlay').classList.remove('hidden');
 
+  // The subscriber badge follows the current subscription, not permanent achievements.
+  const subscriberBadge = `<div class="header-icon-wrap">
+    <span class="profile-badge-slot ${hasSubscriberBadge() ? 'unlocked' : ''}"><img src="badge-subscriber.svg" alt="Subscriber" width="64" height="72"></span>
+    <div class="header-btn-tip">Subscriber<br><span>${hasSubscriberBadge() ? '✅ Inscrição ativa' : '🔒 Exclusivo para inscritos no canal misttylol'}</span></div>
+  </div>`;
   // Show badges
   document.getElementById('profile-badges').innerHTML = ACHIEV_GROUPS.map(g => {
     const unlocked = G.achievements.has('badge_' + g.id);
@@ -4899,20 +5287,56 @@ function openProfile() {
       <span class="profile-badge-slot ${unlocked ? 'unlocked' : ''}"><img src="badge-${g.id}.svg" alt="${g.name}" width="64" height="72"></span>
       <div class="header-btn-tip">${g.name}<br><span>${unlocked ? '✅ Desbloqueado' : '🔒 Complete as 5 conquistas'}</span></div>
     </div>`;
-  }).join('');
+  }).join('') + subscriberBadge;
+}
+
+function hasSubscriberBadge() {
+  return Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
+}
+
+function toggleFramePicker() {
+  const picker = document.getElementById('frame-picker');
+  picker?.classList.toggle('visible');
+  document.querySelector('.frame-edit-btn')?.classList.toggle('is-open', picker?.classList.contains('visible'));
+}
+
+function selectProfileFrame(frame) {
+  const subscriber = Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
+  if (!['purple', 'pink', 'blue', 'red'].includes(frame)) return;
+  if (frame === 'purple' && !subscriber) {
+    toast('🔒 A moldura roxa é exclusiva para subscribers.', 2200);
+    return;
+  }
+  G.profileFrame = frame;
+  document.getElementById('subscriber-frame').dataset.frame = frame;
+  document.querySelectorAll('.frame-picker-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.frame === frame));
+  saveGardenToSE();
+  toast('🎨 Moldura atualizada!', 1800);
 }
 
 function closeProfile() {
+  document.getElementById('frame-picker')?.classList.remove('visible');
+  document.querySelector('.frame-edit-btn')?.classList.remove('is-open');
   document.getElementById('profile-overlay').classList.add('hidden');
 }
 
 function saveProfileName() {
   const input = document.getElementById('profile-farm-name');
+  const phraseInput = document.getElementById('profile-daily-phrase');
   const val = input.value.trim();
   if (!val) { input.focus(); return; }
+  G.dailyPhrase = (phraseInput?.value || '').trim().slice(0, 15);
   document.getElementById('garden-name').textContent = val;
   toast('✅ Nome da fazenda atualizado!', 2000);
+  saveGardenToSE();
   closeProfile();
+}
+
+function saveDailyPhrase() {
+  const input = document.getElementById('profile-daily-phrase');
+  G.dailyPhrase = (input?.value || '').trim().slice(0, 15);
+  saveGardenToSE();
+  toast('✅ Frase do dia salva!', 1800);
 }
 
 // ─── MAILBOX ─────────────────────────────────────────────
@@ -5104,6 +5528,18 @@ async function initSEUser(username, displayName) {
 
     // Points ALWAYS come from StreamElements
     G.pts = seUser.points;
+    lastKnownSEPoints = seUser.points;
+
+    // Bônus único de primeira conexão com a Twitch.
+    if (!G.welcomeBonusClaimed) {
+      if (!hadSave) {
+        G.pts += 120;
+        await giveSEPoints(120);
+        seUser.points = G.pts;
+        toast('🎁 Primeira conexão! Você ganhou +120 pontos!', 4000, true);
+      }
+      G.welcomeBonusClaimed = true;
+    }
     updatePts();
 
     // Re-render level and season (restored from save)
@@ -5123,26 +5559,22 @@ async function initSEUser(username, displayName) {
     connectSESocket();
     toast(`🌱 Bem-vinda, ${displayName}! Você tem ${seUser.points} pts 🌟`, 4000);
     saveTimer = setInterval(() => { saveGardenToSE(); }, 30000);
+    if (!hadSave) await saveGardenToSE();
 
     // Show help on first login (no saved garden)
     if (!hadSave) setTimeout(() => openHelp(), 800);
+    if (!hadSave) setTimeout(() => openFirstLoginBonus(), 1500);
 
-    // Sync SE points every 60s (viewers earn points by watching)
+    // Sincroniza automaticamente a cada 5 minutos com a mesma lógica do botão.
     setInterval(async () => {
       if (!seUser) return;
       try {
-        const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {});
-        if (!res.ok) return;
-        const data = await res.json();
-        const live = data.points || 0;
-        if (live > G.pts) {
-          const gained = live - G.pts;
-          G.pts = live;
-          updatePts();
-          toast(`🌟 +${gained} pts da live!`, 2000);
-        }
+        const synced = await syncPtsToSE();
+        if (!synced) return;
+        updatePts();
+        await saveGardenToSE();
       } catch(e) { /* silent */ }
-    }, 60000); // sync a cada 1 minuto
+    }, 300000); // sync a cada 5 minutos
 
   } catch(e) {
     setLoginLoading(false);
@@ -5179,6 +5611,9 @@ async function saveGardenToSE() {
     presenceDays:     G.presenceDays || [],
     specialPlot:      G.specialPlot,
     specialPlotPending:G.specialPlotPending || false,
+    profileFrame:      G.profileFrame || 'red',
+    dailyPhrase:       G.dailyPhrase || '',
+    welcomeBonusClaimed: G.welcomeBonusClaimed === true,
     shopCart:         SHOP_CART,
     mail:             G_MAIL,
     savedAt:          Date.now(),
@@ -5197,29 +5632,45 @@ async function saveGardenToSE() {
 
 // ── Sync G.pts back to SE points balance ──────────────────
 async function syncPtsToSE() {
-  if (!seUser) return;
+  if (!seUser) return true;
   try {
     // Fetch current SE points
     const res     = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {});
-    if (!res.ok) return;
+    if (!res.ok) return false;
     const data    = await res.json();
     const current = data.points || 0;
-    const diff    = G.pts - current;
+    // Mantém os pontos que chegaram diretamente pelo StreamElements e aplica
+    // somente o que mudou dentro do jogo desde a última leitura conhecida.
+    const baseline = lastKnownSEPoints ?? current;
+    const diff = G.pts - baseline;
 
-    if (diff === 0) return;
+    if (diff === 0) {
+      G.pts = current;
+      lastKnownSEPoints = current;
+      if (seUser) seUser.points = current;
+      return true;
+    }
 
+    let syncRes;
     if (diff > 0) {
       // Player gained points — add to SE
-      await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
+      syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
         method:  'PUT'});
     } else {
       // Player spent points — remove from SE
-      await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${Math.abs(diff)}`, {
+      syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${Math.abs(diff)}`, {
         method:  'DELETE'});
     }
-    console.log(`💰 Pontos SE sincronizados: ${current} → ${G.pts} (diff: ${diff > 0 ? '+' : ''}${diff})`);
+    if (!syncRes.ok) return false;
+    const merged = current + diff;
+    G.pts = merged;
+    lastKnownSEPoints = merged;
+    if (seUser) seUser.points = merged;
+    console.log(`💰 Pontos mesclados: SE ${current} + jogo ${diff > 0 ? '+' : ''}${diff} = ${merged}`);
+    return true;
   } catch(e) {
     console.warn('syncPtsToSE failed:', e);
+    return false;
   }
 }
 
@@ -5245,6 +5696,7 @@ window.addEventListener('beforeunload', () => {
     presenceDays: G.presenceDays || [],
     specialPlot: G.specialPlot,
     specialPlotPending: G.specialPlotPending || false,
+    welcomeBonusClaimed: G.welcomeBonusClaimed === true,
     shopCart: SHOP_CART,
     mail: G_MAIL,
     savedAt: Date.now(),
@@ -5300,8 +5752,13 @@ async function loadGardenFromSE(username) {
     G.presenceDays = save.presenceDays || [];
     G.specialPlot = save.specialPlot ?? null;
     G.specialPlotPending = save.specialPlotPending || false;
+    G.profileFrame = save.profileFrame || 'red';
+    G.dailyPhrase = save.dailyPhrase || '';
+    G.welcomeBonusClaimed = save.welcomeBonusClaimed === true;
     Object.keys(SHOP_CART).forEach(k => delete SHOP_CART[k]);
     Object.assign(SHOP_CART, save.shopCart || {});
+
+    applyOfflineProgress(save.savedAt);
 
     // Restore mail
     if (save.mail && Array.isArray(save.mail)) {
@@ -5317,6 +5774,10 @@ async function loadGardenFromSE(username) {
     renderHarvested();
     renderLevelWidget();
     renderSeasonWidget();
+    if (G.dayChangedWhileAway) {
+      setTimeout(() => animateSeasonDay(), 120);
+      G.dayChangedWhileAway = false;
+    }
     renderMissions();
     updateMailBadge();
     updateMissionsBadge();
@@ -5352,6 +5813,7 @@ function connectSESocket() {
       if (data.type === 'pointsevent' && data.data?.username === seUser?.username) {
         const gained = data.data.amount || 0;
         G.pts += gained;
+        if (lastKnownSEPoints !== null) lastKnownSEPoints += gained;
         updatePts();
         saveGardenToSE();
         toast(`🌟 +${gained} pts do canal!`, 2000);
@@ -5367,11 +5829,12 @@ function connectSESocket() {
 }
 
 // ── Spend SE points (deduct from channel) ─────────────────
-async function spendSEPoints(username, amount, reason) {
+async function spendSEPoints(amount) {
   if (!seUser || amount <= 0) return true;
   try {
-    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}/${amount}`, {
+    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${amount}`, {
       method:  'DELETE'});
+    if (res.ok && lastKnownSEPoints !== null) lastKnownSEPoints -= amount;
     return res.ok;
   } catch(e) {
     console.warn('spendPoints failed:', e);
@@ -5380,11 +5843,12 @@ async function spendSEPoints(username, amount, reason) {
 }
 
 // ── Give SE points (add to channel) ───────────────────────
-async function giveSEPoints(username, amount, reason) {
+async function giveSEPoints(amount) {
   if (!seUser || amount <= 0) return;
   try {
-    await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}/${amount}`, {
+    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${amount}`, {
       method:  'PUT'});
+    if (res.ok && lastKnownSEPoints !== null) lastKnownSEPoints += amount;
   } catch(e) {
     console.warn('givePoints failed:', e);
   }
@@ -5395,13 +5859,33 @@ const _origSellSelected = sellSelected;
 // (sellSelected already calls G.pts += total and updatePts)
 // After selling, sync real points back to SE
 function syncPointsToSE() {
-  if (seUser) giveSEPoints(seUser.username, 0, 'sync'); // trigger save
+  if (seUser) syncPtsToSE();
   saveGardenToSE();
 }
 
 function openModal()  { document.getElementById('modal').classList.remove('hidden'); }
 function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 function connectSE()  { closeModal(); }
+
+function openFirstLoginBonus() {
+  if (document.getElementById('first-login-bonus-overlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'first-login-bonus-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="first-login-bonus-title">
+    <button type="button" class="popup-close-x" onclick="event.stopPropagation();closeFirstLoginBonus()" aria-label="Fechar">×</button>
+    <div style="font-size:38px;text-align:center;margin-bottom:4px">🎁</div>
+    <h2 id="first-login-bonus-title" style="text-align:center">Boas-vindas ao seu jardim!</h2>
+    <p style="text-align:center">Por ser seu primeiro login, você recebeu um bônus especial para começar a cultivar.</p>
+    <div class="market-total-pts" style="width:max-content;margin:14px auto 18px;background:var(--grass);color:#fff">+120 <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> pontos</div>
+    <button type="button" id="first-login-bonus-start" class="profile-close-btn" onclick="event.preventDefault();event.stopPropagation();document.getElementById('first-login-bonus-overlay')?.remove()">Começar a cuidar 🌱</button>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function closeFirstLoginBonus() {
+  document.getElementById('first-login-bonus-overlay')?.remove();
+}
 
 function applyTheme(isDark) {
   document.body.classList.toggle('dark-mode', isDark);
@@ -5547,9 +6031,35 @@ renderMissions();
 updateAchievBadge();
 updatePts();
 
-// Normal mode: login and points come from StreamElements.
-const isLocalPreview = false;
-if (window.location.hash.includes('access_token')) {
+// Preview local: permite visualizar a experiência sem conectar a Twitch.
+const isLocalPreview = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+  && new URLSearchParams(window.location.search).has('preview');
+if (isLocalPreview) {
+  seUser = { username: 'preview', displayName: 'Visitante', points: 100000, isSubscriber: false };
+  G.pts = 100000;
+  G.unlockedPlots = 6;
+  G.previewUnlocks = true;
+  G.welcomeBonusClaimed = true;
+  lastDisplayedPts = G.pts;
+  document.getElementById('login-overlay').classList.add('hidden');
+  document.getElementById('twitch-btn').classList.add('connected');
+  document.getElementById('twitch-btn').innerHTML = '👤 Visitante';
+  document.getElementById('garden-name').textContent = G.gardenName || 'Jardim da Mistty';
+  updatePts();
+  renderUpgradeShop();
+  // A prévia já foi testada; não reabrir o bônus de boas-vindas automaticamente.
+  if (new URLSearchParams(window.location.search).has('seasons')) {
+    const showcase = document.createElement('div');
+    showcase.className = 'season-showcase';
+    showcase.innerHTML = [
+      ['spring','🌸','Primavera','Flores delicadas e tons de jardim.','🌸  ·  ✿  ·  🌿'],
+      ['summer','☀️','Verão','Luz quentinha e clima ensolarado.','☀️  ·  🌼  ·  🌿'],
+      ['autumn','🍂','Outono','Folhas douradas e tons acolhedores.','🍂  ·  ✦  ·  🍁'],
+      ['winter','❄️','Inverno','Tons frios, suaves e aconchegantes.','❄️  ·  ✦  ·  ❄️'],
+    ].map(([cls, icon, name, desc, decor]) => `<div class="season-showcase-card ${cls}"><strong>${icon} ${name}</strong><div>${desc}</div><span class="showcase-decor">${decor}</span></div>`).join('');
+    document.querySelector('header')?.after(showcase);
+  }
+} else if (window.location.hash.includes('access_token')) {
   // Coming back from Twitch OAuth
   handleTwitchCallback();
 } else if (sessionStorage.getItem('se_username')) {
@@ -5563,10 +6073,10 @@ if (window.location.hash.includes('access_token')) {
 // ─── PONTOS PASSIVOS ─────────────────────────────────────
 // Pontos vêm do StreamElements via sync a cada 10 min
 setInterval(() => {
-  const bonus = 2 + (hasUpgrade('golden_sun') ? 1 : 0);
+  const bonus = 20 + (hasUpgrade('golden_sun') ? 1 : 0);
   G.pts += bonus;
   updatePts();
-}, 10000);
+}, 600000);
 
 // ─── GROW TIMER ───────────────────────────────────────────
 // Every GROW_INTERVAL_MS: plots with water full grow 1 stage

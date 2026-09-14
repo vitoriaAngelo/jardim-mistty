@@ -3545,9 +3545,8 @@ function effectiveSellValue(type) {
 }
 function effectiveHarvestBonus() { return ['orange','premium'].includes(G.selectedMascot) ? 1 : 0; }
 function effectiveWaterRefillAmount() { return ['strawberry','premium'].includes(G.selectedMascot) ? 2 : 1; }
-// 2 min real = 1 grow tick.
-// No preview, o crescimento é acelerado para testar o ciclo completo do jardim.
-const GROW_INTERVAL_MS = previewAccess() ? 3000 : 120000;
+// 3 seg real = 1 grow tick.
+const GROW_INTERVAL_MS = 3000;
 
 function renderUpgradeShop() {
   const grid = document.getElementById('upgrade-grid');

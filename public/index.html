@@ -5574,6 +5574,7 @@ const REDIRECT_URI     = 'https://misttylandia.netlify.app';
 let seSocket  = null;
 let seUser    = null;
 let saveTimer = null;
+let gardenHydrated = false;
 
 function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
   const overlay = document.getElementById('login-overlay');
@@ -5661,6 +5662,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
   const status = document.getElementById('login-status');
   if (status) status.textContent = '';
   setLoginLoading(true, 'Carregando seus pontos e seu jardim…');
+  gardenHydrated = false;
 
   try {
     const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}`, {});
@@ -5714,6 +5716,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     if (isDefault) {
       document.getElementById('garden-name').textContent = `Jardim de ${displayName}`;
     }
+    gardenHydrated = true;
     document.getElementById('twitch-btn').innerHTML =
       `<span class="live-dot"></span> ${displayName}`;
     document.getElementById('twitch-btn').classList.add('connected');
@@ -5748,7 +5751,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
 
 // ── Save garden state to SE custom store ──────────────────
 async function saveGardenToSE() {
-  if (!seUser) return;
+  if (!seUser || !gardenHydrated) return;
   const saveData = {
     xp:               G.xp,
     farmName:         document.getElementById('garden-name')?.textContent || '',
@@ -5858,7 +5861,7 @@ async function syncPtsToSE() {
 
 // ── Save + sync on page close / tab hide ──────────────────
 window.addEventListener('beforeunload', () => {
-  if (!seUser) return;
+  if (!seUser || !gardenHydrated) return;
   // Use sendBeacon for reliable delivery on page close
   const saveData = {
     xp: G.xp,
@@ -5891,7 +5894,7 @@ window.addEventListener('beforeunload', () => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden' && seUser) {
+  if (document.visibilityState === 'hidden' && seUser && gardenHydrated) {
     saveGardenToSE();
   }
 });
@@ -6155,6 +6158,7 @@ function completeLogout() {
   // Save garden before leaving
   saveGardenToSE().finally(() => {
     seUser = null;
+    gardenHydrated = false;
     sessionStorage.removeItem('se_username');
     sessionStorage.removeItem('se_display');
     if (saveTimer) clearInterval(saveTimer);

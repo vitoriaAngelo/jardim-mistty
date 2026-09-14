@@ -2446,7 +2446,6 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
         Conectar
       </button>
         <button class="mail-badge hidden" id="mail-badge" type="button" aria-label="Abrir notificações do Correio" title="Nova mensagem no Correio" onclick="event.stopPropagation(); openMailbox(); document.getElementById('user-menu').classList.add('hidden');">0</button>
-        <button class="mail-badge hidden" id="achiev-header-badge" type="button" aria-label="Abrir notificações de Conquistas" title="Nova conquista" onclick="event.stopPropagation(); openAchievements(); document.getElementById('user-menu').classList.add('hidden');">0</button>
       <div class="user-menu hidden" id="user-menu">
         <button class="user-menu-item" onclick="openProfile(); document.getElementById('user-menu').classList.add('hidden');">👤 Abrir perfil</button>
         <button class="user-menu-item user-menu-mail-item" onclick="openMailbox(); document.getElementById('user-menu').classList.add('hidden');"><span>✉️ Correio</span><span class="user-menu-mail-badge hidden" id="mail-menu-badge">0</span></button>
@@ -2603,25 +2602,6 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
       <div class="tool-cost"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> <span id="shovel-cost">50 pts</span></div>
       </div>
       <div class="header-btn-tip" id="shovel-tool-tip" style="left:50%;transform:translateX(-50%)">Pá<br><span>Retire uma planta do canteiro — 50 pts</span></div>
-    </div>
-
-    <div class="header-icon-wrap" style="width:100%">
-      <button class="achiev-tool-btn" onclick="openAchievements()">
-<svg class="cozy-tool-art" width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-  <ellipse cx="32" cy="57" rx="21" ry="3" fill="#e1dfcf"/>
-  <path d="M19 18H10Q8 34 24 35M45 18H54Q56 34 40 35" stroke="#778b64" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M19 13H45L42 31Q40 39 32 40Q24 39 22 31Z" fill="#e5ebd9" stroke="#586e47" stroke-width="1.6"/>
-  <path d="M23 17L25 29" stroke="#fffdf7" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M30 40H34V48H30Z" fill="#778b64" stroke="#586e47" stroke-width="1.5"/>
-  <path d="M23 48Q32 45 41 48L43 54H21Z" fill="#80629c" stroke="#64497e" stroke-width="1.6" stroke-linejoin="round"/>
-  <path d="M18 13H46" stroke="#586e47" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M32 31V22M32 27Q25 27 26 21Q32 21 32 27M32 25Q37 19 39 22Q39 27 32 28" stroke="#778b64" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M51 8V12M49 10H53" stroke="#80629c" stroke-width="1.5" stroke-linecap="round"/>
-</svg>
-        <span>Conquistas</span>
-        <span class="achiev-tool-badge hidden" id="achiev-tool-badge">0</span>
-      </button>
-      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Conquistas<br><span>Complete metas e desbloqueie badges</span></div>
     </div>
 
     <div class="header-icon-wrap" style="width:100%">
@@ -5093,10 +5073,15 @@ function applyFertilizer(plotIdx, fertilizerId) {
   if (!G.plotFertilizers) G.plotFertilizers = {};
   G.plotFertilizers[plotIdx] = fertilizerId;
 
-  G.selectedFertilizer = null;
+  // Mantém o adubo selecionado para permitir aplicar em vários canteiros.
+  // A seleção só termina quando o estoque chega a zero.
+  if (G.fertilizerInventory[fertilizerId] <= 0) G.selectedFertilizer = null;
   updateFertilizerCursor();
+  updateHeldItemCursor();
   renderFertilizerInventory();
+  renderInventory();
   renderPlots();
+  clearSelectionIfNoAvailablePlots();
   unlockAchievement('use_fert');
 
   if (fertilizerId === 'quick_grow') {
@@ -5240,6 +5225,17 @@ function updateHeldItemCursor() {
   const qty = G.selectedSeed ? (G.inventory[type] || 0) : (G.fertilizerInventory[type] || 0);
   el.innerHTML = `${item?.emoji || '🌱'} ${item?.name || type} <strong>×${qty}</strong>`;
   el.classList.add('visible');
+}
+
+function clearSelectionIfNoAvailablePlots() {
+  const hasFreePlot = Array.from({ length: G.unlockedPlots || 0 }, (_, idx) => idx)
+    .some(idx => !G.plots[idx] && (!G.selectedFertilizer || !G.plotFertilizers?.[idx]));
+  if (hasFreePlot || (!G.selectedSeed && !G.selectedFertilizer)) return;
+  G.selectedSeed = null;
+  G.selectedFertilizer = null;
+  renderInventory();
+  updateFertilizerCursor();
+  updateHeldItemCursor();
 }
 
 document.addEventListener('mousemove', event => {
@@ -5676,6 +5672,7 @@ function onPlotClick(idx) {
     G.plots[idx] = newPlot;
     renderInventory();
     renderPlots();
+    clearSelectionIfNoAvailablePlots();
     missionProgress('plant3');
     initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0); unlockAchievement('first_plant');
     toast(`🌱 ${getPlantable(type).name} plantada no canteiro ${idx + 1}!`);

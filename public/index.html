@@ -3773,7 +3773,14 @@ async function openRanking() {
             profileFrame: save.profileFrame || user.profileFrame,
             isSubscriber: save.isSubscriber === true || user.isSubscriber === true,
             badges: save.achievements || user.badges,
-            stats: save.stats || (Number.isFinite(savedXp) ? { xp: savedXp } : user.stats),
+            stats: {
+              xp:         save.stats?.xp         ?? savedXp ?? user.stats?.xp ?? 0,
+              harvested:  save.stats?.harvested   ?? user.stats?.harvested ?? 0,
+              purchased:  save.stats?.purchased   ?? user.stats?.purchased ?? 0,
+              watered:    save.stats?.watered     ?? user.stats?.watered ?? 0,
+              soldPoints: save.stats?.soldPoints  ?? user.stats?.soldPoints ?? 0,
+              presence:   save.stats?.presence    ?? user.stats?.presence ?? 0,
+            },
           };
         } catch (e) {
           console.warn(`Não foi possível carregar o perfil de ${username}:`, e);
@@ -5717,6 +5724,14 @@ async function saveGardenToSE() {
     dailyPhrase:       G.dailyPhrase || '',
     isSubscriber:      hasSubscriberBadge(),
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
+    stats: {
+      xp:          G.xp,
+      harvested:   Object.values(G.harvested || {}).reduce((a, b) => a + Number(b || 0), 0),
+      purchased:   G.achievStats?.totalBuy    || 0,
+      watered:     G.achievStats?.totalWater  || 0,
+      soldPoints:  G.achievStats?.totalSellPts|| 0,
+      presence:    G.presenceStreak           || 0,
+    },
     shopCart:         SHOP_CART,
     mail:             G_MAIL,
     savedAt:          Date.now(),

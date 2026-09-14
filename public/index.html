@@ -2981,25 +2981,42 @@ const PLANTS = {
 };
 
 // ─── UTILS ───────────────────────────────────────────────
+const activeToasts = new Map();
 function toast(msg, dur=2400, isMission=false) {
+  if (typeof window.mascotNotify === 'function') {
+    window.mascotNotify(msg, dur, isMission);
+    return;
+  }
   const container = document.getElementById('toast-container');
   if (!container) return;
+  const key = `${isMission ? 'mission:' : 'normal:'}${msg}`;
+  const existing = activeToasts.get(key);
+  if (existing?.element?.isConnected && !existing.element.classList.contains('hiding')) {
+    existing.count++;
+    existing.element.textContent = existing.count > 1 ? `${msg} ×${existing.count}` : msg;
+    clearTimeout(existing.timer);
+    existing.timer = setTimeout(existing.hide, dur);
+    return;
+  }
   const t = document.createElement('div');
   t.className = 'toast' + (isMission ? ' mission' : '');
   t.textContent = msg;
   container.appendChild(t);
 
-  let timer;
+  const entry = { element: t, count: 1, timer: null, hide: null };
   const hide = () => {
+    if (activeToasts.get(key) === entry) activeToasts.delete(key);
     t.classList.add('hiding');
     setTimeout(() => t.remove(), 320);
   };
-  const start = () => { timer = setTimeout(hide, dur); };
-  const pause = () => { clearTimeout(timer); };
-  const resume = () => { timer = setTimeout(hide, 600); }; // shorter after hover
+  entry.hide = hide;
+  const start = () => { entry.timer = setTimeout(hide, dur); };
+  const pause = () => { clearTimeout(entry.timer); };
+  const resume = () => { entry.timer = setTimeout(hide, 600); }; // shorter after hover
 
   t.addEventListener('mouseenter', pause);
   t.addEventListener('mouseleave', resume);
+  activeToasts.set(key, entry);
   start();
 }
 let lastDisplayedPts = null;
@@ -3232,7 +3249,8 @@ function effectiveSellValue(type) {
   return hasUpgrade('merchant') ? Math.round(base * 1.5) : base;
 }
 // 2 min real = 1 grow tick.
-const GROW_INTERVAL_MS = 120000;
+// No preview, o crescimento é acelerado para testar o ciclo completo do jardim.
+const GROW_INTERVAL_MS = previewAccess() ? 3000 : 120000;
 
 function renderUpgradeShop() {
   const grid = document.getElementById('upgrade-grid');
@@ -3675,6 +3693,16 @@ function spawnCoinBurst(el, pts) {
   }
 }
 
+function harvestedProduceArt(type) {
+  const item = getPlantable(type);
+  const isFlower = Boolean(FLOWERS[type]);
+  return `<div class="harvested-produce-art ${isFlower ? 'flower' : 'vegetable'}" aria-hidden="true">
+    <span class="produce-leaf produce-leaf-left">❧</span>
+    <span class="produce-emoji">${item?.emoji || '🌱'}</span>
+    <span class="produce-leaf produce-leaf-right">❧</span>
+  </div>`;
+}
+
 function renderHarvested() {
   const bag = document.getElementById('harvest-bag');
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
@@ -3712,7 +3740,7 @@ function renderHarvested() {
 
     return `
       <div class="market-slot ${selected ? 'selected' : ''}" onclick="toggleSellSlot('${type}')">
-        <div class="market-slot-svg">${seedBagSVG(type)}</div>
+        <div class="market-slot-svg">${harvestedProduceArt(type)}</div>
         <div class="market-slot-name">${getPlantable(type).name}</div>
         <div class="market-slot-stock">×${count}</div>
         ${sellQty}
@@ -4190,7 +4218,7 @@ const SEASONS = [
     id: 'summer', name: 'Verão', icon: '☀️', color: '#f8c030',
     barColor: '#e08000',
     vegetables: ['tomato','corn','pepper','eggplant'],
-    flowers:    ['sunflower','hibiscus','bluebell','poppy'],
+    flowers:    ['sunflower','hibiscus','bluebell','poppy','daisy'],
     msg: 'O verão chegou! Aproveite para cultivar plantas do calor.',
   },
   {
@@ -4644,6 +4672,9 @@ function seasonPriceLabel(type, qty = 1) {
 function seedBagSVG(type, locked = false) {
   const p = getPlantable(type);
   const emoji = p ? p.emoji : '🌱';
+  const seasons = p && typeof SEASONS !== 'undefined'
+    ? SEASONS.filter(s => s.vegetables.includes(type) || s.flowers.includes(type))
+    : [];
   const bagColor = locked ? '#b0a090' : '#f5e8c8';
   const bagStroke = locked ? '#8a7868' : '#c8a060';
   const bagDark = locked ? '#9a8878' : '#d4b870';
@@ -4659,6 +4690,7 @@ function seedBagSVG(type, locked = false) {
       <line x1="14" y1="60" x2="46" y2="60" stroke="${bagStroke}" stroke-width="0.8" opacity=".4"/>
     </svg>
     <span style="position:absolute;top:31px;left:50%;transform:translateX(-50%);font-size:20px;line-height:1;pointer-events:none">${emoji}</span>
+    ${seasons.length ? `<span class="seed-season-symbol ${seasons.length > 1 ? 'multiple' : ''}" title="${seasons.map(s => s.name).join(' e ')}">${seasons.map(s => s.icon).join('')}</span>` : ''}
   </div>`;
 }
 
@@ -5086,12 +5118,7 @@ function onPlotClick(idx) {
     initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + 1; checkAchievements();
     updatePlotTooltip(idx);
 
-    if (justFull) {
-      toast(`✅ Regador cheio! A ${getPlantable(plot.type).name} começa a crescer agora 🌱`);
-    } else {
-      const left = maxW - plot.waterCount;
-      toast(`💧 Regada! Faltam ${left} rega${left !== 1 ? 's' : ''} para encher.`);
-    }
+    toast('💧 Planta regada com sucesso!');
     return;
   }
 

@@ -64,6 +64,7 @@
   const minute = 60000;
   const cooldowns = new Map();
   let greeted = false, nextMessage = 0, hideAt = 0, startedAt = 0, lastMessageAt = 0, warnedDayKey = '';
+  let mascotNotification = null;
   const close = () => { bubble.hidden = true; message.textContent = ''; };
   mascot.querySelector('.mascot-dismiss').onclick = close;
   function say(text, key, cooldown = 10 * minute) {
@@ -78,6 +79,19 @@
   function blocked() {
     return document.hidden || !!document.querySelector('.modal-overlay:not(.hidden), .profile-overlay:not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(.hidden), .levelup-overlay:not(.hidden)');
   }
+  window.mascotNotify = (text, duration = 2400) => {
+    const now = Date.now();
+    const same = mascotNotification && mascotNotification.text === text && now < mascotNotification.until;
+    mascotNotification = {
+      text,
+      count: same ? mascotNotification.count + 1 : 1,
+      until: now + Math.max(4000, Number(duration) || 2400)
+    };
+    if (!blocked() && seUser && document.getElementById('login-overlay')?.classList.contains('hidden')) {
+      const countText = mascotNotification.count > 1 ? ` ×${mascotNotification.count}` : '';
+      say(`${text}${countText}`, 'notification', 0);
+    }
+  };
   const petMessages = [
     'Um carinho e uma pausa… crescer também leva tempo. Que bom ter você aqui! 🌿',
     'Se eu pudesse, te dava um abraço de folhinhas. Sinta-se abraçado! 💚',
@@ -105,6 +119,11 @@
     if (!loggedIn) { greeted = false; startedAt = 0; close(); return; }
     if (now >= hideAt) close();
     if (blocked()) { close(); return; }
+    if (mascotNotification && now < mascotNotification.until && now - lastMessageAt >= 1000) {
+      const countText = mascotNotification.count > 1 ? ` ×${mascotNotification.count}` : '';
+      say(`${mascotNotification.text}${countText}`, 'notification', 0);
+      return;
+    }
     if (!greeted) {
       greeted = true;
       startedAt = now;

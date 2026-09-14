@@ -3821,12 +3821,12 @@ async function openRanking() {
             isSubscriber: save.isSubscriber === true || user.isSubscriber === true,
             badges: save.achievements || user.badges,
             stats: {
-              xp: Number(save.stats?.xp ?? save.xp ?? savedStats.xp ?? savedXp ?? user.stats?.xp ?? 0),
+              xp: Number(save.xp ?? savedStats.xp ?? save.stats?.xp ?? savedXp ?? user.stats?.xp ?? 0),
               harvested: Number(savedStats.totalHarvest ?? save.stats?.harvested ?? savedStats.harvested ?? user.stats?.harvested ?? 0),
-              purchased: Number(save.stats?.purchased ?? savedStats.totalBuy ?? savedStats.purchased ?? user.stats?.purchased ?? 0),
-              watered: Number(save.stats?.watered ?? savedStats.totalWater ?? savedStats.watered ?? user.stats?.watered ?? 0),
-              soldPoints: Number(save.stats?.soldPoints ?? savedStats.totalSellPts ?? savedStats.soldPoints ?? user.stats?.soldPoints ?? 0),
-              presence: Number(save.stats?.presence ?? save.presenceStreak ?? savedStats.presence ?? user.stats?.presence ?? 0),
+              purchased: Number(savedStats.totalBuy ?? save.stats?.purchased ?? savedStats.purchased ?? user.stats?.purchased ?? 0),
+              watered: Number(savedStats.totalWater ?? save.stats?.watered ?? savedStats.watered ?? user.stats?.watered ?? 0),
+              soldPoints: Number(savedStats.totalSellPts ?? save.stats?.soldPoints ?? savedStats.soldPoints ?? user.stats?.soldPoints ?? 0),
+              presence: Number(save.presenceStreak ?? save.stats?.presence ?? savedStats.presence ?? user.stats?.presence ?? 0),
             },
           };
         } catch (e) {

@@ -3717,6 +3717,37 @@ async function openRanking() {
       if (!res.ok) throw new Error(`SE API ${res.status}`);
       const data = await res.json();
       users = (data.users || data || []).slice(0, 10);
+
+      // O leaderboard do StreamElements fornece o saldo de pontos, mas os
+      // dados do jogo (XP/nível, estatísticas, badges etc.) ficam no JSON do
+      // jogador. Enriquecemos os 10 usuários exibidos com esse estado salvo.
+      users = await Promise.all(users.map(async (user) => {
+        const username = user.username || user._id;
+        if (!username) return user;
+        try {
+          const saveRes = await fetch(`/garden-load?username=${encodeURIComponent(username)}`);
+          const saveJson = saveRes.ok ? await saveRes.json() : null;
+          const save = saveJson?.data || {};
+          const savedXp = Number(save.xp ?? save.stats?.xp);
+          const savedLevel = Number(save.level ?? save.lv);
+          const derivedLevel = Number.isFinite(savedLevel) && savedLevel > 0
+            ? savedLevel
+            : (Number.isFinite(savedXp) ? getLevelData(savedXp).current.lv : undefined);
+          return {
+            ...user,
+            ...(derivedLevel ? { level: derivedLevel } : {}),
+            ...(Number.isFinite(savedXp) ? { xp: savedXp } : {}),
+            farmName: save.farmName || user.farmName,
+            dailyPhrase: save.dailyPhrase || user.dailyPhrase,
+            profileFrame: save.profileFrame || user.profileFrame,
+            badges: save.achievements || user.badges,
+            stats: save.stats || (Number.isFinite(savedXp) ? { xp: savedXp } : user.stats),
+          };
+        } catch (e) {
+          console.warn(`Não foi possível carregar o perfil de ${username}:`, e);
+          return user;
+        }
+      }));
     }
 
     rankingUsers = users;

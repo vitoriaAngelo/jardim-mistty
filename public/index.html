@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jardim da Mistty 🌱</title>
+<title>Jardim dos Encantos 🌱</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1493,6 +1493,7 @@ body.dark-mode .ranking-pagination button { border-color:#52624d; background:#30
   display: flex; align-items: center; justify-content: center;
 }
 .login-overlay.hidden { display: none; }
+body:has(.login-overlay:not(.hidden)) { overflow: hidden; }
 .login-box {
   display: flex; flex-direction: column; align-items: center;
   gap: 12px; padding: 40px 32px;
@@ -1516,7 +1517,7 @@ body.dark-mode .ranking-pagination button { border-color:#52624d; background:#30
 
 /* A little garden gate: styles stay scoped to the welcome screen. */
 .login-overlay {
-  overflow-y: auto; padding: 32px 20px;
+  overflow: hidden; padding: 32px 20px;
   background: radial-gradient(ellipse at 18% 20%, #f9ecd5 0, transparent 48%),
     radial-gradient(ellipse at 90% 85%, #dce4cf 0, transparent 50%), #f5f1e7;
   color: #414b39;
@@ -1541,6 +1542,8 @@ body.dark-mode .ranking-pagination button { border-color:#52624d; background:#30
 .login-art-caption span { display: block; font-family: Georgia, serif; font-style: italic; font-size: 21px; margin-bottom: 5px; }
 .login-content { padding: 48px 38px 30px; text-align: center; }
 .login-welcome { display: inline-block; border: 1px solid #dedfcf; border-radius: 30px; padding: 7px 13px; color: #6a755d; font-size: 11px; margin-bottom: 24px; }
+.login-event-note { display: inline-flex; align-items: center; gap: 6px; margin: -10px auto 18px; padding: 7px 12px; border: 1px solid #e3d3aa; border-radius: 999px; background: #fbf5df; color: #806b3f; font-size: 11px; font-weight: 800; box-shadow: 0 2px 0 rgba(173, 143, 78, .12); }
+.login-build-note { max-width: 300px; margin: -5px auto 20px; color: #78816f; font-size: 10px; line-height: 1.55; }
 .login-content h1 { font: 400 45px/1.08 Georgia, 'Times New Roman', serif; letter-spacing: -1.5px; color: #414f38; }
 .login-content h1 em { font-weight: 400; color: #778359; }
 .login-description { margin: 20px auto 27px; max-width: 265px; font-size: 14px; line-height: 1.8; color: #707565; }
@@ -1568,7 +1571,7 @@ body.dark-mode .ranking-pagination button { border-color:#52624d; background:#30
 .login-footer { padding-top: 20px; font-size: 10px; line-height: 1.9; color: #797c6f; }
 .login-footer a { color: #596b48; text-underline-offset: 3px; }
 @media (max-width: 680px) {
-  .login-overlay { padding: 22px 16px; align-items: flex-start; }
+  .login-overlay { overflow-y: auto; padding: 22px 16px; align-items: flex-start; }
   .login-box { max-width: 420px; grid-template-columns: 1fr; border-radius: 22px; }
   .login-art { min-height: 0; padding: 20px 24px 14px; }
   .login-garden { height: 160px; margin: 0; }
@@ -2708,15 +2711,17 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
     </div>
     <div class="login-content">
     <div class="login-welcome">🌿 Que bom ter você por aqui</div>
-    <h1>Cantinho<br>da <em>Mistty</em></h1>
-    <p class="login-description">A comunidade da live tem um cantinho aqui.<br>Entre, crie seu próprio jardim e cuide dele do seu jeitinho e aumente seus pontos da live.</p>
+    <div class="login-event-note">✨ A competição de verdade começa em 18/09, mas você pode brincar um pouco para aprender.</div>
+    <div class="login-build-note">💚 O site ainda pode passar por instabilidades. Tudo está sendo feito com muito amor e, logo logo, estará prontinho.</div>
+    <h1>Jardim<br><em>dos Encantos</em></h1>
+    <p class="login-description">A comunidade da live tem um jardim especial para você.<br>Entre, cuide do seu cantinho e junte pontos para trocar por dinheiro e vários outros prêmios.</p>
     <button class="login-twitch-btn" onclick="loginWithTwitch()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
       Entrar com Twitch
     </button>
     <p class="login-note">Use sua conta Twitch para entrar no jardim.</p>
     <div id="login-status" role="status" aria-live="polite"></div>
-    <div class="login-rituals"><span><b>🌱</b>Plante sonhos</span><span><b>☀️</b>Cuide com calma</span><span><b>🌷</b>Veja florescer</span></div>
+    <div class="login-rituals"><span><b>🌱</b>Plante sonhos</span><span><b>☀️</b>Cuide com calma</span><span><b>🌷</b>Veja florescer</span><span><b>🎁</b>Troque por prêmios</span></div>
     <div class="login-footer">
       Criado com 💚 por <strong>Vitória Paula</strong><br>
       <a href="https://www.twitch.tv/misttylol" target="_blank"
@@ -6341,7 +6346,7 @@ G.growTimer = setInterval(growTick, GROW_INTERVAL_MS);
 
 <script>
   // Preview-only: show the game screen locally without requiring login.
-  if (location.hostname === 'localhost') {
+  if (location.hostname === 'localhost' && new URLSearchParams(location.search).has('preview')) {
     document.getElementById('login-overlay')?.classList.add('hidden');
   }
 </script>

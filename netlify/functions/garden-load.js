@@ -6,6 +6,7 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
     'Content-Type': 'application/json',
   };
 

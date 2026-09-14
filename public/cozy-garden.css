@@ -153,6 +153,8 @@ body:has(#user-menu:not(.hidden)) #cozy-tooltip { display: none !important; }
  body.dark-mode .promo-corner{background:linear-gradient(135deg,#cf3a70,#a92052);color:#dff3c8;border-color:#eb8ead;box-shadow:0 2px 0 #731737,0 5px 12px #0003}
  body.dark-mode .achiev-item-bar{background:#20281f;box-shadow:inset 0 1px 2px #0005}
 body.dark-mode .achiev-item-progress-copy strong{color:#bdd4a7}
+ .shop-item-xp{font-size:10px;font-weight:900;color:var(--grass2);background:#eaf3df;border-radius:999px;padding:2px 7px;line-height:1.2}
+ body.dark-mode .shop-item-xp{background:#3d5137;color:#c8e2ae}
  .seed-season-symbol{position:absolute;top:2px;left:1px;z-index:3;display:inline-flex;align-items:center;justify-content:center;gap:1px;min-width:20px;height:20px;padding:0 2px;border:2px solid #fffdf7;border-radius:999px;background:#f8f1d9;font-size:12px;line-height:1;box-shadow:0 2px 4px #4b573326}
  .seed-season-symbol.multiple{min-width:32px;font-size:10px;letter-spacing:-1px}
  body.dark-mode .seed-season-symbol{border-color:#30392d;background:#4b5a40}

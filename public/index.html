@@ -2392,7 +2392,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
   <path d="M30 45V35M30 40Q23 40 24 34Q30 34 30 40M30 37Q35 31 37 34Q37 39 30 40" stroke="#fffdf7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
         <div class="tool-label">Regador</div>
-        <div class="tool-cost">🌟 6 pts</div>
+        <div class="tool-cost"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> 6 pts</div>
       </div>
       <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Regador<br><span>Clique na planta para regar — 6 pts</span></div>
     </div>
@@ -2412,7 +2412,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
   <path d="M12 46Q6 40 8 36Q15 38 12 46M12 48L13 41" fill="#e5ebd9" stroke="#778b64" stroke-width="1.2" stroke-linecap="round"/>
 </svg>
         <div class="tool-label">Pá</div>
-        <div class="tool-cost">🌟 10 pts</div>
+        <div class="tool-cost"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> 10 pts</div>
       </div>
       <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Pá<br><span>Planta pronta? Clique para colher — 10 pts</span></div>
     </div>
@@ -2831,13 +2831,15 @@ function getLevelData(totalXP) {
   return { current, next };
 }
 
-function gainXP(action, sourceEl) {
+function gainXP(action, sourceEl, overrideXp = null, overrideLabel = null) {
   const act = XP_ACTIONS[action];
   if (!act) return;
-  G.xp += act.xp;
+  const xp = Number.isFinite(Number(overrideXp)) ? Number(overrideXp) : act.xp;
+  const label = overrideLabel || (Number.isFinite(Number(overrideXp)) ? `+${xp} XP` : act.label);
+  G.xp += xp;
 
   // Check level up
-  const before = getLevelData(G.xp - act.xp);
+  const before = getLevelData(G.xp - xp);
   const after  = getLevelData(G.xp);
   const leveledUp = after.current.lv > before.current.lv;
 
@@ -2848,7 +2850,7 @@ function gainXP(action, sourceEl) {
     const rect = sourceEl.getBoundingClientRect();
     const float = document.createElement('div');
     float.className = 'xp-float';
-    float.textContent = act.label;
+    float.textContent = label;
     float.style.left = (rect.left + rect.width / 2 - 30) + 'px';
     float.style.top  = (rect.top - 10) + 'px';
     float.style.color = after.current.color;
@@ -2950,6 +2952,7 @@ const G = {
   missions: null,
   achievements: null,
   achievStats: null,
+  farmerXP: 0,
   achievSeen: 0,
   presenceStreak: 0,
   presenceLastDay: '',
@@ -3181,7 +3184,7 @@ function renderPlotShop() {
             ? `<div class="plot-owned-badge">✔ Possui</div>`
             : levelLocked
               ? `<div class="cozy-level-chip" style="font-size:11px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:3px 10px">🔒 Nível ${u.minLevel}</div>`
-              : `<div class="plot-shop-price">🌟 ${u.cost}</div>`
+              : `<div class="plot-shop-price"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${u.cost}</div>`
           }
         </div>
       </div>`;
@@ -3197,7 +3200,6 @@ function buyPlot(slot) {
   if (!previewAccess() && G.pts < u.cost) { toast(`✨ Faltam ${u.cost - G.pts} pts para comprar esse canteiro!`); return; }
   if (!previewAccess()) G.pts -= u.cost;
   G.unlockedPlots = Math.max(G.unlockedPlots, slot + 1);
-  gainXP('buy', document.getElementById('panel-canteiros'));
   updatePts();
   renderPlots();
   renderPlotShop();
@@ -3282,7 +3284,7 @@ function renderUpgradeShop() {
             : pending ? `<div class="upgrade-owned-badge">Escolher</div>`
             : levelLocked
               ? ``
-              : `<div class="upgrade-price">🌟 ${cost}</div>`
+              : `<div class="upgrade-price"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${cost}</div>`
           }
         </div>
       </div>`;
@@ -3304,7 +3306,6 @@ function buyUpgrade(id) {
     G.pts -= cost;
     G.upgradeLevels[id] = level + 1;
     G.upgrades.add(id);
-    gainXP('buy', document.getElementById('panel-melhorias'));
     updatePts(); renderUpgradeShop(); renderFertilizerShop();
     spendSEPoints(cost);
     toast(`${u.icon} ${u.name} nível ${level + 1}! Próxima compra: ${Math.round(u.cost * Math.pow(1.6, level + 1))} pts`, 3500);
@@ -3320,7 +3321,6 @@ function buyUpgrade(id) {
   }
   G.pts -= u.cost;
   G.upgrades.add(id);
-  gainXP('buy', document.getElementById('panel-melhorias'));
   updatePts();
   renderUpgradeShop();
   renderShop();
@@ -3427,7 +3427,7 @@ function renderInventory() {
           <div class="inv-tip">
             <strong>${p.name}</strong><br>
             💧 ${p.maxWater} regas · 🌱 ${p.maxGrow} crescimentos<br>
-            🌟 Venda: ${SELL_VALUE[type]} pts
+            <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> Venda: ${SELL_VALUE[type]} pts
           </div>
         </div>`;
     }).join('')
@@ -3511,7 +3511,7 @@ function buyShopCart() {
   }
   if (G.pts < total) { toast('✨ Pontos insuficientes para concluir a compra!'); return; }
   G.pts -= total;
-  entries.forEach(([type, qty]) => { const target = typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type] ? 'fertilizerInventory' : 'inventory'; G[target][type] = (G[target][type] || 0) + qty; for (let i = 0; i < qty; i++) { gainXP('buy'); missionProgress('buy2'); } });
+  entries.forEach(([type, qty]) => { const target = typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type] ? 'fertilizerInventory' : 'inventory'; G[target][type] = (G[target][type] || 0) + qty; for (let i = 0; i < qty; i++) { missionProgress('buy2'); } });
   renderFertilizerShop(); renderFertilizerInventory();
   updatePts(); renderInventory(); initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + entries.reduce((sum, [, qty]) => sum + qty, 0); checkAchievements(); spendSEPoints(total);
   clearShopCart(); toast(`🛍️ Compra concluída! ${entries.reduce((s,[,q])=>s+q,0)} item${entries.length > 1 ? 's' : ''} adicionados.`);
@@ -3601,10 +3601,11 @@ function renderFlowerShop() {
       ${outOfSeason ? '<span class="promo-corner">Promoção</span>' : ''}
       <div class="shop-item-name">${p.name}</div>
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${p.maxGrow}</div>
+      <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
       <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
-        venda <span style="color:var(--soil2);font-weight:800;margin:0 2px">🌟 ${sellVal}</span>(${profitLabel})
+        venda <span style="color:var(--soil2);font-weight:800;margin:0 2px"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${sellVal}</span>(${profitLabel})
       </div>
     </div>`;
   }).join('');
@@ -3621,7 +3622,6 @@ function buyFlower(type, el) {
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
   G.pts -= total;
   G.inventory[type] = (G.inventory[type] || 0) + qty;
-  gainXP('buy', el);
   updatePts();
   renderInventory();
   missionProgress('buy2');
@@ -3645,15 +3645,19 @@ function sellSelected() {
   if (total === 0) return;
 
   const sold = [];
+  let soldQty = 0;
   Object.entries(SELL).forEach(([type, qty]) => {
     if (qty > 0) {
       G.harvested[type] = (G.harvested[type] || 0) - qty;
+      soldQty += qty;
       sold.push(`${qty}× ${getPlantable(type).emoji}`);
       SELL[type] = 0;
     }
   });
 
   G.pts += total;
+  // XP de fazendeiro é separado do XP de nível e fica reservado para a evolução futura.
+  G.farmerXP = (G.farmerXP || 0) + Math.max(1, Math.floor((total + soldQty) / 10));
   updatePts();
   missionProgress('sell1');
   initAchievements();
@@ -4128,7 +4132,6 @@ function missionProgress(id, amount = 1) {
     G.missions.claimed[id] = true;
     G.pts += def.rewardPts;
     const missionEl = document.getElementById('missions-modal-bar') || document.getElementById('missions-btn');
-    gainXP('buy', missionEl);
     G.xp += def.rewardXP;
     renderLevelWidget();
     updatePts();
@@ -4468,7 +4471,7 @@ function renderFertilizerShop() {
           <div class="fertilizer-cost">
             ${locked
               ? `<div class="cozy-level-chip" style="font-size:11px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:3px 10px">🔒 Nv${f.minLevel}</div>`
-              : `<div class="fertilizer-price">🌟 ${total}</div>
+              : `<div class="fertilizer-price"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total}</div>
                  ${shopQtyControls(f.id)}<button type="button" class="fertilizer-buy-btn" onclick="event.stopPropagation();addToShopCart('${f.id}', event)" ${G.pts >= total ? '' : 'disabled'}>Adicionar</button>`
             }
           </div>
@@ -4486,7 +4489,6 @@ function buyFertilizer(id) {
   if (!previewAccess() && currentLevel() < f.minLevel) { toast(`🔒 Precisa ser nível ${f.minLevel}!`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
   G.pts -= total;
-  gainXP('buy', document.getElementById('panel-adubos'));
 
   G.fertilizerInventory[id] = (G.fertilizerInventory[id] || 0) + qty;
   updatePts();
@@ -4650,6 +4652,14 @@ function getPlantable(type) {
   return PLANTS[type] || FLOWERS[type] || null;
 }
 
+// XP is earned on harvest, with a distinct value for each crop.
+function harvestXP(type) {
+  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
+  const index = Math.max(0, allTypes.indexOf(type));
+  return 20 + index * 3;
+}
+
+
 function isOutOfSeason(type) { return !isInSeason(type); }
 function seasonDiscountRate(type) {
   const choices = [0.10, 0.15, 0.20, 0.25, 0.30, 0.35];
@@ -4664,8 +4674,8 @@ function seasonPrice(type) {
 function seasonPriceLabel(type, qty = 1) {
   const p = getPlantable(type);
   const price = seasonPrice(type) * qty;
-  if (!p || !isOutOfSeason(type)) return `🌟 ${price}`;
-  return `<s style="opacity:.55">🌟 ${p.cost * qty}</s> <strong style="color:#6f8e55">🌟 ${price}</strong> <span class="cozy-promo-chip">-${Math.round(seasonDiscountRate(type) * 100)}%</span>`;
+  if (!p || !isOutOfSeason(type)) return `<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
+  return `<s style="opacity:.55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${p.cost * qty}</s> <strong style="color:#6f8e55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}</strong> <span class="cozy-promo-chip">-${Math.round(seasonDiscountRate(type) * 100)}%</span>`;
 }
 
 // ─── SEED BAG SVG ────────────────────────────────────────
@@ -4752,10 +4762,11 @@ function renderShop() {
       ${outOfSeason ? '<span class="promo-corner">Promoção</span>' : ''}
       <div class="shop-item-name">${p.name}</div>
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${p.maxGrow}</div>
+      <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
       <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
-        venda <span style="color:var(--soil2);font-weight:800;margin:0 2px">🌟 ${sellVal}</span>(${profitLabel})
+        venda <span style="color:var(--soil2);font-weight:800;margin:0 2px"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${sellVal}</span>(${profitLabel})
       </div>
     </div>`;
   }).join('');
@@ -4772,7 +4783,6 @@ function buyPlant(type, el) {
   G.inventory[type] = (G.inventory[type] || 0) + qty;
   updatePts();
   renderInventory();
-  gainXP('buy', el);
   missionProgress('buy2');
   initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + 1; checkAchievements();
   spendSEPoints(total);
@@ -4821,7 +4831,7 @@ function buildPlotEl(plot, idx) {
     inner.className = 'plot-inner';
     inner.innerHTML = `<div class="lock-hint">
       <div class="lock-icon">🔒</div>
-      <span>${u ? `🌟 ${u.cost} pts` : 'bloqueado'}</span>
+      <span>${u ? `<img class="points-token" style="width:16px;height:16px" src="points-sprout.svg" alt="" aria-hidden="true"> ${u.cost} pts` : 'bloqueado'}</span>
     </div>`;
     div.appendChild(inner);
     const lbl = document.createElement('div');
@@ -4990,7 +5000,7 @@ function onPlotClick(idx) {
     const hasGolden = plot.goldenSoil;
     G.plots[idx] = null;
     spawnSparkles(idx);
-    gainXP('harvest', plotEl);
+    gainXP('harvest', plotEl, harvestXP(type), `+${harvestXP(type)} XP 🧺 Colheita!`);
     if (outOfSeason) {
       toast(`🥀 ${getPlantable(type).name} perdida! Cresceu fora da estação — não pode ser vendida.`, 4000);
       updatePts();
@@ -5047,7 +5057,6 @@ function onPlotClick(idx) {
     G.plots[idx] = newPlot;
     renderInventory();
     renderPlots();
-    gainXP('plant', plotEl);
     missionProgress('plant3');
     initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0); unlockAchievement('first_plant');
     toast(`🌱 ${getPlantable(type).name} plantada no canteiro ${idx + 1}!`);
@@ -5113,7 +5122,6 @@ function onPlotClick(idx) {
     }
 
     spawnDrops(idx);
-    gainXP('water', plotEl);
     missionProgress('water5');
     initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + 1; checkAchievements();
     updatePlotTooltip(idx);
@@ -5133,7 +5141,7 @@ function onPlotClick(idx) {
     G.harvested[type] = (G.harvested[type] || 0) + 1;
     G.plots[idx] = null;
     spawnSparkles(idx);
-    gainXP('harvest', plotEl);
+    gainXP('harvest', plotEl, harvestXP(type), `+${harvestXP(type)} XP 🧺 Colheita!`);
     toast(`🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!`);
     setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     return;
@@ -5901,6 +5909,7 @@ async function saveGardenToSE() {
   if (!seUser || !gardenHydrated) return;
   const saveData = {
     xp:               G.xp,
+    farmerXP:         G.farmerXP || 0,
     farmName:         document.getElementById('garden-name')?.textContent || '',
     inventory:        G.inventory,
     fertilizerInventory: G.fertilizerInventory,
@@ -6014,6 +6023,7 @@ window.addEventListener('beforeunload', () => {
   // Use sendBeacon for reliable delivery on page close
   const saveData = {
     xp: G.xp,
+    farmerXP: G.farmerXP || 0,
     farmName: document.getElementById('garden-name')?.textContent || '',
     inventory: G.inventory,
     fertilizerInventory: G.fertilizerInventory,
@@ -6079,6 +6089,7 @@ async function loadGardenFromSE(username) {
 
     // Restore all state — pts always comes from SE, not from save
     G.xp              = save.xp             || 0;
+    G.farmerXP        = save.farmerXP       || 0;
 
     // Restore farm name
     if (save.farmName) {
@@ -6486,7 +6497,6 @@ function growTick() {
     if (plot.growCount >= maxG) {
       refreshShovelTool();
       toast(`🌸 ${getPlantable(plot.type).name} floresceu!${plot.goldenSoil ? ' ✨ Terra Dourada ativa!' : ''}`);
-      gainXP('bloom', document.querySelector(`[data-idx="${idx}"]`));
     }
     updatePlotTooltip(idx);
   });

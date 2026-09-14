@@ -5510,7 +5510,7 @@ function loginWithTwitch() {
     + `?client_id=${TWITCH_CLIENT_ID}`
     + `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`
     + `&response_type=token`
-    + `&scope=user:read:email`
+    + `&scope=user:read:email%20user:read:subscriptions`
     + `&force_verify=false`;
   window.location.href = url;
 }
@@ -5543,7 +5543,7 @@ async function handleTwitchCallback() {
     if (!data.data || !data.data[0]) throw new Error('Usuário Twitch não encontrado');
 
     const tw = data.data[0];
-    await initSEUser(tw.login, tw.display_name);
+    await initSEUser(tw.login, tw.display_name, twitchToken, tw.id);
     return true;
 
   } catch(e) {
@@ -5556,7 +5556,29 @@ async function handleTwitchCallback() {
 }
 
 // ── Init user from SE ──────────────────────────────────────
-async function initSEUser(username, displayName) {
+async function getTwitchSubscriptionStatus(accessToken, userId) {
+  try {
+    const broadcasterRes = await fetch(`https://api.twitch.tv/helix/users?login=${encodeURIComponent('misttylol')}`, {
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Client-Id': TWITCH_CLIENT_ID }
+    });
+    if (!broadcasterRes.ok) return false;
+    const broadcasterData = await broadcasterRes.json();
+    const broadcasterId = broadcasterData.data?.[0]?.id;
+    if (!broadcasterId || !userId) return false;
+
+    const subRes = await fetch(`https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${broadcasterId}&user_id=${userId}`, {
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Client-Id': TWITCH_CLIENT_ID }
+    });
+    if (!subRes.ok) return false;
+    const subData = await subRes.json();
+    return Array.isArray(subData.data) && subData.data.length > 0;
+  } catch (e) {
+    console.warn('Não foi possível verificar a inscrição na Twitch:', e);
+    return false;
+  }
+}
+
+async function initSEUser(username, displayName, twitchAccessToken = '', twitchUserId = '') {
   const status = document.getElementById('login-status');
   if (status) status.textContent = '';
   setLoginLoading(true, 'Carregando seus pontos e seu jardim…');
@@ -5573,6 +5595,11 @@ async function initSEUser(username, displayName) {
       const ptsData = await res.json();
       seUser = { username, displayName, points: ptsData.points || 0 };
     }
+
+    seUser.isSubscriber = twitchAccessToken
+      ? await getTwitchSubscriptionStatus(twitchAccessToken, twitchUserId)
+      : sessionStorage.getItem('twitch_is_subscriber') === 'true';
+    sessionStorage.setItem('twitch_is_subscriber', String(seUser.isSubscriber));
 
     sessionStorage.setItem('se_username', username);
     sessionStorage.setItem('se_display',  displayName);

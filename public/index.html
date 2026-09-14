@@ -3457,20 +3457,19 @@ function renderPlotShop() {
   }).join('');
 }
 
-function buyPlot(slot) {
+async function buyPlot(slot) {
   const u = PLOT_UPGRADES.find(p => p.slot === slot);
   if (!u) return;
   if (G.unlockedPlots > slot) { toast('Você já tem esse canteiro! 🪵'); return; }
   if (!previewAccess() && G.unlockedPlots < slot) { toast('Desbloqueie os canteiros anteriores primeiro!'); return; }
   if (!previewAccess() && currentLevel() < u.minLevel) { toast(`🔒 Precisa ser nível ${u.minLevel} para este canteiro!`); return; }
   if (!previewAccess() && G.pts < u.cost) { toast(`✨ Faltam ${u.cost - G.pts} pts para comprar esse canteiro!`); return; }
-  if (!previewAccess()) G.pts -= u.cost;
+  if (!(await chargeGamePoints(u.cost))) return;
   G.unlockedPlots = Math.max(G.unlockedPlots, slot + 1);
-  updatePts();
   renderPlots();
   renderPlotShop();
   unlockAchievement('unlock_plot');
-  spendSEPoints(u.cost);
+  saveGardenToSE();
   toast(`🪵 ${u.name} desbloqueado! Vai plantar? 🌱`, 3000);
 }
 
@@ -3587,7 +3586,7 @@ function renderUpgradeShop() {
   }).join('');
 }
 
-function buyUpgrade(id) {
+async function buyUpgrade(id) {
   const existing = UPGRADES.find(u => u.id === id);
   if (hasUpgrade(id) && !existing?.maxLevel && !existing?.refill) return;
   const u = UPGRADES.find(u => u.id === id);
@@ -3604,34 +3603,34 @@ function buyUpgrade(id) {
       toast(`💧 O reservatório já está cheio! (${maxWateringCapacity()}/${maxWateringCapacity()})`, 3000);
       return;
     }
-    G.pts -= cost;
+    if (!(await chargeGamePoints(cost))) return;
     G.waterCapacity = Math.min(maxWateringCapacity(), (G.waterCapacity || 0) + 5);
     renderWateringCapacity();
     updatePts();
     renderUpgradeShop();
-    spendSEPoints(cost);
+    saveGardenToSE();
     toast(`🫗 Reservatório cheio em +5! (${G.waterCapacity}/${maxWateringCapacity()})`, 3000);
     return;
   }
   if (u.maxLevel) {
-    G.pts -= cost;
+    if (!(await chargeGamePoints(cost))) return;
     G.upgradeLevels[id] = level + 1;
     G.upgrades.add(id);
     updatePts(); renderUpgradeShop(); renderFertilizerShop();
     renderWateringCapacity();
-    spendSEPoints(cost);
+    saveGardenToSE();
     toast(`${u.icon} ${u.name} nível ${level + 1}! Próxima compra: ${Math.round(u.cost * Math.pow(1.6, level + 1))} pts`, 3500);
     return;
   }
   if (id === 'special_plot') {
-    if (!previewAccess) G.pts -= u.cost;
+    if (!(await chargeGamePoints(u.cost))) return;
     G.specialPlotPending = true;
     updatePts(); renderUpgradeShop(); renderPlots();
-    spendSEPoints(u.cost);
+    saveGardenToSE();
     toast('✨ Clique em um canteiro vazio para escolher o Canteiro Especial!', 4000);
     return;
   }
-  G.pts -= u.cost;
+  if (!(await chargeGamePoints(u.cost))) return;
   G.upgrades.add(id);
   updatePts();
   renderUpgradeShop();
@@ -3639,7 +3638,7 @@ function buyUpgrade(id) {
   renderPlots();
   renderWateringCapacity();
   unlockAchievement('buy_upgrade');
-  spendSEPoints(u.cost);
+  saveGardenToSE();
   toast(`${u.icon} ${u.name} ativada!`, 3000);
   spawnCoinBurst(document.getElementById('panel-melhorias'), 10);
 }
@@ -3734,16 +3733,16 @@ function confirmRemovePlant(idx) {
   openModal();
 }
 
-function removePlantFromPlot(idx) {
+async function removePlantFromPlot(idx) {
   closeModal();
   const plot = G.plots[idx];
   if (!plot) return;
   const sCost = effectiveShovelCost();
   if (G.pts < sCost) { toast(`🌟 Você precisa de ${sCost} pts para retirar a planta!`); return; }
-  G.pts -= sCost;
+  if (!(await chargeGamePoints(sCost))) return;
   G.plots[idx] = null;
-  updatePts();
   spawnSparkles(idx);
+  saveGardenToSE();
   toast(`🪴 ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} retirada do canteiro!`);
   setTimeout(() => { renderPlots(); }, 300);
 }
@@ -3876,7 +3875,7 @@ function renderShopCart() {
   const details = `<div class="shop-cart-items">${entries.map(([type, qty]) => { const p = cartProduct(type); return `<div class="shop-cart-row"><span>${p.emoji} ${p.name}</span><div class="shop-cart-row-controls"><button onclick="event.stopPropagation();adjustCartQty('${type}',-1)" aria-label="Retirar ${p.name}">−</button><span>×${qty}</span><button onclick="event.stopPropagation();adjustCartQty('${type}',1)" aria-label="Adicionar ${p.name}">+</button></div></div>`; }).join('')}</div>`;
   el.innerHTML = `<div><div class="shop-cart-toggle">🛍️ Sacola · ${count} item${count > 1 ? 's' : ''}</div>${details}<div class="shop-cart-total">Total = <img class="points-token" src="points-sprout.svg" width="22" height="22" alt="" aria-hidden="true"> ${total} pts</div></div><button class="shop-cart-buy" onclick="event.stopPropagation();buyShopCart()">Comprar</button><button class="popup-close-x" style="position:static;width:24px;height:24px" onclick="event.stopPropagation();clearShopCart()" aria-label="Esvaziar sacola">×</button>`;
 }
-function buyShopCart() {
+async function buyShopCart() {
   const entries = Object.entries(SHOP_CART).filter(([, qty]) => qty > 0);
   if (!entries.length) return;
   let total = 0;
@@ -3887,10 +3886,11 @@ function buyShopCart() {
     total += cartUnitCost(type) * qty;
   }
   if (G.pts < total) { toast('✨ Pontos insuficientes para concluir a compra!'); return; }
-  G.pts -= total;
+  if (!(await chargeGamePoints(total))) return;
   entries.forEach(([type, qty]) => { const target = typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type] ? 'fertilizerInventory' : 'inventory'; G[target][type] = (G[target][type] || 0) + qty; for (let i = 0; i < qty; i++) { missionProgress('buy2'); } });
   renderFertilizerShop(); renderFertilizerInventory();
-  updatePts(); renderInventory(); initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + entries.reduce((sum, [, qty]) => sum + qty, 0); checkAchievements(); spendSEPoints(total);
+  updatePts(); renderInventory(); initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + entries.reduce((sum, [, qty]) => sum + qty, 0); checkAchievements();
+  saveGardenToSE();
   clearShopCart(); toast(`🛍️ Compra concluída! ${entries.reduce((s,[,q])=>s+q,0)} item${entries.length > 1 ? 's' : ''} adicionados.`);
 }
 function adjustShopQty(type, delta) {
@@ -3994,7 +3994,7 @@ function renderFlowerShop() {
   container.innerHTML = sortBar + `<div class="shop-grid-inner">${items}</div>`;
 }
 
-function buyFlower(type, el) {
+async function buyFlower(type, el) {
   const p = FLOWERS[type];
   const qty = SHOP_QTY[type] || 1;
   const total = seasonPrice(type) * qty;
@@ -4002,13 +4002,13 @@ function buyFlower(type, el) {
   if (p.subscriberOnly && !hasSubscriberBadge()) { toast('✦ Esta flor é exclusiva para subscribers.'); return; }
   if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para esta flor!`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
-  G.pts -= total;
+  if (!(await chargeGamePoints(total))) return;
   G.inventory[type] = (G.inventory[type] || 0) + qty;
   updatePts();
   renderInventory();
   missionProgress('buy2');
   initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + 1; checkAchievements();
-  spendSEPoints(total);
+  saveGardenToSE();
   toast(`${p.emoji} ${qty} ${p.name}${qty > 1 ? 's' : ''} comprada${qty > 1 ? 's' : ''}!`);
 }
 
@@ -4175,12 +4175,16 @@ function applySelectedMascotAppearance(animate=false) {
   if (typeof window.setGardenMascot === 'function') window.setGardenMascot(G.selectedMascot, animate);
   else if (typeof window.setMascotPremium === 'function') window.setMascotPremium(premium, animate);
 }
-function buyMascot(id, cost) {
+async function buyMascot(id, cost) {
   if (!G.ownedMascots) G.ownedMascots = {};
   const localPreview = ['localhost','127.0.0.1'].includes(window.location.hostname) && new URLSearchParams(window.location.search).has('preview');
   if (!hasSubscriberBadge() && !localPreview && !previewAccess()) { toast('✦ Mascotes Premium são exclusivos para subscribers.'); return; }
   if (G.selectedMascot === id) { toast('🐾 Este mascote já está selecionado!'); return; }
-  if (!G.ownedMascots?.[id]) { if (G.pts < cost) { toast(`✨ Faltam ${cost - G.pts} pontos para este mascote.`); return; } G.pts -= cost; G.ownedMascots[id] = true; }
+  if (!G.ownedMascots?.[id]) {
+    if (G.pts < cost) { toast(`✨ Faltam ${cost - G.pts} pontos para este mascote.`); return; }
+    if (!(await chargeGamePoints(cost))) return;
+    G.ownedMascots[id] = true;
+  }
   G.selectedMascot = id; applySelectedMascotAppearance(true); updatePts(); renderMascotShop(); renderWateringCapacity(); saveGardenToSE(); toast(id === 'premium' ? '✨ O Brotinho se transformou! Todos os benefícios Premium estão ativos.' : '🐾 Mascote selecionado! Seus benefícios já estão ativos.', 3500);
 }
 window.buyMascot = buyMascot;
@@ -5036,7 +5040,7 @@ function renderFertilizerShop() {
   }</div>`;
 }
 
-function buyFertilizer(id) {
+async function buyFertilizer(id) {
   const f = FERTILIZERS[id];
   if (!f) return;
   const qty = SHOP_QTY[id] || 1;
@@ -5044,13 +5048,13 @@ function buyFertilizer(id) {
   const total = unitCost * qty;
   if (!previewAccess() && currentLevel() < f.minLevel) { toast(`🔒 Precisa ser nível ${f.minLevel}!`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
-  G.pts -= total;
+  if (!(await chargeGamePoints(total))) return;
 
   G.fertilizerInventory[id] = (G.fertilizerInventory[id] || 0) + qty;
   updatePts();
   renderFertilizerShop();
   renderFertilizerInventory();
-  spendSEPoints(total);
+  saveGardenToSE();
   toast(`${f.emoji} ${qty} ${f.name}${qty > 1 ? 's' : ''} comprada${qty > 1 ? 's' : ''}!`);
 }
 
@@ -5373,20 +5377,20 @@ function renderShop() {
 
   container.innerHTML = sortBar + `<div class="shop-grid-inner">${items}</div>`;
 }
-function buyPlant(type, el) {
+async function buyPlant(type, el) {
   const p = getPlantable(type);
   const qty = SHOP_QTY[type] || 1;
   const total = seasonPrice(type) * qty;
   if (p.subscriberOnly && !hasSubscriberBadge()) { toast('✦ Este cultivo é exclusivo para subscribers.'); return; }
   if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para comprar!`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
-  G.pts -= total;
+  if (!(await chargeGamePoints(total))) return;
   G.inventory[type] = (G.inventory[type] || 0) + qty;
   updatePts();
   renderInventory();
   missionProgress('buy2');
   initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + 1; checkAchievements();
-  spendSEPoints(total);
+  saveGardenToSE();
   toast(`${p.emoji} ${qty} muda${qty > 1 ? 's' : ''} de ${p.name} comprada${qty > 1 ? 's' : ''}!`);
 }
 
@@ -5568,7 +5572,7 @@ function buildPlotEl(plot, idx) {
   return div;
 }
 
-function onPlotClick(idx) {
+async function onPlotClick(idx) {
   if (idx >= G.unlockedPlots) return;
   const plot = G.plots[idx];
   const tool = G.selectedTool;
@@ -5595,7 +5599,7 @@ function onPlotClick(idx) {
   if (plot && isReady(plot) && G.selectedTool !== 'shovel') {
     const sCost = effectiveShovelCost();
     if (G.pts < sCost) { toast(`🌟 Você precisa de ${sCost} pts para colher!`); return; }
-    G.pts -= sCost;
+    if (!(await chargeGamePoints(sCost))) return;
     const type = plot.type;
     const outOfSeason = plot.outOfSeason || !isInSeason(type);
     const hasGolden = plot.goldenSoil;
@@ -5605,6 +5609,7 @@ function onPlotClick(idx) {
     if (outOfSeason) {
       toast(`🥀 ${getPlantable(type).name} perdida! Cresceu fora da estação — não pode ser vendida.`, 4000);
       updatePts();
+      saveGardenToSE();
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     } else {
       const qty = (hasGolden ? 2 + upgradeLevel('golden_soil_plus') : 1) + effectiveHarvestBonus();
@@ -5616,6 +5621,7 @@ function onPlotClick(idx) {
       G.achievStats.totalHarvest = (G.achievStats.totalHarvest||0) + qty;
       if (FLOWERS[type]) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0); // tracked at sell
       checkAchievements();
+      saveGardenToSE();
       toast(`🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!${plot.goldenPlot ? ' ✨ Canteiro Especial: planta dourada vale 3x!' : hasGolden ? ' ✨ Terra Dourada: +1 unidade extra!' : ''}`);
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     }
@@ -7112,6 +7118,36 @@ async function updateOnlineCount() {
     if (label.textContent !== text) label.textContent = text;
   } catch (e) {
     label.textContent = 'online';
+  }
+}
+
+let pointChargeInFlight = false;
+async function chargeGamePoints(amount) {
+  const cost = Math.max(0, Number(amount) || 0);
+  if (!cost) return true;
+  if (pointChargeInFlight) {
+    toast('⏳ Aguarde a compra anterior ser confirmada.', 2200);
+    return false;
+  }
+  if (G.pts < cost) {
+    toast(`✨ Faltam ${cost - G.pts} pts para concluir.`, 2400);
+    return false;
+  }
+
+  pointChargeInFlight = true;
+  try {
+    if (!previewAccess()) {
+      const confirmed = await spendSEPoints(cost);
+      if (!confirmed) {
+        toast('❌ O desconto dos pontos não foi confirmado. Nenhum item foi entregue.', 3500);
+        return false;
+      }
+    }
+    G.pts -= cost;
+    updatePts();
+    return true;
+  } finally {
+    pointChargeInFlight = false;
   }
 }
 let latestSalesItems = [];

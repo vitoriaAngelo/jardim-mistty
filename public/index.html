@@ -3660,7 +3660,7 @@ function normalizeBadgeId(value) {
   const raw = typeof value === 'string' ? value : value?.id;
   return String(raw || '')
     .trim()
-    .replace(/^badge[-_]/i, '')
+    .replace(/^(?:badge[-_])+/, '')
     .replace(/\.svg$/i, '')
     .toLowerCase();
 }

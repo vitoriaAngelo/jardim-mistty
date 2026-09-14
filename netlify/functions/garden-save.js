@@ -58,6 +58,14 @@ exports.handler = async (event) => {
       safeData.isPremium = safeData.isPremium === true
         || existingData.isPremium === true
         || premiumFields.some((field) => safeData[field]);
+      // Um salvamento de saída antigo pode não conter os dados do mascote.
+      // Nesse caso, preserva a seleção já registrada no servidor.
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'ownedMascots') && existingData.ownedMascots) {
+        safeData.ownedMascots = existingData.ownedMascots;
+      }
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'selectedMascot') && existingData.selectedMascot) {
+        safeData.selectedMascot = existingData.selectedMascot;
+      }
     }
 
     const payload = { username, data: safeData, updated_at: new Date().toISOString() };

@@ -6726,6 +6726,8 @@ window.addEventListener('beforeunload', () => {
     premiumFertilizersClaimed: G.premiumFertilizersClaimed === true,
     premiumSpecialPlotClaimed: G.premiumSpecialPlotClaimed === true,
     isPremium: G.isPremium === true,
+    selectedMascot: G.selectedMascot || null,
+    ownedMascots: G.ownedMascots || {},
     profileFrame: G.profileFrame || 'red',
     dailyPhrase: G.dailyPhrase || '',
     isSubscriber: hasSubscriberBadge(),

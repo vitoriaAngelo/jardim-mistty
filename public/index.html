@@ -6758,6 +6758,7 @@ async function loadGardenFromSE(username) {
     updateMailBadge();
     updateMissionsBadge();
     updateAchievBadge();
+    renderPremiumBenefits();
     console.log('📦 Jardim carregado! pts:', G.pts, 'inv:', Object.keys(G.inventory).length, 'itens');
   } catch(e) {
     console.warn('Load failed:', e);
@@ -7039,6 +7040,7 @@ if (isLocalPreview) {
   document.getElementById('twitch-btn').innerHTML = '👤 Visitante';
   document.getElementById('garden-name').textContent = G.gardenName || 'Jardim da Mistty';
   updatePts();
+  renderPremiumBenefits();
   renderUpgradeShop();
   // A prévia já foi testada; não reabrir o bônus de boas-vindas automaticamente.
   if (new URLSearchParams(window.location.search).has('seasons')) {

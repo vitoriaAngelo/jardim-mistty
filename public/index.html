@@ -7148,6 +7148,12 @@ setInterval(() => {
 // O cálculo continua usando waterCapacityLastRefill, então recarregar a página
 // ou ficar offline não perde o progresso do temporizador.
 G.waterRefillTimer = setInterval(refillWateringCapacity, 5000);
+// Navegadores podem pausar timers em abas inativas; ao voltar, força a
+// atualização imediatamente para mostrar a reposição que ocorreu nesse tempo.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refillWateringCapacity();
+});
+window.addEventListener('focus', refillWateringCapacity);
 
 // ─── GROW TIMER ───────────────────────────────────────────
 // Every GROW_INTERVAL_MS: plots with water full grow 1 stage

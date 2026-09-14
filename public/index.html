@@ -261,6 +261,7 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
   font-family: 'Nunito', sans-serif; cursor: pointer;
 }
 .mail-badge.hidden { display: none; }
+#twitch-btn-wrap > #achiev-header-badge { top: 14px; }
 .user-menu-mail-item { display:flex; align-items:center; justify-content:space-between; gap:18px; }
 .user-menu-mail-badge { min-width:16px; width:16px; height:16px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:#879b72; color:#fffdf7; font:800 9px/16px 'Nunito',sans-serif; box-shadow:0 2px 0 #667b56; }
 .user-menu-mail-badge.hidden { display:none; }
@@ -434,6 +435,8 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
 .premium-claim.claimed { background:#dcebd0; border-color:#8aaa72; color:#416037; box-shadow:none; cursor:default; }
 .premium-claim-all { width:100%; margin-top:10px; padding:12px; border:1px solid #a77bc4; border-radius:12px; background:linear-gradient(135deg,#ead8f7,#caa8df); color:#4d3562; font:900 14px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 3px 0 #8c65aa; }
 .premium-claim-all:hover { transform:translateY(-1px); box-shadow:0 4px 0 #8c65aa; }
+.premium-claim:disabled, .premium-claim-all:disabled { cursor:default; transform:none; box-shadow:none; opacity:.82; }
+.premium-claim-all.claimed { background:#dcebd0; border-color:#8aaa72; color:#416037; }
 .ranking-farm-title { display:flex; align-items:center; gap:3px; min-width:0; flex-wrap:nowrap; }
 .ranking-farm-title .ranking-farm-name { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ranking-farm-title .premium-profile-chip { flex-shrink:0; }
@@ -2443,9 +2446,11 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
         Conectar
       </button>
         <button class="mail-badge hidden" id="mail-badge" type="button" aria-label="Abrir notificações do Correio" title="Nova mensagem no Correio" onclick="event.stopPropagation(); openMailbox(); document.getElementById('user-menu').classList.add('hidden');">0</button>
+        <button class="mail-badge hidden" id="achiev-header-badge" type="button" aria-label="Abrir notificações de Conquistas" title="Nova conquista" onclick="event.stopPropagation(); openAchievements(); document.getElementById('user-menu').classList.add('hidden');">0</button>
       <div class="user-menu hidden" id="user-menu">
         <button class="user-menu-item" onclick="openProfile(); document.getElementById('user-menu').classList.add('hidden');">👤 Abrir perfil</button>
         <button class="user-menu-item user-menu-mail-item" onclick="openMailbox(); document.getElementById('user-menu').classList.add('hidden');"><span>✉️ Correio</span><span class="user-menu-mail-badge hidden" id="mail-menu-badge">0</span></button>
+        <button class="user-menu-item user-menu-mail-item" onclick="openAchievements(); document.getElementById('user-menu').classList.add('hidden');"><span>🏆 Conquistas</span><span class="user-menu-mail-badge hidden" id="achiev-menu-badge">0</span></button>
         <button class="user-menu-item" onclick="logout()">🚪 Sair</button>
       </div>
     </div>
@@ -2758,7 +2763,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
       <div class="help-panel" id="hpanel-extras">
         <div class="help-section">
           <div class="help-section-title">🌱 Brotinho</div>
-          <div class="help-tip"><div class="help-tip-icon">💬</div><div>Seu mascote avisa quando é hora de plantar, regar, colher, sincronizar pontos ou se preparar para a próxima estação.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">💬</div><div>Seu mascote exibe as notificações importantes do game sem interromper você com mensagens automáticas.</div></div>
           <div class="help-tip"><div class="help-tip-icon">💚</div><div>Passe o mouse para ele reagir e <strong>clique no Brotinho</strong> para receber uma mensagem carinhosa.</div></div>
         </div>
         <div class="help-section">
@@ -4201,7 +4206,20 @@ function buyMascot(id, cost) {
 window.buyMascot = buyMascot;
 function renderPremiumBenefits() {
   const states = { watering:G.premiumWateringCan, shovel:G.premiumShovel, plants:G.premiumPlantsUnlocked, fertilizers:G.premiumFertilizersClaimed, plot:G.premiumSpecialPlotClaimed };
-  document.querySelectorAll('.premium-claim').forEach(btn => { const id = btn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]; if (states[id]) { btn.textContent = '✓ Resgatado'; btn.classList.add('claimed'); } });
+  document.querySelectorAll('.premium-claim').forEach(btn => {
+    const id = btn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+    const claimed = Boolean(states[id]);
+    btn.textContent = claimed ? '✓ Prêmio já resgatado' : 'Resgatar';
+    btn.disabled = claimed;
+    btn.classList.toggle('claimed', claimed);
+  });
+  const allClaimed = Object.values(states).every(Boolean);
+  const claimAllButton = document.querySelector('.premium-claim-all');
+  if (claimAllButton) {
+    claimAllButton.textContent = allClaimed ? '✓ Prêmios já resgatados' : '✦ Resgatar tudo!';
+    claimAllButton.disabled = allClaimed;
+    claimAllButton.classList.toggle('claimed', allClaimed);
+  }
   document.getElementById('tool-water')?.classList.toggle('premium-tool-active', G.premiumWateringCan);
   document.getElementById('tool-shovel')?.classList.toggle('premium-tool-active', G.premiumShovel);
   const cost = document.getElementById('shovel-cost'); if (cost) cost.textContent = `${effectiveShovelCost()} pts`;
@@ -4351,7 +4369,7 @@ function renderRankingPage() {
     const badgeIds = validBadgeIds(unlockedBadges);
     const badges = badgeIds.slice(0, 4).map(id => {
       const badgeName = id === 'subscriber' ? 'Subscriber' : (ACHIEV_GROUPS.find(g => g.id === id)?.name || 'Badge desbloqueado');
-      return `<span class="ranking-badge-wrap"><img src="/badge-${id}.svg" alt="${badgeName}" aria-label="${badgeName}" onerror="this.style.display='none'"><span class="ranking-badge-tip">${badgeName}</span></span>`;
+      return `<span class="ranking-badge-wrap"><img src="badge-${id}.svg" alt="${badgeName}" aria-label="${badgeName}"><span class="ranking-badge-tip">${badgeName}</span></span>`;
     }).join('');
     const medal = pos <= 3
       ? `<span class="ranking-place ranking-place-${pos}" aria-label="${pos}º lugar"><span>${pos}</span></span>`
@@ -4544,9 +4562,13 @@ function updateAchievBadge() {
   const seen   = G.achievSeen || 0;
   const unseen = Math.max(0, total - seen);
   const badge  = document.getElementById('achiev-tool-badge');
-  if (!badge) return;
-  badge.textContent = unseen;
-  badge.classList.toggle('hidden', unseen === 0);
+  const menuBadge = document.getElementById('achiev-menu-badge');
+  const headerBadge = document.getElementById('achiev-header-badge');
+  [badge, menuBadge, headerBadge].forEach(el => {
+    if (!el) return;
+    el.textContent = unseen;
+    el.classList.toggle('hidden', unseen === 0);
+  });
 }
 
 function achievementProgress(id) {
@@ -4737,8 +4759,25 @@ function renderMissions() {
   if (modalBar) modalBar.innerHTML = html;
 }
 
-// Atualiza as missões em intervalos leves para evitar redesenhos excessivos.
-setInterval(() => { renderMissions(); }, 5000);
+// Atualiza somente o relógio. A lista completa é redesenhada apenas quando
+// o progresso muda, o painel abre ou um novo dia de missões começa.
+function updateMissionsClock() {
+  if (document.hidden) return;
+  initMissions();
+  if (Date.now() >= G.missions.resetAt) {
+    renderMissions();
+    return;
+  }
+  const remaining = Math.max(0, G.missions.resetAt - Date.now());
+  const mm = String(Math.floor(remaining / 60000)).padStart(2, '0');
+  const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
+  const label = `Renova em ${mm}:${ss}`;
+  ['missions-timer', 'missions-modal-timer'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.textContent !== label) el.textContent = label;
+  });
+}
+setInterval(updateMissionsClock, 1000);
 const SEASONS = [
   {
     id: 'spring', name: 'Primavera', icon: '🌸', color: '#f0a0c0',
@@ -4839,10 +4878,10 @@ function openRankingProfile(index) {
   const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
   const profileBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : [...(u.badges || u.unlockedBadges || u.achievements || [])];
   if ((isMe && hasSubscriberBadge()) || u.isSubscriber) profileBadges.push('subscriber');
-  const badgeIds = validBadgeIds(profileBadges).slice(0, 3);
+  const badgeIds = validBadgeIds(profileBadges).slice(0, 4);
   const badgeHtml = badgeIds.length ? badgeIds.map(id => {
     const name = id === 'subscriber' ? 'Subscriber' : (ACHIEV_GROUPS.find(g => g.id === id)?.name || 'Badge desbloqueado');
-    return `<span class="ranking-badge-wrap"><img src="/badge-${id}.svg" alt="${name}" onerror="this.style.display='none'"><span class="ranking-badge-tip">${name}</span></span>`;
+    return `<span class="ranking-badge-wrap"><img src="badge-${id}.svg" alt="${name}"><span class="ranking-badge-tip">${name}</span></span>`;
   }).join('') : '<span style="color:var(--text2);font-size:12px">Nenhum badge desbloqueado</span>';
   const overlay = document.createElement('div');
   overlay.className = 'mail-overlay';
@@ -6453,6 +6492,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     renderSeasonWidget();
 
     document.getElementById('login-overlay').classList.add('hidden');
+    window.dispatchEvent(new Event('garden-login-state-change'));
     // Only set default name if no saved farm name was loaded
     const savedName = document.getElementById('garden-name').textContent.trim();
     const isDefault = !savedName || savedName === 'Jardim da Mistty' || savedName === 'Jardim de Mistty';
@@ -6505,6 +6545,30 @@ function readGardenCache(username) {
     const raw = localStorage.getItem(gardenCacheKey(username));
     return raw ? JSON.parse(raw) : null;
   } catch (e) { return null; }
+}
+function premiumClaimsCacheKey(username) { return `mistty-garden-premium:${String(username || '').toLowerCase()}`; }
+function writePremiumClaimsCache(username) {
+  try {
+    localStorage.setItem(premiumClaimsCacheKey(username), JSON.stringify({
+      watering: G.premiumWateringCan === true,
+      shovel: G.premiumShovel === true,
+      plants: G.premiumPlantsUnlocked === true,
+      fertilizers: G.premiumFertilizersClaimed === true,
+      plot: G.premiumSpecialPlotClaimed === true,
+    }));
+  } catch (e) { console.warn('Cache Premium indisponível:', e); }
+}
+function restorePremiumClaimsCache(username) {
+  try {
+    const claims = JSON.parse(localStorage.getItem(premiumClaimsCacheKey(username)) || 'null');
+    if (!claims) return;
+    G.premiumWateringCan = G.premiumWateringCan || claims.watering === true;
+    G.premiumShovel = G.premiumShovel || claims.shovel === true;
+    G.premiumPlantsUnlocked = G.premiumPlantsUnlocked || claims.plants === true;
+    G.premiumFertilizersClaimed = G.premiumFertilizersClaimed || claims.fertilizers === true;
+    G.premiumSpecialPlotClaimed = G.premiumSpecialPlotClaimed || claims.plot === true;
+    G.isPremium = G.isPremium || Object.values(claims).some(Boolean);
+  } catch (e) { /* mantém o estado vindo do servidor */ }
 }
 
 async function saveGardenToSE() {
@@ -6562,6 +6626,8 @@ async function saveGardenToSE() {
     savedAt:          Date.now(),
   };
   writeGardenCache(seUser.username, saveData);
+  writePremiumClaimsCache(seUser.username);
+  if (isLocalPreview) return;
   try {
     const response = await fetch('/garden-save', {
       method: 'POST',
@@ -6654,6 +6720,12 @@ window.addEventListener('beforeunload', () => {
     presenceDays: G.presenceDays || [],
     specialPlot: G.specialPlot,
     specialPlotPending: G.specialPlotPending || false,
+    premiumWateringCan: G.premiumWateringCan === true,
+    premiumShovel: G.premiumShovel === true,
+    premiumPlantsUnlocked: G.premiumPlantsUnlocked === true,
+    premiumFertilizersClaimed: G.premiumFertilizersClaimed === true,
+    premiumSpecialPlotClaimed: G.premiumSpecialPlotClaimed === true,
+    isPremium: G.isPremium === true,
     profileFrame: G.profileFrame || 'red',
     dailyPhrase: G.dailyPhrase || '',
     isSubscriber: hasSubscriberBadge(),
@@ -6672,6 +6744,7 @@ window.addEventListener('beforeunload', () => {
   };
   const blob = new Blob([JSON.stringify({ username: seUser.username, data: saveData })], { type: 'application/json' });
   writeGardenCache(seUser.username, saveData);
+  writePremiumClaimsCache(seUser.username);
   navigator.sendBeacon('/garden-save', blob);
 });
 
@@ -6739,6 +6812,7 @@ async function loadGardenFromSE(username) {
     G.premiumFertilizersClaimed = save.premiumFertilizersClaimed === true;
     G.premiumSpecialPlotClaimed = save.premiumSpecialPlotClaimed === true;
     G.isPremium = save.isPremium === true || G.premiumWateringCan || G.premiumShovel || G.premiumPlantsUnlocked || G.premiumFertilizersClaimed || G.premiumSpecialPlotClaimed;
+    restorePremiumClaimsCache(username);
     G.selectedMascot = save.selectedMascot || null;
     G.ownedMascots = save.ownedMascots || (G.selectedMascot ? {[G.selectedMascot]: true} : {});
     applySelectedMascotAppearance();
@@ -6979,6 +7053,7 @@ function completeLogout() {
     document.getElementById('user-menu').classList.add('hidden');
     // Show login screen
     document.getElementById('login-overlay').classList.remove('hidden');
+    window.dispatchEvent(new Event('garden-login-state-change'));
     setLoginLoading(false);
     document.getElementById('login-status').textContent = '';
     document.getElementById('garden-name').textContent = 'Jardim da Mistty';
@@ -7034,7 +7109,8 @@ async function updateOnlineCount() {
     const res = await fetch('/online-count', { cache: 'no-store' });
     const data = await res.json();
     const count = Math.max(1, Number(data.online || 0));
-    label.textContent = `${count} ${count === 1 ? 'online' : 'online'}`;
+    const text = `${count} online`;
+    if (label.textContent !== text) label.textContent = text;
   } catch (e) {
     label.textContent = 'online';
   }
@@ -7045,7 +7121,7 @@ function renderLatestSale() {
   const feed = document.getElementById('latest-sales-feed');
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
   if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span>'; return; }
-  feed.innerHTML = `<span class="latest-sales-content sales-slide-in">🛒 Últimas vendas: <strong>@${sale.farmName || sale.username}</strong> recebeu ${Number(sale.total).toLocaleString()} pontos em vendas</span>`;
+  feed.innerHTML = `<span class="latest-sales-content sales-slide-in">🛒 Últimas vendas: <strong>${String(sale.farmName || sale.username).replace(/^@+/, '')}</strong> recebeu ${Number(sale.total).toLocaleString()} pontos em vendas</span>`;
 }
 async function updateLatestSales() {
   const feed = document.getElementById('latest-sales-feed');
@@ -7072,12 +7148,17 @@ async function updateLatestSales() {
 
 // Check on load and every 2 minutes
 checkLiveStatus();
-setInterval(checkLiveStatus, 120000);
+setInterval(() => { if (!document.hidden) checkLiveStatus(); }, 120000);
 updateOnlineCount();
-setInterval(updateOnlineCount, 30000);
+setInterval(() => { if (!document.hidden) updateOnlineCount(); }, 30000);
 updateLatestSales();
-setInterval(updateLatestSales, 30000);
-setInterval(() => { if (latestSalesItems.length > 1) { latestSalesIndex = (latestSalesIndex + 1) % latestSalesItems.length; renderLatestSale(); } }, 4500);
+setInterval(() => { if (!document.hidden) updateLatestSales(); }, 30000);
+setInterval(() => {
+  if (!document.hidden && latestSalesItems.length > 1) {
+    latestSalesIndex = (latestSalesIndex + 1) % latestSalesItems.length;
+    renderLatestSale();
+  }
+}, 4500);
 selectTool('water');
 renderShop();
 renderFlowerShop();
@@ -7096,10 +7177,11 @@ updatePts();
 renderPremiumBenefits();
 
 // Preview local: permite visualizar a experiência sem conectar a Twitch.
-const isLocalPreview = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-  && new URLSearchParams(window.location.search).has('preview');
+const isLocalPreview = new URLSearchParams(window.location.search).has('preview');
 if (isLocalPreview) {
   seUser = { username: 'preview', displayName: 'Visitante', points: 100000, isSubscriber: true, subscriptionChecked: true };
+  restorePremiumClaimsCache(seUser.username);
+  gardenHydrated = true;
   G.isSubscriber = true;
   sessionStorage.setItem('twitch_is_subscriber', 'true');
   G.pts = 100000;
@@ -7149,7 +7231,9 @@ setInterval(() => {
 // assim que o intervalo terminar (inclusive os 2 minutos do regador premium).
 // O cálculo continua usando waterCapacityLastRefill, então recarregar a página
 // ou ficar offline não perde o progresso do temporizador.
-G.waterRefillTimer = setInterval(refillWateringCapacity, 5000);
+G.waterRefillTimer = setInterval(() => {
+  if (!document.hidden) refillWateringCapacity();
+}, 5000);
 // Navegadores podem pausar timers em abas inativas; ao voltar, força a
 // atualização imediatamente para mostrar a reposição que ocorreu nesse tempo.
 document.addEventListener('visibilitychange', () => {
@@ -7199,7 +7283,9 @@ function growTick() {
   if (anyGrew) renderPlots();
 }
 
-G.growTimer = setInterval(growTick, GROW_INTERVAL_MS);
+G.growTimer = setInterval(() => {
+  if (!document.hidden) growTick();
+}, GROW_INTERVAL_MS);
 </script>
 <footer style="
   width: 100%; max-width: 900px;
@@ -7233,6 +7319,6 @@ G.growTimer = setInterval(growTick, GROW_INTERVAL_MS);
     document.getElementById('login-overlay')?.classList.add('hidden');
   }
 </script>
-<script src="garden-mascot.js?v=8"></script>
+<script src="garden-mascot.js?v=9"></script>
 </body>
 </html>

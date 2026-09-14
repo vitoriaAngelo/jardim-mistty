@@ -92,25 +92,26 @@
   document.body.append(mascot);
   const bubble = mascot.querySelector('.mascot-bubble');
   const message = mascot.querySelector('p');
-  const minute = 60000;
-  const cooldowns = new Map();
-  let greeted = false, nextMessage = 0, hideAt = 0, startedAt = 0, lastMessageAt = 0, warnedDayKey = '';
+  let hideTimer = null;
   let mascotNotification = null;
-  const close = () => { bubble.hidden = true; message.textContent = ''; };
+  const close = () => {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+    bubble.hidden = true;
+    message.textContent = '';
+  };
   mascot.querySelector('.mascot-dismiss').onclick = close;
-  function say(text, key, cooldown = 10 * minute) {
-    const now = Date.now();
-    lastMessageAt = now;
+  function say(text) {
+    clearTimeout(hideTimer);
     message.textContent = text;
     bubble.hidden = false;
-    hideAt = now + 9000;
-    nextMessage = now + 90000;
-    cooldowns.set(key, now + cooldown);
+    hideTimer = setTimeout(close, 9000);
   }
   function blocked() {
     return document.hidden || !!document.querySelector('.modal-overlay:not(.hidden), .profile-overlay:not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
   }
   window.mascotNotify = (text, duration = 2400) => {
+    syncVisibility();
     const now = Date.now();
     const same = mascotNotification && mascotNotification.text === text && now < mascotNotification.until;
     mascotNotification = {
@@ -120,21 +121,10 @@
     };
     if (!blocked() && seUser && document.getElementById('login-overlay')?.classList.contains('hidden')) {
       const countText = mascotNotification.count > 1 ? ` ×${mascotNotification.count}` : '';
-      say(`${text}${countText}`, 'notification', 0);
+      say(`${text}${countText}`);
     }
   };
-  const petMessages = [
-    'Um carinho e uma pausa… crescer também leva tempo. Que bom ter você aqui! 🌿',
-    'Se eu pudesse, te dava um abraço de folhinhas. Sinta-se abraçado! 💚',
-    'Seu jardim fica mais bonito quando você aparece. Vamos cuidar dele juntinhos? 🌱',
-    'Pausa para respirar… até as florzinhas crescem no seu próprio ritmo. 🌼'
-  ];
-  const temperamentMessages = {
-    orange: ['Que alegria te ver! Vamos colher muitas frutinhas? 🍊','O jardim está radiante hoje! ✨'],
-    apple: ['Um abraço de maçã para você! Tudo fica mais bonito com carinho. 🍎','Vamos cuidar das plantinhas com muito amor? 💕'],
-    strawberry: ['Ei! Vamos logo, temos um jardim para cuidar! 🍓','Não mexa nas minhas plantinhas… a não ser para regar! 😤']
-  };
-  let petMessageIndex = 0;
+  let petReactionIndex = 0;
   const petButton = mascot.querySelector('.mascot-button');
   window.setMascotPremium = (active, animate = false) => {
     document.body.classList.toggle('mascot-premium-active', Boolean(active));
@@ -174,61 +164,19 @@
     clearTimeout(reactionTimer);
     petButton.classList.remove('mascot-hop', 'mascot-dance');
     void petButton.offsetWidth;
-    const reaction = petMessageIndex % 2 === 0 ? 'mascot-hop' : 'mascot-dance';
+    const reaction = petReactionIndex++ % 2 === 0 ? 'mascot-hop' : 'mascot-dance';
     petButton.classList.add(reaction);
     reactionTimer = setTimeout(() => petButton.classList.remove(reaction), 1400);
-    const custom = temperamentMessages[document.body.classList.contains('mascot-apple-active') ? 'apple' : document.body.classList.contains('mascot-strawberry-active') ? 'strawberry' : document.body.classList.contains('mascot-orange-active') ? 'orange' : 'sprout'];
-    const lines = custom || petMessages;
-    say(lines[petMessageIndex++ % lines.length], 'pet');
   };
-  function tick() {
-    const now = Date.now();
+  function syncVisibility() {
     const loggedIn = !!seUser && document.getElementById('login-overlay')?.classList.contains('hidden');
     mascot.hidden = !loggedIn;
     mascot.classList.toggle('is-visible', loggedIn && !blocked());
-    if (!loggedIn) { greeted = false; startedAt = 0; close(); return; }
-    if (now >= hideAt) close();
+    if (!loggedIn) { close(); return; }
     if (blocked()) { close(); return; }
-    if (mascotNotification && now < mascotNotification.until && now - lastMessageAt >= 1000) {
-      const countText = mascotNotification.count > 1 ? ` ×${mascotNotification.count}` : '';
-      say(`${mascotNotification.text}${countText}`, 'notification', 0);
-      return;
-    }
-    if (!greeted) {
-      greeted = true;
-      startedAt = now;
-      cooldowns.clear();
-      say('Oi! Eu sou o Brotinho 🌱 Vou cuidar deste cantinho com você. Vamos cultivar coisas bonitas?', 'hello');
-      return;
-    }
-    const dayRemaining = typeof seasonDayEndsAt === 'number' ? seasonDayEndsAt - now : Infinity;
-    const dayKey = `${G.seasonIdx}:${G.seasonDay}:${seasonDayEndsAt}`;
-    if (dayRemaining > 0 && dayRemaining <= minute && warnedDayKey !== dayKey && now - lastMessageAt >= 20000) {
-      warnedDayKey = dayKey;
-      say('O dia está quase acabando… falta menos de um minutinho! Aproveite para terminar seus cuidados. 🌙', `day-end-${dayKey}`, 0);
-      return;
-    }
-    if (now < nextMessage) return;
-    const plots = G.plots.slice(0, G.unlockedPlots);
-    const plants = plots.filter(p => p && !p.outOfSeason);
-    const ready = plants.some(p => p.growCount >= effectiveMaxGrow(p.type));
-    const thirsty = plants.some(p => p.waterCount < effectiveMaxWater(p.type) && p.growCount < effectiveMaxGrow(p.type));
-    const almost = plants.some(p => p.waterCount >= effectiveMaxWater(p.type) && p.growCount < effectiveMaxGrow(p.type) && p.growCount / effectiveMaxGrow(p.type) >= .75);
-    const pendingPoints = lastKnownSEPoints !== null && G.pts !== lastKnownSEPoints;
-    const tips = [
-      ['season', G.seasonDay >= SEASON_DAYS_LEN - 1, `Sente essa brisinha? ${SEASONS[(G.seasonIdx + 1) % SEASONS.length].name} está chegando. Vamos preparar o jardim? 🍃`, 25 * minute],
-      ['water', thirsty, 'Tem plantinha com sede por aqui… uma reguinha e ela volta a crescer feliz! 💧', 8 * minute],
-      ['ready', ready, 'Olha só: já tem plantinha pronta! Sua colheita está esperando um carinho. 🧺', 10 * minute],
-      ['almost', almost, 'Suas plantinhas estão quase prontas… falta só um pouquinho para colher! 🌼', 10 * minute],
-      ['plant', plots.some(p => !p), 'Tem um pedacinho de terra esperando uma sementinha. Que tal plantar algo bonito? 🌱', 12 * minute],
-      ['sync', pendingPoints && now - startedAt >= 5 * minute, 'Quando puder, toque em sincronizar os pontos para atualizar seu saldo da live. ✨', 15 * minute]
-    ];
-    // Pick the least recently mentioned eligible tip; never queue stale messages.
-    const tip = tips.filter(([key, valid]) => valid && now >= (cooldowns.get(key) || 0))
-      .sort((a, b) => (cooldowns.get(a[0]) || 0) - (cooldowns.get(b[0]) || 0))[0];
-    if (tip) say(tip[2], tip[0], tip[3]);
   }
-  setInterval(tick, 2000);
-  document.addEventListener('visibilitychange', tick);
-  tick();
+  document.addEventListener('visibilitychange', syncVisibility);
+  window.addEventListener('focus', syncVisibility);
+  window.addEventListener('garden-login-state-change', syncVisibility);
+  syncVisibility();
 })();

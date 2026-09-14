@@ -27,6 +27,13 @@ exports.handler = async (event) => {
     if (!username) return { statusCode: 400, headers, body: JSON.stringify({ error: 'username required' }) };
 
     const safeData = { ...(data || {}) };
+    const premiumFields = [
+      'premiumWateringCan',
+      'premiumShovel',
+      'premiumPlantsUnlocked',
+      'premiumFertilizersClaimed',
+      'premiumSpecialPlotClaimed',
+    ];
     const existingRes = await fetch(
       `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data&order=updated_at.desc&limit=1`,
       {
@@ -38,10 +45,19 @@ exports.handler = async (event) => {
     );
     if (existingRes.ok) {
       const existingRows = await existingRes.json();
-      const existingName = existingRows[0]?.data?.farmName;
+      const existingData = existingRows[0]?.data || {};
+      const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {
         safeData.farmName = existingName;
       }
+      // Resgates Premium são permanentes. Uma gravação atrasada ou um F5 não
+      // pode apagar um presente que já foi resgatado anteriormente.
+      premiumFields.forEach((field) => {
+        safeData[field] = safeData[field] === true || existingData[field] === true;
+      });
+      safeData.isPremium = safeData.isPremium === true
+        || existingData.isPremium === true
+        || premiumFields.some((field) => safeData[field]);
     }
 
     const payload = { username, data: safeData, updated_at: new Date().toISOString() };

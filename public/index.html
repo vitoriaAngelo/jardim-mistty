@@ -4737,8 +4737,8 @@ function renderMissions() {
   if (modalBar) modalBar.innerHTML = html;
 }
 
-// Timer tick every second
-setInterval(() => { renderMissions(); }, 1000);
+// Atualiza as missões em intervalos leves para evitar redesenhos excessivos.
+setInterval(() => { renderMissions(); }, 5000);
 const SEASONS = [
   {
     id: 'spring', name: 'Primavera', icon: '🌸', color: '#f0a0c0',
@@ -6315,6 +6315,7 @@ const REDIRECT_URI     = 'https://misttylandia.netlify.app';
 let seSocket  = null;
 let seUser    = null;
 let saveTimer = null;
+let syncTimer = null;
 let gardenHydrated = false;
 
 function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
@@ -6465,6 +6466,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
 
     connectSESocket();
     toast(`🌱 Bem-vinda, ${displayName}! Você tem ${seUser.points} pts 🌟`, 4000);
+    if (saveTimer) clearInterval(saveTimer);
     saveTimer = setInterval(() => { saveGardenToSE(); }, 30000);
     if (!hadSave) await saveGardenToSE();
 
@@ -6474,7 +6476,8 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     maybeShowUpdateNews(hadSave);
 
     // Sincroniza automaticamente a cada 5 minutos com a mesma lógica do botão.
-    setInterval(async () => {
+    if (syncTimer) clearInterval(syncTimer);
+    syncTimer = setInterval(async () => {
       if (!seUser) return;
       try {
         const synced = await syncPtsToSE();
@@ -6964,6 +6967,7 @@ function completeLogout() {
     sessionStorage.removeItem('se_username');
     sessionStorage.removeItem('se_display');
     if (saveTimer) clearInterval(saveTimer);
+    if (syncTimer) clearInterval(syncTimer);
     if (seSocket)  seSocket.disconnect();
     // Reset button
     document.getElementById('twitch-btn').innerHTML = `

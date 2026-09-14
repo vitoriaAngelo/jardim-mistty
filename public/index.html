@@ -6721,7 +6721,6 @@ async function loadGardenFromSE(username) {
     G.upgradeLevels   = save.upgradeLevels || {};
     G.waterCapacity = Number(save.waterCapacity ?? 5);
     G.waterCapacityLastRefill = Number(save.waterCapacityLastRefill || Date.now());
-    refillWateringCapacity();
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
     G.missions        = save.missions         || null;
@@ -6743,6 +6742,9 @@ async function loadGardenFromSE(username) {
     G.selectedMascot = save.selectedMascot || null;
     G.ownedMascots = save.ownedMascots || (G.selectedMascot ? {[G.selectedMascot]: true} : {});
     applySelectedMascotAppearance();
+    // O benefício Premium precisa estar restaurado antes de calcular o tempo
+    // de reposição; caso contrário o carregamento usa os 5 minutos do regador comum.
+    refillWateringCapacity();
     G.profileFrame = save.profileFrame || 'red';
     G.dailyPhrase = save.dailyPhrase || '';
     G.lastSale = save.lastSale || null;

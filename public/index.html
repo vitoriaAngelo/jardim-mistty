@@ -5365,23 +5365,31 @@ function closeProfile() {
   document.getElementById('profile-overlay').classList.add('hidden');
 }
 
-function saveProfileName() {
+async function saveProfileName() {
   const input = document.getElementById('profile-farm-name');
   const phraseInput = document.getElementById('profile-daily-phrase');
   const val = input.value.trim();
   if (!val) { input.focus(); return; }
   G.dailyPhrase = (phraseInput?.value || '').trim().slice(0, 15);
   document.getElementById('garden-name').textContent = val;
-  toast('✅ Nome da fazenda atualizado!', 2000);
-  saveGardenToSE();
-  closeProfile();
+  try {
+    await saveGardenToSE();
+    toast('✅ Nome da fazenda atualizado!', 2000);
+    closeProfile();
+  } catch (e) {
+    toast('❌ Não foi possível salvar o perfil.', 2400);
+  }
 }
 
-function saveDailyPhrase() {
+async function saveDailyPhrase() {
   const input = document.getElementById('profile-daily-phrase');
   G.dailyPhrase = (input?.value || '').trim().slice(0, 15);
-  saveGardenToSE();
-  toast('✅ Frase do dia salva!', 1800);
+  try {
+    await saveGardenToSE();
+    toast('✅ Frase do dia salva!', 1800);
+  } catch (e) {
+    toast('❌ Não foi possível salvar a frase.', 2400);
+  }
 }
 
 // ─── MAILBOX ─────────────────────────────────────────────
@@ -5664,14 +5672,16 @@ async function saveGardenToSE() {
     savedAt:          Date.now(),
   };
   try {
-    await fetch('/garden-save', {
+    const response = await fetch('/garden-save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: seUser.username, data: saveData }),
     });
+    if (!response.ok) throw new Error(`Save failed: ${response.status}`);
     console.log('💾 Jardim salvo no Supabase!');
   } catch(e) {
     console.warn('Save failed:', e);
+    throw e;
   }
 }
 

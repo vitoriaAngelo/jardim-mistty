@@ -3651,6 +3651,11 @@ function renderHarvested() {
 let rankingUsers = [];
 let rankingPage = 0;
 
+function defaultFarmName(username) {
+  const safeUsername = String(username || '').replace(/^@+/, '').trim();
+  return safeUsername ? `Jardim de @${safeUsername}` : 'Jardim não informado';
+}
+
 function renderRankingPage() {
   const users = rankingUsers;
   const pageSize = 5;
@@ -3664,7 +3669,7 @@ function renderRankingPage() {
     const pts = u.points || 0;
     const isMe = myUser && username.toLowerCase() === myUser;
     const displayName = isMe && seUser?.displayName ? seUser.displayName : username;
-    const farmName = u.farmName || (isMe ? document.getElementById('garden-name')?.textContent : 'Fazenda não informada') || 'Fazenda não informada';
+    const farmName = u.farmName || (isMe ? document.getElementById('garden-name')?.textContent : '') || defaultFarmName(username);
     const userLevel = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
     const dailyPhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
     const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
@@ -4093,7 +4098,7 @@ function openRankingProfile(index) {
   if (!u) return;
   const username = u.username || u._id || '?';
   const isMe = seUser?.username && username.toLowerCase() === seUser.username.toLowerCase();
-  const farmName = u.farmName || (isMe ? document.getElementById('garden-name')?.textContent : 'Fazenda não informada') || 'Fazenda não informada';
+  const farmName = u.farmName || (isMe ? document.getElementById('garden-name')?.textContent : '') || defaultFarmName(username);
   const level = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
   const profilePhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
   const stats = u.stats || {};

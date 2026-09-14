@@ -210,6 +210,19 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .header-icon-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #d0bfa0; }
 .header-icon-btn.plain { border-color: transparent; background: transparent; box-shadow: none; }
 .header-icon-btn.plain:hover { background: var(--cream2); border-color: #e0cfb0; box-shadow: 0 2px 0 #d0bfa0; }
+.online-count { display:inline-flex; align-items:center; gap:5px; min-height:44px; padding:7px 10px; border:2px solid #d8c7a5; border-radius:14px; background:var(--cream2); color:var(--text); box-shadow:0 3px 0 #d0bfa0; font:800 11px/1 'Nunito',sans-serif; white-space:nowrap; }
+.online-count-dot { width:8px; height:8px; border-radius:50%; background:#77a45c; box-shadow:0 0 0 3px #77a45c2b; animation:pulse 1.8s ease-in-out infinite; }
+.market-online-count { min-height:0; margin-left:7px; padding:5px 8px; border-radius:10px; font-size:10px; box-shadow:0 2px 0 #d0bfa0; }
+.online-count-tools { width:100%; box-sizing:border-box; justify-content:center; margin-top:2px; }
+.latest-sales-feed { width:170px; min-height:38px; box-sizing:border-box; padding:6px 9px; border:1px solid #d8c7a5; border-radius:12px; background:var(--cream2); color:var(--text2); font:700 10px/1.35 'Nunito',sans-serif; }
+.latest-sales-strip { width:min(390px,calc(100% - 32px)); min-height:30px; margin:8px auto 0; display:flex; align-items:center; justify-content:center; text-align:center; }
+.latest-sales-feed strong { color:var(--text); font-size:10px; }
+.latest-sales-feed .latest-sales-content.sales-slide-in { animation:sales-slide-in .35s ease both; }
+@keyframes sales-slide-in { from { opacity:.2; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+body.dark-mode .latest-sales-feed { border-color:#52624d; background:#30392d; color:#d9e5d0; }
+body.dark-mode .latest-sales-feed strong { color:#f0f5e8; }
+body.dark-mode .online-count { border-color:#52624d; background:#30392d; color:#edf2e6; box-shadow:0 3px 0 #1b241b; }
+body.dark-mode .online-count-dot { background:#a8d68b; box-shadow:0 0 0 3px #a8d68b2b; }
 
 .header-btn-tip {
   display: none; position: absolute;
@@ -2438,6 +2451,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     </div>
   </div>
 </header>
+<div class="latest-sales-feed latest-sales-strip" id="latest-sales-feed" aria-live="polite"><span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span></div>
 
 <!-- GAME -->
 <div class="game-wrap">
@@ -2508,6 +2522,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
         </svg><span>Mascote</span>
       </button><div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Mascote<br><span>Escolha um companheiro especial</span></div>
     </div>
+    <div class="online-count online-count-tools" id="online-count" role="status" aria-live="polite"><span class="online-count-dot"></span><span id="online-count-label">1 online</span></div>
   </div>
 
   <div class="garden-section">
@@ -4038,6 +4053,7 @@ function sellSelected() {
   });
 
   G.pts += total;
+  G.lastSale = { items: sold.join(' '), total, at: Date.now() };
   // XP de fazendeiro é separado do XP de nível e fica reservado para a evolução futura.
   G.farmerXP = (G.farmerXP || 0) + Math.max(1, Math.floor((total + soldQty) / 10));
   updatePts();
@@ -6527,6 +6543,7 @@ async function saveGardenToSE() {
     ownedMascots: G.ownedMascots || {},
     profileFrame:      G.profileFrame || 'red',
     dailyPhrase:       G.dailyPhrase || '',
+    lastSale:          G.lastSale || null,
     isSubscriber:      hasSubscriberBadge(),
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
     stats: {
@@ -6725,6 +6742,7 @@ async function loadGardenFromSE(username) {
     applySelectedMascotAppearance();
     G.profileFrame = save.profileFrame || 'red';
     G.dailyPhrase = save.dailyPhrase || '';
+    G.lastSale = save.lastSale || null;
     G.isSubscriber = save.isSubscriber === true;
     if (seUser && !seUser.subscriptionChecked && G.isSubscriber) {
       seUser.isSubscriber = true;
@@ -7003,9 +7021,57 @@ async function checkLiveStatus() {
   }
 }
 
+async function updateOnlineCount() {
+  const label = document.getElementById('online-count-label');
+  if (!label) return;
+  try {
+    const res = await fetch('/online-count', { cache: 'no-store' });
+    const data = await res.json();
+    const count = Math.max(1, Number(data.online || 0));
+    label.textContent = `${count} ${count === 1 ? 'online' : 'online'}`;
+  } catch (e) {
+    label.textContent = 'online';
+  }
+}
+let latestSalesItems = [];
+let latestSalesIndex = 0;
+function renderLatestSale() {
+  const feed = document.getElementById('latest-sales-feed');
+  const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
+  if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span>'; return; }
+  feed.innerHTML = `<span class="latest-sales-content sales-slide-in">🛒 Últimas vendas: <strong>@${sale.farmName || sale.username}</strong> recebeu ${Number(sale.total).toLocaleString()} pontos em vendas</span>`;
+}
+async function updateLatestSales() {
+  const feed = document.getElementById('latest-sales-feed');
+  if (!feed) return;
+  const previewSales = new URLSearchParams(window.location.search).has('preview');
+  if (previewSales) {
+    latestSalesItems = [
+      { username:'luna', farmName:'JardimDaLuna', total:1250 },
+      { username:'flores', farmName:'CantinhoDasFlores', total:980 },
+      { username:'girassol', farmName:'SitioGirassol', total:760 },
+    ];
+    latestSalesIndex = 0;
+    renderLatestSale();
+    return;
+  }
+  try {
+    const res = await fetch('/latest-sales', { cache:'no-store' });
+    const data = await res.json();
+    latestSalesItems = Array.isArray(data.sales) ? data.sales : [];
+    latestSalesIndex = 0;
+    renderLatestSale();
+  } catch(e) { /* mantém o estado inicial */ }
+}
+
 // Check on load and every 2 minutes
 checkLiveStatus();
 setInterval(checkLiveStatus, 120000);
+updateOnlineCount();
+setInterval(updateOnlineCount, 30000);
+updateLatestSales();
+setInterval(updateLatestSales, 30000);
+setInterval(() => { if (latestSalesItems.length > 1) { latestSalesIndex = (latestSalesIndex + 1) % latestSalesItems.length; renderLatestSale(); } }, 4500);
 selectTool('water');
 renderShop();
 renderFlowerShop();

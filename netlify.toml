@@ -21,3 +21,13 @@
   from = "/live-status"
   to = "/.netlify/functions/live-status"
   status = 200
+
+[[redirects]]
+  from = "/online-count"
+  to = "/.netlify/functions/online-count"
+  status = 200
+
+[[redirects]]
+  from = "/latest-sales"
+  to = "/.netlify/functions/latest-sales"
+  status = 200

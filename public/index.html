@@ -7138,11 +7138,16 @@ if (isLocalPreview) {
 // ─── PONTOS PASSIVOS ─────────────────────────────────────
 // Pontos vêm do StreamElements via sync a cada 10 min
 setInterval(() => {
-  refillWateringCapacity();
   const bonus = 20 + (hasUpgrade('golden_sun') ? 1 : 0);
   G.pts += bonus;
   updatePts();
 }, 600000);
+
+// Atualiza o reservatório com frequência suficiente para refletir a reposição
+// assim que o intervalo terminar (inclusive os 2 minutos do regador premium).
+// O cálculo continua usando waterCapacityLastRefill, então recarregar a página
+// ou ficar offline não perde o progresso do temporizador.
+G.waterRefillTimer = setInterval(refillWateringCapacity, 5000);
 
 // ─── GROW TIMER ───────────────────────────────────────────
 // Every GROW_INTERVAL_MS: plots with water full grow 1 stage

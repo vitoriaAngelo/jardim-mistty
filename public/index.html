@@ -2923,6 +2923,7 @@ const G = {
   specialPlotPending: false,
   profileFrame: 'red',
   dailyPhrase: '',
+  isSubscriber: false,
   welcomeBonusClaimed: false,
   previewUnlocks: false,
 };
@@ -3354,10 +3355,17 @@ const SELL = { potato: 0, carrot: 0, tomato: 0, beetroot: 0, lettuce: 0, cassava
                rose: 0, sunflower: 0, lavender: 0, daisy: 0, tulip: 0,
                orchid: 0, hibiscus: 0, bluebell: 0, cherry: 0, poppy: 0, jasmine: 0 };
 
-const SELL_VALUE = { potato: 25, carrot: 38, tomato: 52, beetroot: 70, lettuce: 42, cassava: 90,
-                     corn: 44, pumpkin: 62, eggplant: 54, pepper: 58, broccoli: 72,
-                     rose: 35, sunflower: 45, lavender: 55, daisy: 28, tulip: 40,
-                     orchid: 75, hibiscus: 70, bluebell: 50, cherry: 88, poppy: 42, jasmine: 60 };
+// Venda base já cobre: semente + todas as regas (6 pts cada) + colheita (10 pts),
+// mantendo uma margem cozy de lucro para cada cultivo.
+const SELL_VALUE = { potato: 70, carrot: 100, tomato: 130, beetroot: 160, lettuce: 100, cassava: 200,
+                     corn: 120, pumpkin: 150, eggplant: 130, pepper: 145, broccoli: 165,
+                     rose: 115, sunflower: 135, lavender: 155, daisy: 55, tulip: 100,
+                     orchid: 175, hibiscus: 160, bluebell: 125, cherry: 190, poppy: 105, jasmine: 140 };
+
+function cultivationCost(type) {
+  const item = getPlantable(type);
+  return item.cost + (item.maxWater * 6) + 10;
+}
 const SHOP_QTY = {};
 const SHOP_CART = {};
 let SHOP_CART_OPEN = false;
@@ -3473,7 +3481,7 @@ function renderFlowerShop() {
     const outOfSeason = !isInSeason(type);
     const canAfford = G.pts >= p.cost * (SHOP_QTY[type] || 1);
     const sellVal = SELL_VALUE[type];
-    const profit = sellVal - p.cost;
+    const profit = sellVal - cultivationCost(type);
     const profitLabel = profit >= 0
       ? `<span class="cozy-profit" style="color:#4a9a28">+${profit}</span>`
       : `<span class="cozy-loss" style="color:#c04030">${profit}</span>`;
@@ -3690,7 +3698,8 @@ function renderRankingPage() {
     const dailyPhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
     const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
     const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : (isMe ? (G.profileFrame || 'red') : 'red');
-    const unlockedBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : (u.badges || u.unlockedBadges || u.achievements || []);
+    const unlockedBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : [...(u.badges || u.unlockedBadges || u.achievements || [])];
+    if ((isMe && hasSubscriberBadge()) || u.isSubscriber) unlockedBadges.push('subscriber');
     const badgeIds = validBadgeIds(unlockedBadges);
     const badges = badgeIds.slice(0, 4).map(id => {
       const badgeName = id === 'subscriber' ? 'Subscriber' : (ACHIEV_GROUPS.find(g => g.id === id)?.name || 'Badge desbloqueado');
@@ -3761,6 +3770,7 @@ async function openRanking() {
             farmName: save.farmName || user.farmName,
             dailyPhrase: save.dailyPhrase || user.dailyPhrase,
             profileFrame: save.profileFrame || user.profileFrame,
+            isSubscriber: save.isSubscriber === true || user.isSubscriber === true,
             badges: save.achievements || user.badges,
             stats: save.stats || (Number.isFinite(savedXp) ? { xp: savedXp } : user.stats),
           };
@@ -4128,7 +4138,9 @@ function openRankingProfile(index) {
   ];
   const statsHtml = statItems.map(([icon, value, label]) => `<div class="ranking-profile-stat">${icon} ${Number(value || 0).toLocaleString('pt-BR')}<small>${label}</small></div>`).join('');
   const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
-  const badgeIds = validBadgeIds(isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : (u.badges || u.unlockedBadges || u.achievements || [])).slice(0, 4);
+  const profileBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : [...(u.badges || u.unlockedBadges || u.achievements || [])];
+  if ((isMe && hasSubscriberBadge()) || u.isSubscriber) profileBadges.push('subscriber');
+  const badgeIds = validBadgeIds(profileBadges).slice(0, 4);
   const badgeHtml = badgeIds.length ? badgeIds.map(id => {
     const name = id === 'subscriber' ? 'Subscriber' : (ACHIEV_GROUPS.find(g => g.id === id)?.name || 'Badge desbloqueado');
     return `<span class="ranking-badge-wrap"><img src="/badge-${id}.svg" alt="${name}" onerror="this.style.display='none'"><span class="ranking-badge-tip">${name}</span></span>`;
@@ -4523,7 +4535,7 @@ function renderShop() {
     const outOfSeason = !isInSeason(type);
     const canAfford = G.pts >= p.cost * (SHOP_QTY[type] || 1);
     const sellVal = effectiveSellValue(type);
-    const profit = sellVal - p.cost;
+    const profit = sellVal - cultivationCost(type);
     const profitLabel = profit >= 0
       ? `<span class="cozy-profit" style="color:#4a9a28">+${profit}</span>`
       : `<span class="cozy-loss" style="color:#c04030">${profit}</span>`;
@@ -5342,7 +5354,7 @@ function openProfile() {
 }
 
 function hasSubscriberBadge() {
-  return Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
+  return Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || G.isSubscriber || sessionStorage.getItem('twitch_is_subscriber') === 'true');
 }
 
 function toggleFramePicker() {
@@ -5602,9 +5614,11 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
       seUser = { username, displayName, points: ptsData.points || 0 };
     }
 
+    seUser.subscriptionChecked = Boolean(twitchAccessToken);
     seUser.isSubscriber = twitchAccessToken
       ? await getTwitchSubscriptionStatus(twitchAccessToken, twitchUserId)
       : sessionStorage.getItem('twitch_is_subscriber') === 'true';
+    G.isSubscriber = seUser.isSubscriber;
     sessionStorage.setItem('twitch_is_subscriber', String(seUser.isSubscriber));
 
     sessionStorage.setItem('se_username', username);
@@ -5699,6 +5713,7 @@ async function saveGardenToSE() {
     specialPlotPending:G.specialPlotPending || false,
     profileFrame:      G.profileFrame || 'red',
     dailyPhrase:       G.dailyPhrase || '',
+    isSubscriber:      hasSubscriberBadge(),
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
     shopCart:         SHOP_CART,
     mail:             G_MAIL,
@@ -5784,6 +5799,9 @@ window.addEventListener('beforeunload', () => {
     presenceDays: G.presenceDays || [],
     specialPlot: G.specialPlot,
     specialPlotPending: G.specialPlotPending || false,
+    profileFrame: G.profileFrame || 'red',
+    dailyPhrase: G.dailyPhrase || '',
+    isSubscriber: hasSubscriberBadge(),
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
     shopCart: SHOP_CART,
     mail: G_MAIL,
@@ -5842,6 +5860,11 @@ async function loadGardenFromSE(username) {
     G.specialPlotPending = save.specialPlotPending || false;
     G.profileFrame = save.profileFrame || 'red';
     G.dailyPhrase = save.dailyPhrase || '';
+    G.isSubscriber = save.isSubscriber === true;
+    if (seUser && !seUser.subscriptionChecked && G.isSubscriber) {
+      seUser.isSubscriber = true;
+      sessionStorage.setItem('twitch_is_subscriber', 'true');
+    }
     G.welcomeBonusClaimed = save.welcomeBonusClaimed === true;
     Object.keys(SHOP_CART).forEach(k => delete SHOP_CART[k]);
     Object.assign(SHOP_CART, save.shopCart || {});

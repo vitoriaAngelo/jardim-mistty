@@ -16,16 +16,32 @@ exports.handler = async (event) => {
     const { username, data } = JSON.parse(event.body);
     if (!username) return { statusCode: 400, headers, body: JSON.stringify({ error: 'username required' }) };
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/gardens`, {
-      method: 'POST',
+    const payload = { username, data, updated_at: new Date().toISOString() };
+    let res = await fetch(`${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}`, {
+      method: 'PATCH',
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates',
+        'Prefer': 'return=representation',
       },
-      body: JSON.stringify({ username, data, updated_at: new Date().toISOString() }),
+      body: JSON.stringify({ data, updated_at: payload.updated_at }),
     });
+
+    if (res.ok) {
+      const updated = await res.json();
+      if (!Array.isArray(updated) || updated.length === 0) {
+        res = await fetch(`${SUPABASE_URL}/rest/v1/gardens`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      }
+    }
 
     if (!res.ok) {
       const err = await res.text();

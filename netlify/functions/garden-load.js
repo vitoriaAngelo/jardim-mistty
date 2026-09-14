@@ -16,7 +16,7 @@ exports.handler = async (event) => {
 
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data`,
+      `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data&order=updated_at.desc&limit=1`,
       {
         headers: {
           'apikey': SUPABASE_KEY,

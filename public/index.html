@@ -88,12 +88,81 @@ header {
 .header-right { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
 
 .pts-block { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-.pts-badge {
+.pts-badge { 
   display: flex; align-items: center; gap: 5px;
   background: var(--soil2); color: var(--cream);
   border-radius: 99px; padding: 6px 14px;
   font-weight: 800; font-size: 13px; white-space: nowrap;
   box-shadow: 0 2px 0 #3a1a08;
+}
+/* Cursor cozy de fazenda: uma pequena mudinha com cabo de madeira. */
+body, body button:not(:disabled), body .shop-item:not(.cant-afford), body .fertilizer-item:not(.cant-afford), body .plot:not(.locked) {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M4 4l7 19 3-8 8-3z' fill='%23fffdf7' stroke='%23414f38' stroke-width='1.4' stroke-linejoin='round'/%3E%3Cpath d='M13 21c0-5 1-9 5-13' fill='none' stroke='%23778b64' stroke-width='1.5' stroke-linecap='round'/%3E%3Cpath d='M14 15c-4-1-6-4-5-7 4 0 6 2 5 7z' fill='%23a9bd93' stroke='%23414f38' stroke-width='1.1'/%3E%3Ccircle cx='20' cy='7' r='3' fill='%23f3b6c8' stroke='%23414f38' stroke-width='1.1'/%3E%3Ccircle cx='20' cy='7' r='1.1' fill='%23e8c96d'/%3E%3C/svg%3E") 2 2, default;
+}
+.pts-badge .points-refresh { width:20px; height:20px; padding:0; border:0; background:transparent; color:inherit; font-size:16px; }
+.pts-badge .points-refresh:hover { color:#f4f0df; border:0; background:#4f6548 !important; box-shadow:none !important; }
+body.dark-mode .pts-badge .points-refresh:hover { color:#dce8d4; background:#263426 !important; }
+.pts-row { display:flex; align-items:center; gap:5px; }
+.points-token { display:inline-block; width:26px; height:26px; flex-shrink:0; vertical-align:middle; filter:drop-shadow(0 1px 1px #59422240); }
+.market-points-badge .points-token { width:22px; height:22px; }
+.market-slot-sell-qty .points-token, .market-total-pts .points-token, .profile-stat-val .points-token { width:20px; height:20px; }
+.market-slot-sell-qty span, .market-total-pts, .profile-stat-val { display:flex; align-items:center; gap:4px; }
+.points-refresh { width:28px; height:28px; border:1px solid var(--cozy-line, #d8c9ac); border-radius:9px; background:var(--cream2); color:var(--text2); cursor:pointer; font-size:15px; line-height:1; }
+.points-refresh:hover { color:var(--grass2); border-color:var(--grass); transform:none; }
+.points-refresh.loading { animation:spin-refresh .7s linear infinite; pointer-events:none; }
+header .header-icon-wrap:has(.points-refresh:hover) > .header-btn-tip { display:none; }
+@keyframes spin-refresh { to { transform:rotate(360deg); } }
+.pts-feedback {
+  position: absolute; top: calc(100% + 3px); right: 8px;
+  font-size: 11px; font-weight: 800; white-space: nowrap;
+  pointer-events: none; z-index: 250;
+  animation: points-feedback-in .9s ease-out forwards;
+}
+.pts-feedback.gain { color: #9ad477; }
+.pts-feedback.loss { color: #e59a9a; }
+.market-points-badge { margin-left:auto; display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; background:var(--cream2); color:var(--text2); border:1px solid var(--cozy-line); font-size:11px; font-weight:800; white-space:nowrap; }
+.presence-streak { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:800; color:var(--text2); white-space:nowrap; padding:8px 10px; border:1px solid var(--cozy-line, #d8c9ac); border-radius:10px; background:var(--cream2); cursor:pointer; line-height:1.1; }
+.missions-presence { margin:12px 0 4px; }
+.presence-week { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin:0 0 14px; }
+.presence-day { text-align:center; padding:6px 2px; border:1px solid var(--cozy-line, #d8c9ac); border-radius:9px; background:var(--cream2); color:var(--text2); font-size:10px; font-weight:800; }
+.presence-day { background:#f5f3ea; border-color:#e2e3d5; border-radius:15px; box-shadow:none; }
+.presence-day strong { display:block; font-size:14px; margin-top:2px; color:var(--text); }
+.presence-day small { display:block; margin-top:3px; font-size:9px; font-weight:800; color:var(--grass2); }
+.presence-day.today { border-color:var(--grass); }
+.presence-day.done { background:var(--grass); color:#fff; border-color:var(--grass2); }
+.presence-day.done strong { color:#fff; }
+.presence-day.done small { color:#fff; opacity:.9; }
+.presence-week-help { position:relative; margin-top:0; }
+.presence-week-help::before { content:'ⓘ Como funciona'; display:block; margin:0 0 5px 2px; color:var(--text2); font-size:10px; font-weight:800; }
+.presence-week-help:hover .presence-explainer, .presence-week-help:focus-within .presence-explainer { display:block; }
+.presence-explainer { display:none; position:absolute; z-index:20; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:190px; padding:8px 10px; border-radius:10px; background:var(--cozy-paper, #fffdf7); color:var(--text); border:1px solid var(--cozy-line, #d8c9ac); box-shadow:0 5px 16px rgba(50,40,25,.16); font-size:11px; font-weight:700; line-height:1.35; text-align:center; }
+.presence-explainer::before { content:''; position:absolute; left:50%; top:100%; border:6px solid transparent; border-top-color:var(--cozy-paper, #fffdf7); transform:translateX(-50%); }
+body.dark-mode .presence-explainer { background:#303a30; color:#e1ecd9; border-color:#53604f; }
+body.dark-mode .presence-explainer::before { border-top-color:#303a30; }
+.presence-streak:hover { border-color:var(--grass); }
+.presence-streak input { width:16px; height:16px; accent-color:var(--grass); cursor:pointer; margin:0; flex:none; }
+.presence-copy { display:flex; flex-direction:column; gap:2px; }
+.presence-title { color:var(--text); }
+.presence-hint { font-size:10px; font-weight:700; color:var(--text2); opacity:.8; }
+.presence-streak:has(input:checked) { border-color:var(--grass); }
+.presence-streak:has(input:checked) .presence-hint { color:var(--grass2); opacity:1; }
+.presence-streak input:disabled { cursor:default; opacity:.75; }
+body.dark-mode .presence-streak { color:#58634f; background:#f5f3ea; border-color:#d9d6c8; }
+body.dark-mode .presence-streak .presence-title { color:#4d5b45; }
+body.dark-mode .presence-streak .presence-hint { color:#697260; }
+body.dark-mode .presence-day { background:#252b24; border-color:#485644; color:#c7d3be; box-shadow:none; }
+body.dark-mode .presence-day strong { color:#e1ecd9; }
+body.dark-mode .presence-day small { color:#b7d39e; }
+body.dark-mode .presence-day.done { background:#3d5139; border-color:#718d65; }
+body.dark-mode .presence-day.today { box-shadow:0 0 0 2px rgba(137,168,120,.28); }
+body.dark-mode .presence-day.today { box-shadow:0 0 0 2px rgba(137,168,120,.28); }
+body.dark-mode .presence-week-help::before { color:#c7d3be; }
+body.dark-mode .presence-title { color:#e1ecd9; }
+@keyframes points-feedback-in {
+  0% { opacity: 0; transform: translateY(-3px); }
+  20% { opacity: 1; transform: translateY(0); }
+  75% { opacity: 1; transform: translateY(2px); }
+  100% { opacity: 0; transform: translateY(5px); }
 }
 
 .header-icons { display: flex; align-items: center; gap: 4px; }
@@ -124,6 +193,17 @@ header {
   border: 6px solid transparent; border-top-color: #2a1a08;
 }
 .header-icon-wrap:hover .header-btn-tip { display: block; }
+.season-tooltip-wrap { position: relative; }
+.season-tooltip-wrap:hover, .season-tooltip-wrap:focus-within { z-index: 50; }
+.season-tooltip-wrap:hover .header-btn-tip, .season-tooltip-wrap:focus-within .header-btn-tip { display: block !important; opacity: 1 !important; visibility: visible !important; }
+.season-tooltip-wrap::after { content:'Item fora de estação\A Espere a estação correta para a compra.'; display:none; position:absolute; z-index:300; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:210px; padding:12px 15px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 8px 26px #4b573326; font-size:12px; font-weight:700; line-height:1.6; text-align:center; white-space:pre-line; pointer-events:none; }
+.season-tooltip-wrap:hover::after, .season-tooltip-wrap:focus-within::after { display:block; }
+body.dark-mode .season-tooltip-wrap::after { background:#303a30; border-color:#53604f; color:#edf2e6; }
+.shop-add-tooltip { position:relative; }
+.shop-add-tooltip:hover, .shop-add-tooltip:focus-within { z-index:60; }
+.shop-add-tooltip::after { content:'Clique para adicionar à sacola.\A Escolha a quantidade abaixo.'; display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:205px; padding:10px 13px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:13px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 8px 24px #4b573326; font-size:11px; font-weight:700; line-height:1.45; text-align:center; white-space:pre-line; pointer-events:none; }
+.shop-add-tooltip:hover::after, .shop-add-tooltip:focus-within::after { display:block; }
+body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#53604f; color:#edf2e6; }
 
 .mail-badge {
   position: absolute; top: -6px; right: -6px;
@@ -298,13 +378,15 @@ header {
   position: relative;
 }
 .card-title {
-  font-size: 14px; font-weight: 800; color: var(--text2);
+  font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--text2);
   margin-bottom: 12px;
   display: flex; align-items: center; gap: 6px;
 }
+body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 !important; }
 
 /* ─── PLOTS ──────────────────────────────── */
 .plots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.plot.special-plot { outline:2px solid #d6b45f; outline-offset:2px; }
 
 .plot {
   background: linear-gradient(175deg, #d4aa7a 0%, #c49060 100%);
@@ -898,10 +980,11 @@ header {
   box-shadow: 0 1px 0 #3a1a08;
 }
 .market-slot-sell-qty {
-  position: absolute;
-  bottom: -6px; left: 50%; transform: translateX(-50%);
+  position: static;
+  transform: none;
+  margin-top: 2px;
   background: var(--grass); color: #fff;
-  border-radius: 99px; min-width: 22px; height: 18px;
+  border-radius: 99px; min-width: 22px; min-height: 22px;
   display: flex; align-items: center; justify-content: center;
   font-size: 10px; font-weight: 800;
   padding: 0 5px;
@@ -1270,10 +1353,11 @@ header {
   margin-bottom: 8px;
 }
 .achiev-group-badge {
-  font-size: 28px; flex-shrink: 0;
+  width: 52px; height: 58px; flex-shrink: 0;
   filter: grayscale(1) opacity(.35);
   transition: filter .4s;
 }
+.achiev-group-badge img { width:100%; height:100%; object-fit:contain; }
 .achiev-group-badge.unlocked { filter: none; }
 .achiev-group-info { flex: 1; }
 .achiev-group-name { font-size: 13px; font-weight: 800; color: var(--text); }
@@ -1303,11 +1387,13 @@ header {
 /* Profile badges */
 .profile-badges { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; overflow: visible; }
 .profile-badge-slot {
-  font-size: 32px; filter: grayscale(1) opacity(.3);
+  display: inline-flex; width: 64px; height: 72px;
+  font-size: 32px; filter: grayscale(1) opacity(.55);
   transition: filter .4s, transform .3s;
   cursor: default;
 }
 .profile-badge-slot.unlocked { filter: none; }
+.profile-badge-slot img { width:100%; height:100%; object-fit:contain; }
 .profile-badge-slot.unlocked:hover { transform: scale(1.15); }
 
 /* ─── LOGIN SCREEN ───────────────────────── */
@@ -1673,12 +1759,40 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
   box-shadow: 0 3px 0 #e1dfcf, var(--cozy-shadow);
   transition: background .18s, transform .18s, box-shadow .18s;
 }
+.shop-cart { display:flex; align-items:center; justify-content:space-between; gap:10px; position:fixed; right:20px; bottom:20px; z-index:500; min-width:220px; padding:10px 12px; background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; box-shadow:0 8px 24px #4b573326; }
+.shop-cart.empty { display:none; }
+.shop-cart-info { font-size:11px; font-weight:800; color:var(--text); }
+.shop-cart-total { display:flex; align-items:center; gap:4px; color:var(--text2); margin-top:2px; }
+.shop-cart-total .points-token { width:20px; height:20px; }
+.shop-cart-buy { border:0; border-radius:10px; padding:8px 13px; background:var(--grass); color:#fff; font:800 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
+.shop-cart-buy:hover { filter:brightness(1.08); }
+.shop-cart-toggle { border:0; background:transparent; color:var(--text); font:800 11px 'Nunito',sans-serif; cursor:pointer; padding:0; text-align:left; }
+.shop-cart-items { display:flex; flex-direction:column; gap:5px; max-height:0; overflow:hidden; margin:0; border-top:1px solid transparent; padding-top:0; opacity:0; transition:max-height .25s ease, margin .25s ease, padding .25s ease, opacity .2s ease, border-color .25s ease; }
+.shop-cart:hover .shop-cart-items, .shop-cart:focus-within .shop-cart-items { max-height:300px; margin:8px 0 10px; border-top-color:var(--cozy-line,#d8c9ac); padding-top:8px; opacity:1; }
+.shop-cart-row { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:11px; color:var(--text); }
+.shop-cart-row-controls { display:flex; align-items:center; gap:4px; }
+.shop-cart-row-controls button { width:19px; height:19px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:50%; background:var(--cream); color:var(--text); font-weight:800; line-height:1; cursor:pointer; }
+.shop-cart-row-controls span { min-width:24px; text-align:center; font-weight:800; }
+body.dark-mode .shop-cart { background:#30392d; border-color:#485644; }
+body.dark-mode .shop-cart-info { color:#e1ecd9; }
+body.dark-mode .shop-cart-total { color:#c7d3be; }
+body.dark-mode .shop-cart-toggle, body.dark-mode .shop-cart-row { color:#e1ecd9; }
+body.dark-mode .shop-cart-row-controls button { background:#252b24; border-color:#53604f; color:#e1ecd9; }
+.sell-confirm-items { display:flex; flex-direction:column; gap:7px; max-height:240px; overflow:auto; margin:14px 0 10px; padding:10px; background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; }
+.sell-confirm-items .shop-cart-row { font-size:12px; }
+#sell-all-confirm-overlay { z-index:1200; }
+#sell-all-confirm-overlay .modal-actions button { position:relative; z-index:1; pointer-events:auto; }
+body.dark-mode .sell-confirm-items { background:#30392d; border-color:#53604f; }
+body.dark-mode .sell-confirm-items .shop-cart-row { color:#e1ecd9; }
+.shop-qty-controls { display:flex; align-items:center; gap:3px; margin-top:3px; }
+.shop-qty-controls button { width:16px; height:16px; padding:0; border:1px solid var(--cozy-line); border-radius:50%; background:var(--cream2); color:var(--text); font-size:10px; font-weight:800; cursor:pointer; line-height:1; }
+.shop-qty-controls span { min-width:20px; text-align:center; font-size:10px; font-weight:800; color:var(--text2); }
 .header-icon-btn { min-width: 44px; min-height: 44px; border-radius: 14px; padding: 9px; }
 .header-icon-btn:hover, .logo:hover, .tool-card:hover, .achiev-tool-btn:hover {
   background: #f0f3e8; border-color: #aab79a; transform: translateY(-2px);
   box-shadow: 0 4px 0 #d8dfcd, 0 10px 24px #4b573318;
 }
-.logo { border-radius: 16px; padding: 10px 14px; font-family: Georgia, serif; font-weight: 400; }
+.logo { border-radius: 16px; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-weight: 800; }
 .logo-profile-icon { font-family: 'Nunito', sans-serif; background: #edf1e5; border-radius: 9px; padding: 5px; opacity: 1; font-size: 13px; }
 .twitch-connect, .twitch-connect.connected { min-height: 44px; background: #80629c; border: 1px solid #80629c; border-radius: 13px; box-shadow: 0 3px 0 #64497e; color: #fffdf7; }
 .twitch-connect:hover, .twitch-connect.connected:hover { background: #72548f; transform: translateY(-2px); box-shadow: 0 4px 0 #64497e; }
@@ -1686,18 +1800,52 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
 .user-menu { background: var(--cozy-paper); border: 1px solid var(--cozy-line); border-radius: 16px; padding: 6px; box-shadow: 0 12px 32px #4b573324; min-width: 170px; }
 .user-menu-item { min-height: 44px; border-radius: 10px; color: #785d72; }
 .user-menu-item:hover { background: #f2eaf2; color: #694b67; }
-.tools-panel { width: 112px; flex-shrink: 0; gap: 12px; }
-.tool-card, .achiev-tool-btn { position: relative; border-radius: 20px; padding: 14px 8px; min-height: 116px; margin: 0; gap: 7px; font-family: 'Nunito', sans-serif; }
-.tool-card svg { width: 48px; height: 48px; filter: saturate(.65); }
+.tools-panel { width: 100px; flex-shrink: 0; gap: 10px; }
+.tool-card, .achiev-tool-btn { position: relative; border-radius: 18px; padding: 10px 6px; min-height: 96px; margin: 0; gap: 5px; font-family: 'Nunito', sans-serif; }
+.tool-card svg { width: 40px; height: 40px; filter: saturate(.65); }
 .tool-card.active { background: #edf2e4; border-color: #879b72; box-shadow: 0 3px 0 #bccbaa, 0 0 0 3px #879b7218; }
 .tool-card.active::after { content: ''; position: absolute; top: 11px; right: 11px; width: 6px; height: 6px; border-radius: 50%; background: #778b64; }
 .tool-card.disabled { opacity: .48; box-shadow: 0 2px 0 #e1dfcf; }
 .tool-label { font-size: 12px; color: var(--cozy-ink); }
 .tool-cost { font-size: 10px; color: #707565; background: #f5f1e7; border: 1px solid #e7e1d3; box-shadow: none; padding: 3px 8px; }
-.achiev-tool-btn { flex-direction: column; font-size: 11px; min-height: 100px; }
-.cozy-action-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 14px; background: #f4edda; font-size: 23px; }
+.achiev-tool-btn { flex-direction: column; font-size: 10px; min-height: 88px; }
+.cozy-action-icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 12px; background: #f4edda; font-size: 20px; }
 .cozy-ranking .cozy-action-icon { background: #eee8f1; }
 .mail-badge, .achiev-tool-badge { background: #a57878; border-color: var(--cozy-paper); }
+/* Cozy level card: softer paper, a little breathing room, and a garden-like badge. */
+.level-widget {
+  position: relative; gap: 12px; padding: 9px 16px 9px 11px;
+  background: linear-gradient(135deg, #fffdf7 0%, #f4f6ed 100%);
+  border: 1px solid #d7dccb; border-radius: 20px;
+  box-shadow: 0 3px 0 #d7dccb, 0 8px 22px #4b573318;
+  overflow: hidden;
+}
+.level-widget::after { content: '✦'; position: absolute; right: 10px; top: 5px; color: #c7b789; opacity: .55; font-size: 12px; }
+.level-badge { width: 44px; height: 44px; border: 3px solid #fffdf7; box-shadow: 0 3px 0 #c6d1b6, 0 0 0 1px #c6d1b6; }
+.level-badge .lv-num { width: 18px; height: 18px; border: 1px solid #c6d1b6; box-shadow: 0 2px 5px #4b573320; }
+.level-name { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800; color: #59694b; letter-spacing: .1px; }
+.level-xp-row { margin-top: 6px; }
+.xp-bar-wrap { height: 8px; background: #e7ecdf; border: 1px solid #d7dccb; border-radius: 99px; box-shadow: inset 0 1px 2px #4b573315; }
+.xp-bar-fill { border-radius: inherit; background: linear-gradient(90deg, #879b72, #b4c391); }
+.xp-text { color: #707565; font-size: 10px; }
+.theme-toggle { font-size: 15px; }
+#twitch-btn-wrap > #mail-badge { position: absolute; top: -6px; right: -6px; z-index: 301; }
+.help-modal, .mail-modal, .profile-modal, .modal, .levelup-card { position: relative; }
+.popup-close-x { position: absolute; top: 10px; right: 12px; width: 30px; height: 30px; padding: 0; border: 1px solid #d7dccb; border-radius: 50%; background: #f1f1e7; color: #59694b; font: 700 20px/1 'Nunito', sans-serif; cursor: pointer; box-shadow: 0 2px 0 #d7dccb; }
+.popup-close-x:hover { background: #e8eee0; transform: translateY(-1px); }
+/* Cozy vegetable cards: preserve the grid and shapes, soften the presentation. */
+.shop-grid-inner { gap: 12px; }
+.shop-item {
+  background: linear-gradient(145deg, #fffdf7 0%, #f5f6ee 100%);
+  border: 1px solid #dfe3d5; border-radius: 20px;
+  padding: 15px 9px 13px; gap: 7px;
+  box-shadow: 0 3px 0 #d7dccb, 0 7px 18px #4b573314;
+}
+.shop-item:hover { border-color: #aab79a; transform: translateY(-3px); box-shadow: 0 5px 0 #c6d1b6, 0 10px 22px #4b57331c; }
+.shop-item-name { font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800; color: var(--text); }
+.shop-item > svg { filter: saturate(.72) drop-shadow(0 3px 2px #4b573320); }
+.shop-item-price { background: #80629c; box-shadow: 0 2px 0 #64497e; }
+.shop-item.cant-afford { background: #f1f2ec; box-shadow: 0 2px 0 #dfe3d5; }
 .header-btn-tip, .plot-tooltip {
   background: var(--cozy-paper); color: var(--cozy-ink); border: 1px solid var(--cozy-line);
   border-radius: 14px; padding: 12px 15px; box-shadow: 0 8px 26px #4b573326;
@@ -1709,6 +1857,74 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
 header .header-btn-tip { bottom: auto; top: calc(100% + 12px); }
 header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--cozy-paper); }
 .header-left .header-btn-tip { left: 0; transform: none; }
+/* Keep header tooltips beside the controls instead of covering the game info. */
+header .header-icon-wrap > .header-btn-tip { top: 50%; left: calc(100% + 12px); bottom: auto; transform: translateY(-50%); }
+header .header-icon-wrap > .header-btn-tip::after { top: 50%; left: auto; right: 100%; transform: translateY(-50%); border-top-color: transparent; border-right-color: var(--cozy-paper); border-bottom-color: transparent; }
+header .header-left .header-btn-tip { left: calc(100% + 12px); right: auto; transform: translateY(-50%); }
+header #twitch-btn-wrap > .header-btn-tip { left: auto; right: 0; top: calc(100% + 12px); transform: none; }
+header #twitch-btn-wrap > .header-btn-tip::after { top: auto; left: auto; right: 18px; bottom: 100%; transform: none; border-top-color: transparent; border-right-color: transparent; border-bottom-color: var(--cozy-paper); }
+header #twitch-btn-wrap:has(.user-menu:not(.hidden)) > .header-btn-tip { display: none; }
+header .presence-wrap > .header-btn-tip { left:auto; right:0; top:calc(100% + 12px); bottom:auto; transform:none; }
+header .presence-wrap > .header-btn-tip::after { top:auto; left:auto; right:22px; bottom:100%; transform:none; border-top-color:transparent; border-right-color:transparent; border-bottom-color:var(--cozy-paper); }
+/* Dark mode, using the garden's existing green, lilac and gold accents. */
+body.dark-mode {
+  --cream: #252b24; --cream2: #30392d; --text: #edf2e6; --text2: #c7d3be;
+  --cozy-paper: #252b24; --cozy-line: #485644; --cozy-ink: #edf2e6; --cozy-muted: #c7d3be;
+  background-color: #172018;
+  background-image: linear-gradient(160deg, #1c2a1f 0%, #17231a 48%, #111a14 100%);
+  color: var(--text);
+}
+body.dark-mode header, body.dark-mode .card, body.dark-mode .modal, body.dark-mode .mail-modal,
+body.dark-mode .profile-modal, body.dark-mode .help-modal, body.dark-mode .levelup-card { background: #252b24; border-color: #485644; box-shadow: 0 4px 0 #151d16, 0 8px 28px #0006; }
+body.dark-mode .logo, body.dark-mode .season-widget, body.dark-mode .level-widget,
+body.dark-mode .shop-item, body.dark-mode .fertilizer-item, body.dark-mode .plot-shop-item,
+body.dark-mode .tool-card, body.dark-mode .achiev-tool-btn, body.dark-mode .header-icon-btn { background: #30392d; border-color: #485644; color: var(--text); box-shadow: 0 3px 0 #1b241b; }
+body.dark-mode .level-widget { background: linear-gradient(135deg, #30392d, #252b24); }
+body.dark-mode .season-widget { background: transparent; border: 0; box-shadow: none; }
+body.dark-mode .shop-item:hover, body.dark-mode .tool-card:hover, body.dark-mode .header-icon-btn:hover { border-color: #879b72; }
+body.dark-mode .level-name, body.dark-mode .shop-item-name, body.dark-mode .fertilizer-name { color: #dce8d4; }
+body.dark-mode .shop-item-price, body.dark-mode .pts-badge { background:#3d5139; color:#eef4e9; box-shadow:0 2px 0 #263426; }
+body.dark-mode .shop-item-price { color: #fffdf7 !important; }
+body.dark-mode .upgrade-item.owned { background:#30392d; border-color:#718d65; box-shadow:0 3px 0 #263426; }
+body.dark-mode .upgrade-item.owned .upgrade-name { color:#edf2e6 !important; }
+body.dark-mode .upgrade-item.owned .upgrade-desc { color:#dce8d4 !important; opacity:1; }
+body.dark-mode .upgrade-item.available, body.dark-mode .upgrade-item.cant-afford { background:#3a4637; border-color:#53604f; box-shadow:0 3px 0 #263426; }
+body.dark-mode .upgrade-item.cant-afford { opacity:.78; }
+body.dark-mode .upgrade-item.available .upgrade-name, body.dark-mode .upgrade-item.cant-afford .upgrade-name { color:#e1ecd9; }
+body.dark-mode .upgrade-item.available .upgrade-desc, body.dark-mode .upgrade-item.cant-afford .upgrade-desc { color:#c7d3be; }
+body.dark-mode .shop-item .cozy-profit { color: #b9e39d !important; }
+body.dark-mode .shop-item .cozy-loss { color: #f0b0b0 !important; }
+body.dark-mode .shop-item.cant-afford .shop-item-name[style*="opacity"],
+body.dark-mode .shop-item .cozy-season-chip { color:#263426 !important; opacity:1 !important; }
+body.dark-mode .shop-item:has(.cozy-season-chip) { opacity:1 !important; }
+body.dark-mode .season-tooltip-wrap .header-btn-tip { color:#edf2e6; }
+body.dark-mode .tool-cost { color:#fffdf7 !important; background:#3d5139 !important; border-color:#3d5139 !important; box-shadow:0 2px 0 #263426 !important; }
+body.dark-mode .market-points-badge { background:#30392d; color:#e8d39b; border-color:#53604f; }
+body.dark-mode .market-total-pts { color:#34422f !important; }
+body.dark-mode .shop-season-select, body.dark-mode .shop-sort-btn { background:#30392d; color:#dce8d4 !important; border-color:#53604f; box-shadow:0 2px 0 #1b241b; }
+body.dark-mode .shop-sort-btn:hover { color:#edf5e7 !important; border-color:#879b72; }
+body.dark-mode .shop-sort-btn.active { background:#3d5139; color:#eef4e9 !important; border-color:#718d65; box-shadow:0 2px 0 #263426; }
+body.dark-mode .fertilizer-price, body.dark-mode .plot-shop-price { color: #e8d39b !important; }
+body.dark-mode .plot-shop-price { background:#3d5139 !important; color:#fffdf7 !important; box-shadow:0 2px 0 #263426; }
+body.dark-mode .upgrade-price { background:#3d5139 !important; color:#fffdf7 !important; box-shadow:0 2px 0 #263426 !important; }
+body.dark-mode .fertilizer-buy-btn { background:#e7eddb !important; color:#34422f !important; box-shadow:0 3px 0 #b7c6a8 !important; }
+body.dark-mode .fertilizer-buy-btn:hover { background:#edf3e3 !important; box-shadow:0 4px 0 #b7c6a8 !important; }
+body.dark-mode .shop-item span[style*="var(--soil2)"] { color: #e8d39b !important; }
+body.dark-mode .inv-slot.selected .inv-slot-name, body.dark-mode .fert-inv-slot.selected-quick .fert-inv-name,
+body.dark-mode .fert-inv-slot.selected-golden .fert-inv-name { color: #59694b !important; }
+body.dark-mode .xp-bar-wrap { background: #1b261c; border-color: #485644; }
+body.dark-mode .popup-close-x { background: #30392d; border-color: #586b52; color: #edf2e6; box-shadow: 0 2px 0 #1b241b; }
+body.dark-mode .popup-close-x:hover { background: #3c4a38; }
+body.dark-mode .user-menu { background: #252b24; border-color: #485644; }
+body.dark-mode .user-menu-item { color: #dce8d4; }
+body.dark-mode .user-menu-item:hover { background:#e7eddb !important; color:#263426 !important; }
+body.dark-mode .profile-label { color: #c7d3be; opacity: .95; }
+body.dark-mode #logout-confirm-overlay .modal p { color: #e8f0df !important; opacity: 1; }
+body.dark-mode .season-widget, body.dark-mode .xp-text,
+body.dark-mode .fertilizer-desc, body.dark-mode .fertilizer-effect, body.dark-mode .profile-stat-lbl,
+body.dark-mode .help-tab, body.dark-mode .shop-item > div[style*="color:var(--text2)"],
+body.dark-mode .fertilizer-price { color: #c7d3be !important; opacity: .95; }
+body.dark-mode .profile-stat-lbl { color:#59694b !important; opacity:1; }
 .help-overlay, .profile-overlay, .mail-overlay, .modal-overlay, .levelup-overlay { background: #414b3966; backdrop-filter: blur(8px); }
 .help-modal, .profile-modal, .mail-modal, .modal, .levelup-card {
   --cream: #fffdf7; --cream2: #f3f1e7; --text: #414f38; --text2: #707565; --soil2: #6f765e; --grass: #778b64; --grass2: #586e47;
@@ -1739,7 +1955,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 .achiev-unlocked-chip { background: #e8ecd9; color: #586e47; }
 .profile-avatar { background: #edf1e4; border: 1px solid #c6d1b6; box-shadow: none; }
 .profile-level-badge, .mail-reward-badge, .help-step-num { box-shadow: none; }
-.profile-level-name { font: 400 22px Georgia, serif; }
+.profile-level-name { font: 800 22px 'Nunito', sans-serif; }
 .profile-input, .modal-input { min-width: 0; background: #fffdf7; border: 1px solid #d7dccb; color: #414f38; padding: 12px; }
 .profile-input:focus, .modal-input:focus { border-color: #879b72; box-shadow: 0 0 0 3px #879b7220; }
 .mail-close-btn, .profile-close-btn, .profile-save-btn, .help-close, .levelup-dismiss, .modal-actions button {
@@ -1750,6 +1966,26 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 .profile-close-btn { background: #f1f1e7; color: #59694b; border-color: #d7dccb; box-shadow: 0 2px 0 #d7dccb; }
 .levelup-new-name { background: #778b64 !important; box-shadow: none; }
 .toast, .toast.mission { background: #fffdf7; color: #414f38; border: 1px solid #d9dfcc; border-radius: 16px; box-shadow: 0 8px 28px #4b573326; white-space: normal; max-width: calc(100vw - 32px); line-height: 1.6; padding: 13px 20px; }
+body.dark-mode .help-modal { --cream: #252b24; --cream2: #30392d; --text: #edf2e6; --text2: #c7d3be; --soil2: #c7d3be; --grass: #879b72; --grass2: #a9bd93; }
+body.dark-mode .help-tabs { background: #30392d; }
+body.dark-mode .help-tab, body.dark-mode .help-section-title, body.dark-mode .help-step-text,
+body.dark-mode .help-tip, body.dark-mode .help-upgrade-name, body.dark-mode .help-upgrade-desc { color: #c7d3be !important; }
+body.dark-mode .help-tab.active { background: #252b24; color: #dce8d4 !important; }
+body.dark-mode .help-step, body.dark-mode .help-tip, body.dark-mode .help-upgrade-row { background: #30392d; border-color: #485644; }
+body.dark-mode .help-step-text strong, body.dark-mode .help-tip strong { color: #dce8d4; }
+body.dark-mode .mail-empty-message { color: #c7d3be !important; opacity: .95 !important; }
+body.dark-mode .logo-profile-icon { background: #3c4a38; color: #c7d3be; }
+body.dark-mode .plot { box-shadow: 0 4px 0 #5c3f2b, 0 5px 12px #0005; }
+body.dark-mode .plot:hover { box-shadow: 0 6px 0 #5c3f2b, 0 7px 14px #0006; }
+body.dark-mode .plot::before { background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0, rgba(255,255,255,.012) 1px, transparent 1px, transparent 6px); }
+body.dark-mode .plot:not(.locked) { background: linear-gradient(175deg, #384737 0%, #2d392e 100%); border-color: #566b50; }
+body.dark-mode .plot:not(.locked)::after { background: linear-gradient(180deg, #263226 0%, #202a21 100%); }
+body.dark-mode .plot:not(.locked) .plot-inner { background: radial-gradient(ellipse at 50% 80%, #4a5d42 0, #354633 60%, transparent 72%); }
+body.dark-mode .plot-water-bar { background: #566456; }
+body.dark-mode .plot-label { color: #e3eddc; }
+body.dark-mode .plot-label span { color: #b9d7df !important; }
+body.dark-mode .plot-label span[style*="opacity"] { color: #d7e4d0 !important; opacity: .9 !important; }
+body.dark-mode .plot-grow-label { color: #b8d39c !important; }
 @media (max-width: 650px) {
   header { grid-template-columns: 1fr; padding: 14px; }
   .header-right { justify-content: flex-start; flex-wrap: wrap; }
@@ -1821,17 +2057,16 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
   <div class="header-right">
     <!-- Points -->
     <div class="header-icon-wrap">
-      <div class="pts-badge">🌟 <span id="pts-num">0</span> pts</div>
-      <div class="header-btn-tip">Seus pontos<br><span>Atualiza a cada 1 min de live assistida</span></div>
+      <div class="pts-badge"><img class="points-token" src="points-sprout.svg" width="26" height="26" alt="" aria-hidden="true"> <span id="pts-num">0</span> pts <button class="points-refresh" id="points-refresh" aria-label="Atualizar pontos" onclick="refreshPoints()">↻</button></div>
+      <div id="pts-feedback" aria-live="polite"></div>
+      <div class="header-btn-tip">Seus pontos<br><span>Atualiza a cada 5 minutos<br>+20 pts a cada 10 minutos<br>Botão ↻ para ajustar os pontos manualmente</span></div>
     </div>
 
     <!-- Icon buttons -->
     <div class="header-icons">
       <div class="header-icon-wrap">
-        <button class="header-icon-btn" aria-label="Correio" onclick="openMailbox()">
-          ✉️<span class="mail-badge hidden" id="mail-badge">0</span>
-        </button>
-        <div class="header-btn-tip">Correio<br><span>Cartas com recompensas de nível</span></div>
+        <button class="header-icon-btn theme-toggle" id="theme-toggle" aria-label="Ativar modo escuro" onclick="toggleDarkMode()">🌙</button>
+        <div class="header-btn-tip">Tema<br><span>Alternar modo claro e escuro</span></div>
       </div>
       <div class="header-icon-wrap">
         <button class="header-icon-btn" aria-label="Missões do dia" onclick="openMissionsModal()">
@@ -1853,8 +2088,10 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
         <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
         Conectar
       </button>
-      <div class="header-btn-tip">Sua conta<br><span>Clique no seu nome para abrir o menu e sair.</span></div>
+      <span class="mail-badge hidden" id="mail-badge">0</span>
       <div class="user-menu hidden" id="user-menu">
+        <button class="user-menu-item" onclick="openProfile(); document.getElementById('user-menu').classList.add('hidden');">👤 Abrir perfil</button>
+        <button class="user-menu-item" onclick="openMailbox(); document.getElementById('user-menu').classList.add('hidden');">✉️ Correio</button>
         <button class="user-menu-item" onclick="logout()">🚪 Sair</button>
       </div>
     </div>
@@ -1916,6 +2153,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
       <div class="shop-panel" id="panel-melhorias">
         <div class="upgrade-grid" id="upgrade-grid"></div>
       </div>
+      <div class="shop-cart empty" id="shop-cart"></div>
     </div>
 
     <div class="card" id="harvest-card" style="padding:14px 18px">
@@ -1929,6 +2167,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
           <path d="M5 2 Q8 0 11 2" stroke="#5c3820" stroke-width="1.2" fill="none" stroke-linecap="round"/>
         </svg>
         Mercado
+        <span class="market-points-badge" aria-label="Seus pontos no Mercado">Seus pontos: <img class="points-token" src="points-sprout.svg" width="26" height="26" alt="" aria-hidden="true"> <span id="market-pts-num">0</span> pts</span>
       </div>
       <div id="harvest-bag"></div>
     </div>
@@ -2020,6 +2259,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 <!-- RANKING MODAL -->
 <div class="mail-overlay hidden" id="ranking-overlay">
   <div class="mail-modal" style="max-width:400px">
+    <button class="popup-close-x" aria-label="Fechar ranking" onclick="closeRanking()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between">
       <span>🥇 Ranking Global</span>
       <span id="ranking-subtitle" style="font-size:11px;font-weight:600;color:var(--text2);opacity:.6"></span>
@@ -2034,6 +2274,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 <!-- ACHIEVEMENTS MODAL -->
 <div class="mail-overlay hidden" id="achiev-overlay">
   <div class="mail-modal" style="max-width:420px">
+    <button class="popup-close-x" aria-label="Fechar conquistas" onclick="closeAchievements()">×</button>
     <div class="mail-modal-title">🏆 Conquistas</div>
     <div id="achiev-list"></div>
     <button class="mail-close-btn" onclick="closeAchievements()">Fechar</button>
@@ -2043,6 +2284,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 <!-- HELP MODAL -->
 <div class="help-overlay hidden" id="help-overlay">
   <div class="help-modal">
+    <button class="popup-close-x" aria-label="Fechar dicas" onclick="closeHelp()">×</button>
     <div class="help-header">
       <div class="help-title">💡 Como Jogar</div>
       <div class="help-tabs">
@@ -2089,8 +2331,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
         <div class="help-section">
           <div class="help-section-title">🧪 Adubos</div>
           <div class="help-tip"><div class="help-tip-icon">⚡</div><div><strong>Adubo Rápido</strong> — canteiro vazio antes de plantar. Cresce 2× mais rápido!</div></div>
-          <div class="help-tip"><div class="help-tip-icon">✨</div><div><strong>Terra Dourada</strong> — canteiro vazio antes de plantar. Colheita rende 2 unidades!</div></div>
-          <div class="help-tip"><div class="help-tip-icon">💧</div><div><strong>Hidratante</strong> — ao comprar, rega todos os canteiros de uma vez!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">✨</div><div><strong>Terra Dourada</strong> — canteiro vazio antes de plantar. A próxima colheita rende +1 unidade!</div></div>
         </div>
         <div class="help-section">
           <div class="help-section-title">🪵 Canteiros e melhorias</div>
@@ -2152,10 +2393,12 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 <!-- MISSIONS MODAL -->
 <div class="mail-overlay hidden" id="missions-overlay">
   <div class="mail-modal">
+    <button class="popup-close-x" aria-label="Fechar missões" onclick="closeMissionsModal()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between">
       <span>📋 Missões do Dia</span>
-      <span id="missions-modal-timer" style="font-size:11px;font-weight:700;color:var(--text2);opacity:.6"></span>
     </div>
+    <label class="presence-streak missions-presence" id="presence-streak"><input type="checkbox" id="presence-check" onchange="claimPresence()"><span class="presence-copy"><span class="presence-title" id="presence-title">Marcar presença</span><span class="presence-hint"><span id="presence-days">0 dias</span> · ganhe pontos por dia consecutivo</span></span></label>
+    <div class="presence-week-help" tabindex="0" aria-label="Como funciona a presença diária"><div class="presence-week" id="presence-week" aria-label="Presença nos dias da semana"></div><div class="presence-explainer" role="tooltip">Marque diariamente e ganhe pontos. Faltou? Recomece.</div></div>
     <div id="missions-modal-bar"></div>
     <button class="mail-close-btn" onclick="closeMissionsModal()">Fechar</button>
   </div>
@@ -2164,6 +2407,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 <!-- PROFILE MODAL -->
 <div class="profile-overlay hidden" id="profile-overlay">
   <div class="profile-modal">
+    <button class="popup-close-x" aria-label="Fechar perfil" onclick="closeProfile()">×</button>
     <div class="profile-header">
       <div class="profile-avatar" id="profile-avatar">🌱</div>
       <div class="profile-info">
@@ -2182,6 +2426,11 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
     </div>
 
     <div class="profile-section">
+      <div class="profile-label">Estatísticas da Fazenda</div>
+      <div class="profile-stats" id="profile-stats"></div>
+    </div>
+
+    <div class="profile-section">
       <div class="profile-label">Badges Desbloqueados</div>
       <div class="profile-badges" id="profile-badges"></div>
     </div>
@@ -2193,6 +2442,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 <!-- MAILBOX MODAL -->
 <div class="mail-overlay hidden" id="mail-overlay">
   <div class="mail-modal">
+    <button class="popup-close-x" aria-label="Fechar correio" onclick="closeMailbox()">×</button>
     <div class="mail-modal-title">✉️ Correio</div>
     <div id="mail-list"></div>
     <button class="mail-close-btn" onclick="closeMailbox()">Fechar</button>
@@ -2202,6 +2452,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 <!-- LEVEL UP OVERLAY -->
 <div class="levelup-overlay hidden" id="levelup-overlay">
   <div class="levelup-card" id="levelup-card">
+    <button class="popup-close-x" aria-label="Fechar aviso de nível" onclick="dismissLevelUp()">×</button>
     <div class="levelup-icon" id="lu-icon">🎉</div>
     <div class="levelup-title">Subiu de Nível!</div>
     <div class="levelup-sub" id="lu-sub">Você chegou ao nível 2</div>
@@ -2276,6 +2527,7 @@ header .header-btn-tip::after { top: auto; bottom: 100%; border-top-color: trans
 <!-- MODAL (legacy, hidden) -->
 <div class="modal-overlay hidden" id="modal">
   <div class="modal">
+    <button class="popup-close-x" aria-label="Fechar janela" onclick="closeModal()">×</button>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Fechar</button>
     </div>
@@ -2452,7 +2704,9 @@ const G = {
   plots: Array(6).fill(null),
   unlockedPlots: 2,
   harvested: {},
+  goldenHarvested: {},
   upgrades: new Set(),
+  upgradeLevels: {},
   seConnected: false,
   seTimer: null,
   growTimer: null,
@@ -2462,6 +2716,13 @@ const G = {
   achievements: null,
   achievStats: null,
   achievSeen: 0,
+  presenceStreak: 0,
+  presenceLastDay: '',
+  presenceBonusDate: '',
+  presenceDays: [],
+  specialPlot: null,
+  specialPlotPending: false,
+  previewUnlocks: false,
 };
 
 // maxWater = regas para encher (habilitar crescimento)
@@ -2471,8 +2732,8 @@ const PLANTS = {
   lettuce:  { name:'Alface',      emoji:'🥬', cost:50,  maxWater:4,  maxGrow:8,  color:'#4ab848', leafColor:'#2a8a28', minLevel:1  },
   carrot:   { name:'Cenoura',     emoji:'🥕', cost:45,  maxWater:5,  maxGrow:10, color:'#f07030', leafColor:'#6aaa3a', minLevel:2  },
   tomato:   { name:'Tomate',      emoji:'🍅', cost:60,  maxWater:7,  maxGrow:15, color:'#e84040', leafColor:'#5ab830', minLevel:3  },
-  beetroot: { name:'Beterraba',   emoji:'🫚', cost:80,  maxWater:8,  maxGrow:18, color:'#9b2a6a', leafColor:'#3a7a28', minLevel:5  },
-  cassava:  { name:'Mandioca',    emoji:'🟫', cost:100, maxWater:10, maxGrow:24, color:'#c8a878', leafColor:'#4a7a28', minLevel:7  },
+  beetroot: { name:'Beterraba',   emoji:'🫜', cost:80,  maxWater:8,  maxGrow:18, color:'#9b2a6a', leafColor:'#3a7a28', minLevel:5  },
+  cassava:  { name:'Mandioca',    emoji:'🥔', cost:100, maxWater:10, maxGrow:24, color:'#c8a878', leafColor:'#4a7a28', minLevel:7  },
   corn:     { name:'Milho',       emoji:'🌽', cost:55,  maxWater:6,  maxGrow:13, color:'#f0c030', leafColor:'#4a8a20', minLevel:3  },
   pumpkin:  { name:'Abóbora',     emoji:'🎃', cost:75,  maxWater:7,  maxGrow:16, color:'#e07020', leafColor:'#3a7a18', minLevel:6  },
   eggplant: { name:'Berinjela',   emoji:'🍆', cost:65,  maxWater:6,  maxGrow:14, color:'#7030a0', leafColor:'#3a8020', minLevel:4  },
@@ -2502,14 +2763,99 @@ function toast(msg, dur=2400, isMission=false) {
   t.addEventListener('mouseleave', resume);
   start();
 }
+let lastDisplayedPts = null;
+let pointsFeedbackTimer = null;
+function showPointsFeedback(delta) {
+  const feedback = document.getElementById('pts-feedback');
+  if (!feedback || !delta) return;
+  clearTimeout(pointsFeedbackTimer);
+  feedback.className = `pts-feedback ${delta > 0 ? 'gain' : 'loss'}`;
+  feedback.textContent = `${delta > 0 ? '+' : ''}${delta} pts`;
+  pointsFeedbackTimer = setTimeout(() => { feedback.textContent = ''; feedback.className = ''; }, 950);
+}
 function updatePts() {
+  const previous = lastDisplayedPts;
   document.getElementById('pts-num').textContent = G.pts;
+  const marketPts = document.getElementById('market-pts-num');
+  if (marketPts) marketPts.textContent = G.pts;
+  if (previous !== null && G.pts !== previous) showPointsFeedback(G.pts - previous);
+  lastDisplayedPts = G.pts;
+  renderPresence();
   renderShop();
   renderFlowerShop();
   renderFertilizerShop();
   renderFertilizerInventory();
   renderPlotShop();
   renderUpgradeShop();
+}
+
+function renderPresence() {
+  const today = new Date().toISOString().slice(0, 10);
+  const check = document.getElementById('presence-check');
+  const days = document.getElementById('presence-days');
+  const cycleDay = G.presenceLastDay === today ? (G.presenceStreak || 1) : Math.min((G.presenceStreak || 0) + 1, 7);
+  if (days) days.textContent = `Dia ${cycleDay}/7`;
+  if (check) { check.checked = G.presenceLastDay === today; check.disabled = check.checked; }
+  const title = document.getElementById('presence-title');
+  if (title) title.textContent = G.presenceLastDay === today ? 'Presença marcada!' : 'Marcar presença';
+  const week = document.getElementById('presence-week');
+  if (week) {
+    const names = ['Dia 01','Dia 02','Dia 03','Dia 04','Dia 05','Dia 06','Dia 07'];
+    const now = new Date();
+    const sunday = new Date(now); sunday.setDate(now.getDate() - now.getDay());
+    week.innerHTML = names.map((name, index) => {
+      const day = new Date(sunday); day.setDate(sunday.getDate() + index);
+      const key = day.toISOString().slice(0, 10);
+      const done = (G.presenceDays || []).includes(key);
+      const bonus = Math.min(10 + index * 5, 50);
+      return `<div class="presence-day ${key === today ? 'today' : ''} ${done ? 'done' : ''}"><span>${name}</span><strong>${done ? '✓' : '·'}</strong><small>+${bonus} pts</small></div>`;
+    }).join('');
+  }
+}
+function claimPresence() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (G.presenceLastDay === today) return renderPresence();
+  if (!G.presenceLastDay) G.presenceStreak = 1;
+  else {
+    const previous = new Date(`${G.presenceLastDay}T00:00:00`);
+    const current = new Date(`${today}T00:00:00`);
+    const days = Math.round((current - previous) / 86400000);
+    G.presenceStreak = days === 1 && G.presenceStreak < 7 ? (G.presenceStreak || 0) + 1 : 1;
+  }
+  G.presenceLastDay = today;
+  G.presenceDays = [...new Set([...(G.presenceDays || []), today])].slice(-60);
+  const bonus = Math.min(10 + Math.max(0, G.presenceStreak - 1) * 5, 50);
+  G.pts += bonus;
+  G.presenceBonusDate = today;
+  updatePts();
+  renderPresence();
+  saveGardenToSE();
+  toast(`🔥 Presença confirmada: +${bonus} pts!`, 3000);
+}
+
+async function refreshPoints() {
+  const button = document.getElementById('points-refresh');
+  if (button?.classList.contains('loading')) return;
+  button?.classList.add('loading');
+  try {
+    if (seUser && !isLocalPreview) {
+      const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`);
+      if (!res.ok) throw new Error('Falha ao atualizar');
+      const data = await res.json();
+      G.pts = data.points || 0;
+      seUser.points = G.pts;
+      updatePts();
+    }
+    // Confirm the refreshed balance in StreamElements and persist the garden
+    // snapshot in the database before reporting success.
+    await syncPtsToSE();
+    await saveGardenToSE();
+    toast('🌟 Pontos atualizados!', 1600);
+  } catch (e) {
+    toast('Não foi possível atualizar os pontos agora.', 2200);
+  } finally {
+    setTimeout(() => button?.classList.remove('loading'), 450);
+  }
 }
 
 // Deduct points from SE when player spends
@@ -2553,9 +2899,10 @@ function renderPlotShop() {
   grid.innerHTML = PLOT_UPGRADES.map(u => {
     const owned = G.unlockedPlots > u.slot;
     const lv = currentLevel();
-    const levelLocked = !owned && lv < u.minLevel;
-    const canAfford = G.pts >= u.cost;
-    const unavailable = !owned && G.unlockedPlots < u.slot;
+    const previewAccess = G.previewUnlocks || (window.location.hostname === 'localhost' && new URLSearchParams(window.location.search).has('preview'));
+    const levelLocked = !owned && !previewAccess && lv < u.minLevel;
+    const canAfford = previewAccess || G.pts >= u.cost;
+    const unavailable = !previewAccess && !owned && G.unlockedPlots < u.slot;
     const disabled = !owned && (levelLocked || !canAfford || unavailable);
     return `
       <div class="plot-shop-item ${owned ? 'owned' : disabled ? 'cant-afford' : ''}" onclick="buyPlot(${u.slot})">
@@ -2580,11 +2927,11 @@ function buyPlot(slot) {
   const u = PLOT_UPGRADES.find(p => p.slot === slot);
   if (!u) return;
   if (G.unlockedPlots > slot) { toast('Você já tem esse canteiro! 🪵'); return; }
-  if (G.unlockedPlots < slot) { toast('Desbloqueie os canteiros anteriores primeiro!'); return; }
-  if (currentLevel() < u.minLevel) { toast(`🔒 Precisa ser nível ${u.minLevel} para este canteiro!`); return; }
-  if (G.pts < u.cost) { toast(`✨ Faltam ${u.cost - G.pts} pts para comprar esse canteiro!`); return; }
-  G.pts -= u.cost;
-  G.unlockedPlots++;
+  if (!previewAccess() && G.unlockedPlots < slot) { toast('Desbloqueie os canteiros anteriores primeiro!'); return; }
+  if (!previewAccess() && currentLevel() < u.minLevel) { toast(`🔒 Precisa ser nível ${u.minLevel} para este canteiro!`); return; }
+  if (!previewAccess() && G.pts < u.cost) { toast(`✨ Faltam ${u.cost - G.pts} pts para comprar esse canteiro!`); return; }
+  if (!previewAccess()) G.pts -= u.cost;
+  G.unlockedPlots = Math.max(G.unlockedPlots, slot + 1);
   gainXP('buy', document.getElementById('panel-canteiros'));
   updatePts();
   renderPlots();
@@ -2596,6 +2943,9 @@ function buyPlot(slot) {
 
 // ─── UPGRADES ─────────────────────────────────────────────
 const UPGRADES = [
+  { id:'special_plot', icon:'✨', name:'Canteiro Especial', desc:'Escolha um canteiro para produzir plantas douradas que valem 3x mais.', cost:2500, minLevel:10, effect:'Produz plantas douradas · venda 3x' },
+  { id:'quick_grow_plus', icon:'⚡', name:'Adubo Rápido melhorado', desc:'Aumenta o bônus do Adubo Rápido. Pode comprar até 3x.', cost:400, minLevel:4, maxLevel:3, effect:'+1 estágio extra por nível' },
+  { id:'golden_soil_plus', icon:'✨', name:'Terra Dourada Melhorada', desc:'Aumenta a recompensa da Terra Dourada. Pode comprar até 5x.', cost:600, minLevel:8, maxLevel:5, effect:'+1 unidade extra por nível' },
   { id:'big_watering', icon:'🪣', name:'Regador Turbo',          desc:'Cada clique no regador enche 2 etapas de uma vez.',                           cost:500,  minLevel:3, effect:'Rega conta como 2'    },
   { id:'fertilizer',   icon:'🌿', name:'Vaso Especial',           desc:'Reduz em 30% a quantidade de regas necessárias.',                             cost:600,  minLevel:4, effect:'Menos regas p/ ativar' },
   { id:'nimble',       icon:'⚡', name:'Mãos Ágeis',              desc:'Usar o regador e a pá não custa nenhum ponto.',                               cost:700,  minLevel:5, effect:'Ferramentas grátis'    },
@@ -2608,7 +2958,9 @@ const UPGRADES = [
 // (stored in G.upgrades = Set of ids)
 
 function hasUpgrade(id) { return G.upgrades.has(id); }
+function upgradeLevel(id) { return Number(G.upgradeLevels?.[id] || (hasUpgrade(id) ? 1 : 0)); }
 function currentLevel() { return getLevelData(G.xp).current.lv; }
+function previewAccess() { return false; }
 
 function effectiveWaterCost()  { return hasUpgrade('nimble') ? 0 : 6; }
 function effectiveShovelCost() { return hasUpgrade('nimble') ? 0 : 10; }
@@ -2635,28 +2987,33 @@ function renderUpgradeShop() {
   const grid = document.getElementById('upgrade-grid');
   if (!grid) return;
   grid.innerHTML = UPGRADES.map(u => {
-    const owned = hasUpgrade(u.id);
+    const level = upgradeLevel(u.id);
+    const owned = hasUpgrade(u.id) && !u.maxLevel;
+    const maxed = !!u.maxLevel && level >= u.maxLevel;
+    const pending = u.id === 'special_plot' && G.specialPlotPending;
     const lv = currentLevel();
-    const levelLocked = !owned && lv < u.minLevel;
-    const canAfford = G.pts >= u.cost;
-    const cls = owned ? 'owned' : levelLocked ? 'cant-afford' : canAfford ? 'available' : 'cant-afford';
+    const levelLocked = !owned && !maxed && !previewAccess() && lv < u.minLevel;
+    const cost = u.maxLevel ? Math.round(u.cost * Math.pow(1.6, level)) : u.cost;
+    const canAfford = previewAccess() || G.pts >= cost;
+    const cls = owned || maxed ? 'owned' : pending ? 'cant-afford' : levelLocked ? 'cant-afford' : canAfford ? 'available' : 'cant-afford';
     return `
       <div class="upgrade-item ${cls}" onclick="buyUpgrade('${u.id}')">
         <div class="upgrade-icon">${u.icon}</div>
         <div class="upgrade-info">
           <div class="upgrade-name">
             ${u.name}
-            ${owned ? `<span class="upgrade-active-badge">✔ ativo</span>` : ''}
+            ${owned ? `<span class="upgrade-active-badge">✔ ativo</span>` : u.maxLevel ? `<span class="upgrade-active-badge">${level}/${u.maxLevel}</span>` : ''}
             ${levelLocked ? `<span class="cozy-level-chip" style="font-size:9px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:2px 7px;margin-left:4px">🔒 Nível ${u.minLevel}</span>` : ''}
           </div>
-          <div class="upgrade-desc">${owned ? `<em>${u.effect}</em>` : levelLocked ? `Disponível no nível ${u.minLevel}` : u.desc}</div>
+          <div class="upgrade-desc">${owned || maxed ? `<em>${u.effect}</em>` : pending ? 'Escolha um canteiro vazio' : levelLocked ? `Disponível no nível ${u.minLevel}` : u.desc}</div>
         </div>
         <div class="upgrade-right">
-          ${owned
+          ${owned || maxed
             ? `<div class="upgrade-owned-badge">Possui</div>`
+            : pending ? `<div class="upgrade-owned-badge">Escolher</div>`
             : levelLocked
               ? ``
-              : `<div class="upgrade-price">🌟 ${u.cost}</div>`
+              : `<div class="upgrade-price">🌟 ${cost}</div>`
           }
         </div>
       </div>`;
@@ -2664,11 +3021,34 @@ function renderUpgradeShop() {
 }
 
 function buyUpgrade(id) {
-  if (hasUpgrade(id)) return;
+  const existing = UPGRADES.find(u => u.id === id);
+  if (hasUpgrade(id) && !existing?.maxLevel) return;
   const u = UPGRADES.find(u => u.id === id);
   if (!u) return;
-  if (currentLevel() < u.minLevel) { toast(`🔒 Precisa ser nível ${u.minLevel} para esta melhoria!`); return; }
-  if (G.pts < u.cost) { toast(`✨ Faltam ${u.cost - G.pts} pts para esta melhoria!`); return; }
+  const level = upgradeLevel(id);
+  if (u.maxLevel && level >= u.maxLevel) { toast(`✅ ${u.name} já está no máximo!`); return; }
+  const cost = u.maxLevel ? Math.round(u.cost * Math.pow(1.6, level)) : u.cost;
+  const previewAccess = G.previewUnlocks || (window.location.hostname === 'localhost' && new URLSearchParams(window.location.search).has('preview'));
+  if (!previewAccess && currentLevel() < u.minLevel) { toast(`🔒 Precisa ser nível ${u.minLevel} para esta melhoria!`); return; }
+  if (!previewAccess && G.pts < cost) { toast(`✨ Faltam ${cost - G.pts} pts para esta melhoria!`); return; }
+  if (u.maxLevel) {
+    G.pts -= cost;
+    G.upgradeLevels[id] = level + 1;
+    G.upgrades.add(id);
+    gainXP('buy', document.getElementById('panel-melhorias'));
+    updatePts(); renderUpgradeShop(); renderFertilizerShop();
+    spendSEPoints(cost);
+    toast(`${u.icon} ${u.name} nível ${level + 1}! Próxima compra: ${Math.round(u.cost * Math.pow(1.6, level + 1))} pts`, 3500);
+    return;
+  }
+  if (id === 'special_plot') {
+    if (!previewAccess) G.pts -= u.cost;
+    G.specialPlotPending = true;
+    updatePts(); renderUpgradeShop(); renderPlots();
+    spendSEPoints(u.cost);
+    toast('✨ Clique em um canteiro vazio para escolher o Canteiro Especial!', 4000);
+    return;
+  }
   G.pts -= u.cost;
   G.upgrades.add(id);
   gainXP('buy', document.getElementById('panel-melhorias'));
@@ -2766,6 +3146,67 @@ const SELL_VALUE = { potato: 25, carrot: 38, tomato: 52, beetroot: 70, lettuce: 
                      corn: 44, pumpkin: 62, eggplant: 54, pepper: 58, broccoli: 72,
                      rose: 35, sunflower: 45, lavender: 55, daisy: 28, tulip: 40,
                      orchid: 75, hibiscus: 70, bluebell: 50, cherry: 88, poppy: 42, jasmine: 60 };
+const SHOP_QTY = {};
+const SHOP_CART = {};
+let SHOP_CART_OPEN = false;
+function cartProduct(type) { return getPlantable(type) || (typeof FERTILIZERS !== 'undefined' ? FERTILIZERS[type] : null); }
+function cartUnitCost(type) {
+  const p = cartProduct(type); if (!p) return 0;
+  if (typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type]) return p.cost + (type === 'golden_soil' ? upgradeLevel('golden_soil_plus') * 100 : type === 'quick_grow' ? upgradeLevel('quick_grow_plus') * 100 : 0);
+  return p.cost;
+}
+function addToShopCart(type) {
+  const qty = SHOP_QTY[type] || 1;
+  SHOP_CART[type] = (SHOP_CART[type] || 0) + qty;
+  renderShopCart();
+  toast(`🛍️ ${qty} item${qty > 1 ? 's' : ''} adicionado${qty > 1 ? 's' : ''} à sacola!`, 1400);
+}
+function clearShopCart() { Object.keys(SHOP_CART).forEach(type => delete SHOP_CART[type]); renderShopCart(); }
+function toggleShopCart() { SHOP_CART_OPEN = !SHOP_CART_OPEN; renderShopCart(); }
+function adjustCartQty(type, delta) {
+  SHOP_CART[type] = Math.max(0, (SHOP_CART[type] || 0) + delta);
+  if (!SHOP_CART[type]) delete SHOP_CART[type];
+  renderShopCart();
+}
+function renderShopCart() {
+  const el = document.getElementById('shop-cart'); if (!el) return;
+  const entries = Object.entries(SHOP_CART).filter(([, qty]) => qty > 0);
+  if (!entries.length) { el.classList.add('empty'); el.innerHTML = ''; return; }
+  const total = entries.reduce((sum, [type, qty]) => sum + cartUnitCost(type) * qty, 0);
+  const count = entries.reduce((sum, [, qty]) => sum + qty, 0);
+  el.classList.remove('empty');
+  const details = `<div class="shop-cart-items">${entries.map(([type, qty]) => { const p = cartProduct(type); return `<div class="shop-cart-row"><span>${p.emoji} ${p.name}</span><div class="shop-cart-row-controls"><button onclick="event.stopPropagation();adjustCartQty('${type}',-1)" aria-label="Retirar ${p.name}">−</button><span>×${qty}</span><button onclick="event.stopPropagation();adjustCartQty('${type}',1)" aria-label="Adicionar ${p.name}">+</button></div></div>`; }).join('')}</div>`;
+  el.innerHTML = `<div><div class="shop-cart-toggle">🛍️ Sacola · ${count} item${count > 1 ? 's' : ''}</div>${details}<div class="shop-cart-total">Total = <img class="points-token" src="points-sprout.svg" width="22" height="22" alt="" aria-hidden="true"> ${total} pts</div></div><button class="shop-cart-buy" onclick="event.stopPropagation();buyShopCart()">Comprar</button><button class="popup-close-x" style="position:static;width:24px;height:24px" onclick="event.stopPropagation();clearShopCart()" aria-label="Esvaziar sacola">×</button>`;
+}
+function buyShopCart() {
+  const entries = Object.entries(SHOP_CART).filter(([, qty]) => qty > 0);
+  if (!entries.length) return;
+  let total = 0;
+  for (const [type, qty] of entries) {
+    const p = cartProduct(type);
+    const fertilizer = typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type];
+    if (!p || (!fertilizer && !isInSeason(type)) || (!previewAccess() && currentLevel() < p.minLevel)) { toast('🌱 Remova da sacola os itens indisponíveis nesta estação ou nível.'); return; }
+    total += cartUnitCost(type) * qty;
+  }
+  if (G.pts < total) { toast('✨ Pontos insuficientes para concluir a compra!'); return; }
+  G.pts -= total;
+  entries.forEach(([type, qty]) => { const target = typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type] ? 'fertilizerInventory' : 'inventory'; G[target][type] = (G[target][type] || 0) + qty; for (let i = 0; i < qty; i++) { gainXP('buy'); missionProgress('buy2'); } });
+  renderFertilizerShop(); renderFertilizerInventory();
+  updatePts(); renderInventory(); initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + entries.reduce((sum, [, qty]) => sum + qty, 0); checkAchievements(); spendSEPoints(total);
+  clearShopCart(); toast(`🛍️ Compra concluída! ${entries.reduce((s,[,q])=>s+q,0)} item${entries.length > 1 ? 's' : ''} adicionados.`);
+}
+function adjustShopQty(type, delta) {
+  SHOP_QTY[type] = Math.max(1, Math.min(99, (SHOP_QTY[type] || 1) + delta));
+  const panel = document.querySelector('.shop-panel.visible')?.id;
+  if (panel === 'panel-flores') renderFlowerShop();
+  else if (panel === 'panel-adubos') renderFertilizerShop();
+  else renderShop();
+  renderShopCart();
+}
+function shopQtyControls(type) {
+  const qty = SHOP_QTY[type] || 1;
+  return `<div class="shop-qty-controls" onclick="event.stopPropagation()"><button type="button" onclick="adjustShopQty('${type}',-1)">−</button><span>×${qty}</span><button type="button" onclick="adjustShopQty('${type}',1)">+</button></div>`;
+}
 
 // ─── FLOWERS ──────────────────────────────────────────────
 // Flores têm as mesmas mecânicas de rega + crescimento dos vegetais
@@ -2816,9 +3257,9 @@ function renderFlowerShop() {
 
   const items = entries.map(([type, p]) => {
     const lv = currentLevel();
-    const locked = lv < p.minLevel;
+    const locked = !previewAccess() && lv < p.minLevel;
     const outOfSeason = !isInSeason(type);
-    const canAfford = G.pts >= p.cost;
+    const canAfford = G.pts >= p.cost * (SHOP_QTY[type] || 1);
     const sellVal = SELL_VALUE[type];
     const profit = sellVal - p.cost;
     const profitLabel = profit >= 0
@@ -2831,17 +3272,19 @@ function renderFlowerShop() {
       <div class="cozy-level-chip" style="font-size:10px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:2px 8px;margin-top:2px">🔒 Nível ${p.minLevel}</div>
     </div>`;
 
-    if (outOfSeason) return `<div class="shop-item cant-afford">
+    if (outOfSeason) return `<div class="shop-item cant-afford season-tooltip-wrap" tabindex="0">
       ${seedBagSVG(type, true)}
       <div class="shop-item-name" style="opacity:.5">${p.name}</div>
       <div class="cozy-season-chip" style="font-size:10px;font-weight:800;background:#a06020;color:#fff;border-radius:99px;padding:2px 8px;margin-top:2px">${currentSeason().icon} Fora de estação</div>
+      <div class="header-btn-tip">Item fora de estação<br><span>Espere a estação correta para a compra.</span></div>
     </div>`;
 
-    return `<div class="shop-item ${canAfford ? '' : 'cant-afford'}" onclick="buyFlower('${type}', this)">
+    return `<div class="shop-item shop-add-tooltip ${canAfford ? '' : 'cant-afford'}" onclick="addToShopCart('${type}')">
       ${seedBagSVG(type)}
       <div class="shop-item-name">${p.name}</div>
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${p.maxGrow}</div>
-      <div class="shop-item-price">🌟 ${p.cost}</div>
+      <div class="shop-item-price">🌟 ${p.cost * (SHOP_QTY[type] || 1)}</div>
+      ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
         venda <span style="color:var(--soil2);font-weight:800;margin:0 2px">🌟 ${sellVal}</span>(${profitLabel})
       </div>
@@ -2853,19 +3296,21 @@ function renderFlowerShop() {
 
 function buyFlower(type, el) {
   const p = FLOWERS[type];
+  const qty = SHOP_QTY[type] || 1;
+  const total = p.cost * qty;
   if (!p) return;
-  if (currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para esta flor!`); return; }
+  if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para esta flor!`); return; }
   if (!isInSeason(type)) { toast(`${currentSeason().icon} Esta flor não cresce nesta estação!`); return; }
-  if (G.pts < p.cost) { toast('✨ Pontos insuficientes!'); return; }
-  G.pts -= p.cost;
-  G.inventory[type] = (G.inventory[type] || 0) + 1;
+  if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
+  G.pts -= total;
+  G.inventory[type] = (G.inventory[type] || 0) + qty;
   gainXP('buy', el);
   updatePts();
   renderInventory();
   missionProgress('buy2');
   initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + 1; checkAchievements();
-  spendSEPoints(p.cost);
-  toast(`${p.emoji} ${p.name} comprada! Selecione e plante num canteiro.`);
+  spendSEPoints(total);
+  toast(`${p.emoji} ${qty} ${p.name}${qty > 1 ? 's' : ''} comprada${qty > 1 ? 's' : ''}!`);
 }
 
 function sellTotal() {
@@ -2962,7 +3407,7 @@ function renderHarvested() {
     const sellQty = selected ? `
       <div class="market-slot-sell-qty" style="display:flex;align-items:center;gap:3px;padding:0 4px">
         ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',-1)" ${qty <= 1 ? 'disabled' : ''}>−</button>` : ''}
-        <span>🌟 ${qty * unitVal}</span>
+        <span><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${qty * unitVal}</span>
         ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',1)" ${qty >= count ? 'disabled' : ''}>+</button>` : ''}
       </div>` : '';
 
@@ -2983,7 +3428,7 @@ function renderHarvested() {
     <div class="market-slots">${slots}</div>
     <div class="market-footer">
       <div class="market-total-wrap">
-        <div class="market-total-pts">🌟 ${total} pts</div>
+        <div class="market-total-pts">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div>
         <button class="sell-btn" onclick="sellAll()" style="background:var(--soil2);box-shadow:0 3px 0 #3a1a08">Vender tudo 🧺</button>
         <button class="sell-btn" onclick="sellSelected()" ${total === 0 ? 'disabled' : ''}>Vender 💰</button>
       </div>
@@ -3144,7 +3589,7 @@ function openAchievements() {
     const badgeUnlocked = G.achievements.has('badge_' + g.id);
     return `<div class="achiev-group">
       <div class="achiev-group-header">
-        <div class="achiev-group-badge ${badgeUnlocked ? 'unlocked' : ''}">${g.badge}</div>
+        <div class="achiev-group-badge ${badgeUnlocked ? 'unlocked' : ''}"><img src="badge-${g.id}.svg" alt="${g.name}" width="52" height="58"></div>
         <div class="achiev-group-info">
           <div class="achiev-group-name">${g.name}</div>
           <div class="achiev-group-prog">${done}/${total} conquistas</div>
@@ -3379,7 +3824,7 @@ const FERTILIZERS = {
     desc: 'Dobra a velocidade de crescimento de uma planta por uma colheita completa.',
     effect: 'Cresce 2× mais rápido',
     cost: 80,
-    minLevel: 2,
+    minLevel: 4,
     color: '#60c0e0',
   },
   golden_soil: {
@@ -3387,22 +3832,11 @@ const FERTILIZERS = {
     name: 'Terra Dourada',
     emoji: '✨',
     icon: '🪣',
-    desc: 'Aumenta o valor de venda da próxima colheita daquela planta em 100%.',
-    effect: 'Venda +100% (1 colheita)',
+    desc: 'A próxima colheita irá render +1 unidade.',
+    effect: '+1 unidade',
     cost: 150,
-    minLevel: 1,
+    minLevel: 8,
     color: '#e0a020',
-  },
-  mega_water: {
-    id: 'mega_water',
-    name: 'Hidratante',
-    emoji: '💧',
-    icon: '🫙',
-    desc: 'Ao usar, rega automaticamente todos os canteiros plantados de uma vez, custando apenas 1× o valor do regador por canteiro.',
-    effect: 'Rega todos os canteiros (1× por canteiro)',
-    cost: 60,
-    minLevel: 1,
-    color: '#4090d0',
   },
 };
 
@@ -3417,6 +3851,9 @@ function renderFertilizerInventory() {
 
   bar.innerHTML = `<div class="fert-inv-slots">${validEntries.map(([id, f]) => {
     const count = G.fertilizerInventory[id] || 0;
+    const currentEffect = id === 'golden_soil'
+      ? `+${upgradeLevel('golden_soil_plus') + 1} unidade${upgradeLevel('golden_soil_plus') ? 's' : ''}`
+      : id === 'quick_grow' ? `Cresce ${upgradeLevel('quick_grow_plus') + 2}× mais rápido` : f.effect;
     const selClass = G.selectedFertilizer === id
       ? (id === 'quick_grow' ? 'selected-quick' : 'selected-golden')
       : '';
@@ -3426,7 +3863,7 @@ function renderFertilizerInventory() {
       <div class="fert-inv-count">×${count}</div>
       <div class="fert-tip">
         <strong>${f.name}</strong><br>
-        ${f.effect}
+        ${currentEffect}
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -3451,24 +3888,31 @@ function renderFertilizerShop() {
   const lv = currentLevel();
   container.innerHTML = `<div class="fertilizer-grid">${
     Object.values(FERTILIZERS).map(f => {
-      const locked = lv < f.minLevel;
-      const canAfford = G.pts >= f.cost;
+      const locked = !previewAccess() && lv < f.minLevel;
+      const qty = SHOP_QTY[f.id] || 1;
+      const goldenLevel = f.id === 'golden_soil' ? upgradeLevel('golden_soil_plus') : 0;
+      const quickLevel = f.id === 'quick_grow' ? upgradeLevel('quick_grow_plus') : 0;
+      const unitCost = f.cost + (goldenLevel + quickLevel) * 100;
+      const total = unitCost * qty;
+      const description = f.id === 'golden_soil' ? `A próxima colheita irá render +${goldenLevel + 1} unidade${goldenLevel ? 's' : ''}.` : f.id === 'quick_grow' ? `A planta crescerá ${quickLevel + 2}× mais rápido.` : f.desc;
+      const effect = f.id === 'golden_soil' ? `+${goldenLevel + 1} unidade${goldenLevel ? 's' : ''}` : f.id === 'quick_grow' ? `Cresce ${quickLevel + 2}× mais rápido` : f.effect;
+      const canAfford = G.pts >= total;
       const stock = G.fertilizerInventory[f.id] || 0;
       return `
-        <div class="fertilizer-item ${locked ? 'cant-afford' : canAfford ? '' : 'cant-afford'}" onclick="${locked ? '' : `buyFertilizer('${f.id}')`}">
+        <div class="fertilizer-item ${locked ? 'cant-afford' : `shop-add-tooltip ${canAfford ? '' : 'cant-afford'}`}" onclick="${locked ? '' : `addToShopCart('${f.id}')`}">
           <div class="fertilizer-icon" style="background:${f.color}22;border-color:${f.color}44">${f.icon}<span style="font-size:18px">${f.emoji}</span></div>
           <div class="fertilizer-info">
             <div class="fertilizer-name">${f.name}
               ${stock > 0 ? `<span class="fertilizer-stock">×${stock}</span>` : ''}
             </div>
-            <div class="fertilizer-desc">${locked ? `🔒 Nível ${f.minLevel}` : f.desc}</div>
-            <div class="fertilizer-effect">${f.effect}</div>
+            <div class="fertilizer-desc">${locked ? `🔒 Nível ${f.minLevel}` : description}</div>
+            <div class="fertilizer-effect">${effect}</div>
           </div>
           <div class="fertilizer-cost">
             ${locked
               ? `<div class="cozy-level-chip" style="font-size:11px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:3px 10px">🔒 Nv${f.minLevel}</div>`
-              : `<div class="fertilizer-price">🌟 ${f.cost}</div>
-                 <button class="fertilizer-buy-btn" ${canAfford ? '' : 'disabled'}>Comprar</button>`
+              : `<div class="fertilizer-price">🌟 ${total}</div>
+                 ${shopQtyControls(f.id)}<button type="button" class="fertilizer-buy-btn" onclick="event.stopPropagation();addToShopCart('${f.id}')" ${G.pts >= total ? '' : 'disabled'}>Adicionar</button>`
             }
           </div>
         </div>`;
@@ -3479,34 +3923,20 @@ function renderFertilizerShop() {
 function buyFertilizer(id) {
   const f = FERTILIZERS[id];
   if (!f) return;
-  if (currentLevel() < f.minLevel) { toast(`🔒 Precisa ser nível ${f.minLevel}!`); return; }
-  if (G.pts < f.cost) { toast('✨ Pontos insuficientes!'); return; }
-  G.pts -= f.cost;
+  const qty = SHOP_QTY[id] || 1;
+  const unitCost = f.cost + (id === 'golden_soil' ? upgradeLevel('golden_soil_plus') * 100 : id === 'quick_grow' ? upgradeLevel('quick_grow_plus') * 100 : 0);
+  const total = unitCost * qty;
+  if (!previewAccess() && currentLevel() < f.minLevel) { toast(`🔒 Precisa ser nível ${f.minLevel}!`); return; }
+  if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
+  G.pts -= total;
   gainXP('buy', document.getElementById('panel-adubos'));
 
-  // mega_water applies instantly on buy — fully waters ALL plots
-  if (id === 'mega_water') {
-    let watered = 0;
-    G.plots.forEach((p) => {
-      if (!p) return;
-      const maxW = effectiveMaxWater(p.type);
-      if (p.waterCount >= maxW) return;
-      p.waterCount = maxW; // fill completely, no cost
-      watered++;
-    });
-    updatePts();
-    renderPlots();
-    toast(`💧 Hidratante usado! ${watered} canteiro${watered !== 1 ? 's' : ''} regado${watered !== 1 ? 's' : ''} completamente!`);
-    renderFertilizerShop();
-    return;
-  }
-
-  G.fertilizerInventory[id] = (G.fertilizerInventory[id] || 0) + 1;
+  G.fertilizerInventory[id] = (G.fertilizerInventory[id] || 0) + qty;
   updatePts();
   renderFertilizerShop();
   renderFertilizerInventory();
-  spendSEPoints(f.cost);
-  toast(`${f.emoji} ${f.name} comprado! Clique num canteiro plantado para aplicar.`);
+  spendSEPoints(total);
+  toast(`${f.emoji} ${qty} ${f.name}${qty > 1 ? 's' : ''} comprada${qty > 1 ? 's' : ''}!`);
 }
 
 function applyFertilizer(plotIdx, fertilizerId) {
@@ -3533,7 +3963,7 @@ function applyFertilizer(plotIdx, fertilizerId) {
   if (fertilizerId === 'quick_grow') {
     toast(`⚡ Adubo Rápido aplicado no canteiro ${plotIdx + 1}! A próxima planta crescerá 2× mais rápido.`);
   } else if (fertilizerId === 'golden_soil') {
-    toast(`✨ Terra Dourada aplicada no canteiro ${plotIdx + 1}! A próxima colheita valerá 2× mais!`);
+    toast(`✨ Terra Dourada aplicada no canteiro ${plotIdx + 1}! A próxima colheita renderá +1 unidade.`);
   }
 }
 
@@ -3553,8 +3983,47 @@ function sellAll() {
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
   const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
   if (!hasAny) return;
-  // Select all and sell
-  allTypes.forEach(t => { SELL[t] = G.harvested[t] || 0; });
+  allTypes.forEach(type => { SELL[type] = G.harvested[type] || 0; });
+  renderSellAllConfirm();
+}
+
+function renderSellAllConfirm() {
+  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
+  const available = allTypes.filter(type => (G.harvested[type] || 0) > 0);
+  const total = available.reduce((sum, type) => sum + (SELL[type] || 0) * effectiveSellValue(type), 0);
+  const rows = available.map(type => {
+    const item = getPlantable(type);
+    const qty = SELL[type] || 0;
+    const max = G.harvested[type] || 0;
+    return `<div class="shop-cart-row"><span>${item.emoji} ${item.name}</span><div class="shop-cart-row-controls"><button onclick="adjustSellAllQty('${type}',-1)" aria-label="Remover ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1)" aria-label="Adicionar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button></div></div>`;
+  }).join('');
+  document.getElementById('sell-all-confirm-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'sell-all-confirm-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="sell-all-confirm-title">
+    <button class="popup-close-x" onclick="closeSellAllConfirm()" aria-label="Fechar">×</button>
+    <h2 id="sell-all-confirm-title">Escolha o que vender</h2>
+    <p>Confira os itens e ajuste as quantidades antes de confirmar.</p>
+    <div class="sell-confirm-items">${rows}</div>
+    <div class="market-total-pts" style="width:max-content;margin:14px auto 4px">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div>
+    <div class="modal-actions"><button type="button" class="btn-cancel" onclick="event.stopPropagation();closeSellAllConfirm()">Não</button><button type="button" class="btn-ok" onclick="event.stopPropagation();confirmSellAll()" ${total === 0 ? 'disabled' : ''}>Sim</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function adjustSellAllQty(type, delta) {
+  const max = G.harvested[type] || 0;
+  SELL[type] = Math.max(0, Math.min(max, (SELL[type] || 0) + delta));
+  renderSellAllConfirm();
+}
+
+function closeSellAllConfirm() {
+  document.getElementById('sell-all-confirm-overlay')?.remove();
+}
+
+function confirmSellAll() {
+  closeSellAllConfirm();
   sellSelected();
 }
 
@@ -3649,9 +4118,9 @@ function renderShop() {
 
   const items = entries.map(([type, p]) => {
     const lv = currentLevel();
-    const locked = lv < p.minLevel;
+    const locked = !previewAccess() && lv < p.minLevel;
     const outOfSeason = !isInSeason(type);
-    const canAfford = G.pts >= p.cost;
+    const canAfford = G.pts >= p.cost * (SHOP_QTY[type] || 1);
     const sellVal = effectiveSellValue(type);
     const profit = sellVal - p.cost;
     const profitLabel = profit >= 0
@@ -3664,17 +4133,19 @@ function renderShop() {
       <div class="cozy-level-chip" style="font-size:10px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:2px 8px;margin-top:2px">🔒 Nível ${p.minLevel}</div>
     </div>`;
 
-    if (outOfSeason) return `<div class="shop-item cant-afford" style="position:relative">
+    if (outOfSeason) return `<div class="shop-item cant-afford season-tooltip-wrap" tabindex="0" style="position:relative">
       ${seedBagSVG(type, true)}
       <div class="shop-item-name" style="opacity:.5">${p.name}</div>
       <div class="cozy-season-chip" style="font-size:10px;font-weight:800;background:#a06020;color:#fff;border-radius:99px;padding:2px 8px;margin-top:2px">${currentSeason().icon} Fora de estação</div>
+      <div class="header-btn-tip">Item fora de estação<br><span>Espere a estação correta para a compra.</span></div>
     </div>`;
 
-    return `<div class="shop-item ${canAfford ? '' : 'cant-afford'}" onclick="buyPlant('${type}', this)">
+    return `<div class="shop-item shop-add-tooltip ${canAfford ? '' : 'cant-afford'}" onclick="addToShopCart('${type}')">
       ${seedBagSVG(type)}
       <div class="shop-item-name">${p.name}</div>
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${p.maxGrow}</div>
-      <div class="shop-item-price">🌟 ${p.cost}</div>
+      <div class="shop-item-price">🌟 ${p.cost * (SHOP_QTY[type] || 1)}</div>
+      ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
         venda <span style="color:var(--soil2);font-weight:800;margin:0 2px">🌟 ${sellVal}</span>(${profitLabel})
       </div>
@@ -3685,18 +4156,20 @@ function renderShop() {
 }
 function buyPlant(type, el) {
   const p = getPlantable(type);
-  if (currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para comprar!`); return; }
+  const qty = SHOP_QTY[type] || 1;
+  const total = p.cost * qty;
+  if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para comprar!`); return; }
   if (!isInSeason(type)) { toast(`${currentSeason().icon} Fora de estação! Disponível na próxima ${currentSeason().name === 'Inverno' ? 'Primavera' : 'estação correta'}.`); return; }
-  if (G.pts < p.cost) { toast('✨ Pontos insuficientes!'); return; }
-  G.pts -= p.cost;
-  G.inventory[type] = (G.inventory[type] || 0) + 1;
+  if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
+  G.pts -= total;
+  G.inventory[type] = (G.inventory[type] || 0) + qty;
   updatePts();
   renderInventory();
   gainXP('buy', el);
   missionProgress('buy2');
   initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + 1; checkAchievements();
-  spendSEPoints(p.cost);
-  toast(`${p.emoji} Muda de ${p.name} comprada! Clique em um canteiro para plantar.`);
+  spendSEPoints(total);
+  toast(`${p.emoji} ${qty} muda${qty > 1 ? 's' : ''} de ${p.name} comprada${qty > 1 ? 's' : ''}!`);
 }
 
 // ─── PLOTS ───────────────────────────────────────────────
@@ -3717,6 +4190,7 @@ function updatePlotTooltip(idx) {
     }
     ${plot.quickGrow ? '<br>⚡ Adubo Rápido ativo' : ''}
     ${plot.goldenSoil ? '<br>✨ Terra Dourada ativa' : ''}
+    ${plot.goldenPlot ? '<br>🌟 Canteiro Especial · valor 3x' : ''}
   `;
 }
 
@@ -3730,7 +4204,7 @@ function renderPlots() {
 function buildPlotEl(plot, idx) {
   const locked = idx >= G.unlockedPlots;
   const div = document.createElement('div');
-  div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty');
+  div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty') + (plot?.goldenPlot || G.specialPlot === idx ? ' special-plot' : '');
   div.dataset.idx = idx;
 
   // LOCKED
@@ -3775,6 +4249,12 @@ function buildPlotEl(plot, idx) {
       div.appendChild(badge);
       div.style.borderColor = prepFert === 'quick_grow' ? '#f0a020' : '#d4a000';
     }
+    if (G.specialPlot === idx) {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'plot-tooltip';
+      tooltip.innerHTML = '<strong>✨ Canteiro Especial</strong><br>Plantas douradas valem 3× mais';
+      div.appendChild(tooltip);
+    }
   } else {
     const maxW = effectiveMaxWater(plot.type);
     const maxG = effectiveMaxGrow(plot.type);
@@ -3798,6 +4278,7 @@ function buildPlotEl(plot, idx) {
       }
       ${plot.quickGrow ? '<br>⚡ Adubo Rápido ativo' : ''}
       ${plot.goldenSoil ? '<br>✨ Terra Dourada ativa' : ''}
+      ${plot.goldenPlot ? '<br>✨ Canteiro Especial · plantas valem 3× mais' : ''}
     `;
     div.appendChild(tooltip);
 
@@ -3875,6 +4356,17 @@ function onPlotClick(idx) {
   const tool = G.selectedTool;
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);
 
+  if (G.specialPlotPending) {
+    if (plot) { toast('Escolha um canteiro vazio para o upgrade.'); return; }
+    G.specialPlot = idx;
+    G.specialPlotPending = false;
+    G.upgrades.add('special_plot');
+    renderPlots(); renderUpgradeShop();
+    saveGardenToSE();
+    toast(`✨ Canteiro ${idx + 1} agora produz plantas douradas!`, 3500);
+    return;
+  }
+
   // Se adubo selecionado mas canteiro TEM planta → avisar
   if (G.selectedFertilizer && plot) {
     toast(`⚠️ O ${FERTILIZERS[G.selectedFertilizer].name} precisa ser aplicado num canteiro VAZIO antes de plantar!`, 3000);
@@ -3897,15 +4389,16 @@ function onPlotClick(idx) {
       updatePts();
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     } else {
-      const qty = hasGolden ? 2 : 1;
-      G.harvested[type] = (G.harvested[type] || 0) + qty;
+      const qty = hasGolden ? 2 + upgradeLevel('golden_soil_plus') : 1;
+      const harvestQty = qty * (plot.goldenPlot ? 3 : 1);
+      G.harvested[type] = (G.harvested[type] || 0) + harvestQty;
       updatePts();
       missionProgress('harvest2');
       initAchievements();
       G.achievStats.totalHarvest = (G.achievStats.totalHarvest||0) + qty;
       if (FLOWERS[type]) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0); // tracked at sell
       checkAchievements();
-      toast(`🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!${hasGolden ? ' ✨ Terra Dourada: +2 unidades!' : ''}`);
+      toast(`🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!${plot.goldenPlot ? ' ✨ Canteiro Especial: planta dourada vale 3x!' : hasGolden ? ' ✨ Terra Dourada: +1 unidade extra!' : ''}`);
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     }
     return;
@@ -3932,7 +4425,7 @@ function onPlotClick(idx) {
     const type = G.selectedSeed;
     G.inventory[type]--;
     if (G.inventory[type] <= 0) G.selectedSeed = null;
-    const newPlot = { type, waterCount: 0, growCount: 0 };
+    const newPlot = { type, waterCount: 0, growCount: 0, goldenPlot: G.specialPlot === idx };
     // Apply any pre-applied fertilizer on this slot
     if (G.plotFertilizers && G.plotFertilizers[idx]) {
       const fid = G.plotFertilizers[idx];
@@ -4378,6 +4871,8 @@ function closeModal() { document.getElementById('modal').classList.add('hidden')
 // ─── PROFILE ─────────────────────────────────────────────
 function openProfile() {
   const { current } = getLevelData(G.xp);
+  initAchievements();
+  const stats = G.achievStats;
 
   document.getElementById('profile-avatar').textContent = current.emoji;
   document.getElementById('profile-level-badge').textContent = `Nível ${current.lv}`;
@@ -4386,14 +4881,22 @@ function openProfile() {
   document.getElementById('profile-farm-name').value =
     document.getElementById('garden-name').textContent;
 
+  document.getElementById('profile-stats').innerHTML = [
+    ['✨', G.xp || 0, 'XP acumulado'],
+    ['🧺', stats.totalHarvest || 0, 'Itens colhidos'],
+    ['🛍️', stats.totalBuy || 0, 'Itens comprados'],
+    ['💧', stats.totalWater || 0, 'Regas realizadas'],
+    ['<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true">', stats.totalSellPts || 0, 'Pontos em vendas'],
+    ['🔥', G.presenceStreak || 0, 'Dias de presença'],
+  ].map(([icon, value, label]) => `<div class="profile-stat"><div class="profile-stat-val">${icon} ${Number(value).toLocaleString('pt-BR')}</div><div class="profile-stat-lbl">${label}</div></div>`).join('');
+
   document.getElementById('profile-overlay').classList.remove('hidden');
 
   // Show badges
-  initAchievements();
   document.getElementById('profile-badges').innerHTML = ACHIEV_GROUPS.map(g => {
     const unlocked = G.achievements.has('badge_' + g.id);
     return `<div class="header-icon-wrap">
-      <span class="profile-badge-slot ${unlocked ? 'unlocked' : ''}">${g.badge}</span>
+      <span class="profile-badge-slot ${unlocked ? 'unlocked' : ''}"><img src="badge-${g.id}.svg" alt="${g.name}" width="64" height="72"></span>
       <div class="header-btn-tip">${g.name}<br><span>${unlocked ? '✅ Desbloqueado' : '🔒 Complete as 5 conquistas'}</span></div>
     </div>`;
   }).join('');
@@ -4469,7 +4972,7 @@ function renderMailList() {
   const unopened = G_MAIL.filter(m => !m.opened);
 
   if (!unopened.length) {
-    list.innerHTML = `<div style="text-align:center;padding:20px 0;font-size:13px;font-weight:600;color:var(--text2);opacity:.6">
+    list.innerHTML = `<div class="mail-empty-message" style="text-align:center;padding:20px 0;font-size:13px;font-weight:600;color:var(--text2);opacity:.6">
       📭 Nenhuma carta por enquanto — suba de nível para receber recompensas!
     </div>`;
     return;
@@ -4661,13 +5164,22 @@ async function saveGardenToSE() {
     plots:            G.plots,
     unlockedPlots:    G.unlockedPlots,
     harvested:        G.harvested,
+    goldenHarvested:   G.goldenHarvested || {},
     upgrades:         [...G.upgrades],
+    upgradeLevels:    G.upgradeLevels || {},
     seasonIdx:        G.seasonIdx,
     seasonDay:        G.seasonDay,
     missions:         G.missions,
     achievements:     [...(G.achievements || [])],
     achievStats:      G.achievStats || {},
     achievSeen:       G.achievSeen  || 0,
+    presenceStreak:   G.presenceStreak || 0,
+    presenceLastDay:  G.presenceLastDay || '',
+    presenceBonusDate:G.presenceBonusDate || '',
+    presenceDays:     G.presenceDays || [],
+    specialPlot:      G.specialPlot,
+    specialPlotPending:G.specialPlotPending || false,
+    shopCart:         SHOP_CART,
     mail:             G_MAIL,
     savedAt:          Date.now(),
   };
@@ -4721,12 +5233,19 @@ window.addEventListener('beforeunload', () => {
     inventory: G.inventory,
     fertilizerInventory: G.fertilizerInventory,
     plotFertilizers: G.plotFertilizers, plots: G.plots,
-    unlockedPlots: G.unlockedPlots, harvested: G.harvested,
-    upgrades: [...G.upgrades], seasonIdx: G.seasonIdx,
+    unlockedPlots: G.unlockedPlots, harvested: G.harvested, goldenHarvested: G.goldenHarvested || {},
+    upgrades: [...G.upgrades], upgradeLevels: G.upgradeLevels || {}, seasonIdx: G.seasonIdx,
     seasonDay: G.seasonDay, missions: G.missions,
     achievements: [...(G.achievements || [])],
     achievStats: G.achievStats || {},
     achievSeen: G.achievSeen || 0,
+    presenceStreak: G.presenceStreak || 0,
+    presenceLastDay: G.presenceLastDay || '',
+    presenceBonusDate: G.presenceBonusDate || '',
+    presenceDays: G.presenceDays || [],
+    specialPlot: G.specialPlot,
+    specialPlotPending: G.specialPlotPending || false,
+    shopCart: SHOP_CART,
     mail: G_MAIL,
     savedAt: Date.now(),
   };
@@ -4766,13 +5285,23 @@ async function loadGardenFromSE(username) {
     G.plots           = (save.plots || Array(6).fill(null)).map(p => p || null);
     G.unlockedPlots   = save.unlockedPlots    || 2;
     G.harvested       = save.harvested        || {};
-    G.upgrades        = new Set(save.upgrades || []);
+  G.upgrades        = new Set(save.upgrades || []);
+  G.goldenHarvested = save.goldenHarvested || {};
+  G.upgradeLevels   = save.upgradeLevels || {};
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
     G.achievSeen      = save.achievSeen       || 0;
+    G.presenceStreak  = save.presenceStreak  || 0;
+    G.presenceLastDay = save.presenceLastDay || '';
+    G.presenceBonusDate = save.presenceBonusDate || '';
+    G.presenceDays = save.presenceDays || [];
+    G.specialPlot = save.specialPlot ?? null;
+    G.specialPlotPending = save.specialPlotPending || false;
+    Object.keys(SHOP_CART).forEach(k => delete SHOP_CART[k]);
+    Object.assign(SHOP_CART, save.shopCart || {});
 
     // Restore mail
     if (save.mail && Array.isArray(save.mail)) {
@@ -4874,6 +5403,23 @@ function openModal()  { document.getElementById('modal').classList.remove('hidde
 function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 function connectSE()  { closeModal(); }
 
+function applyTheme(isDark) {
+  document.body.classList.toggle('dark-mode', isDark);
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) {
+    toggle.textContent = isDark ? '☀️' : '🌙';
+    toggle.setAttribute('aria-label', isDark ? 'Ativar modo claro' : 'Ativar modo escuro');
+  }
+}
+
+function toggleDarkMode() {
+  const isDark = !document.body.classList.contains('dark-mode');
+  localStorage.setItem('mistty-theme', isDark ? 'dark' : 'light');
+  applyTheme(isDark);
+}
+
+applyTheme(localStorage.getItem('mistty-theme') === 'dark');
+
 function toggleUserMenu() {
   if (!seUser) return; // not logged in — do nothing
   const menu = document.getElementById('user-menu');
@@ -4905,6 +5451,20 @@ document.addEventListener('click', (e) => {
 });
 
 function logout() {
+  if (document.getElementById('logout-confirm-overlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'logout-confirm-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="logout-confirm-title">
+    <button class="popup-close-x" onclick="document.getElementById('logout-confirm-overlay')?.remove()" aria-label="Fechar">×</button>
+    <h2 id="logout-confirm-title">Sair da conta?</h2>
+    <p>Seu progresso será salvo antes de encerrar a sessão.</p>
+    <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('logout-confirm-overlay')?.remove()">Cancelar</button><button class="btn-ok" onclick="document.getElementById('logout-confirm-overlay')?.remove(); completeLogout()">Sair e salvar</button></div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function completeLogout() {
   // Save garden before leaving
   saveGardenToSE().finally(() => {
     seUser = null;
@@ -4987,17 +5547,9 @@ renderMissions();
 updateAchievBadge();
 updatePts();
 
-// Preview-only local mode: lets the visual work be reviewed without Twitch.
-const isLocalPreview = new URLSearchParams(window.location.search).has('preview') || window.location.hash === '#preview';
-if (isLocalPreview && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
-  seUser = { username: 'preview', displayName: 'Visitante', points: 860 };
-  G.pts = 860;
-  document.getElementById('login-overlay').classList.add('hidden');
-  document.getElementById('twitch-btn').classList.add('connected');
-  document.getElementById('twitch-btn').innerHTML = '👤 Visitante';
-  document.getElementById('garden-name').textContent = G.gardenName || 'Jardim da Mistty';
-  updatePts();
-} else if (window.location.hash.includes('access_token')) {
+// Normal mode: login and points come from StreamElements.
+const isLocalPreview = false;
+if (window.location.hash.includes('access_token')) {
   // Coming back from Twitch OAuth
   handleTwitchCallback();
 } else if (sessionStorage.getItem('se_username')) {
@@ -5027,7 +5579,7 @@ function growTick() {
     if (plot.waterCount < maxW) return;
     if (plot.growCount >= maxG) return;
     // quick_grow fertilizer: advance 2 extra steps
-    const bonus = plot.quickGrow ? 2 : 0;
+    const bonus = plot.quickGrow ? 1 + upgradeLevel('quick_grow_plus') : 0;
     plot.growCount = Math.min(maxG, plot.growCount + effectiveGrowStep() + bonus);
     anyGrew = true;
 
@@ -5087,5 +5639,11 @@ G.growTimer = setInterval(growTick, GROW_INTERVAL_MS);
   </div>
 </footer>
 
+<script>
+  // Preview-only: show the game screen locally without requiring login.
+  if (location.hostname === 'localhost') {
+    document.getElementById('login-overlay')?.classList.add('hidden');
+  }
+</script>
 </body>
 </html>

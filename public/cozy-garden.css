@@ -120,6 +120,7 @@ header { gap: 16px; padding: 18px 20px; }
 .cozy-tooltip.below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--cream); }
 .cozy-tooltips-ready .header-btn-tip, .cozy-tooltips-ready .plot-tooltip,
 .cozy-tooltips-ready .inv-slot .inv-tip, .cozy-tooltips-ready .fert-inv-slot .fert-tip { display: none !important; }
+body:has(#user-menu:not(.hidden)) #cozy-tooltip { display: none !important; }
 @media (max-width: 850px) {
   header { grid-template-columns: 1fr auto; }
   .header-right { grid-column: 1 / -1; justify-content: space-between; }

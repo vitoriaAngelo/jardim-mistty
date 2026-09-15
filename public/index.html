@@ -451,6 +451,19 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
 .premium-claim-all:hover { transform:translateY(-1px); box-shadow:0 4px 0 #8c65aa; }
 .premium-claim:disabled, .premium-claim-all:disabled { cursor:default; transform:none; box-shadow:none; opacity:.82; }
 .premium-claim-all.claimed { background:#dcebd0; border-color:#8aaa72; color:#416037; }
+.pix-success-overlay { position:fixed; inset:0; z-index:1400; display:grid; place-items:center; padding:20px; background:rgba(32,45,31,.42); backdrop-filter:blur(3px); }
+.pix-success-overlay.hidden { display:none; }
+.pix-success-modal { width:min(390px,100%); padding:26px 24px 22px; border:1px solid #dec783; border-radius:24px; background:linear-gradient(160deg,#fffaf0,#f3f0df); color:#59694b; text-align:center; box-shadow:0 8px 0 #cdb982, 0 18px 38px rgba(67,54,25,.2); animation:pix-success-in .28s cubic-bezier(.2,.8,.25,1) both; }
+.pix-success-icon { width:62px; height:62px; margin:0 auto 10px; display:grid; place-items:center; border-radius:50%; background:#e9f2d9; border:2px solid #a8c381; font-size:32px; box-shadow:0 4px 0 #91ad6d; }
+.pix-success-modal h2 { margin:0; font:900 21px/1.2 'Nunito',sans-serif; color:#526946; }
+.pix-success-modal p { margin:9px 0 17px; font:700 14px/1.45 'Nunito',sans-serif; color:#687052; }
+.pix-success-modal button { min-width:150px; padding:10px 18px; border:1px solid #92a96f; border-radius:12px; background:#a9c57e; color:#fffdf7; font:900 13px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 3px 0 #7f9d60; }
+.pix-success-modal button:hover { transform:translateY(-1px); }
+@keyframes pix-success-in { from { opacity:0; transform:translateY(10px) scale(.96); } to { opacity:1; transform:none; } }
+body.dark-mode .pix-success-modal { border-color:#8f7843; background:linear-gradient(160deg,#354332,#293528); color:#edf4df; box-shadow:0 8px 0 #68562e, 0 18px 38px #11181199; }
+body.dark-mode .pix-success-modal h2 { color:#f4e5b0; }
+body.dark-mode .pix-success-modal p { color:#cbd9c2; }
+body.dark-mode .pix-success-icon { background:#43543a; border-color:#8ea96d; }
 .ranking-farm-title { display:flex; align-items:center; gap:3px; min-width:0; flex-wrap:nowrap; }
 .ranking-farm-title .ranking-farm-name { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ranking-farm-title .premium-profile-chip { flex-shrink:0; }
@@ -517,7 +530,7 @@ body.dark-mode .update-news-item { background:#30392d; border-color:#52624d; col
 body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 !important; }
 
 /* ─── PLOTS ──────────────────────────────── */
-.plots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.plots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: stretch; }
 .plot.special-plot { outline:2px solid #d6b45f; outline-offset:2px; }
 
 .plot {
@@ -528,7 +541,10 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
   transition: transform .18s, box-shadow .18s;
   box-shadow: 0 4px 0 #9a6a3a, 0 6px 16px rgba(80,40,0,.12);
   display: flex; flex-direction: column; align-items: center; gap: 5px;
-  min-height: 160px;
+  /* Todos os canteiros mantêm a mesma altura do canteiro completo (#1). */
+  height: 236px;
+  min-height: 236px;
+  box-sizing: border-box;
   position: relative;
   border: 2.5px solid #b8884a;
   user-select: none;
@@ -1767,6 +1783,9 @@ body:has(.login-overlay:not(.hidden)) { overflow: hidden; }
 .subscriber-frame[data-frame="pink"] { background:linear-gradient(145deg,#f8d8e7,#e9a9c7 55%,#c97da6); box-shadow:0 4px 0 #a76186,0 0 0 2px #fde8f1; }
 .subscriber-frame[data-frame="blue"] { background:linear-gradient(145deg,#d8ecf7,#a9cce2 55%,#78a6c5); box-shadow:0 4px 0 #557f9d,0 0 0 2px #e3f4fc; }
 .subscriber-frame[data-frame="red"] { background:linear-gradient(145deg,#f6d5d1,#e5a29d 55%,#be706e); box-shadow:0 4px 0 #914d4c,0 0 0 2px #fbe5e2; }
+.subscriber-frame[data-frame="yellow"] { background:linear-gradient(145deg,#fff1ae,#e8bd55 55%,#c8943a); box-shadow:0 4px 0 #9a7440,0 0 0 2px #fff2bd; }
+.subscriber-frame[data-frame="vip"] { background:repeating-linear-gradient(135deg,#fff2a6 0 7px,#e6b94d 7px 14px,#fff8c9 14px 21px); border:3px solid #b07d32; box-shadow:0 4px 0 #80602c,0 0 0 2px #fff0a8; }
+.subscriber-frame[data-frame="vip"]::before { content:'VIP'; top:-12px; right:-10px; color:#fff4b0; background:#a87529; border:1px solid #ffe895; border-radius:7px; padding:2px 4px; font:900 9px 'Nunito',sans-serif; text-shadow:0 1px #76501e; }
 .frame-edit-btn { position:absolute; right:-4px; bottom:-4px; z-index:2; width:18px; height:18px; padding:0; border:2px solid #fffdf7; border-radius:50%; background:#8b5bb5; color:#fff; font:700 11px/14px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #68418c; }
 .frame-edit-btn:hover { background:#9d70c2; transform:none; }
 .frame-edit-btn { transition:background .2s ease, transform .22s ease, box-shadow .22s ease; }
@@ -1791,6 +1810,8 @@ body.dark-mode .subscriber-label { color:#d9baf2; }
 .frame-picker-btn[data-frame="blue"] { background:#a9cce2; box-shadow:0 0 0 1px #82b0cb; }
 .frame-picker-btn[data-frame="red"] { background:#e5a29d; box-shadow:0 0 0 1px #c87d79; }
 .frame-picker-btn[data-frame="purple"] { background:#c39be2; }
+.frame-picker-btn[data-frame="yellow"] { background:#e8bd55; box-shadow:0 0 0 1px #c8943a; }
+.frame-picker-btn[data-frame="vip"] { background:repeating-linear-gradient(135deg,#fff2a6 0 5px,#d9a93f 5px 10px,#fff8c9 10px 15px); border-color:#b07d32; box-shadow:0 0 0 1px #80602c; }
 .frame-picker-btn.selected { box-shadow:0 0 0 2px #a779c9; }
 .frame-picker-btn.locked { opacity:.52; cursor:not-allowed; filter:grayscale(.35); }
 .frame-picker.has-locked-purple { position:absolute; left:0; top:48px; }
@@ -2051,7 +2072,7 @@ body.dark-mode .profile-current-value { color:#f1f5e9; }
 .plot-label { text-shadow: none; }
 .plot-label span { color: #f8f1e2 !important; }
 .empty-slot-hint { opacity: .75; }
-.empty-slot-hint span { color: #6d7c59; }
+.empty-slot-hint span { color: #6d7c59; font-size:9px; }
 .cozy-growing { transform-origin: 50% 94%; animation: cozy-sway 5s ease-in-out infinite; }
 @keyframes cozy-sway { 0%,100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg); } }
 @media (prefers-reduced-motion: reduce) { .plant-svg, .cozy-growing, .bloom-anim { animation: none !important; } }
@@ -2080,10 +2101,35 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
 .shop-cart:hover .shop-cart-items, .shop-cart:focus-within .shop-cart-items { max-height:300px; margin:8px 0 10px; border-top-color:var(--cozy-line,#d8c9ac); padding-top:8px; opacity:1; }
 .shop-cart-row { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; color:var(--text); }
 .shop-cart-row > span { white-space:nowrap; }
-.plot-harvest-count { margin-top:2px; color:#f0d28a; font-size:9px; font-weight:900; white-space:nowrap; }
+.plot-harvest-count { margin-top:2px; color:#80652e; font-size:10px; line-height:1.1; font-weight:900; white-space:nowrap; }
+.plot-special-expiry { display:block; width:100%; font-size:10px !important; line-height:1.1; text-align:center; white-space:nowrap; transform:translateY(2px); }
+.special-plot-icon { width:25px; height:25px; filter:drop-shadow(0 2px 2px #7c5b2444); }
+.plot-label .special-plot-icon { width:14px; height:14px; vertical-align:middle; }
+.fertilizer-status-badge { display:grid; place-items:center; width:24px; height:24px; border:1px solid #e8d49a; border-radius:9px; background:#fff8dc; box-shadow:0 2px 0 #d6bb68; font-size:14px; }
+.fertilizer-status-badge.quick { border-color:#b9d99f; background:#eff8df; box-shadow:0 2px 0 #9abd7e; }
+body.dark-mode .fertilizer-status-badge { background:#51452a; border-color:#b99b4f; box-shadow:0 2px 0 #806d35; }
+body.dark-mode .fertilizer-status-badge.quick { background:#344a32; border-color:#729765; box-shadow:0 2px 0 #4c7045; }
 body.dark-mode .plot-harvest-count { color:#f4d990; }
 .shop-item-harvests { margin-top:2px; color:#9a7440; font-size:10px; font-weight:900; }
 body.dark-mode .shop-item-harvests { color:#e4c47c; }
+.bonus-price { display:block; margin-top:3px; color:#9a7440; font-size:14px; font-weight:900; }
+body.dark-mode .bonus-price { color:#f4d990; }
+.bonus-kit-icon { display:grid; place-items:center; width:48px; height:48px; margin:0 auto 8px; border-radius:16px; background:#fff7d7; border:1px solid #e6c96d; box-shadow:0 3px 0 #d8ba58; }
+.bonus-kit-icon svg { width:34px; height:34px; }
+body.dark-mode .bonus-kit-icon { background:#51482c; border-color:#b99b4f; box-shadow:0 3px 0 #806d35; }
+#bonus-overlay .mail-modal { max-width:900px !important; }
+#bonus-overlay .premium-benefits { grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+#bonus-overlay .premium-benefits > div { display:flex; flex-direction:column; align-items:stretch; min-height:245px; padding:15px; border:1px solid #e5d8bd; border-radius:20px; background:linear-gradient(160deg,#fff9e8,#f2f0df); box-shadow:0 4px 0 #dfd2b5; }
+#bonus-overlay .premium-benefits > div { cursor:pointer; transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease, filter .2s ease; }
+#bonus-overlay .premium-benefits > div:hover { transform:translateY(-5px); border-color:#d4a943; box-shadow:0 8px 0 #d8ba58, 0 10px 22px #b58a3040; filter:saturate(1.08); }
+#bonus-overlay .premium-benefits > div > strong { color:#59694b; font-size:15px; line-height:1.25; }
+#bonus-overlay .premium-benefits > div > span { margin-top:8px; color:#687052; font-size:12px; line-height:1.7; }
+#bonus-overlay .premium-benefits > div > .premium-claim { margin-top:auto; }
+body.dark-mode #bonus-overlay .premium-benefits > div { border-color:#58684f; background:linear-gradient(160deg,#354332,#293528); box-shadow:0 4px 0 #1d281e; }
+body.dark-mode #bonus-overlay .premium-benefits > div > strong { color:#edf4df; }
+body.dark-mode #bonus-overlay .premium-benefits > div > span { color:#cbd9c2; }
+body.dark-mode #bonus-overlay .premium-benefits > div:hover { border-color:#d6b85c; box-shadow:0 8px 0 #806d35, 0 10px 22px #11181199; }
+@media (max-width:680px) { #bonus-overlay .premium-benefits { grid-template-columns:1fr; } #bonus-overlay .premium-benefits > div { min-height:0; } }
 .shop-cart-row-controls { display:flex; align-items:center; gap:4px; }
 .shop-cart-row-controls button { width:19px; height:19px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:50%; background:var(--cream); color:var(--text); font-weight:800; line-height:1; cursor:pointer; }
 .shop-cart-row-controls span { min-width:24px; text-align:center; font-weight:800; }
@@ -2538,6 +2584,8 @@ body.dark-mode .frame-picker-btn[data-frame="purple"] { background:#c39be2; bord
 body.dark-mode .frame-picker-btn[data-frame="pink"] { background:#e9a9c7; border-color:#fff0f6; box-shadow:0 0 0 1px #d98caf; }
 body.dark-mode .frame-picker-btn[data-frame="blue"] { background:#a9cce2; border-color:#edf8ff; box-shadow:0 0 0 1px #82b0cb; }
 body.dark-mode .frame-picker-btn[data-frame="red"] { background:#e5a29d; border-color:#fff0ed; box-shadow:0 0 0 1px #c87d79; }
+body.dark-mode .frame-picker-btn[data-frame="yellow"] { background:#d6aa43; border-color:#fff0bd; box-shadow:0 0 0 1px #b07d32; }
+body.dark-mode .frame-picker-btn[data-frame="vip"] { background:repeating-linear-gradient(135deg,#e8c967 0 5px,#a8792d 5px 10px,#f4df8c 10px 15px); border-color:#fff0bd; box-shadow:0 0 0 1px #b07d32; }
 body.season-spring .profile-modal { background:radial-gradient(circle at 100% 0,#f5dce455 0 20%,transparent 21%),linear-gradient(135deg,#fffdf7,#edf5e7 62%,#fae8eb) !important; }
 body.season-summer .profile-modal { background:radial-gradient(circle at 100% 0,#f2d98a55 0 20%,transparent 21%),linear-gradient(135deg,#fffdf7,#f8efcf 62%,#eef2cf) !important; }
 body.season-autumn .profile-modal { background:radial-gradient(circle at 100% 0,#dda87a55 0 20%,transparent 21%),linear-gradient(135deg,#fffdf7,#f4e5d2 62%,#efd7c5) !important; }
@@ -2731,6 +2779,21 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
         <span class="achiev-tool-badge inventory-tool-badge hidden" id="inventory-tool-badge">0</span>
       </button>
       <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Inventário<br><span>Escolha uma muda para plantar</span></div>
+    </div>
+    <div class="header-icon-wrap" style="width:100%">
+      <button class="achiev-tool-btn cozy-bonus" onclick="openBonusShop()" aria-label="Bônus da fazenda">
+        <svg class="cozy-tool-art" width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <ellipse cx="32" cy="57" rx="21" ry="3" fill="#e1dfcf"/>
+          <path d="M15 25H49V51Q32 58 15 51Z" fill="#f6df91" stroke="#9a7440" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M13 22Q32 19 51 22V29Q32 32 13 29Z" fill="#e8bd55" stroke="#9a7440" stroke-width="1.8"/>
+          <path d="M30 22V53" stroke="#fff7ff" stroke-width="2.2" opacity=".85"/>
+          <path d="M32 22Q25 18 25 13Q30 12 32 19Q34 12 39 13Q39 18 32 22Z" fill="#f4d98a" stroke="#9a7440" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M22 38Q32 31 42 38Q32 47 22 38Z" fill="#fffdf7" stroke="#9a7440" stroke-width="1.3"/>
+          <circle cx="28" cy="38" r="1.2" fill="#e8bd55"/><circle cx="36" cy="38" r="1.2" fill="#e8bd55"/>
+        </svg>
+        <span>Bônus</span>
+      </button>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Bônus<br><span>Compre benefícios para sua fazenda</span></div>
     </div>
     <div class="header-icon-wrap" style="width:100%">
       <button class="achiev-tool-btn cozy-shop" onclick="openShop()" aria-label="Loja">
@@ -3105,6 +3168,8 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
           <span class="frame-option" data-tooltip="Moldura rosa"><button class="frame-picker-btn" data-frame="pink" aria-label="Moldura rosa" onclick="selectProfileFrame('pink')"></button></span>
           <span class="frame-option" data-tooltip="Moldura azul"><button class="frame-picker-btn" data-frame="blue" aria-label="Moldura azul" onclick="selectProfileFrame('blue')"></button></span>
           <span class="frame-option" data-tooltip="Moldura vermelha"><button class="frame-picker-btn" data-frame="red" aria-label="Moldura vermelha" onclick="selectProfileFrame('red')"></button></span>
+          <span class="frame-option" data-tooltip="Moldura de apoiador amarela · permanente"><button class="frame-picker-btn" data-frame="yellow" aria-label="Moldura de apoiador amarela" onclick="selectProfileFrame('yellow')"></button></span>
+          <span class="frame-option" data-tooltip="Moldura VIP · exclusiva do Kit Especialista"><button class="frame-picker-btn" data-frame="vip" aria-label="Moldura VIP" onclick="selectProfileFrame('vip')"></button></span>
       </div>
     </div>
 
@@ -3282,6 +3347,30 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
   </div>
 </div>
 <div class="shop-cart empty shop-cart-closed" id="shop-cart"></div>
+
+<!-- BONUS MODAL -->
+<div class="mail-overlay hidden" id="bonus-overlay">
+  <div class="mail-modal" style="max-width:440px">
+    <button class="popup-close-x" aria-label="Fechar bônus" onclick="closeBonusShop()">×</button>
+    <div class="mail-modal-title">✨ Bônus da fazenda</div>
+    <p class="premium-copy">Escolha um bônus para sua fazenda. O pagamento será feito com Pix.</p>
+    <div class="premium-benefits">
+      <div><span class="bonus-kit-icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><path d="M20 34V20" stroke="#6c934d" stroke-width="2.5" stroke-linecap="round"/><path d="M20 25Q11 25 11 17Q19 16 20 23" fill="#a9cf72" stroke="#6c934d" stroke-width="1.5"/><path d="M20 29Q29 29 29 20Q21 19 20 27" fill="#c5df8b" stroke="#6c934d" stroke-width="1.5"/><path d="M13 34H27" stroke="#b57955" stroke-width="3" stroke-linecap="round"/></svg></span><strong>Kit — Jardineiro Iniciante</strong><b class="bonus-price">R$ 5,00</b><span>💧 Recarga do regador pela metade do preço<br>🪣 Aumenta em 2 a capacidade do regador<br>🧪 5 adubos de Terra Dourada<br>🪵 1 canteiro Especial por 1 estação<br>🖼️ Moldura de apoiador amarela — permanente</span><button class="premium-claim" onclick="requestBonusPix('Kit Jardineiro Iniciante')">Pagar com Pix</button></div>
+      <div><span class="bonus-kit-icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><path d="M20 34V19" stroke="#6c934d" stroke-width="2.5" stroke-linecap="round"/><path d="M20 25Q10 25 10 16Q19 16 20 23" fill="#a9cf72" stroke="#6c934d" stroke-width="1.5"/><path d="M20 25Q30 25 30 16Q21 16 20 23" fill="#c5df8b" stroke="#6c934d" stroke-width="1.5"/><circle cx="20" cy="13" r="5" fill="#f4b6c8" stroke="#ba6e8b" stroke-width="1.5"/><circle cx="17.8" cy="12.5" r="1" fill="#fffdf7"/><circle cx="22.2" cy="12.5" r="1" fill="#fffdf7"/><path d="M17 34H23" stroke="#b57955" stroke-width="3" stroke-linecap="round"/></svg></span><strong>Kit — Jardineiro Experiente</strong><b class="bonus-price">R$ 10,00</b><span>💧 Recarga do regador pela metade do preço<br>🪣 Aumenta em 4 a capacidade do regador<br>⏱️ 1 minuto no carregamento do regador<br>🧪 5 adubos de cada tipo<br>🪵 2 canteiros Especiais por 2 estações<br>🌱 4 pacotes de sementes Premium<br>🖼️ Moldura de apoiador amarela — permanente</span><button class="premium-claim" onclick="requestBonusPix('Kit Jardineiro Experiente')">Pagar com Pix</button></div>
+      <div><span class="bonus-kit-icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><path d="M20 7L22.5 13H29L23.8 16.5L26 23L20 19L14 23L16.2 16.5L11 13H17.5Z" fill="#f4d36d" stroke="#b07d32" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 27L15 35H25L28 27" fill="#e8bd55" stroke="#9a7440" stroke-width="1.6"/><path d="M12 27Q20 31 28 27" stroke="#fff7d7" stroke-width="1.5"/><path d="M15 24H25" stroke="#9a7440" stroke-width="2" stroke-linecap="round"/></svg></span><strong>Kit — Jardineiro Especialista</strong><b class="bonus-price">R$ 15,00</b><span>💧 Recarga do regador pela metade do preço<br>🪣 Aumenta em 4 a capacidade do regador<br>⏱️ 1 minuto de espera para recuperar o regador<br>🧪 10 adubos de cada tipo<br>🪵 4 canteiros Especiais por 3 estações<br>🌱 8 pacotes de sementes Premium<br>👑 Moldura VIP por 30 dias + moldura de apoiador amarela permanente</span><button class="premium-claim" onclick="requestBonusPix('Kit Jardineiro Especialista')">Pagar com Pix</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGAMENTO PIX CONFIRMADO -->
+<div class="pix-success-overlay hidden" id="pix-success-overlay" role="dialog" aria-modal="true" aria-labelledby="pix-success-title">
+  <div class="pix-success-modal">
+    <div class="pix-success-icon" aria-hidden="true">✓</div>
+    <h2 id="pix-success-title">Pagamento concluído!</h2>
+    <p id="pix-success-message">Seu kit já está disponível no inventário.</p>
+    <button type="button" onclick="closePixSuccess(); openInventory();">Abrir inventário</button>
+  </div>
+</div>
 
 <!-- PREMIUM MODAL -->
 <div class="mail-overlay hidden" id="premium-overlay">
@@ -3550,8 +3639,12 @@ const G = {
   presenceBonusDate: '',
   presenceDays: [],
   specialPlot: null,
+  specialPlots: [],
+  specialPlotExpiresAt: 0,
   specialPlotPending: false,
   profileFrame: 'red',
+  supporterFrameUnlocked: false,
+  bonusKitLevel: 0,
   dailyPhrase: '',
   isSubscriber: false,
   welcomeBonusClaimed: false,
@@ -3811,7 +3904,15 @@ const UPGRADES = [];
 function hasUpgrade(id) { return G.upgrades.has(id); }
 function upgradeLevel(id) { return Number(G.upgradeLevels?.[id] || (hasUpgrade(id) ? 1 : 0)); }
 function currentLevel() { return getLevelData(G.xp).current.lv; }
-function wateringRefillCost() { return currentLevel() >= 5 ? 500 : 120; }
+function wateringRefillCost() {
+  const base = currentLevel() >= 5 ? 500 : 120;
+  return G.bonusRefillDiscount ? Math.ceil(base / 2) : base;
+}
+function effectiveWaterRecoveryMinutes() {
+  const base = G.premiumWateringCan ? 2 : 5;
+  const skillReduction = Number(G.skillNodes?.irrigacao_tempo || 0);
+  return Math.max(1, base - Number(G.bonusWaterRecoveryMinutes || 0) - skillReduction);
+}
 function previewAccess() {
   return G.previewUnlocks || ((window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname))
     && new URLSearchParams(window.location.search).has('preview'));
@@ -3819,13 +3920,13 @@ function previewAccess() {
 
 function effectiveShovelCost() { return G.premiumShovel ? 25 : 50; }
 function maxWateringCapacity() {
-  if (currentLevel() >= 15) return 10;
-  if (currentLevel() >= 10) return 7;
-  return 5;
+  const levelCapacity = currentLevel() >= 15 ? 10 : currentLevel() >= 10 ? 7 : 5;
+  // O bônus dos kits pode ultrapassar o limite base de 10 águas.
+  return levelCapacity + Number(G.bonusWateringCapacity || 0);
 }
 function refillWateringCapacity() {
   const now = Date.now();
-  const interval = (G.premiumWateringCan ? 2 : 5) * 60 * 1000;
+  const interval = effectiveWaterRecoveryMinutes() * 60 * 1000;
   if (!G.waterCapacityLastRefill) G.waterCapacityLastRefill = now;
   const gained = Math.floor((now - G.waterCapacityLastRefill) / interval);
   if (gained > 0) {
@@ -3858,7 +3959,7 @@ function renderWateringCapacity() {
     if (amount >= max) {
       caption.textContent = 'cheinho de água';
     } else {
-      const interval = (G.premiumWateringCan ? 2 : 5) * 60000;
+      const interval = effectiveWaterRecoveryMinutes() * 60000;
       const elapsed = Date.now() - Number(G.waterCapacityLastRefill || Date.now());
       const remaining = Math.max(0, Math.ceil((interval - elapsed) / 1000));
       const minutes = Math.floor(remaining / 60);
@@ -3867,7 +3968,8 @@ function renderWateringCapacity() {
     }
   }
   const waterTip = document.querySelector('#water-tool-tip span');
-  if (waterTip) waterTip.textContent = `1 água por rega · recupera ${effectiveWaterRefillAmount()} água${effectiveWaterRefillAmount() === 1 ? '' : 's'} a cada ${G.premiumWateringCan ? 2 : 5} minutos`;
+  const refillMinutes = effectiveWaterRecoveryMinutes();
+  if (waterTip) waterTip.textContent = `1 água por rega · recupera ${effectiveWaterRefillAmount()} água${effectiveWaterRefillAmount() === 1 ? '' : 's'} a cada ${refillMinutes} minuto${refillMinutes === 1 ? '' : 's'}`;
 }
 function effectiveGrowStep()   { return 1; } // fast_grow removido — usar habilidades
 function effectiveMaxWater(type) {
@@ -4021,6 +4123,23 @@ function isReady(plot) {
   if (!plot) return false;
   return plot.growCount >= effectiveMaxGrowWithSkill(plot.type);
 }
+function isSpecialPlotActive(index) {
+  if (G.specialPlotExpiresAt && Date.now() >= G.specialPlotExpiresAt) {
+    G.specialPlots = [];
+    G.specialPlot = null;
+    G.specialPlotExpiresAt = 0;
+    return false;
+  }
+  if (Array.isArray(G.specialPlots) && G.specialPlots.includes(index)) return true;
+  if (G.specialPlot !== index) return false;
+  if (G.specialPlotExpiresAt && Date.now() >= G.specialPlotExpiresAt) {
+    G.specialPlot = null;
+    G.specialPlotExpiresAt = 0;
+    return false;
+  }
+  return true;
+}
+function specialPlotIcon() { return '<svg class="special-plot-icon" viewBox="0 0 32 32" fill="none" aria-label="Canteiro especial"><path d="M8 14h16v12H8z" fill="#e8bd55" stroke="#9a7440" stroke-width="1.5"/><path d="M6 11h20v5H6z" fill="#f5d878" stroke="#9a7440" stroke-width="1.5"/><path d="M16 11V26M11 8q5-5 5 3M21 8q-5-5-5 3" stroke="#9a7440" stroke-width="1.7" stroke-linecap="round"/><path d="m25 4 .8 2.2L28 7l-2.2.8L25 10l-.8-2.2L22 7l2.2-.8L25 4Z" fill="#fff1a8" stroke="#c8943a" stroke-width=".8"/></svg>'; }
 
 function refreshShovelTool() {
   const hasPlant = G.plots.some(Boolean);
@@ -4526,6 +4645,81 @@ function goToInventoryFromShop() {
   closeShop();
   setTimeout(() => openInventory(), 190);
 }
+function openBonusShop() {
+  document.getElementById('bonus-overlay')?.classList.remove('hidden');
+  document.querySelectorAll('#bonus-overlay .premium-benefits > div > span').forEach(el => {
+    el.innerHTML = el.innerHTML.replace(/(?<!-\s)(?:⏱️\s*)?1 minuto(?: de espera para recuperar o regador| no carregamento do regador)/g, '- 1 minuto no carregamento do regador');
+    el.innerHTML = el.innerHTML.replace(/Moldura VIP por 30 dias/g, 'Moldura VIP por 10 dias');
+  });
+  if (typeof window.mascotNotify === 'function') window.mascotNotify('Escolha um bônus fofinho para sua fazenda! ✨', 4000);
+}
+function closeBonusShop() { document.getElementById('bonus-overlay')?.classList.add('hidden'); }
+function showPixSuccess(kitName) {
+  const overlay = document.getElementById('pix-success-overlay');
+  const message = document.getElementById('pix-success-message');
+  if (!overlay) return;
+  if (message) message.textContent = `${kitName || 'Seu kit'} já está disponível no inventário.`;
+  overlay.classList.remove('hidden');
+  if (typeof window.mascotNotify === 'function') window.mascotNotify('Pagamento confirmado! Seu bônus chegou ao inventário ✨', 4200);
+}
+function closePixSuccess() { document.getElementById('pix-success-overlay')?.classList.add('hidden'); }
+async function requestBonusPix(name) {
+  if (!previewAccess()) {
+    const email = window.prompt('Digite seu e-mail para gerar o Pix:');
+    if (!email) return;
+    try {
+      const response = await fetch('/.netlify/functions/create-pix-payment', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username:seUser?.username, kit:name, email }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Não foi possível gerar o Pix.');
+      const code = data.qrCode || '';
+      const copied = async () => { try { await navigator.clipboard.writeText(code); toast('Código Pix copiado!'); } catch (_) { toast('Selecione e copie o código Pix.'); } };
+      const overlay = document.createElement('div'); overlay.className='pix-success-overlay'; overlay.id='pix-checkout-overlay';
+      overlay.innerHTML = `<div class="pix-success-modal"><div class="pix-success-icon" aria-hidden="true">₿</div><h2>Pix criado!</h2><p>Escaneie o QR Code ou copie o código abaixo. Estamos aguardando a confirmação.</p>${data.qrCodeBase64 ? `<img src="data:image/png;base64,${data.qrCodeBase64}" alt="QR Code Pix" style="width:190px;height:190px;margin:4px auto 10px;display:block">` : ''}<textarea readonly style="width:100%;min-height:72px;border:1px solid #d9c99f;border-radius:10px;padding:8px;font:11px monospace;resize:none">${code}</textarea><button type="button" onclick="(${copied.toString()})()">Copiar código Pix</button><button type="button" style="margin-top:8px;background:#e8e1cd;color:#59694b;box-shadow:none" onclick="document.getElementById('pix-checkout-overlay')?.remove()">Fechar</button></div>`;
+      document.body.appendChild(overlay); toast('Aguardando confirmação do pagamento…', 2800);
+      let attempts = 0;
+      const poll = setInterval(async () => { attempts += 1; try { const statusRes = await fetch(`/.netlify/functions/payment-status?orderId=${encodeURIComponent(data.orderId)}`); const status = await statusRes.json(); if (status.status === 'paid') { clearInterval(poll); overlay.remove(); applyBonusKit(name); showPixSuccess(name); } else if (['rejected','cancelled'].includes(status.status) || attempts >= 60) { clearInterval(poll); } } catch (_) {} }, 5000);
+    } catch (error) { toast(error.message || 'Não foi possível gerar o Pix.', 3500); }
+    return;
+  }
+  applyBonusKit(name);
+}
+function applyBonusKit(name) {
+  const grants = {
+    'Kit Jardineiro Iniciante': { rank: 1, discount: true, capacity: 2, golden: 5, special: 1, frame: 'yellow' },
+    'Kit Jardineiro Experiente': { rank: 2, discount: true, capacity: 4, recovery: 1, allFertilizers: 5, special: 2, seeds: 1, frame: 'yellow' },
+    'Kit Jardineiro Especialista': { rank: 3, discount: true, capacity: 4, recovery: 1, allFertilizers: 10, special: 4, specialRealDays: 10, seeds: 2, vipDays: 10, frame: 'vip' },
+  };
+  const kit = grants[name];
+  if (!kit) return;
+  const previousRank = Number(G.bonusKitLevel || 0);
+  const isUpgrade = kit.rank > previousRank;
+  if (isUpgrade) {
+    G.bonusKitLevel = kit.rank;
+    G.bonusRefillDiscount = true;
+    if (kit.capacity) G.bonusWateringCapacity = kit.capacity;
+    if (kit.recovery) G.bonusWaterRecoveryMinutes = kit.recovery;
+    if (kit.frame) G.profileFrame = kit.frame;
+    if (kit.frame === 'yellow' || kit.frame === 'vip') G.supporterFrameUnlocked = true;
+    if (kit.vipDays) G.bonusVipUntil = Date.now() + kit.vipDays * 86400000;
+  }
+  if (kit.golden) G.fertilizerInventory.golden_soil = (G.fertilizerInventory.golden_soil || 0) + kit.golden;
+  if (kit.allFertilizers) Object.keys(FERTILIZERS).forEach(id => { G.fertilizerInventory[id] = (G.fertilizerInventory[id] || 0) + kit.allFertilizers; });
+  const premiumSeedTypes = ['ruby_kale', 'star_radish', 'moon_lily', 'royal_dahlia'];
+  if (kit.seeds) premiumSeedTypes.forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + kit.seeds; });
+  if (isUpgrade && kit.special) {
+    const durationMs = kit.specialRealDays ? kit.specialRealDays * 24 * 60 * 60 * 1000 : (kit.specialDays ? SEASON_DAY_MS * kit.specialDays : (kit.special === 1 ? SEASON_TOTAL_MS : kit.special === 2 ? SEASON_TOTAL_MS * 2 : SEASON_TOTAL_MS * 3));
+    const emptyPlots = G.plots.map((plot, index) => (!plot && index < G.unlockedPlots ? index : -1)).filter(index => index >= 0).slice(0, kit.special);
+    if (emptyPlots.length) {
+      G.specialPlots = [...new Set([...(G.specialPlots || []), ...emptyPlots])];
+      G.specialPlot = emptyPlots[0];
+      G.specialPlotExpiresAt = Date.now() + durationMs;
+    }
+  }
+  renderInventory(); renderFertilizerInventory(); renderPlots(); renderWateringCapacity(); updatePts();
+  if (kit.special && !Number.isInteger(G.specialPlot)) toast('🌱 Libere um canteiro vazio para receber o canteiro especial.', 3500);
+  saveGardenToSE();
+  toast(`✨ ${name} aplicado na prévia!`, 3500);
+}
 function openPremium() {
   document.getElementById('premium-overlay')?.classList.remove('hidden');
   renderPremiumBenefits();
@@ -4583,7 +4777,7 @@ async function buyMascot(id, cost) {
 window.buyMascot = buyMascot;
 function renderPremiumBenefits() {
   const states = { watering:G.premiumWateringCan, shovel:G.premiumShovel, plants:G.premiumPlantsUnlocked, fertilizers:G.premiumFertilizersClaimed, plot:G.premiumSpecialPlotClaimed };
-  document.querySelectorAll('.premium-claim').forEach(btn => {
+  document.querySelectorAll('#premium-overlay .premium-claim').forEach(btn => {
     const id = btn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
     const claimed = Boolean(states[id]);
     btn.textContent = claimed ? '✓ Prêmio já resgatado' : 'Resgatar';
@@ -4743,7 +4937,7 @@ function renderRankingPage() {
     const userLevel = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
     const dailyPhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
     const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
-    const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : (isMe ? (G.profileFrame || 'red') : 'red');
+    const frame = ['purple','pink','blue','red','yellow','vip'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : (isMe ? (G.profileFrame || 'red') : 'red');
     const unlockedBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : [...(u.badges || u.unlockedBadges || u.achievements || [])];
     if ((isMe && hasSubscriberBadge()) || u.isSubscriber) unlockedBadges.push('subscriber');
     const badgeIds = validBadgeIds(unlockedBadges);
@@ -5263,7 +5457,7 @@ function openRankingProfile(index) {
     ['🔥', isMe ? (G.presenceStreak || 0) : (stats.presence ?? 0), 'Dias de presença']
   ];
   const statsHtml = statItems.map(([icon, value, label]) => `<div class="ranking-profile-stat">${icon} ${Number(value || 0).toLocaleString('pt-BR')}<small>${label}</small></div>`).join('');
-  const frame = ['purple','pink','blue','red'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
+  const frame = ['purple','pink','blue','red','yellow','vip'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
   const profileBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : [...(u.badges || u.unlockedBadges || u.achievements || [])];
   if ((isMe && hasSubscriberBadge()) || u.isSubscriber) profileBadges.push('subscriber');
   const badgeIds = validBadgeIds(profileBadges).slice(0, 4);
@@ -5855,7 +6049,7 @@ function renderPlots() {
 function buildPlotEl(plot, idx) {
   const locked = idx >= G.unlockedPlots;
   const div = document.createElement('div');
-  div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty') + (plot?.goldenPlot || G.specialPlot === idx ? ' special-plot' : '');
+  div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty') + (plot?.goldenPlot || isSpecialPlotActive(idx) ? ' special-plot' : '');
   div.dataset.idx = idx;
 
   // LOCKED
@@ -5893,14 +6087,19 @@ function buildPlotEl(plot, idx) {
     </div>`;
     if (prepFert) {
       const badge = document.createElement('div');
-      badge.style.cssText = 'position:absolute;top:6px;right:6px;font-size:18px;z-index:4;';
+      badge.className = 'fertilizer-status-badge ' + (prepFert === 'quick_grow' ? 'quick' : 'golden');
+      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;';
       badge.innerHTML = prepFert === 'quick_grow'
         ? `<span class="fert-effect-quick">⚡</span>`
         : `<span class="fert-effect-golden">✨</span>`;
       div.appendChild(badge);
       div.style.borderColor = prepFert === 'quick_grow' ? '#f0a020' : '#d4a000';
     }
-    if (G.specialPlot === idx) {
+    if (isSpecialPlotActive(idx)) {
+      const specialBadge = document.createElement('div');
+      specialBadge.style.cssText = 'position:absolute;top:5px;left:5px;z-index:4;';
+      specialBadge.innerHTML = specialPlotIcon();
+      div.appendChild(specialBadge);
       const tooltip = document.createElement('div');
       tooltip.className = 'plot-tooltip';
       tooltip.innerHTML = '<strong>✨ Canteiro Especial</strong><br>Plantas douradas valem 3× mais';
@@ -5936,11 +6135,18 @@ function buildPlotEl(plot, idx) {
     // Show fertilizer badge on growing plant
     if (plot.quickGrow || plot.goldenSoil) {
       const badge = document.createElement('div');
-      badge.style.cssText = 'position:absolute;top:6px;right:6px;font-size:14px;z-index:4;';
+      badge.className = 'fertilizer-status-badge ' + (plot.quickGrow ? 'quick' : 'golden');
+      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;';
       badge.innerHTML = plot.quickGrow
         ? `<span class="fert-effect-quick">⚡</span>`
         : `<span class="fert-effect-golden">✨</span>`;
       div.appendChild(badge);
+    }
+    if (plot.goldenPlot || isSpecialPlotActive(idx)) {
+      const specialBadge = document.createElement('div');
+      specialBadge.style.cssText = 'position:absolute;top:5px;left:5px;z-index:4;';
+      specialBadge.innerHTML = specialPlotIcon();
+      div.appendChild(specialBadge);
     }
   }
 
@@ -5986,10 +6192,13 @@ function buildPlotEl(plot, idx) {
     const harvestTotal = harvestCyclesFor(plot.type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestTotal);
     const harvestInfo = harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
+    const specialDays = G.specialPlotExpiresAt ? Math.max(1, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS)) : 1;
+    const specialLabel = `${specialDays.toLocaleString('pt-BR')} dia${specialDays > 1 ? 's' : ''}`;
+    const specialInfo = isSpecialPlotActive(idx) ? `<div class="plot-harvest-count">${specialPlotIcon()} especial - ${specialLabel} restante${specialDays > 1 ? 's' : ''}</div>` : '';
     if (growReady) {
-      lbl.innerHTML = `✅ pronto!${harvestInfo}`;
+      lbl.innerHTML = `✅ pronto!${harvestInfo}${specialInfo}`;
     } else {
-      lbl.innerHTML = `<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}`;
+      lbl.innerHTML = `<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}${specialInfo}`;
       const growLbl = document.createElement('div');
       growLbl.className = 'plot-grow-label';
       growLbl.style.cssText = 'font-size:10px;font-weight:800;color:rgba(160,220,120,.95);margin-top:1px;';
@@ -5999,7 +6208,9 @@ function buildPlotEl(plot, idx) {
       div.appendChild(growLbl);
     }
   } else {
-    lbl.textContent = 'vazio';
+    const specialDays = G.specialPlotExpiresAt ? Math.max(1, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS)) : 1;
+    const specialLabel = `${specialDays.toLocaleString('pt-BR')} dia${specialDays > 1 ? 's' : ''}`;
+    lbl.innerHTML = isSpecialPlotActive(idx) ? `<span class="plot-special-expiry">${specialPlotIcon()} especial - <strong>${specialLabel} restante${specialDays > 1 ? 's' : ''}</strong></span>` : 'vazio';
   }
   div.appendChild(lbl);
 
@@ -6155,7 +6366,7 @@ async function onPlotClick(idx) {
     G.inventory[type]--;
     if (G.inventory[type] <= 0) G.selectedSeed = null;
     updateHeldItemCursor();
-    const newPlot = { type, waterCount: 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: G.specialPlot === idx };
+    const newPlot = { type, waterCount: 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: isSpecialPlotActive(idx) };
     // Apply any pre-applied fertilizer on this slot
     if (G.plotFertilizers && G.plotFertilizers[idx]) {
       const fid = G.plotFertilizers[idx];
@@ -6713,7 +6924,15 @@ function toggleFramePicker() {
 
 function selectProfileFrame(frame) {
   const subscriber = Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
-  if (!['purple', 'pink', 'blue', 'red'].includes(frame)) return;
+  if (!['purple', 'pink', 'blue', 'red', 'yellow', 'vip'].includes(frame)) return;
+  if (frame === 'yellow' && !G.supporterFrameUnlocked) {
+    toast('🔒 A moldura amarela é desbloqueada ao comprar um kit de bônus.', 2600);
+    return;
+  }
+  if (frame === 'vip' && (!G.bonusVipUntil || Date.now() >= G.bonusVipUntil)) {
+    toast('🔒 A moldura VIP é exclusiva do Kit Especialista e dura 10 dias.', 2600);
+    return;
+  }
   if (frame === 'purple' && !subscriber) {
     toast('🔒 A moldura roxa é exclusiva para subscribers.', 2200);
     return;
@@ -7130,6 +7349,13 @@ async function saveGardenToSENow() {
     presenceBonusDate:G.presenceBonusDate || '',
     presenceDays:     G.presenceDays || [],
     specialPlot:      G.specialPlot,
+    specialPlots:     G.specialPlots || [],
+    specialPlotExpiresAt: G.specialPlotExpiresAt || 0,
+    bonusRefillDiscount: G.bonusRefillDiscount === true,
+    bonusWateringCapacity: Number(G.bonusWateringCapacity || 0),
+    bonusWaterRecoveryMinutes: Number(G.bonusWaterRecoveryMinutes || 0),
+    bonusKitLevel: Number(G.bonusKitLevel || 0),
+    bonusVipUntil: Number(G.bonusVipUntil || 0),
     specialPlotPending:G.specialPlotPending || false,
     premiumWateringCan: G.premiumWateringCan === true,
     premiumShovel: G.premiumShovel === true,
@@ -7140,6 +7366,7 @@ async function saveGardenToSENow() {
     selectedMascot: G.selectedMascot || null,
     ownedMascots: G.ownedMascots || {},
     profileFrame:      G.profileFrame || 'red',
+    supporterFrameUnlocked: G.supporterFrameUnlocked === true,
     dailyPhrase:       G.dailyPhrase || '',
     lastSale:          G.lastSale || null,
     isSubscriber:      hasSubscriberBadge(),
@@ -7268,6 +7495,13 @@ window.addEventListener('beforeunload', () => {
     presenceBonusDate: G.presenceBonusDate || '',
     presenceDays: G.presenceDays || [],
     specialPlot: G.specialPlot,
+    specialPlots: G.specialPlots || [],
+    specialPlotExpiresAt: G.specialPlotExpiresAt || 0,
+    bonusRefillDiscount: G.bonusRefillDiscount === true,
+    bonusWateringCapacity: Number(G.bonusWateringCapacity || 0),
+    bonusWaterRecoveryMinutes: Number(G.bonusWaterRecoveryMinutes || 0),
+    bonusKitLevel: Number(G.bonusKitLevel || 0),
+    bonusVipUntil: Number(G.bonusVipUntil || 0),
     specialPlotPending: G.specialPlotPending || false,
     premiumWateringCan: G.premiumWateringCan === true,
     premiumShovel: G.premiumShovel === true,
@@ -7278,6 +7512,7 @@ window.addEventListener('beforeunload', () => {
     selectedMascot: G.selectedMascot || null,
     ownedMascots: G.ownedMascots || {},
     profileFrame: G.profileFrame || 'red',
+    supporterFrameUnlocked: G.supporterFrameUnlocked === true,
     dailyPhrase: G.dailyPhrase || '',
     isSubscriber: hasSubscriberBadge(),
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
@@ -7379,6 +7614,13 @@ async function loadGardenFromSE(username) {
     G.presenceBonusDate = save.presenceBonusDate || '';
     G.presenceDays = save.presenceDays || [];
     G.specialPlot = save.specialPlot ?? null;
+    G.specialPlots = Array.isArray(save.specialPlots) ? save.specialPlots : (Number.isInteger(G.specialPlot) ? [G.specialPlot] : []);
+    G.specialPlotExpiresAt = Number(save.specialPlotExpiresAt || 0);
+    G.bonusRefillDiscount = save.bonusRefillDiscount === true;
+    G.bonusWateringCapacity = Number(save.bonusWateringCapacity || 0);
+    G.bonusWaterRecoveryMinutes = Number(save.bonusWaterRecoveryMinutes || 0);
+    G.bonusKitLevel = Number(save.bonusKitLevel || 0);
+    G.bonusVipUntil = Number(save.bonusVipUntil || 0);
     G.specialPlotPending = save.specialPlotPending || false;
     G.premiumWateringCan = save.premiumWateringCan === true;
     G.premiumShovel = save.premiumShovel === true;
@@ -7394,6 +7636,7 @@ async function loadGardenFromSE(username) {
     // de reposição; caso contrário o carregamento usa os 5 minutos do regador comum.
     refillWateringCapacity();
     G.profileFrame = save.profileFrame || 'red';
+    G.supporterFrameUnlocked = save.supporterFrameUnlocked === true;
     G.dailyPhrase = save.dailyPhrase || '';
     G.lastSale = save.lastSale || null;
     G.isSubscriber = save.isSubscriber === true;
@@ -7822,11 +8065,23 @@ renderSkillTreeBadge();
 // Preview local: permite visualizar a experiência sem conectar a Twitch.
 const isLocalPreview = new URLSearchParams(window.location.search).has('preview');
 if (isLocalPreview) {
-  seUser = { username: 'preview', displayName: 'Visitante', points: 100000, isSubscriber: true, subscriptionChecked: true };
+  seUser = { username: 'preview', displayName: 'Visitante', points: 100000, isSubscriber: false, subscriptionChecked: true };
   restorePremiumClaimsCache(seUser.username);
   gardenHydrated = true;
-  G.isSubscriber = true;
-  sessionStorage.setItem('twitch_is_subscriber', 'true');
+  G.isSubscriber = false;
+  sessionStorage.removeItem('twitch_is_subscriber');
+  G.isPremium = false;
+  G.premiumWateringCan = false;
+  G.premiumShovel = false;
+  G.premiumPlantsUnlocked = false;
+  G.premiumFertilizersClaimed = false;
+  G.premiumSpecialPlotClaimed = false;
+  G.selectedMascot = null;
+  G.bonusRefillDiscount = false;
+  G.bonusWateringCapacity = 0;
+  G.bonusWaterRecoveryMinutes = 0;
+  G.bonusKitLevel = 0;
+  G.bonusVipUntil = 0;
   G.pts = 100000;
   G.xp = LEVELS[9].minXP - 1;
   G.unlockedPlots = 6;
@@ -8312,7 +8567,7 @@ setInterval(() => {
     const dropdown = document.createElement('div');
     dropdown.className = 'tools-dropdown-content';
     const toolChildren = [...toolsPanel.children].filter(child => !child.classList.contains('online-count-tools'));
-    const alwaysVisible = toolChildren.splice(0, 2);
+    const alwaysVisible = toolChildren.splice(0, 3);
     toolChildren.forEach(child => dropdown.appendChild(child));
     const toggle = document.createElement('button');
     toggle.className = 'tools-dropdown-toggle';

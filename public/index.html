@@ -3739,7 +3739,7 @@ function hasUpgrade(id) { return G.upgrades.has(id); }
 function upgradeLevel(id) { return Number(G.upgradeLevels?.[id] || (hasUpgrade(id) ? 1 : 0)); }
 function currentLevel() { return getLevelData(G.xp).current.lv; }
 function previewAccess() {
-  return G.previewUnlocks || (['localhost', '127.0.0.1'].includes(window.location.hostname)
+  return G.previewUnlocks || ((window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname))
     && new URLSearchParams(window.location.search).has('preview'));
 }
 
@@ -7059,10 +7059,10 @@ async function syncPtsToSEOnce() {
     }
 
     let syncRes;
-    // A API usa PUT para adicionar e DELETE para retirar, sempre com
-    // quantidade positiva no caminho.
-    syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${Math.abs(diff)}`, {
-      method: diff > 0 ? 'PUT' : 'DELETE'
+    // O endpoint de pontos do StreamElements usa PUT; valores positivos
+    // adicionam e valores negativos descontam o saldo.
+    syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
+      method: 'PUT'
     });
     if (!syncRes.ok) return false;
     const merged = current + diff;
@@ -7366,10 +7366,9 @@ function connectSESocket() {
 // ── Queue point mutations so rapid purchases cannot race ──
 function queueSEPointsMutation(amount, method) {
   if (!seUser || amount <= 0) return Promise.resolve(true);
-  const seMethod = method === 'DELETE' ? 'DELETE' : 'PUT';
-  const seDelta = seMethod === 'DELETE' ? -amount : amount;
+  const seDelta = method === 'DELETE' ? -amount : amount;
   const operation = sePointsMutationQueue.then(async () => {
-    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${amount}`, { method: seMethod });
+    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${seDelta}`, { method: 'PUT' });
     if (!res.ok) throw new Error(`Points update failed: ${res.status}`);
     if (lastKnownSEPoints !== null) {
       lastKnownSEPoints += seDelta;

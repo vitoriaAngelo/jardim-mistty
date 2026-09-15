@@ -3641,6 +3641,7 @@ const G = {
   specialPlot: null,
   specialPlots: [],
   specialPlotExpiresAt: 0,
+  specialistPlotDurationFixed: false,
   specialPlotPending: false,
   profileFrame: 'red',
   supporterFrameUnlocked: false,
@@ -4154,6 +4155,12 @@ function normalizeSpecialPlotsByEntitlement() {
   if (!changed) return false;
   G.specialPlots = repaired;
   G.specialPlot = repaired[0] ?? null;
+  return true;
+}
+function repairSpecialistPlotDuration() {
+  if (Number(G.bonusKitLevel || 0) < 3 || G.specialistPlotDurationFixed === true) return false;
+  G.specialPlotExpiresAt = Date.now() + 10 * 24 * 60 * 60 * 1000;
+  G.specialistPlotDurationFixed = true;
   return true;
 }
 
@@ -7376,6 +7383,7 @@ async function saveGardenToSENow() {
     specialPlot:      G.specialPlot,
     specialPlots:     G.specialPlots || [],
     specialPlotExpiresAt: G.specialPlotExpiresAt || 0,
+    specialistPlotDurationFixed: G.specialistPlotDurationFixed === true,
     bonusRefillDiscount: G.bonusRefillDiscount === true,
     bonusWateringCapacity: Number(G.bonusWateringCapacity || 0),
     bonusWaterRecoveryMinutes: Number(G.bonusWaterRecoveryMinutes || 0),
@@ -7522,6 +7530,7 @@ window.addEventListener('beforeunload', () => {
     specialPlot: G.specialPlot,
     specialPlots: G.specialPlots || [],
     specialPlotExpiresAt: G.specialPlotExpiresAt || 0,
+    specialistPlotDurationFixed: G.specialistPlotDurationFixed === true,
     bonusRefillDiscount: G.bonusRefillDiscount === true,
     bonusWateringCapacity: Number(G.bonusWateringCapacity || 0),
     bonusWaterRecoveryMinutes: Number(G.bonusWaterRecoveryMinutes || 0),
@@ -7645,6 +7654,7 @@ async function loadGardenFromSE(username) {
     G.bonusWateringCapacity = Number(save.bonusWateringCapacity || 0);
     G.bonusWaterRecoveryMinutes = Number(save.bonusWaterRecoveryMinutes || 0);
     G.bonusKitLevel = Number(save.bonusKitLevel || 0);
+    G.specialistPlotDurationFixed = save.specialistPlotDurationFixed === true;
     G.bonusVipUntil = Number(save.bonusVipUntil || 0);
     G.specialPlotPending = save.specialPlotPending || false;
     G.premiumWateringCan = save.premiumWateringCan === true;
@@ -7652,7 +7662,7 @@ async function loadGardenFromSE(username) {
     G.premiumPlantsUnlocked = save.premiumPlantsUnlocked === true;
     G.premiumFertilizersClaimed = save.premiumFertilizersClaimed === true;
     G.premiumSpecialPlotClaimed = save.premiumSpecialPlotClaimed === true;
-    if (normalizeSpecialPlotsByEntitlement()) saveGardenToSE();
+    if (normalizeSpecialPlotsByEntitlement() || repairSpecialistPlotDuration()) saveGardenToSE();
     G.isPremium = save.isPremium === true || G.premiumWateringCan || G.premiumShovel || G.premiumPlantsUnlocked || G.premiumFertilizersClaimed || G.premiumSpecialPlotClaimed;
     restorePremiumClaimsCache(username);
     G.selectedMascot = save.selectedMascot || null;

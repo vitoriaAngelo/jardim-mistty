@@ -3795,6 +3795,7 @@ function effectiveMaxGrowWithSkill(type) {
   return Math.max(1, Math.round(base * (1 - skillGrowReduction())));
 }
 const GROW_INTERVAL_MS = 90000;
+let growAwaySince = null;
 
 function renderUpgradeShop() {
   const grid = document.getElementById('upgrade-grid');
@@ -5399,8 +5400,8 @@ function applyOfflineProgress(savedAt) {
   const growTicks = Math.floor(elapsed / GROW_INTERVAL_MS);
   if (growTicks <= 0) return;
   G.plots.forEach(plot => {
-    if (!plot || plot.waterCount < effectiveMaxWater(plot.type) || plot.growCount >= effectiveMaxGrow(plot.type)) return;
-    const maxG = effectiveMaxGrow(plot.type);
+    if (!plot || plot.waterCount < effectiveMaxWater(plot.type) || plot.growCount >= effectiveMaxGrowWithSkill(plot.type)) return;
+    const maxG = effectiveMaxGrowWithSkill(plot.type);
     const bonus = plot.quickGrow ? 1 : 0; // quick_grow_plus removido
     const steps = growTicks * (effectiveGrowStep() + bonus);
     plot.growCount = Math.min(maxG, plot.growCount + steps);
@@ -6898,7 +6899,10 @@ function restorePremiumClaimsCache(username) {
   } catch (e) { /* mantém o estado vindo do servidor */ }
 }
 
-async function saveGardenToSE() {
+// Serializa gravações para que um POST antigo nunca termine depois de um
+// POST mais novo e restaure um estado anterior após atualizar a página.
+let gardenSaveQueue = Promise.resolve();
+async function saveGardenToSENow() {
   if (!seUser || !gardenHydrated) return;
   const saveData = {
     xp:               G.xp,
@@ -6980,6 +6984,12 @@ async function saveGardenToSE() {
     console.warn('Save failed:', e);
     throw e;
   }
+}
+
+function saveGardenToSE() {
+  const operation = gardenSaveQueue.then(() => saveGardenToSENow());
+  gardenSaveQueue = operation.catch(() => {});
+  return operation;
 }
 
 // ── Sync G.pts back to SE points balance ──────────────────
@@ -7095,6 +7105,14 @@ window.addEventListener('beforeunload', () => {
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && seUser && gardenHydrated) {
+    // Browsers can freeze timers in background tabs; keep the real start time.
+    growAwaySince = Date.now();
+    saveGardenToSE();
+  } else if (document.visibilityState === 'visible' && growAwaySince && gardenHydrated) {
+    applyOfflineProgress(growAwaySince);
+    growAwaySince = null;
+    renderPlots();
+    renderSeasonWidget();
     saveGardenToSE();
   }
 });

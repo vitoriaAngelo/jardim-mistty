@@ -7029,10 +7029,10 @@ async function syncPtsToSEOnce() {
     }
 
     let syncRes;
-    // StreamElements altera o saldo com PUT: valores positivos adicionam
-    // pontos e valores negativos descontam pontos.
-    syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
-      method: 'PUT'
+    // A API usa PUT para adicionar e DELETE para retirar, sempre com
+    // quantidade positiva no caminho.
+    syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${Math.abs(diff)}`, {
+      method: diff > 0 ? 'PUT' : 'DELETE'
     });
     if (!syncRes.ok) return false;
     const merged = current + diff;
@@ -7336,9 +7336,10 @@ function connectSESocket() {
 // ── Queue point mutations so rapid purchases cannot race ──
 function queueSEPointsMutation(amount, method) {
   if (!seUser || amount <= 0) return Promise.resolve(true);
-  const seDelta = method === 'DELETE' ? -amount : amount;
+  const seMethod = method === 'DELETE' ? 'DELETE' : 'PUT';
+  const seDelta = seMethod === 'DELETE' ? -amount : amount;
   const operation = sePointsMutationQueue.then(async () => {
-    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${seDelta}`, { method: 'PUT' });
+    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${amount}`, { method: seMethod });
     if (!res.ok) throw new Error(`Points update failed: ${res.status}`);
     if (lastKnownSEPoints !== null) {
       lastKnownSEPoints += seDelta;
@@ -7582,7 +7583,7 @@ function renderLatestSale() {
   const feed = document.getElementById('latest-sales-feed');
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
   if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span>'; return; }
-  feed.innerHTML = `<span class="latest-sales-content sales-slide-in">🛒 Últimas vendas: <strong>${String(sale.farmName || sale.username).replace(/^@+/, '')}</strong> recebeu ${Number(sale.total).toLocaleString()} pontos em vendas</span>`;
+  feed.innerHTML = `<span class="latest-sales-content sales-slide-in">🛒 <strong>${String(sale.farmName || sale.username).replace(/^@+/, '')}</strong> acabou de faturar ${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
 }
 async function updateLatestSales() {
   const feed = document.getElementById('latest-sales-feed');

@@ -7376,12 +7376,12 @@ function connectSESocket() {
 // ── Queue point mutations so rapid purchases cannot race ──
 function queueSEPointsMutation(amount, method) {
   if (!seUser || amount <= 0) return Promise.resolve(true);
-  const seDelta = method === 'DELETE' ? -amount : amount;
+  const seAmount = Math.abs(Number(amount) || 0);
   const operation = sePointsMutationQueue.then(async () => {
-    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${seDelta}`, { method: 'PUT' });
+    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${seAmount}`, { method });
     if (!res.ok) throw new Error(`Points update failed: ${res.status}`);
     if (lastKnownSEPoints !== null) {
-      lastKnownSEPoints += seDelta;
+      lastKnownSEPoints += method === 'DELETE' ? -seAmount : seAmount;
       seUser.points = lastKnownSEPoints;
     }
     return true;

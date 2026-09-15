@@ -7378,7 +7378,13 @@ function queueSEPointsMutation(amount, method) {
   if (!seUser || amount <= 0) return Promise.resolve(true);
   const seAmount = Math.abs(Number(amount) || 0);
   const operation = sePointsMutationQueue.then(async () => {
-    const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${seAmount}`, { method });
+    const basePath = `${SE_API}/points/${SE_CHANNEL}/${seUser.username}`;
+    let res = await fetch(`${basePath}/${seAmount}`, { method });
+    // StreamElements installations differ: some accept DELETE, while older
+    // point endpoints expect a negative PUT for deductions.
+    if (!res.ok && method === 'DELETE') {
+      res = await fetch(`${basePath}/-${seAmount}`, { method: 'PUT' });
+    }
     if (!res.ok) throw new Error(`Points update failed: ${res.status}`);
     if (lastKnownSEPoints !== null) {
       lastKnownSEPoints += method === 'DELETE' ? -seAmount : seAmount;

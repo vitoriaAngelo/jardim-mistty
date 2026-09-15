@@ -3668,9 +3668,9 @@ async function refreshPoints() {
 
 // ─── SHOP TABS ───────────────────────────────────────────
 function switchShopTab(tab) {
-  ['vegetais','flores','adubos','canteiros','melhorias'].forEach(t => {
-    document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
-    document.getElementById(`panel-${t}`).classList.toggle('visible', t === tab);
+  ['vegetais','flores','adubos','canteiros'].forEach(t => {
+    document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
+    document.getElementById(`panel-${t}`)?.classList.toggle('visible', t === tab);
   });
 }
 
@@ -7216,6 +7216,8 @@ async function loadGardenFromSE(username) {
       });
       if (refundTotal > 0) {
         G.pts += refundTotal;
+        // Dar os pontos de reembolso no SE também
+        giveSEPoints(refundTotal).catch(e => console.warn('Reembolso SE falhou:', e));
         console.log(`💰 Reembolso de melhorias: +${refundTotal} pts`);
       }
       // Marcar como reembolsado para não repetir

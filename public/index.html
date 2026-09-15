@@ -2036,6 +2036,7 @@ body.dark-mode .profile-current-value { color:#f1f5e9; }
 .plot-water-fill { background: #8fb8c3; box-shadow: none; }
 .plot-grow-label { color: #597346 !important; }
 .growth-countdown { margin-left: 5px; font-size: 9px; font-weight: 700; opacity: .75; white-space: nowrap; }
+.growth-countdown { font-variant-numeric: tabular-nums; }
 .plot-label { text-shadow: none; }
 .plot-label span { color: #f8f1e2 !important; }
 .empty-slot-hint { opacity: .75; }
@@ -3038,7 +3039,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
 
 <!-- PROFILE MODAL -->
 <div class="profile-overlay hidden" id="profile-overlay">
-  <div class="profile-modal">
+  <div class="profile-modal" onclick="event.stopPropagation()" onpointerdown="event.stopPropagation()">
     <span class="profile-season-art top" aria-hidden="true">🌱 🌸 🦋</span>
     <span class="profile-season-art bottom" aria-hidden="true">🌱 🌸 🦋</span>
     <button class="popup-close-x" aria-label="Fechar perfil" onclick="closeProfile()">×</button>
@@ -4076,7 +4077,7 @@ function renderInventory() {
           <div class="inv-slot-count">×${count}</div>
           <div class="inv-tip">
             <strong>${p.name}</strong><br>
-            💧 ${p.maxWater} regas · 🌱 ${p.maxGrow} crescimentos<br>
+            💧 ${p.maxWater} regas · 🌱 ${effectiveMaxGrow(type)} crescimentos<br>
             <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> Venda: ${SELL_VALUE[type]} pts
           </div>
         </div>`;
@@ -4261,7 +4262,7 @@ function renderFlowerShop() {
       ${outOfSeason ? '<span class="promo-corner">Promoção</span>' : ''}
       <div class="shop-item-name">${p.name}</div>
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
-      <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${p.maxGrow}</div>
+      <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
       <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
@@ -5671,7 +5672,7 @@ function renderShop() {
       ${outOfSeason ? '<span class="promo-corner">Promoção</span>' : ''}
       <div class="shop-item-name">${p.name}</div>
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
-      <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${p.maxGrow}</div>
+      <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
       <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
@@ -5846,7 +5847,8 @@ function buildPlotEl(plot, idx) {
     growBarWrap.className = 'plot-water-bar';
     growBarWrap.style.opacity = waterFull ? '1' : '0.3';
     const growFill = document.createElement('div');
-    growFill.className = 'plot-water-fill';
+    growFill.className = 'plot-water-fill growth-progress-fill';
+    growFill.dataset.growthProgress = idx;
     growFill.style.background = '#6aaa3a';
     growFill.style.boxShadow = '0 0 8px rgba(106,170,58,.7)';
     growFill.style.width = ((plot.growCount / maxG) * 100) + '%';
@@ -6546,6 +6548,7 @@ function openProfile() {
   ].map(([icon, value, label]) => `<div class="profile-stat"><div class="profile-stat-val">${icon} ${Number(value).toLocaleString('pt-BR')}</div><div class="profile-stat-lbl">${label}</div></div>`).join('');
 
   document.getElementById('profile-overlay').classList.remove('hidden');
+  window.dispatchEvent(new Event('profile-modal-state-change'));
 
   // The subscriber badge follows the current subscription, not permanent achievements.
   const subscriberBadge = `<div class="header-icon-wrap">
@@ -6590,21 +6593,28 @@ function closeProfile() {
   document.getElementById('frame-picker')?.classList.remove('visible');
   document.querySelector('.frame-edit-btn')?.classList.remove('is-open');
   document.getElementById('profile-overlay').classList.add('hidden');
+  window.dispatchEvent(new Event('profile-modal-state-change'));
 }
 
 async function saveProfileName() {
   const input = document.getElementById('profile-farm-name');
   const phraseInput = document.getElementById('profile-daily-phrase');
   const val = input.value.trim();
-  if (!val) { input.focus(); return; }
+  if (!val) {
+    input.focus();
+    if (typeof window.mascotNotify === 'function') window.mascotNotify('O nome da fazenda não pode ficar em branco.', 2400);
+    else toast('🌿 O nome da fazenda não pode ficar em branco.', 2400);
+    return;
+  }
   G.dailyPhrase = (phraseInput?.value || '').trim().slice(0, 25);
   document.getElementById('garden-name').textContent = val;
+  if (typeof window.mascotNotify === 'function') window.mascotNotify('Nome da fazenda alterado!', 2000);
+  else toast('🌿 Nome da fazenda alterado!', 2000);
   try {
     await saveGardenToSE();
-    toast('✅ Nome da fazenda atualizado!', 2000);
-    closeProfile();
   } catch (e) {
-    toast('❌ Não foi possível salvar o perfil.', 2400);
+    if (typeof window.mascotNotify === 'function') window.mascotNotify('Não foi possível salvar o perfil.', 2400);
+    else toast('❌ Não foi possível salvar o perfil.', 2400);
   }
 }
 
@@ -8025,14 +8035,21 @@ async function upgradeSkillNode(nodeId, branchId) {
 
 function updateGrowthCountdowns() {
   const seconds = Math.ceil((GROW_INTERVAL_MS - (Date.now() % GROW_INTERVAL_MS)) / 1000);
+  const cycleProgress = (Date.now() % GROW_INTERVAL_MS) / GROW_INTERVAL_MS;
   document.querySelectorAll('[data-growth-countdown]').forEach(el => {
     const idx = Number(el.dataset.growthCountdown);
     const plot = G.plots[idx];
     if (!plot || plot.waterCount < effectiveMaxWater(plot.type) || isReady(plot)) {
       el.textContent = '';
+      const fill = document.querySelector(`[data-growth-progress="${idx}"]`);
+      if (fill && plot) fill.style.width = `${Math.min(100, plot.growCount / effectiveMaxGrowWithSkill(plot.type) * 100)}%`;
       return;
     }
     el.textContent = `· ${seconds}s`;
+    const maxG = effectiveMaxGrowWithSkill(plot.type);
+    const visualProgress = Math.min(maxG, plot.growCount + cycleProgress);
+    const fill = document.querySelector(`[data-growth-progress="${idx}"]`);
+    if (fill) fill.style.width = `${Math.min(100, visualProgress / maxG * 100)}%`;
   });
 }
 
@@ -8078,9 +8095,17 @@ function growTick() {
   if (anyGrew) renderPlots();
 }
 
-G.growTimer = setInterval(() => {
-  if (!document.hidden) growTick();
-}, GROW_INTERVAL_MS);
+function startGrowthClock() {
+  clearTimeout(G.growTimer);
+  const delay = GROW_INTERVAL_MS - (Date.now() % GROW_INTERVAL_MS);
+  G.growTimer = setTimeout(() => {
+    if (!document.hidden) growTick();
+    G.growTimer = setInterval(() => {
+      if (!document.hidden) growTick();
+    }, GROW_INTERVAL_MS);
+  }, delay);
+}
+startGrowthClock();
 setInterval(() => {
   if (!document.hidden) updateGrowthCountdowns();
 }, 250);

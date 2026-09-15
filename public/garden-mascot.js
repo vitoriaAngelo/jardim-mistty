@@ -108,7 +108,7 @@
     hideTimer = setTimeout(close, 9000);
   }
   function blocked() {
-    return document.hidden || !!document.querySelector('.modal-overlay:not(.hidden), .profile-overlay:not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
+    return document.hidden || !!document.querySelector('.modal-overlay:not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
   }
   window.mascotNotify = (text, duration = 2400) => {
     syncVisibility();
@@ -178,5 +178,6 @@
   document.addEventListener('visibilitychange', syncVisibility);
   window.addEventListener('focus', syncVisibility);
   window.addEventListener('garden-login-state-change', syncVisibility);
+  window.addEventListener('profile-modal-state-change', syncVisibility);
   syncVisibility();
 })();

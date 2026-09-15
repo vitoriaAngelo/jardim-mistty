@@ -36,7 +36,7 @@ exports.handler = async (event) => {
     ];
     
     // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
-    const GROW_INTERVAL_MS = 10000; // 10 segundos por estágio
+    const GROW_INTERVAL_MS = 15000; // 15 segundos por estágio
     const maxGrowthPerTick = 1;
     const validationRes = await fetch(
       `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,

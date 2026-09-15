@@ -3254,7 +3254,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     <div class="update-news-item"><span>🌱</span><div><strong>Pontos retroativos</strong><br>Já tem nível? Seus pontos de habilidade já estão disponíveis! Acesse o botão 🌿 no topo para distribuí-los.</div></div>
     <div class="update-news-item"><span>🧺</span><div><strong>Colheita gratuita</strong><br>Colher plantas prontas agora é de graça! Somente a pá (retirar muda antes de crescer) tem custo.</div></div>
     <div class="update-news-item"><span>📋</span><div><strong>Missões no painel lateral</strong><br>O botão de missões saiu do topo e agora fica no painel lateral, abaixo do Ranking.</div></div>
-    <div class="update-news-item"><span>⏱️</span><div><strong>Crescimento ajustado</strong><br>Cada tick de crescimento agora leva 10 segundos após a planta estar totalmente regada.</div></div>
+    <div class="update-news-item"><span>⏱️</span><div><strong>Crescimento ajustado</strong><br>Cada tick de crescimento agora leva 15 segundos, com o dobro de estágios.</div></div>
   </div></div>
 </div>
 
@@ -3758,7 +3758,18 @@ function renderWateringCapacity() {
   const fill = document.getElementById('water-fill');
   if (fill) fill.style.width = `${Math.max(0, Math.min(100, amount / max * 100))}%`;
   const caption = document.getElementById('water-caption');
-  if (caption) caption.textContent = amount >= max ? 'cheinho de água' : amount === 0 ? 'repondo água…' : `+1 água / ${G.premiumWateringCan ? 2 : 5} min`;
+  if (caption) {
+    if (amount >= max) {
+      caption.textContent = 'cheinho de água';
+    } else {
+      const interval = (G.premiumWateringCan ? 2 : 5) * 60000;
+      const elapsed = Date.now() - Number(G.waterCapacityLastRefill || Date.now());
+      const remaining = Math.max(0, Math.ceil((interval - elapsed) / 1000));
+      const minutes = Math.floor(remaining / 60);
+      const seconds = String(remaining % 60).padStart(2, '0');
+      caption.textContent = `+1 água em ${minutes}:${seconds}`;
+    }
+  }
 }
 function effectiveGrowStep()   { return 1; } // fast_grow removido — usar habilidades
 function effectiveMaxWater(type) {
@@ -3770,9 +3781,8 @@ function effectiveMaxWater(type) {
   return val;
 }
 function effectiveMaxGrow(type) {
-  // Crescimento Acelerado não reduz o total — ele avança mais por tick
-  // (total de estágios não muda, apenas quantos por tick)
-  return getPlantable(type).maxGrow;
+  // Todas as plantas e flores agora exigem o dobro de estágios.
+  return getPlantable(type).maxGrow * 2;
 }
 function effectiveSellValue(type, epicOverride) {
   const base = SELL_VALUE[type];
@@ -3786,16 +3796,16 @@ function effectiveSellValue(type, epicOverride) {
 }
 function effectiveHarvestBonus() { return ['orange','premium'].includes(G.selectedMascot) ? 1 : 0; }
 function effectiveWaterRefillAmount() { return ['strawberry','premium'].includes(G.selectedMascot) ? 2 : 1; }
-// 10 seg reais = 1 grow tick. Solo Vivo reduz até -12%.
+// 15 seg reais = 1 grow tick. Solo Vivo reduz até -12%.
 function effectiveGrowInterval() {
-  return Math.round(10000 * (1 - skillGrowReduction()));
+  return Math.round(15000 * (1 - skillGrowReduction()));
 }
 // Solo Vivo: reduz o maxGrow efetivo (menos ticks necessários = cresce mais rápido)
 function effectiveMaxGrowWithSkill(type) {
   const base = effectiveMaxGrow(type);
   return Math.max(1, Math.round(base * (1 - skillGrowReduction())));
 }
-const GROW_INTERVAL_MS = 10000;
+const GROW_INTERVAL_MS = 15000;
 let growAwaySince = null;
 
 function renderUpgradeShop() {
@@ -7686,6 +7696,9 @@ setInterval(() => {
 G.waterRefillTimer = setInterval(() => {
   if (!document.hidden) refillWateringCapacity();
 }, 5000);
+setInterval(() => {
+  if (!document.hidden) renderWateringCapacity();
+}, 1000);
 // Navegadores podem pausar timers em abas inativas; ao voltar, força a
 // atualização imediatamente para mostrar a reposição que ocorreu nesse tempo.
 document.addEventListener('visibilitychange', () => {

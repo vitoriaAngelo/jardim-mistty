@@ -7134,6 +7134,13 @@ async function loadGardenFromSE(username) {
       json = { data: readGardenCache(username) };
       loadFailed = true;
     }
+    // O F5 pode acontecer antes de o POST terminar no servidor. Se o cache
+    // local contém uma gravação mais nova, ele é a fonte correta para esta
+    // sessão (especialmente após uma colheita, que deixa o canteiro vazio).
+    const cachedData = readGardenCache(username);
+    if (cachedData && (!json?.data || Number(cachedData.savedAt || 0) > Number(json.data.savedAt || 0))) {
+      json = { data: cachedData };
+    }
     if (!json?.data) return loadFailed ? null : false;
     hadSave = true;
 

@@ -461,6 +461,21 @@ body.dark-mode .bonus-kit-status { color:#cfe2b9; }
 .pix-success-modal p { margin:9px 0 17px; font:700 14px/1.45 'Nunito',sans-serif; color:#687052; }
 .pix-success-modal button { min-width:150px; padding:10px 18px; border:1px solid #92a96f; border-radius:12px; background:#a9c57e; color:#fffdf7; font:900 13px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 3px 0 #7f9d60; }
 .pix-success-modal button:hover { transform:translateY(-1px); }
+.pix-email-modal { width:min(410px,100%); padding:26px 24px 22px; border:1px solid #dec783; border-radius:24px; background:linear-gradient(160deg,#fffaf0,#f3f0df); color:#59694b; box-shadow:0 8px 0 #cdb982,0 18px 38px rgba(67,54,25,.2); animation:pix-success-in .28s cubic-bezier(.2,.8,.25,1) both; }
+.pix-email-modal h2 { margin:0 0 8px; color:#526946; font:900 21px/1.2 'Nunito',sans-serif; }
+.pix-email-modal p { margin:0 0 16px; color:#687052; font:700 13px/1.4 'Nunito',sans-serif; }
+.pix-email-modal label { display:block; margin-bottom:6px; color:#59694b; font:800 12px 'Nunito',sans-serif; }
+.pix-email-modal input { width:100%; box-sizing:border-box; padding:12px 13px; border:1px solid #c8b77e; border-radius:12px; outline:none; background:#fffdf7; color:#4f6045; font:700 14px 'Nunito',sans-serif; }
+.pix-email-modal input:focus { border-color:#8aaa72; box-shadow:0 0 0 3px #b9d69b55; }
+.pix-email-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; }
+.pix-email-actions button { min-width:105px; padding:10px 15px; border-radius:12px; font:900 13px 'Nunito',sans-serif; cursor:pointer; }
+.pix-email-cancel { border:1px solid #cdbd9b; background:#eee7d5; color:#687052; box-shadow:0 3px 0 #d1c4a5; }
+.pix-email-submit { border:1px solid #92a96f; background:#a9c57e; color:#fffdf7; box-shadow:0 3px 0 #7f9d60; }
+body.dark-mode .pix-email-modal { border-color:#8f7843; background:linear-gradient(160deg,#354332,#293528); box-shadow:0 8px 0 #68562e,0 18px 38px #11181199; }
+body.dark-mode .pix-email-modal h2, body.dark-mode .pix-email-modal label { color:#f4e5b0; }
+body.dark-mode .pix-email-modal p { color:#cbd9c2; }
+body.dark-mode .pix-email-modal input { border-color:#71875f; background:#202a21; color:#edf4df; }
+body.dark-mode .pix-email-cancel { border-color:#58684f; background:#30392d; color:#cbd9c2; box-shadow:0 3px 0 #1d281e; }
 @keyframes pix-success-in { from { opacity:0; transform:translateY(10px) scale(.96); } to { opacity:1; transform:none; } }
 body.dark-mode .pix-success-modal { border-color:#8f7843; background:linear-gradient(160deg,#354332,#293528); color:#edf4df; box-shadow:0 8px 0 #68562e, 0 18px 38px #11181199; }
 body.dark-mode .pix-success-modal h2 { color:#f4e5b0; }
@@ -4709,9 +4724,22 @@ function showPixSuccess(kitName) {
   if (typeof window.mascotNotify === 'function') window.mascotNotify('Pagamento confirmado! Seu bônus chegou ao inventário ✨', 4200);
 }
 function closePixSuccess() { document.getElementById('pix-success-overlay')?.classList.add('hidden'); }
+function askPixEmail() {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'pix-success-overlay';
+    overlay.innerHTML = '<div class="pix-email-modal" role="dialog" aria-modal="true" aria-labelledby="pix-email-title"><div class="pix-success-icon" style="width:48px;height:48px;font-size:24px;margin-bottom:12px">💌</div><h2 id="pix-email-title">Vamos preparar seu Pix</h2><p>Informe seu e-mail para gerar o pagamento com segurança.</p><label for="pix-email-input">E-mail</label><input id="pix-email-input" type="email" autocomplete="email" placeholder="voce@exemplo.com"><div class="pix-email-actions"><button type="button" class="pix-email-cancel">Cancelar</button><button type="button" class="pix-email-submit">Continuar</button></div></div>';
+    const input = overlay.querySelector('#pix-email-input');
+    const finish = value => { overlay.remove(); resolve(value); };
+    overlay.querySelector('.pix-email-cancel').onclick = () => finish('');
+    overlay.querySelector('.pix-email-submit').onclick = () => finish(input.value.trim());
+    input.addEventListener('keydown', event => { if (event.key === 'Enter') overlay.querySelector('.pix-email-submit').click(); if (event.key === 'Escape') finish(''); });
+    document.body.appendChild(overlay); setTimeout(() => input.focus(), 40);
+  });
+}
 async function requestBonusPix(name) {
   if (!previewAccess()) {
-    const email = window.prompt('Digite seu e-mail para gerar o Pix:');
+    const email = await askPixEmail();
     if (!email) return;
     try {
       const response = await fetch('/.netlify/functions/create-pix-payment', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username:seUser?.username, kit:name, email }) });

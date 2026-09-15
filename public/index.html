@@ -3892,7 +3892,7 @@ function selectTool(t) {
 }
 function isReady(plot) {
   if (!plot) return false;
-  return plot.growCount >= effectiveMaxGrow(plot.type);
+  return plot.growCount >= effectiveMaxGrowWithSkill(plot.type);
 }
 
 function refreshShovelTool() {
@@ -5671,7 +5671,7 @@ function updatePlotTooltip(idx) {
   if (!el) return;
   const p = getPlantable(plot.type);
   const maxW = effectiveMaxWater(plot.type);
-  const maxG = effectiveMaxGrow(plot.type);
+  const maxG = effectiveMaxGrowWithSkill(plot.type);
   const ready = plot.growCount >= maxG;
   el.innerHTML = `
     <strong>${p.emoji} ${p.name}</strong><br>
@@ -5748,7 +5748,7 @@ function buildPlotEl(plot, idx) {
     }
   } else {
     const maxW = effectiveMaxWater(plot.type);
-    const maxG = effectiveMaxGrow(plot.type);
+    const maxG = effectiveMaxGrowWithSkill(plot.type);
     const growProgress = plot.growCount / maxG;
     const plantEl = document.createElement('div');
     plantEl.className = 'plant-container';
@@ -5788,7 +5788,7 @@ function buildPlotEl(plot, idx) {
 
   if (plot) {
     const maxW = effectiveMaxWater(plot.type);
-    const maxG = effectiveMaxGrow(plot.type);
+    const maxG = effectiveMaxGrowWithSkill(plot.type);
     const waterPct = Math.min(1, plot.waterCount / maxW);
     const waterFull = plot.waterCount >= maxW;
 
@@ -5819,7 +5819,7 @@ function buildPlotEl(plot, idx) {
   lbl.className = 'plot-label';
   if (plot) {
     const maxW = effectiveMaxWater(plot.type);
-    const maxG = effectiveMaxGrow(plot.type);
+    const maxG = effectiveMaxGrowWithSkill(plot.type);
     const waterFull = plot.waterCount >= maxW;
     const growReady = plot.growCount >= maxG;
     if (growReady) {
@@ -6051,7 +6051,7 @@ async function onPlotClick(idx) {
     const plotDiv = document.querySelector(`[data-idx="${idx}"]`);
     if (plotDiv) {
       const lbl = plotDiv.querySelector('.plot-label');
-      const maxG = effectiveMaxGrow(plot.type);
+      const maxG = effectiveMaxGrowWithSkill(plot.type);
       if (lbl) lbl.innerHTML = `<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>`;
       const glbl = plotDiv.querySelector('.plot-grow-label');
       if (glbl) {

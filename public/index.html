@@ -4140,19 +4140,20 @@ function isSpecialPlotActive(index) {
   return true;
 }
 function specialPlotIcon() { return '<svg class="special-plot-icon" viewBox="0 0 32 32" fill="none" aria-label="Canteiro especial"><path d="M8 14h16v12H8z" fill="#e8bd55" stroke="#9a7440" stroke-width="1.5"/><path d="M6 11h20v5H6z" fill="#f5d878" stroke="#9a7440" stroke-width="1.5"/><path d="M16 11V26M11 8q5-5 5 3M21 8q-5-5-5 3" stroke="#9a7440" stroke-width="1.7" stroke-linecap="round"/><path d="m25 4 .8 2.2L28 7l-2.2.8L25 10l-.8-2.2L22 7l2.2-.8L25 4Z" fill="#fff1a8" stroke="#c8943a" stroke-width=".8"/></svg>'; }
-function repairSpecialPlotsFromBonus() {
-  if (Number(G.bonusKitLevel || 0) < 3 || !G.unlockedPlots) return false;
-  const current = Array.isArray(G.specialPlots) ? G.specialPlots.filter(index => index < G.unlockedPlots) : [];
+function normalizeSpecialPlotsByEntitlement() {
+  if (!G.unlockedPlots) return false;
+  const kitPlots = { 1: 1, 2: 2, 3: 4 }[Number(G.bonusKitLevel || 0)] || 0;
+  const twitchPlots = G.premiumSpecialPlotClaimed === true ? 1 : 0;
+  const entitled = Math.min(G.unlockedPlots, kitPlots + twitchPlots);
+  const current = Array.isArray(G.specialPlots) ? [...new Set(G.specialPlots.filter(index => index < G.unlockedPlots))] : [];
   if (Number.isInteger(G.specialPlot) && G.specialPlot < G.unlockedPlots && !current.includes(G.specialPlot)) current.push(G.specialPlot);
-  const needed = Math.max(0, 4 - current.length);
-  const extra = Array.from({ length: G.unlockedPlots }, (_, index) => index).filter(index => !current.includes(index)).slice(0, needed);
-  const repaired = [...new Set([...current, ...extra])];
-  if (repaired.length <= current.length) return false;
+  const normalized = current.slice(0, entitled);
+  const extra = Array.from({ length: G.unlockedPlots }, (_, index) => index).filter(index => !normalized.includes(index)).slice(0, Math.max(0, entitled - normalized.length));
+  const repaired = [...normalized, ...extra];
+  const changed = repaired.length !== current.length || repaired.some((index, position) => index !== current[position]);
+  if (!changed) return false;
   G.specialPlots = repaired;
-  G.specialPlot = repaired[0];
-  if (!G.specialPlotExpiresAt || Date.now() >= G.specialPlotExpiresAt) {
-    G.specialPlotExpiresAt = Date.now() + 10 * 24 * 60 * 60 * 1000;
-  }
+  G.specialPlot = repaired[0] ?? null;
   return true;
 }
 
@@ -7640,7 +7641,6 @@ async function loadGardenFromSE(username) {
     G.specialPlot = save.specialPlot ?? null;
     G.specialPlots = Array.isArray(save.specialPlots) ? save.specialPlots : (Number.isInteger(G.specialPlot) ? [G.specialPlot] : []);
     G.specialPlotExpiresAt = Number(save.specialPlotExpiresAt || 0);
-    if (repairSpecialPlotsFromBonus()) saveGardenToSE();
     G.bonusRefillDiscount = save.bonusRefillDiscount === true;
     G.bonusWateringCapacity = Number(save.bonusWateringCapacity || 0);
     G.bonusWaterRecoveryMinutes = Number(save.bonusWaterRecoveryMinutes || 0);
@@ -7652,6 +7652,7 @@ async function loadGardenFromSE(username) {
     G.premiumPlantsUnlocked = save.premiumPlantsUnlocked === true;
     G.premiumFertilizersClaimed = save.premiumFertilizersClaimed === true;
     G.premiumSpecialPlotClaimed = save.premiumSpecialPlotClaimed === true;
+    if (normalizeSpecialPlotsByEntitlement()) saveGardenToSE();
     G.isPremium = save.isPremium === true || G.premiumWateringCan || G.premiumShovel || G.premiumPlantsUnlocked || G.premiumFertilizersClaimed || G.premiumSpecialPlotClaimed;
     restorePremiumClaimsCache(username);
     G.selectedMascot = save.selectedMascot || null;

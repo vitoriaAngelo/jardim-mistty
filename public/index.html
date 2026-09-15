@@ -4972,7 +4972,8 @@ function renderRankingPage() {
     const userLevel = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
     const dailyPhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
     const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
-    const frame = ['purple','pink','blue','red','yellow','vip'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : (isMe ? (G.profileFrame || 'red') : 'red');
+    const rankingFrame = isMe ? (G.profileFrame || u.profileFrame || u.frame) : (u.profileFrame || u.frame);
+    const frame = ['purple','pink','blue','red','yellow','vip'].includes(rankingFrame) ? rankingFrame : 'red';
     const unlockedBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : [...(u.badges || u.unlockedBadges || u.achievements || [])];
     if ((isMe && hasSubscriberBadge()) || u.isSubscriber) unlockedBadges.push('subscriber');
     const badgeIds = validBadgeIds(unlockedBadges);
@@ -6973,6 +6974,8 @@ function selectProfileFrame(frame) {
     return;
   }
   G.profileFrame = frame;
+  const rankingSelf = rankingUsers.find(user => String(user.username || user._id || '').toLowerCase() === String(seUser?.username || '').toLowerCase());
+  if (rankingSelf) rankingSelf.profileFrame = frame;
   document.getElementById('subscriber-frame').dataset.frame = frame;
   document.querySelectorAll('.frame-picker-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.frame === frame));
   saveGardenToSE();

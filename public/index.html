@@ -3633,27 +3633,11 @@ async function refreshPoints() {
   button?.classList.add('loading');
   try {
     if (seUser && !isLocalPreview) {
-      // Primeiro envia ao StreamElements qualquer ganho ou gasto feito no jogo.
-      // Só depois consulta novamente o saldo confirmado, evitando sobrescrever
-      // alterações locais com um valor antigo do canal.
+      // A sincronização lê o saldo atual, aplica o delta local e já atualiza
+      // G.pts com o saldo mesclado. Uma segunda leitura imediata pode devolver
+      // o valor anterior por causa da consistência eventual da API.
       const synced = await syncPtsToSE();
       if (!synced) throw new Error('Falha ao sincronizar alterações locais');
-      const res = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`);
-      if (res.status === 404) {
-        // Usuários sem registro de pontos ainda começam com saldo zero.
-        G.pts = 0;
-        lastKnownSEPoints = 0;
-        if (seUser) seUser.points = 0;
-        updatePts();
-        await saveGardenToSE();
-        toast('🌟 Pontos atualizados!', 1600);
-        return;
-      }
-      if (!res.ok) throw new Error('Falha ao atualizar');
-      const data = await res.json();
-      G.pts = data.points || 0;
-      lastKnownSEPoints = G.pts;
-      seUser.points = G.pts;
       updatePts();
     }
     // Persiste no banco o mesmo estado que acabou de ser confirmado no canal.

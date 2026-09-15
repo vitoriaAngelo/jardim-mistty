@@ -3475,6 +3475,7 @@ const G = {
   skillPoints: 0,
   skillNodes: {},
   skillPointsClaimed: 0,
+  upgrades_refunded: false,
   premiumWateringCan: false,
   premiumShovel: false,
   premiumPlantsUnlocked: false,
@@ -3729,15 +3730,8 @@ async function buyPlot(slot) {
 
 // ─── UPGRADES ─────────────────────────────────────────────
 const UPGRADES = [
-  { id:'special_plot', icon:'✨', name:'Canteiro Especial', desc:'Escolha um canteiro para produzir plantas douradas que valem 3x mais.', cost:2500, minLevel:10, effect:'Produz plantas douradas · venda 3x' },
-  { id:'quick_grow_plus', icon:'⚡', name:'Adubo Rápido melhorado', desc:'Aumenta o bônus do Adubo Rápido. Pode comprar até 3x.', cost:400, minLevel:4, maxLevel:3, effect:'+1 estágio extra por nível' },
-  { id:'golden_soil_plus', icon:'✨', name:'Terra Dourada Melhorada', desc:'Aumenta a recompensa da Terra Dourada. Pode comprar até 5x.', cost:600, minLevel:8, maxLevel:5, effect:'+1 unidade extra por nível' },
-  { id:'fertilizer',   icon:'🌿', name:'Vaso Especial',           desc:'Reduz em 30% a quantidade de regas necessárias.',                             cost:600,  minLevel:4, effect:'Menos regas p/ ativar' },
   { id:'watering_capacity', icon:'💧', name:'Reservatório Maior', desc:'Aumenta em 1 a capacidade máxima do regador. Pode comprar até chegar a 10.', cost:350, minLevel:3, maxLevel:5, effect:'+1 capacidade no regador' },
   { id:'refill_watering', icon:'🫗', name:'Encher Reservatório', desc:'Enche 5 unidades de capacidade do regador.', cost:500, minLevel:1, refill:true, effect:'+5 capacidade no regador' },
-  { id:'fast_grow',    icon:'⏱️', name:'Crescimento Acelerado',   desc:'A planta avança 2 estágios de crescimento a cada tick de tempo.',             cost:800,  minLevel:6, effect:'Cresce 2x por tick'    },
-  { id:'golden_sun',   icon:'🌞', name:'Sol Dourado',             desc:'Bônus de +1 ponto extra a cada tick de pontos do canal.',                     cost:900,  minLevel:7, effect:'+1 pt/tick bônus'      },
-  { id:'merchant',     icon:'💰', name:'Mercador Amigo',          desc:'Aumenta em 50% o valor de venda de todas as sementes colhidas.',               cost:1200, minLevel:9, effect:'Venda +50%'            },
 ];
 
 // which upgrades the player has bought
@@ -3781,11 +3775,11 @@ function renderWateringCapacity() {
   const caption = document.getElementById('water-caption');
   if (caption) caption.textContent = amount >= max ? 'cheinho de água' : amount === 0 ? 'repondo água…' : `+1 água / ${G.premiumWateringCan ? 2 : 5} min`;
 }
-function effectiveGrowStep()   { return hasUpgrade('fast_grow') ? 2 : 1; }
+function effectiveGrowStep()   { return 1; } // fast_grow removido — usar habilidades
 function effectiveMaxWater(type) {
   const base = getPlantable(type).maxWater;
   // Vaso Especial: -30% regas
-  let val = hasUpgrade('fertilizer') ? Math.max(1, Math.round(base * 0.7)) : base;
+  let val = base;
   // Skill: Irrigação (-1 água por ciclo, mín. 1)
   val = Math.max(1, val - skillWaterReduction());
   return val;
@@ -3798,7 +3792,7 @@ function effectiveMaxGrow(type) {
 function effectiveSellValue(type, epicOverride) {
   const base = SELL_VALUE[type];
   const mascotBonus = ['apple','premium'].includes(G.selectedMascot) ? 1.15 : 1;
-  let val = Math.round((hasUpgrade('merchant') ? base * 1.5 : base) * mascotBonus);
+  let val = Math.round(base * mascotBonus);
   // Skill: Etiqueta Dourada (+3% por nível)
   val = Math.round(val * (1 + skillSellBonus()));
   // Skill: Venda Épica (item aleatório vale o dobro)
@@ -3825,7 +3819,7 @@ function renderUpgradeShop() {
     const level = upgradeLevel(u.id);
     const owned = hasUpgrade(u.id) && !u.maxLevel && !u.refill;
     const maxed = !!u.maxLevel && level >= u.maxLevel;
-    const pending = u.id === 'special_plot' && G.specialPlotPending;
+    const pending = false;
     const lv = currentLevel();
     const levelLocked = !owned && !maxed && !previewAccess() && lv < u.minLevel;
     const cost = u.maxLevel ? Math.round(u.cost * Math.pow(1.6, level)) : u.cost;
@@ -3891,14 +3885,6 @@ async function buyUpgrade(id) {
     toast(`${u.icon} ${u.name} nível ${level + 1}! Próxima compra: ${Math.round(u.cost * Math.pow(1.6, level + 1))} pts`, 3500);
     return;
   }
-  if (id === 'special_plot') {
-    if (!(await chargeGamePoints(u.cost))) return;
-    G.specialPlotPending = true;
-    updatePts(); renderUpgradeShop(); renderPlots();
-    saveGardenToSE();
-    toast('✨ Clique em um canteiro vazio para escolher o Canteiro Especial!', 4000);
-    return;
-  }
   if (!(await chargeGamePoints(u.cost))) return;
   G.upgrades.add(id);
   updatePts();
@@ -3909,7 +3895,6 @@ async function buyUpgrade(id) {
   unlockAchievement('buy_upgrade');
   saveGardenToSE();
   toast(`${u.icon} ${u.name} ativada!`, 3000);
-  spawnCoinBurst(document.getElementById('panel-melhorias'), 10);
 }
 
 // ─── TOOLS ───────────────────────────────────────────────
@@ -4537,7 +4522,7 @@ function renderHarvested() {
     return;
   }
 
-  const boosted = hasUpgrade('merchant');
+  const boosted = false; // merchant removido
 
   // Only show types that have been harvested
   const harvestedTypes = allTypes.filter(t => (G.harvested[t] || 0) > 0);
@@ -5247,8 +5232,8 @@ function renderFertilizerInventory() {
   bar.innerHTML = `<div class="fert-inv-slots">${validEntries.map(([id, f]) => {
     const count = G.fertilizerInventory[id] || 0;
     const currentEffect = id === 'golden_soil'
-      ? `+${upgradeLevel('golden_soil_plus') + 1} unidade${upgradeLevel('golden_soil_plus') ? 's' : ''}`
-      : id === 'quick_grow' ? `Cresce ${upgradeLevel('quick_grow_plus') + 2}× mais rápido` : f.effect;
+      ? '+1 unidade extra'
+      : id === 'quick_grow' ? 'Cresce 2× mais rápido' : f.effect;
     const selClass = G.selectedFertilizer === id
       ? (id === 'quick_grow' ? 'selected-quick' : 'selected-golden')
       : '';
@@ -5292,8 +5277,8 @@ function renderFertilizerShop() {
     Object.values(FERTILIZERS).map(f => {
       const locked = !previewAccess() && lv < f.minLevel;
       const qty = SHOP_QTY[f.id] || 1;
-      const goldenLevel = f.id === 'golden_soil' ? upgradeLevel('golden_soil_plus') : 0;
-      const quickLevel = f.id === 'quick_grow' ? upgradeLevel('quick_grow_plus') : 0;
+      const goldenLevel = 0;
+      const quickLevel = 0;
       const unitCost = f.cost + (goldenLevel + quickLevel) * 100;
       const total = unitCost * qty;
       const description = f.id === 'golden_soil' ? `A próxima colheita irá render +${goldenLevel + 1} unidade${goldenLevel ? 's' : ''}.` : f.id === 'quick_grow' ? `A planta crescerá ${quickLevel + 2}× mais rápido.` : f.desc;
@@ -5326,7 +5311,7 @@ async function buyFertilizer(id) {
   const f = FERTILIZERS[id];
   if (!f) return;
   const qty = SHOP_QTY[id] || 1;
-  const unitCost = f.cost + (id === 'golden_soil' ? upgradeLevel('golden_soil_plus') * 100 : id === 'quick_grow' ? upgradeLevel('quick_grow_plus') * 100 : 0);
+  const unitCost = f.cost;
   const total = unitCost * qty;
   if (!previewAccess() && currentLevel() < f.minLevel) { toast(`🔒 Precisa ser nível ${f.minLevel}!`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
@@ -5432,7 +5417,7 @@ function applyOfflineProgress(savedAt) {
   G.plots.forEach(plot => {
     if (!plot || plot.waterCount < effectiveMaxWater(plot.type) || plot.growCount >= effectiveMaxGrow(plot.type)) return;
     const maxG = effectiveMaxGrow(plot.type);
-    const bonus = plot.quickGrow ? 1 + upgradeLevel('quick_grow_plus') : 0;
+    const bonus = plot.quickGrow ? 1 : 0; // quick_grow_plus removido
     const steps = growTicks * (effectiveGrowStep() + bonus);
     plot.growCount = Math.min(maxG, plot.growCount + steps);
   });
@@ -5907,7 +5892,7 @@ async function onPlotClick(idx) {
       saveGardenToSE();
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     } else {
-      const qty = (hasGolden ? 2 + upgradeLevel('golden_soil_plus') : 1) + effectiveHarvestBonus();
+      const qty = (hasGolden ? 2 : 1) + effectiveHarvestBonus(); // golden_soil_plus removido
       const harvestQty = qty * (plot.goldenPlot ? 3 : 1);
 
       // Skill: Colheita Dupla (Mão Verde + Colheita Precisa)
@@ -6974,6 +6959,7 @@ async function saveGardenToSE() {
     skillPoints: G.skillPoints || 0,
     skillNodes:  G.skillNodes  || {},
     skillPointsClaimed: G.skillPointsClaimed || 0,
+    upgrades_refunded: G.upgrades_refunded || false,
     stats: {
       xp:          G.xp,
       harvested:   G.achievStats?.totalHarvest || 0,
@@ -7104,6 +7090,7 @@ window.addEventListener('beforeunload', () => {
     skillPoints: G.skillPoints || 0,
     skillNodes:  G.skillNodes  || {},
     skillPointsClaimed: G.skillPointsClaimed || 0,
+    upgrades_refunded: G.upgrades_refunded || false,
     stats: {
       xp: G.xp,
       harvested: G.achievStats?.totalHarvest || 0,
@@ -7207,6 +7194,37 @@ async function loadGardenFromSE(username) {
     G.skillPointsClaimed = save.skillPointsClaimed ?? 0;
     // Retroativo: dar pontos dos níveis ainda não concedidos
     grantRetroactiveSkillPoints();
+    // Reembolso de melhorias removidas (one-time, salvo no upgrades_refunded)
+    if (!save.upgrades_refunded) {
+      const REFUND_MAP = {
+        special_plot:     2500,
+        quick_grow_plus:  400,  // por nível
+        golden_soil_plus: 600,  // por nível
+        fertilizer:       600,
+        fast_grow:        800,
+        golden_sun:       900,
+        merchant:         1200,
+      };
+      let refundTotal = 0;
+      const upgrades = save.upgrades || [];
+      const upgradeLevels = save.upgradeLevels || {};
+      upgrades.forEach(id => {
+        if (REFUND_MAP[id]) refundTotal += REFUND_MAP[id];
+      });
+      Object.entries(upgradeLevels).forEach(([id, lv]) => {
+        if (REFUND_MAP[id] && lv > 0) refundTotal += REFUND_MAP[id] * lv;
+      });
+      if (refundTotal > 0) {
+        G.pts += refundTotal;
+        console.log(`💰 Reembolso de melhorias: +${refundTotal} pts`);
+      }
+      // Marcar como reembolsado para não repetir
+      G.upgrades_refunded = true;
+    }
+    // Limpar melhorias removidas do jogo
+    const REMOVED_UPGRADES = new Set(['special_plot','quick_grow_plus','golden_soil_plus','fertilizer','fast_grow','golden_sun','merchant']);
+    G.upgrades = new Set([...G.upgrades].filter(id => !REMOVED_UPGRADES.has(id)));
+    Object.keys(G.upgradeLevels || {}).forEach(id => { if (REMOVED_UPGRADES.has(id)) delete G.upgradeLevels[id]; });
     // Retroativo: corrigir totalFlowerSell zerado por bug anterior
     // Se a conquista sell_flowers já estava desbloqueada, garante totalFlowerSell >= 1
     if (G.achievements.has('sell_flowers') && !(G.achievStats.totalFlowerSell >= 1)) {
@@ -7959,7 +7977,7 @@ function growTick() {
     if (plot.waterCount < maxW) return;
     if (plot.growCount >= maxG) return;
     // quick_grow fertilizer: advance 2 extra steps
-    const bonus = plot.quickGrow ? 1 + upgradeLevel('quick_grow_plus') : 0;
+    const bonus = plot.quickGrow ? 1 : 0; // quick_grow_plus removido
     plot.growCount = Math.min(maxG, plot.growCount + effectiveGrowStep() + bonus);
     anyGrew = true;
 

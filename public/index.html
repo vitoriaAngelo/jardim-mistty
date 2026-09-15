@@ -1474,6 +1474,11 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .ranking-item[role="button"]:hover::after, .ranking-item[role="button"]:focus-visible::after { display:block; }
 .ranking-item[role="button"]:hover { transform:translateY(-1px); }
 .ranking-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:130px; padding:18px; color:var(--text2); text-align:center; }
+.ranking-tabs { display:flex; gap:6px; margin:10px 0; padding:4px; border-radius:13px; background:var(--cream2); }
+.ranking-tab { flex:1; border:1px solid transparent; border-radius:10px; padding:8px 6px; background:transparent; color:var(--text2); font:800 11px 'Nunito',sans-serif; cursor:pointer; }
+.ranking-tab.active { background:var(--cozy-paper,#fffdf7); border-color:var(--cozy-line); color:var(--cozy-ink); box-shadow:0 2px 0 var(--cozy-line); }
+body.dark-mode .ranking-tabs { background:#202820; }
+body.dark-mode .ranking-tab.active { background:#3b4938; border-color:#607256; color:#f0f5e9; }
 .ranking-loading-icon { display:inline-flex; align-items:center; justify-content:center; font-size:34px; line-height:1; animation:ranking-cozy-float 1.7s ease-in-out infinite; }
 .ranking-loading-text { font-size:13px; font-weight:800; color:var(--text); }
 .ranking-loading-hint { font-size:10px; font-weight:700; color:var(--text2); opacity:.8; }
@@ -2075,6 +2080,10 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
 .shop-cart:hover .shop-cart-items, .shop-cart:focus-within .shop-cart-items { max-height:300px; margin:8px 0 10px; border-top-color:var(--cozy-line,#d8c9ac); padding-top:8px; opacity:1; }
 .shop-cart-row { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; color:var(--text); }
 .shop-cart-row > span { white-space:nowrap; }
+.plot-harvest-count { margin-top:2px; color:#f0d28a; font-size:9px; font-weight:900; white-space:nowrap; }
+body.dark-mode .plot-harvest-count { color:#f4d990; }
+.shop-item-harvests { margin-top:2px; color:#9a7440; font-size:10px; font-weight:900; }
+body.dark-mode .shop-item-harvests { color:#e4c47c; }
 .shop-cart-row-controls { display:flex; align-items:center; gap:4px; }
 .shop-cart-row-controls button { width:19px; height:19px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:50%; background:var(--cream); color:var(--text); font-weight:800; line-height:1; cursor:pointer; }
 .shop-cart-row-controls span { min-width:24px; text-align:center; font-weight:800; }
@@ -2865,7 +2874,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
 </svg>
         <span>Ranking</span>
       </button>
-      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Ranking<br><span>Top 25 espectadores do canal</span></div>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Ranking<br><span>Top 10 espectadores do canal</span></div>
     </div>
 
     <div class="header-icon-wrap" style="width:100%">
@@ -2896,6 +2905,10 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     <button class="popup-close-x" aria-label="Fechar ranking" onclick="closeRanking()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between">
       <span>🥇 Ranking Global</span>
+    </div>
+    <div class="ranking-tabs" role="tablist" aria-label="Tipo de ranking">
+      <button class="ranking-tab active" id="ranking-tab-points" role="tab" aria-selected="true" onclick="switchRankingMode('points')">🪙 Mais pontos</button>
+      <button class="ranking-tab" id="ranking-tab-level" role="tab" aria-selected="false" onclick="switchRankingMode('level')">⭐ Maior nível</button>
     </div>
     <div id="ranking-list">
       <div class="ranking-loading" role="status" aria-live="polite"><span class="ranking-loading-icon" aria-hidden="true">🌱</span><span class="ranking-loading-text">Regando o ranking…</span><span class="ranking-loading-hint">Só um minutinho, as fazendas estão acordando.</span></div>
@@ -3043,7 +3056,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
         <div class="help-section">
           <div class="help-section-title">🏆 Conquistas e Ranking</div>
           <div class="help-tip"><div class="help-tip-icon">🏆</div><div>Complete conquistas para desbloquear <strong>badges</strong> no seu perfil!</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🥇</div><div>O <strong>Ranking</strong> mostra os top 25 espectadores por pontos. Acesse pelo painel lateral.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🥇</div><div>O <strong>Ranking</strong> mostra o top 10 espectadores do canal, por pontos ou por nível. Acesse pelo painel lateral.</div></div>
         </div>
         <div class="help-section">
           <div class="help-section-title">💾 Progresso</div>
@@ -3560,7 +3573,7 @@ const G = {
 // maxWater = regas para encher (habilitar crescimento)
 // maxGrow  = estágios de crescimento por tempo (30min cada)
 const PLANTS = {
-  potato:   { name:'Batata',      emoji:'🥔', cost:30,  maxWater:3,  maxGrow:6,  color:'#c8a060', leafColor:'#4e8a28', minLevel:1  },
+  potato:   { name:'Batata',      emoji:'🥔', cost:30,  maxWater:3,  maxGrow:6,  harvests:3, color:'#c8a060', leafColor:'#4e8a28', minLevel:1  },
   lettuce:  { name:'Alface',      emoji:'🥬', cost:50,  maxWater:4,  maxGrow:8,  color:'#4ab848', leafColor:'#2a8a28', minLevel:1  },
   carrot:   { name:'Cenoura',     emoji:'🥕', cost:45,  maxWater:5,  maxGrow:10, color:'#f07030', leafColor:'#6aaa3a', minLevel:2  },
   tomato:   { name:'Tomate',      emoji:'🍅', cost:60,  maxWater:7,  maxGrow:15, color:'#e84040', leafColor:'#5ab830', minLevel:3  },
@@ -4337,6 +4350,7 @@ function renderFlowerShop() {
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
+      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
       <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
@@ -4680,6 +4694,7 @@ function renderHarvested() {
 let rankingUsers = [];
 let rankingPage = 0;
 let rankingLoadId = 0;
+let rankingMode = 'points';
 
 function defaultFarmName(username) {
   const safeUsername = String(username || '').replace(/^@+/, '').trim();
@@ -4709,7 +4724,9 @@ function validBadgeIds(values) {
 }
 
 function renderRankingPage() {
-  const users = rankingUsers;
+  const users = [...rankingUsers].sort((a, b) => rankingMode === 'level'
+    ? (Number(b.level ?? b.lv ?? 1) - Number(a.level ?? a.lv ?? 1)) || (Number(b.points || 0) - Number(a.points || 0))
+    : Number(b.points || 0) - Number(a.points || 0)).slice(0, 10);
   const pageSize = 5;
   const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
   rankingPage = Math.min(rankingPage, totalPages - 1);
@@ -4740,7 +4757,7 @@ function renderRankingPage() {
     return `<div class="ranking-item ${topClass} ${isMe ? 'me' : ''}" role="button" tabindex="0" aria-label="Abrir perfil de ${farmName}" onclick="openRankingProfile(${rankingPage * pageSize + i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRankingProfile(${rankingPage * pageSize + i})}">
       <div class="ranking-pos">${medal}</div><div class="ranking-frame" data-frame="${frame}" aria-hidden="true">🌱</div>
       <div class="ranking-name"><div class="ranking-farm-title"><div class="ranking-farm-name">${farmName}</div></div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
-      <div class="ranking-pts"><img class="points-token" src="points-sprout.svg" width="20" height="20" alt="" aria-hidden="true"> ${pts.toLocaleString()}</div>
+      <div class="ranking-pts">${rankingMode === 'level' ? `⭐ Nível ${userLevel}` : `<img class="points-token" src="points-sprout.svg" width="20" height="20" alt="" aria-hidden="true"> ${pts.toLocaleString()}`}</div>
     </div>`;
   }).join('');
   document.getElementById('ranking-list').innerHTML = `${rows || '<div style="text-align:center;padding:20px;color:var(--text2)">Nenhum dado encontrado.</div>'}
@@ -4771,14 +4788,15 @@ async function openRanking() {
         { username:'CantinhoCozy', farmName:'Cantinho Cozy', points:120, profileFrame:'red' },
       ];
     } else {
-      // Fetch only the top 10 from the SE loyalty leaderboard
+      // Buscamos uma base maior para que o ranking por nível não fique
+      // limitado apenas aos 10 maiores saldos de pontos.
       const res  = await fetch(
-        `${dataOrigin}${SE_API}/points/${SE_CHANNEL}/top%3Flimit%3D10`,
+        `${dataOrigin}${SE_API}/points/${SE_CHANNEL}/top%3Flimit%3D100`,
         { cache: 'no-store' }
       );
       if (!res.ok) throw new Error(`SE API ${res.status}`);
       const data = await res.json();
-      users = (data.users || data || []).slice(0, 10);
+      users = (data.users || data || []).slice(0, 100);
 
       // O leaderboard do StreamElements fornece o saldo de pontos, mas os
       // dados do jogo (XP/nível, estatísticas, badges etc.) ficam no JSON do
@@ -5620,6 +5638,14 @@ function getPlantable(type) {
   return PLANTS[type] || FLOWERS[type] || null;
 }
 
+function harvestCyclesFor(type) {
+  const item = getPlantable(type);
+  if (!item) return 1;
+  if (Number.isFinite(Number(item.harvests))) return Number(item.harvests);
+  // Cultivos mais baratos compensam com mais ciclos de colheita.
+  return Number(item.cost) <= 60 ? 3 : 2;
+}
+
 function updateHeldItemCursor() {
   const el = document.getElementById('held-item-cursor'); if (!el) return;
   const type = G.selectedSeed || G.selectedFertilizer;
@@ -5766,6 +5792,7 @@ function renderShop() {
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
+      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
       <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
@@ -5956,10 +5983,13 @@ function buildPlotEl(plot, idx) {
     const maxG = effectiveMaxGrowWithSkill(plot.type);
     const waterFull = plot.waterCount >= maxW;
     const growReady = plot.growCount >= maxG;
+    const harvestTotal = harvestCyclesFor(plot.type);
+    const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestTotal);
+    const harvestInfo = harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
     if (growReady) {
-      lbl.textContent = '✅ pronto!';
+      lbl.innerHTML = `✅ pronto!${harvestInfo}`;
     } else {
-      lbl.innerHTML = `<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}`;
+      lbl.innerHTML = `<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}`;
       const growLbl = document.createElement('div');
       growLbl.className = 'plot-grow-label';
       growLbl.style.cssText = 'font-size:10px;font-weight:800;color:rgba(160,220,120,.95);margin-top:1px;';
@@ -6004,8 +6034,18 @@ async function onPlotClick(idx) {
   if (plot && isReady(plot) && G.selectedTool !== 'shovel') {
     const type = plot.type;
     const outOfSeason = plot.outOfSeason || !isInSeason(type);
+    const plant = getPlantable(type);
+    const harvestsTotal = harvestCyclesFor(type);
+    const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);
+    const regrows = !outOfSeason && harvestsRemaining > 1;
     const hasGolden = plot.goldenSoil;
-    G.plots[idx] = null;
+    if (regrows) {
+      plot.harvestsRemaining = harvestsRemaining - 1;
+      plot.waterCount = 0;
+      plot.growCount = 0;
+    } else {
+      G.plots[idx] = null;
+    }
     spawnSparkles(idx);
     gainXP('harvest', plotEl, harvestXP(type), `+${harvestXP(type)} XP 🧺 Colheita!`);
     if (outOfSeason) {
@@ -6070,7 +6110,7 @@ async function onPlotClick(idx) {
       renderFertilizerInventory();
       const toastMsg = gotDouble ? `🧺🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} COLHEITA DUPLA!` :
         `🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!${plot.goldenPlot ? ' ✨ Canteiro Especial: planta dourada vale 3x!' : hasGolden ? ' ✨ Terra Dourada: +1 unidade extra!' : ''}`;
-      toast(toastMsg);
+      toast(regrows ? `${toastMsg} 🌱 Ela continuará plantada — regue novamente! (${plot.harvestsRemaining} colheita${plot.harvestsRemaining > 1 ? 's' : ''} restante${plot.harvestsRemaining > 1 ? 's' : ''})` : toastMsg);
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     }
     return;
@@ -6115,7 +6155,7 @@ async function onPlotClick(idx) {
     G.inventory[type]--;
     if (G.inventory[type] <= 0) G.selectedSeed = null;
     updateHeldItemCursor();
-    const newPlot = { type, waterCount: 0, growCount: 0, goldenPlot: G.specialPlot === idx };
+    const newPlot = { type, waterCount: 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: G.specialPlot === idx };
     // Apply any pre-applied fertilizer on this slot
     if (G.plotFertilizers && G.plotFertilizers[idx]) {
       const fid = G.plotFertilizers[idx];
@@ -6690,6 +6730,17 @@ function closeProfile() {
   document.querySelector('.frame-edit-btn')?.classList.remove('is-open');
   document.getElementById('profile-overlay').classList.add('hidden');
   window.dispatchEvent(new Event('profile-modal-state-change'));
+}
+
+function switchRankingMode(mode) {
+  rankingMode = mode === 'level' ? 'level' : 'points';
+  rankingPage = 0;
+  document.querySelectorAll('.ranking-tab').forEach(tab => {
+    const active = tab.id === `ranking-tab-${rankingMode}`;
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-selected', String(active));
+  });
+  renderRankingPage();
 }
 
 async function saveProfileName() {

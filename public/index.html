@@ -4140,6 +4140,21 @@ function isSpecialPlotActive(index) {
   return true;
 }
 function specialPlotIcon() { return '<svg class="special-plot-icon" viewBox="0 0 32 32" fill="none" aria-label="Canteiro especial"><path d="M8 14h16v12H8z" fill="#e8bd55" stroke="#9a7440" stroke-width="1.5"/><path d="M6 11h20v5H6z" fill="#f5d878" stroke="#9a7440" stroke-width="1.5"/><path d="M16 11V26M11 8q5-5 5 3M21 8q-5-5-5 3" stroke="#9a7440" stroke-width="1.7" stroke-linecap="round"/><path d="m25 4 .8 2.2L28 7l-2.2.8L25 10l-.8-2.2L22 7l2.2-.8L25 4Z" fill="#fff1a8" stroke="#c8943a" stroke-width=".8"/></svg>'; }
+function repairSpecialPlotsFromBonus() {
+  if (Number(G.bonusKitLevel || 0) < 3 || !G.unlockedPlots) return false;
+  const current = Array.isArray(G.specialPlots) ? G.specialPlots.filter(index => index < G.unlockedPlots) : [];
+  if (Number.isInteger(G.specialPlot) && G.specialPlot < G.unlockedPlots && !current.includes(G.specialPlot)) current.push(G.specialPlot);
+  const needed = Math.max(0, 4 - current.length);
+  const extra = Array.from({ length: G.unlockedPlots }, (_, index) => index).filter(index => !current.includes(index)).slice(0, needed);
+  const repaired = [...new Set([...current, ...extra])];
+  if (repaired.length <= current.length) return false;
+  G.specialPlots = repaired;
+  G.specialPlot = repaired[0];
+  if (!G.specialPlotExpiresAt || Date.now() >= G.specialPlotExpiresAt) {
+    G.specialPlotExpiresAt = Date.now() + 10 * 24 * 60 * 60 * 1000;
+  }
+  return true;
+}
 
 function refreshShovelTool() {
   const hasPlant = G.plots.some(Boolean);
@@ -4708,15 +4723,24 @@ function applyBonusKit(name) {
   if (kit.seeds) premiumSeedTypes.forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + kit.seeds; });
   if (isUpgrade && kit.special) {
     const durationMs = kit.specialRealDays ? kit.specialRealDays * 24 * 60 * 60 * 1000 : (kit.specialDays ? SEASON_DAY_MS * kit.specialDays : (kit.special === 1 ? SEASON_TOTAL_MS : kit.special === 2 ? SEASON_TOTAL_MS * 2 : SEASON_TOTAL_MS * 3));
-    const emptyPlots = G.plots.map((plot, index) => (!plot && index < G.unlockedPlots ? index : -1)).filter(index => index >= 0).slice(0, kit.special);
-    if (emptyPlots.length) {
-      G.specialPlots = [...new Set([...(G.specialPlots || []), ...emptyPlots])];
-      G.specialPlot = emptyPlots[0];
+    // O benefício é por canteiro, não apenas por canteiro vazio. Assim, um
+    // pacote comprado depois de uma melhoria antiga completa a quantidade
+    // prometida sem ignorar canteiros que já estão plantados.
+    const existingSpecialPlots = Array.isArray(G.specialPlots) ? G.specialPlots.filter(index => index < G.unlockedPlots) : [];
+    if (Number.isInteger(G.specialPlot) && G.specialPlot < G.unlockedPlots && !existingSpecialPlots.includes(G.specialPlot)) existingSpecialPlots.push(G.specialPlot);
+    const missingSpecialPlots = Math.max(0, kit.special - existingSpecialPlots.length);
+    const additionalPlots = Array.from({ length: G.unlockedPlots }, (_, index) => index)
+      .filter(index => !existingSpecialPlots.includes(index))
+      .slice(0, missingSpecialPlots);
+    const awardedSpecialPlots = [...new Set([...existingSpecialPlots, ...additionalPlots])];
+    if (awardedSpecialPlots.length) {
+      G.specialPlots = awardedSpecialPlots;
+      G.specialPlot = awardedSpecialPlots[0];
       G.specialPlotExpiresAt = Date.now() + durationMs;
     }
   }
   renderInventory(); renderFertilizerInventory(); renderPlots(); renderWateringCapacity(); updatePts();
-  if (kit.special && !Number.isInteger(G.specialPlot)) toast('🌱 Libere um canteiro vazio para receber o canteiro especial.', 3500);
+  if (kit.special && (G.specialPlots || []).length < kit.special) toast(`🌱 O pacote precisa de ${kit.special} canteiros desbloqueados para aplicar tudo.`, 3500);
   saveGardenToSE();
   toast(`✨ ${name} aplicado na prévia!`, 3500);
 }
@@ -7616,6 +7640,7 @@ async function loadGardenFromSE(username) {
     G.specialPlot = save.specialPlot ?? null;
     G.specialPlots = Array.isArray(save.specialPlots) ? save.specialPlots : (Number.isInteger(G.specialPlot) ? [G.specialPlot] : []);
     G.specialPlotExpiresAt = Number(save.specialPlotExpiresAt || 0);
+    if (repairSpecialPlotsFromBonus()) saveGardenToSE();
     G.bonusRefillDiscount = save.bonusRefillDiscount === true;
     G.bonusWateringCapacity = Number(save.bonusWateringCapacity || 0);
     G.bonusWaterRecoveryMinutes = Number(save.bonusWaterRecoveryMinutes || 0);

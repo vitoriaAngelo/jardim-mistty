@@ -471,6 +471,14 @@ body.dark-mode .bonus-kit-status { color:#cfe2b9; }
 .pix-email-actions button { min-width:105px; padding:10px 15px; border-radius:12px; font:900 13px 'Nunito',sans-serif; cursor:pointer; }
 .pix-email-cancel { border:1px solid #cdbd9b; background:#eee7d5; color:#687052; box-shadow:0 3px 0 #d1c4a5; }
 .pix-email-submit { border:1px solid #92a96f; background:#a9c57e; color:#fffdf7; box-shadow:0 3px 0 #7f9d60; }
+.pix-loading-modal { width:min(330px,100%); padding:28px 24px; border:1px solid #dec783; border-radius:24px; background:linear-gradient(160deg,#fffaf0,#f3f0df); color:#59694b; text-align:center; box-shadow:0 8px 0 #cdb982,0 18px 38px rgba(67,54,25,.2); }
+.pix-loading-spinner { width:38px; height:38px; margin:0 auto 13px; border:4px solid #dfe8cd; border-top-color:#8aaa72; border-radius:50%; animation:pix-spin .8s linear infinite; }
+.pix-loading-modal h2 { margin:0 0 7px; color:#526946; font:900 19px/1.2 'Nunito',sans-serif; }
+.pix-loading-modal p { margin:0; color:#687052; font:700 13px/1.4 'Nunito',sans-serif; }
+@keyframes pix-spin { to { transform:rotate(360deg); } }
+body.dark-mode .pix-loading-modal { border-color:#8f7843; background:linear-gradient(160deg,#354332,#293528); box-shadow:0 8px 0 #68562e,0 18px 38px #11181199; }
+body.dark-mode .pix-loading-modal h2 { color:#f4e5b0; }
+body.dark-mode .pix-loading-modal p { color:#cbd9c2; }
 body.dark-mode .pix-email-modal { border-color:#8f7843; background:linear-gradient(160deg,#354332,#293528); box-shadow:0 8px 0 #68562e,0 18px 38px #11181199; }
 body.dark-mode .pix-email-modal h2, body.dark-mode .pix-email-modal label { color:#f4e5b0; }
 body.dark-mode .pix-email-modal p { color:#cbd9c2; }
@@ -4737,14 +4745,23 @@ function askPixEmail() {
     document.body.appendChild(overlay); setTimeout(() => input.focus(), 40);
   });
 }
+function showPixLoading() {
+  const overlay = document.createElement('div');
+  overlay.id = 'pix-loading-overlay'; overlay.className = 'pix-success-overlay';
+  overlay.innerHTML = '<div class="pix-loading-modal" role="status" aria-live="polite"><div class="pix-loading-spinner" aria-hidden="true"></div><h2>Preparando seu Pix…</h2><p>Estamos conversando com o Mercado Pago.<br>Isso leva só um pouquinho.</p></div>';
+  document.body.appendChild(overlay);
+}
+function closePixLoading() { document.getElementById('pix-loading-overlay')?.remove(); }
 async function requestBonusPix(name) {
   if (!previewAccess()) {
     const email = await askPixEmail();
     if (!email) return;
+    showPixLoading();
     try {
       const response = await fetch('/.netlify/functions/create-pix-payment', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username:seUser?.username, kit:name, email }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Não foi possível gerar o Pix.');
+      closePixLoading();
       const code = data.qrCode || '';
       const copied = async () => { try { await navigator.clipboard.writeText(code); toast('Código Pix copiado!'); } catch (_) { toast('Selecione e copie o código Pix.'); } };
       const overlay = document.createElement('div'); overlay.className='pix-success-overlay'; overlay.id='pix-checkout-overlay';
@@ -4752,7 +4769,7 @@ async function requestBonusPix(name) {
       document.body.appendChild(overlay); toast('Aguardando confirmação do pagamento…', 2800);
       let attempts = 0;
       const poll = setInterval(async () => { attempts += 1; try { const statusRes = await fetch(`/.netlify/functions/payment-status?orderId=${encodeURIComponent(data.orderId)}`); const status = await statusRes.json(); if (status.status === 'paid') { clearInterval(poll); overlay.remove(); applyBonusKit(name); showPixSuccess(name); } else if (['rejected','cancelled'].includes(status.status) || attempts >= 60) { clearInterval(poll); } } catch (_) {} }, 5000);
-    } catch (error) { toast(error.message || 'Não foi possível gerar o Pix.', 3500); }
+    } catch (error) { closePixLoading(); toast(error.message || 'Não foi possível gerar o Pix.', 3500); }
     return;
   }
   applyBonusKit(name);

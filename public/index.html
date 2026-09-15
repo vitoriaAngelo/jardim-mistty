@@ -7934,7 +7934,7 @@ function resetSkillTree() {
 }
 
 // ── Investir ponto ─────────────────────────────────────────────────────
-function upgradeSkillNode(nodeId, branchId) {
+async function upgradeSkillNode(nodeId, branchId) {
   const branch = SKILL_BRANCHES.find(b => b.id === branchId);
   const node   = branch?.nodes.find(n => n.id === nodeId);
   if (!node) return;
@@ -7947,8 +7947,8 @@ function upgradeSkillNode(nodeId, branchId) {
   const cost = skillCostPts(nodeId, lvl);
   if (G.pts < cost) { toast(`🌱 Faltam ${cost - G.pts} pts para evoluir!`); return; }
 
-  // Cobrar
-  G.pts -= cost;
+  // Cobrar via chargeGamePoints para sincronizar corretamente com o StreamElements
+  if (!(await chargeGamePoints(cost))) return;
   G.skillPoints--;
   G.skillNodes[nodeId] = lvl + 1;
   // Garantir que skillPointsClaimed está atualizado para evitar re-concessão retroativa

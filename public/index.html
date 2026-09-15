@@ -451,6 +451,8 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
 .premium-claim-all:hover { transform:translateY(-1px); box-shadow:0 4px 0 #8c65aa; }
 .premium-claim:disabled, .premium-claim-all:disabled { cursor:default; transform:none; box-shadow:none; opacity:.82; }
 .premium-claim-all.claimed { background:#dcebd0; border-color:#8aaa72; color:#416037; }
+.bonus-kit-status { display:block; margin-top:7px; color:#6d8a57; font-size:11px; font-weight:900; }
+body.dark-mode .bonus-kit-status { color:#cfe2b9; }
 .pix-success-overlay { position:fixed; inset:0; z-index:1400; display:grid; place-items:center; padding:20px; background:rgba(32,45,31,.42); backdrop-filter:blur(3px); }
 .pix-success-overlay.hidden { display:none; }
 .pix-success-modal { width:min(390px,100%); padding:26px 24px 22px; border:1px solid #dec783; border-radius:24px; background:linear-gradient(160deg,#fffaf0,#f3f0df); color:#59694b; text-align:center; box-shadow:0 8px 0 #cdb982, 0 18px 38px rgba(67,54,25,.2); animation:pix-success-in .28s cubic-bezier(.2,.8,.25,1) both; }
@@ -3371,7 +3373,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     <div class="pix-success-icon" aria-hidden="true">✓</div>
     <h2 id="pix-success-title">Pagamento concluído!</h2>
     <p id="pix-success-message">Seu kit já está disponível no inventário.</p>
-    <button type="button" onclick="closePixSuccess(); openInventory();">Abrir inventário</button>
+    <button type="button" onclick="closePixSuccess(); closeBonusShop(); closeShop(); closePremium(); closeMascotShop(); openInventory();">Abrir inventário</button>
   </div>
 </div>
 
@@ -4677,7 +4679,25 @@ function openBonusShop() {
     el.innerHTML = el.innerHTML.replace(/(?<!-\s)(?:⏱️\s*)?1 minuto(?: de espera para recuperar o regador| no carregamento do regador)/g, '- 1 minuto no carregamento do regador');
     el.innerHTML = el.innerHTML.replace(/Moldura VIP por 30 dias/g, 'Moldura VIP por 10 dias');
   });
+  updateBonusKitStatuses();
   if (typeof window.mascotNotify === 'function') window.mascotNotify('Escolha um bônus fofinho para sua fazenda! ✨', 4000);
+}
+function updateBonusKitStatuses() {
+  const kitRanks = { 'Kit — Jardineiro Iniciante':1, 'Kit — Jardineiro Experiente':2, 'Kit — Jardineiro Especialista':3 };
+  document.querySelectorAll('#bonus-overlay .premium-benefits > div').forEach(card => {
+    const title = card.querySelector('strong')?.textContent?.trim();
+    const rank = kitRanks[title];
+    if (!rank) return;
+    let status = card.querySelector('.bonus-kit-status');
+    if (!status) { status = document.createElement('small'); status.className = 'bonus-kit-status'; card.querySelector('.premium-claim')?.before(status); }
+    const active = Number(G.bonusKitLevel || 0) >= rank;
+    status.hidden = !active;
+    if (!active) return;
+    if (rank === 3 && G.specialPlotExpiresAt) {
+      const days = Math.max(0, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS));
+      status.textContent = days > 0 ? `✓ Adquirido · ativo por ${days.toLocaleString('pt-BR')} dias` : '✓ Adquirido · prazo encerrado';
+    } else status.textContent = '✓ Adquirido · benefícios ativos';
+  });
 }
 function closeBonusShop() { document.getElementById('bonus-overlay')?.classList.add('hidden'); }
 function showPixSuccess(kitName) {
@@ -4700,7 +4720,7 @@ async function requestBonusPix(name) {
       const code = data.qrCode || '';
       const copied = async () => { try { await navigator.clipboard.writeText(code); toast('Código Pix copiado!'); } catch (_) { toast('Selecione e copie o código Pix.'); } };
       const overlay = document.createElement('div'); overlay.className='pix-success-overlay'; overlay.id='pix-checkout-overlay';
-      overlay.innerHTML = `<div class="pix-success-modal"><div class="pix-success-icon" aria-hidden="true">₿</div><h2>Pix criado!</h2><p>Escaneie o QR Code ou copie o código abaixo. Estamos aguardando a confirmação.</p>${data.qrCodeBase64 ? `<img src="data:image/png;base64,${data.qrCodeBase64}" alt="QR Code Pix" style="width:190px;height:190px;margin:4px auto 10px;display:block">` : ''}<textarea readonly style="width:100%;min-height:72px;border:1px solid #d9c99f;border-radius:10px;padding:8px;font:11px monospace;resize:none">${code}</textarea><button type="button" onclick="(${copied.toString()})()">Copiar código Pix</button><button type="button" style="margin-top:8px;background:#e8e1cd;color:#59694b;box-shadow:none" onclick="document.getElementById('pix-checkout-overlay')?.remove()">Fechar</button></div>`;
+      overlay.innerHTML = `<div class="pix-success-modal"><div class="pix-success-icon" aria-hidden="true">₿</div><h2>Confirmando pagamento…</h2><p>Escaneie o QR Code ou copie o código abaixo. Assim que o pagamento for confirmado, seu bônus será liberado.</p>${data.qrCodeBase64 ? `<img src="data:image/png;base64,${data.qrCodeBase64}" alt="QR Code Pix" style="width:190px;height:190px;margin:4px auto 10px;display:block">` : ''}<textarea readonly style="width:100%;min-height:72px;border:1px solid #d9c99f;border-radius:10px;padding:8px;font:11px monospace;resize:none">${code}</textarea><button type="button" onclick="(${copied.toString()})()">Copiar código Pix</button><button type="button" style="margin-top:8px;background:#e8e1cd;color:#59694b;box-shadow:none" onclick="document.getElementById('pix-checkout-overlay')?.remove()">Fechar</button></div>`;
       document.body.appendChild(overlay); toast('Aguardando confirmação do pagamento…', 2800);
       let attempts = 0;
       const poll = setInterval(async () => { attempts += 1; try { const statusRes = await fetch(`/.netlify/functions/payment-status?orderId=${encodeURIComponent(data.orderId)}`); const status = await statusRes.json(); if (status.status === 'paid') { clearInterval(poll); overlay.remove(); applyBonusKit(name); showPixSuccess(name); } else if (['rejected','cancelled'].includes(status.status) || attempts >= 60) { clearInterval(poll); } } catch (_) {} }, 5000);

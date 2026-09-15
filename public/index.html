@@ -214,12 +214,18 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .online-count-dot { width:8px; height:8px; border-radius:50%; background:#77a45c; box-shadow:0 0 0 3px #77a45c2b; animation:pulse 1.8s ease-in-out infinite; }
 .market-online-count { min-height:0; margin-left:7px; padding:5px 8px; border-radius:10px; font-size:10px; box-shadow:0 2px 0 #d0bfa0; }
 .online-count-tools { width:100%; box-sizing:border-box; justify-content:center; margin-top:2px; }
-.latest-sales-feed { width:170px; min-height:38px; box-sizing:border-box; padding:6px 9px; border:1px solid #d8c7a5; border-radius:12px; background:var(--cream2); color:var(--text2); font:700 10px/1.35 'Nunito',sans-serif; }
+.latest-sales-feed { position:relative; width:170px; min-height:30px; box-sizing:border-box; padding:5px 8px; border:1px solid #e4cfa8; border-radius:14px; background:linear-gradient(135deg,#fffaf0 0%,#f8efd9 100%); color:#7b6a54; font:700 11px/1.25 'Nunito',sans-serif; box-shadow:0 2px 0 #dfc99f, 0 5px 12px rgba(117,91,52,.1); }
+.latest-sales-feed::before, .latest-sales-feed::after { content:none; }
+.latest-sales-coin { width:15px; height:15px; margin:0 2px 0 3px; vertical-align:-3px; filter:drop-shadow(0 1px 1px rgba(89,66,34,.2)); }
 .latest-sales-strip { width:min(390px,calc(100% - 32px)); min-height:30px; margin:8px auto 0; display:flex; align-items:center; justify-content:center; text-align:center; }
-.latest-sales-feed strong { color:var(--text); font-size:10px; }
+.latest-sales-feed strong { color:#5f744e; font-size:11px; }
+.watering-refill-offer { display:none; position:absolute; left:calc(100% + 9px); top:50%; transform:translateY(-50%); width:150px; padding:8px 9px; border:1px solid #e3c98f; border-radius:12px; background:#fff7df; color:#80652e; font-size:10px; font-weight:800; line-height:1.25; text-align:center; cursor:pointer; box-shadow:0 3px 0 #dec58d, 0 5px 12px rgba(117,91,52,.12); z-index:8; }
+.watering-refill-offer::before { content:''; position:absolute; right:100%; top:50%; border:6px solid transparent; border-right-color:#e3c98f; transform:translateY(-50%); }
+.watering-refill-offer.visible { display:block; }
+.watering-refill-offer img { width:13px; height:13px; vertical-align:-3px; }
 .latest-sales-feed .latest-sales-content.sales-slide-in { animation:sales-slide-in .35s ease both; }
 @keyframes sales-slide-in { from { opacity:.2; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
-body.dark-mode .latest-sales-feed { border-color:#52624d; background:#30392d; color:#d9e5d0; }
+body.dark-mode .latest-sales-feed { border-color:#677c62; background:linear-gradient(135deg,#354332 0%,#2d392d 100%); color:#d9e5d0; box-shadow:0 3px 0 #202b20, 0 7px 16px rgba(0,0,0,.2); }
 body.dark-mode .latest-sales-feed strong { color:#f0f5e8; }
 body.dark-mode .online-count { border-color:#52624d; background:#30392d; color:#edf2e6; box-shadow:0 3px 0 #1b241b; }
 body.dark-mode .online-count-dot { background:#a8d68b; box-shadow:0 0 0 3px #a8d68b2b; }
@@ -2783,6 +2789,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
         <span class="watering-reading" id="water-capacity">5 / 5</span>
       </div>
       <span class="watering-caption" id="water-caption">cheinho de água</span>
+      <div class="watering-refill-offer" id="watering-refill-offer" role="button" tabindex="0" onclick="event.stopPropagation();buyWaterRefillFromNotice()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();buyWaterRefillFromNotice()}">Regador quase vazio<br>Clique para gastar <img src="points-sprout.svg" alt="" aria-hidden="true"> 500 pontos e encher</div>
       </div>
       <div class="header-btn-tip" id="water-tool-tip" style="left:50%;transform:translateX(-50%)">Regador<br><span>1 água por rega · recupera 1 a cada 5 minutos</span></div>
     </div>
@@ -3641,10 +3648,16 @@ async function refreshPoints() {
       if (!synced) throw new Error('Falha ao sincronizar alterações locais');
       updatePts();
     }
-    // Persiste no banco o mesmo estado que acabou de ser confirmado no canal.
-    await saveGardenToSE();
-    toast('🌟 Pontos atualizados!', 1600);
+    // Uma falha ao salvar o jardim não significa que a sincronização de
+    // pontos falhou. O saldo já foi confirmado pelo StreamElements.
+    try {
+      await saveGardenToSE();
+    } catch (saveError) {
+      console.warn('Pontos sincronizados, mas o jardim não foi salvo:', saveError);
+    }
+    toast('🌟 Seus pontos já estão atualizados!', 1600);
   } catch (e) {
+    console.warn('Atualização de pontos falhou:', e);
     toast('Não foi possível atualizar os pontos agora.', 2200);
   } finally {
     setTimeout(() => button?.classList.remove('loading'), 450);
@@ -3758,6 +3771,8 @@ function renderWateringCapacity() {
   const fill = document.getElementById('water-fill');
   if (fill) fill.style.width = `${Math.max(0, Math.min(100, amount / max * 100))}%`;
   const caption = document.getElementById('water-caption');
+  const offer = document.getElementById('watering-refill-offer');
+  if (offer) offer.classList.toggle('visible', amount <= 1 && amount < max);
   if (caption) {
     if (amount >= max) {
       caption.textContent = 'cheinho de água';
@@ -3891,6 +3906,21 @@ async function buyUpgrade(id) {
   unlockAchievement('buy_upgrade');
   saveGardenToSE();
   toast(`${u.icon} ${u.name} ativada!`, 3000);
+}
+
+async function buyWaterRefillFromNotice() {
+  const cost = 500;
+  refillWateringCapacity();
+  if ((G.waterCapacity || 0) >= maxWateringCapacity()) {
+    toast(`💧 O regador já está cheio! (${maxWateringCapacity()}/${maxWateringCapacity()})`, 2500);
+    return;
+  }
+  if (!(await chargeGamePoints(cost))) return;
+  G.waterCapacity = Math.min(maxWateringCapacity(), (G.waterCapacity || 0) + 5);
+  renderWateringCapacity();
+  updatePts();
+  await saveGardenToSE();
+  toast(`Regador cheio em +5 águas! (${G.waterCapacity}/${maxWateringCapacity()})`, 2800);
 }
 
 // ─── TOOLS ───────────────────────────────────────────────
@@ -7582,8 +7612,8 @@ let latestSalesIndex = 0;
 function renderLatestSale() {
   const feed = document.getElementById('latest-sales-feed');
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
-  if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span>'; return; }
-  feed.innerHTML = `<span class="latest-sales-content sales-slide-in">🛒 <strong>${String(sale.farmName || sale.username).replace(/^@+/, '')}</strong> acabou de faturar ${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
+  if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma venda recente</span>'; return; }
+  feed.innerHTML = `<span class="latest-sales-content sales-slide-in"><strong>${String(sale.farmName || sale.username).replace(/^@+/, '')}</strong> acabou de faturar <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
 }
 async function updateLatestSales() {
   const feed = document.getElementById('latest-sales-feed');

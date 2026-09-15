@@ -7907,6 +7907,8 @@ function resetSkillTree() {
   const spent = Object.values(G.skillNodes || {}).reduce((s, v) => s + v, 0);
   G.skillNodes = {};
   G.skillPoints = (G.skillPoints || 0) + spent;
+  // Atualizar claimed para o nível atual para evitar re-concessão retroativa
+  G.skillPointsClaimed = Math.max(G.skillPointsClaimed || 0, currentLevel());
   saveGardenToSE();
   renderSkillTree();
   toast('↺ Pontos redistribuídos! Você tem ' + G.skillPoints + ' pontos disponíveis.');

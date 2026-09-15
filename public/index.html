@@ -67,9 +67,10 @@ header > * { position:relative; z-index:1; }
 #skilltree-btn.has-points { background:linear-gradient(145deg,#fff0c4,#f4d982); border-color:#d6af58; color:#76552c; box-shadow:0 3px 0 #b98e3c,0 0 12px #e8c96d66; animation:skill-btn-glow 2.4s ease-in-out infinite; }
 #skilltree-btn.has-points, #skilltree-btn.has-points + .header-btn-tip { z-index:50; }
 .header-icon-wrap:has(#skilltree-btn.has-points) { z-index:60; }
-#skilltree-btn.has-points::after { content:'Você tem pontos para distribuir'; position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); width:145px; padding:8px 10px; border:1px solid #dfd2b5; border-radius:12px; background:#fffdf7; color:#687052; box-shadow:0 4px 12px #4b573320; font:800 10px/1.25 'Nunito',sans-serif; text-align:left; z-index:20; }
-#skilltree-btn.has-points::before { content:''; position:absolute; left:calc(100% + 4px); top:50%; width:10px; height:10px; background:#fffdf7; border-left:1px solid #dfd2b5; border-bottom:1px solid #dfd2b5; transform:translateY(-50%) rotate(45deg); z-index:21; }
+#skilltree-btn.has-points::after { content:'Você tem pontos para distribuir'; position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); width:124px; padding:6px 8px; border:1px solid #dfd2b5; border-radius:10px; background:#fffdf7; color:#687052; box-shadow:0 3px 9px #4b573320; font:800 9px/1.2 'Nunito',sans-serif; text-align:left; z-index:20; animation:skill-tip-cycle 30s ease-in-out infinite; }
+#skilltree-btn.has-points::before { content:''; position:absolute; left:calc(100% + 4px); top:50%; width:8px; height:8px; background:#fffdf7; border-left:1px solid #dfd2b5; border-bottom:1px solid #dfd2b5; transform:translateY(-50%) rotate(45deg); z-index:21; animation:skill-tip-cycle 30s ease-in-out infinite; }
 @keyframes skill-btn-glow { 0%,100% { box-shadow:0 3px 0 #b98e3c,0 0 8px #e8c96d44; } 50% { box-shadow:0 3px 0 #b98e3c,0 0 16px #e8c96d99; } }
+@keyframes skill-tip-cycle { 0%,4% { opacity:1; } 10%,88% { opacity:0; } 94%,100% { opacity:1; } }
 header.season-spring::before { background:radial-gradient(circle at 8% 120%,#dcecc8 0 25%,transparent 26%),linear-gradient(120deg,#fffaf0,#edf5e7 58%,#fae8eb); }
 header.season-summer::before { background:radial-gradient(circle at 8% 120%,#e5e9ba 0 25%,transparent 26%),linear-gradient(120deg,#fffaf0,#f7efcf 58%,#eef2cf); }
 header.season-autumn::before { background:radial-gradient(circle at 8% 120%,#ead3b5 0 25%,transparent 26%),linear-gradient(120deg,#fffaf1,#f4e5d2 58%,#efd7c5); }
@@ -374,6 +375,8 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
 .levelup-title { font-size: 28px; font-weight: 800; color: var(--text); }
 .levelup-sub { font-size: 15px; font-weight: 700; color: var(--text2); }
 .levelup-new-name { font-size: 18px; font-weight: 800; padding: 7px 22px; border-radius: 99px; color: #fff; box-shadow: 0 3px 0 rgba(0,0,0,.18); }
+.levelup-rewards { width:min(300px,100%); padding:10px 12px; border:1px solid #dfd2b5; border-radius:16px; background:#fff9e9; color:#687052; font-size:12px; font-weight:800; line-height:1.45; box-shadow:0 3px 0 #e5d7b8; }
+.levelup-rewards strong { display:block; margin-bottom:3px; color:#80652e; font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
 .levelup-dismiss {
   margin-top: 10px; padding: 11px 32px; border-radius: 16px;
   background: var(--grass); color: #fff;
@@ -2058,6 +2061,9 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
   transition: background .18s, transform .18s, box-shadow .18s;
 }
 .shop-cart { display:flex; align-items:center; justify-content:space-between; gap:10px; position:fixed; right:20px; bottom:56px; z-index:500; min-width:240px; padding:12px 14px; background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; box-shadow:0 8px 24px #4b573326; }
+.shop-cart.shop-cart-closed { display:none; }
+.shop-cart.side-cart { left:calc(50% + 400px); right:auto; top:50%; bottom:auto; transform:translateY(-50%); z-index:1700; width:320px; min-width:320px; max-width:320px; padding:10px 12px; gap:7px; }
+@media (max-width:1100px) { .shop-cart.side-cart { left:10px; right:10px; top:auto; bottom:14px; transform:none; width:auto; min-width:0; max-width:none; } }
 .shop-cart.empty { display:none; }
 .shop-cart-info { font-size:11px; font-weight:800; color:var(--text); }
 .shop-cart-total { display:flex; align-items:center; gap:4px; color:var(--text2); margin-top:2px; }
@@ -2068,6 +2074,7 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
 .shop-cart-items { display:flex; flex-direction:column; gap:5px; max-height:0; overflow:hidden; margin:0; border-top:1px solid transparent; padding-top:0; opacity:0; transition:max-height .25s ease, margin .25s ease, padding .25s ease, opacity .2s ease, border-color .25s ease; }
 .shop-cart:hover .shop-cart-items, .shop-cart:focus-within .shop-cart-items { max-height:300px; margin:8px 0 10px; border-top-color:var(--cozy-line,#d8c9ac); padding-top:8px; opacity:1; }
 .shop-cart-row { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; color:var(--text); }
+.shop-cart-row > span { white-space:nowrap; }
 .shop-cart-row-controls { display:flex; align-items:center; gap:4px; }
 .shop-cart-row-controls button { width:19px; height:19px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:50%; background:var(--cream); color:var(--text); font-weight:800; line-height:1; cursor:pointer; }
 .shop-cart-row-controls span { min-width:24px; text-align:center; font-weight:800; }
@@ -2079,6 +2086,7 @@ body.dark-mode .shop-cart-info { color:#e1ecd9; }
 body.dark-mode .shop-cart-total { color:#c7d3be; }
 body.dark-mode .shop-cart-toggle, body.dark-mode .shop-cart-row { color:#e1ecd9; }
 body.dark-mode .shop-cart-row-controls button { background:#252b24; border-color:#53604f; color:#e1ecd9; }
+body.dark-mode .shop-cart.side-cart { box-shadow:0 10px 30px #111811aa; }
 .sell-confirm-items { display:flex; flex-direction:column; gap:7px; max-height:240px; overflow:auto; margin:14px 0 10px; padding:10px; background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; }
 .sell-confirm-items .shop-cart-row { font-size:12px; }
 #sell-all-confirm-overlay { z-index:1200; }
@@ -2149,6 +2157,10 @@ body.dark-mode .sell-confirm-items .shop-cart-row { color:#e1ecd9; }
 .help-modal, .mail-modal, .profile-modal, .modal, .levelup-card { position: relative; }
 .popup-close-x { position: absolute; top: 10px; right: 12px; width: 30px; height: 30px; padding: 0; border: 1px solid #d7dccb; border-radius: 50%; background: #f1f1e7; color: #59694b; font: 700 20px/1 'Nunito', sans-serif; cursor: pointer; box-shadow: 0 2px 0 #d7dccb; }
 .popup-close-x:hover { background: #e8eee0; transform: translateY(-1px); }
+.inventory-shop-link { border: 1px solid var(--cozy-line); border-radius: 999px; background: var(--cream2); color: var(--cozy-ink); padding: 7px 12px; font: 800 12px 'Nunito',sans-serif; cursor:pointer; box-shadow: 0 2px 0 var(--cozy-line); transition: transform .16s ease, background .16s ease; }
+.inventory-shop-link:hover { background: #fff4cf; transform: translateY(-1px); }
+body.dark-mode .inventory-shop-link { background: #4b5f49; border-color: #71856b; color: #f4f5df; box-shadow: 0 2px 0 #29382a; }
+body.dark-mode .inventory-shop-link:hover { background: #5f7659; }
 /* Cozy vegetable cards: preserve the grid and shapes, soften the presentation. */
 .shop-grid-inner { gap: 12px; }
 .shop-item {
@@ -2566,6 +2578,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
   .header-icons .header-btn-tip { left: auto; right: -12px; transform: none; }
   .mail-modal, .profile-modal { padding: 22px 18px; }
   .shop-modal, .inventory-modal { width: calc(100% - 20px); max-width: none; max-height: 90vh; padding: 18px 12px 16px; }
+  .shop-cart.side-cart { left:10px; right:10px; top:auto; bottom:14px; transform:none; max-width:none; min-width:0; }
   .shop-modal .shop-tabs { gap: 5px; }
   .mail-modal-title, .help-title { font-size: 24px; }
   .profile-field-row { flex-wrap: wrap; }
@@ -3133,6 +3146,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     <div class="levelup-title">Subiu de Nível!</div>
     <div class="levelup-sub" id="lu-sub">Você chegou ao nível 2</div>
     <div class="levelup-new-name" id="lu-name">Brotinho</div>
+    <div class="levelup-rewards" id="lu-rewards"><strong>Desbloqueios</strong>Você ganhou novas recompensas para sua fazenda!</div>
     <button class="levelup-dismiss" onclick="dismissLevelUp()">Continuar plantando! 🌱</button>
   </div>
 </div>
@@ -3223,7 +3237,10 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
 <div class="mail-overlay hidden" id="inventory-overlay">
   <div class="mail-modal inventory-modal">
     <button class="popup-close-x" aria-label="Fechar inventário" onclick="closeInventory()">×</button>
-    <div class="mail-modal-title">🎒 Inventário</div>
+    <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between;padding-right:42px">
+      <span>🎒 Inventário</span>
+      <button class="inventory-shop-link" type="button" onclick="goToShopFromInventory()">🛒 Ir para a loja</button>
+    </div>
     <div id="inventory-filter"></div>
     <div id="inventory-bar"></div>
     <div id="fertilizer-inv-bar"></div>
@@ -3236,6 +3253,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     <button class="popup-close-x" aria-label="Fechar loja" onclick="closeShop()">×</button>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:2px">
       <div class="mail-modal-title" style="margin:0">🛒 Loja</div>
+      <button class="inventory-shop-link" type="button" onclick="goToInventoryFromShop()">🎒 Ir para o inventário</button>
       <div id="shop-season-badge" style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
     </div>
     <div class="shop-tabs">
@@ -3250,7 +3268,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     <div class="shop-panel" id="panel-canteiros"><div class="plot-shop-grid" id="plot-shop-grid"></div></div>
   </div>
 </div>
-<div class="shop-cart empty" id="shop-cart"></div>
+<div class="shop-cart empty shop-cart-closed" id="shop-cart"></div>
 
 <!-- PREMIUM MODAL -->
 <div class="mail-overlay hidden" id="premium-overlay">
@@ -3388,7 +3406,8 @@ function gainXP(action, sourceEl, overrideXp = null, overrideLabel = null) {
   }
 
   if (leveledUp) {
-    setTimeout(() => triggerLevelUp(after.current), 400);
+    const levelUpDelay = typeof isLocalPreview !== 'undefined' && isLocalPreview ? 0 : 400;
+    setTimeout(() => triggerLevelUp(after.current), levelUpDelay);
     renderShop();
     renderPlotShop();
     renderUpgradeShop();
@@ -3415,24 +3434,45 @@ function renderLevelWidget() {
   if (logoIcon) logoIcon.textContent = current.emoji;
 }
 
+function levelUnlockText(level) {
+  const unlocks = [];
+  if (level === 10) unlocks.push('🪣 Regador maior: sua capacidade aumenta de 5 para 7 águas (0/7).');
+  const crops = typeof PLANTS !== 'undefined' ? Object.values(PLANTS) : [];
+  const flowers = typeof FLOWERS !== 'undefined' ? Object.values(FLOWERS) : [];
+  const names = [...crops, ...flowers]
+    .filter(item => item.minLevel === level && !item.subscriberOnly)
+    .map(item => `${item.emoji} ${item.name}`);
+  if (names.length) unlocks.push(`🌱 Novos cultivos: ${names.join(', ')}.`);
+  return unlocks.length ? unlocks.join('<br>') : '🌱 Continue subindo de nível para desbloquear novas sementes, plantas e melhorias.';
+}
+
 function triggerLevelUp(lvData) {
   document.getElementById('lu-icon').textContent = lvData.emoji;
   document.getElementById('lu-sub').textContent  = `Você chegou ao nível ${lvData.lv}!`;
   document.getElementById('lu-name').textContent  = lvData.name;
   document.getElementById('lu-name').style.background = lvData.color;
+  const rewards = document.getElementById('lu-rewards');
+  if (rewards) rewards.innerHTML = `<strong>Desbloqueios</strong>${levelUnlockText(lvData.lv)}`;
 
-  // Send level-up mail reward
-  addLevelMail(lvData.lv);
-  // Dar ponto de habilidade ao subir de nível
-  const spGained = spForLevel(lvData.lv);
-  G.skillPoints = (G.skillPoints || 0) + spGained;
-  G.skillPointsClaimed = Math.max(G.skillPointsClaimed || 0, lvData.lv);
-  renderSkillTreeBadge();
-  toast(`✨ +${spGained} ponto${spGained > 1 ? 's' : ''} de habilidade!`, 2500);
-
+  // Mostra o popup primeiro. Assim, uma falha ao registrar uma recompensa
+  // não impede o jogador de ver que subiu de nível.
   const overlay = document.getElementById('levelup-overlay');
   overlay.classList.remove('hidden');
   overlay.classList.add('show');
+
+  try {
+    // Send level-up mail reward
+    addLevelMail(lvData.lv);
+    // Dar ponto de habilidade ao subir de nível
+    const spGained = spForLevel(lvData.lv);
+    G.skillPoints = (G.skillPoints || 0) + spGained;
+    G.skillPointsClaimed = Math.max(G.skillPointsClaimed || 0, lvData.lv);
+    renderSkillTreeBadge();
+    renderWateringCapacity();
+    toast(`✨ +${spGained} ponto${spGained > 1 ? 's' : ''} de habilidade!`, 2500);
+  } catch (error) {
+    console.warn('Recompensa de nível não registrada:', error);
+  }
 
   spawnConfetti();
 }
@@ -3750,9 +3790,7 @@ async function buyPlot(slot) {
 }
 
 // ─── UPGRADES ─────────────────────────────────────────────
-const UPGRADES = [
-  { id:'watering_capacity', icon:'💧', name:'Reservatório Maior', desc:'Aumenta em 1 a capacidade máxima do regador. Pode comprar até chegar a 10.', cost:350, minLevel:3, maxLevel:5, effect:'+1 capacidade no regador' },
-];
+const UPGRADES = [];
 
 // which upgrades the player has bought
 // (stored in G.upgrades = Set of ids)
@@ -3767,7 +3805,11 @@ function previewAccess() {
 }
 
 function effectiveShovelCost() { return G.premiumShovel ? 25 : 50; }
-function maxWateringCapacity() { return Math.min(10, 5 + upgradeLevel('watering_capacity')); }
+function maxWateringCapacity() {
+  if (currentLevel() >= 15) return 10;
+  if (currentLevel() >= 10) return 7;
+  return 5;
+}
 function refillWateringCapacity() {
   const now = Date.now();
   const interval = (G.premiumWateringCan ? 2 : 5) * 60 * 1000;
@@ -3910,12 +3952,12 @@ async function buyUpgrade(id) {
       return;
     }
     if (!(await chargeGamePoints(cost))) return;
-    G.waterCapacity = Math.min(maxWateringCapacity(), (G.waterCapacity || 0) + 5);
+    G.waterCapacity = maxWateringCapacity();
     renderWateringCapacity();
     updatePts();
     renderUpgradeShop();
     saveGardenToSE();
-    toast(`🫗 Reservatório cheio em +5! (${G.waterCapacity}/${maxWateringCapacity()})`, 3000);
+    toast(`🫗 Regador cheio! (${G.waterCapacity}/${maxWateringCapacity()})`, 3000);
     return;
   }
   if (u.maxLevel) {
@@ -3948,11 +3990,11 @@ async function buyWaterRefillFromNotice() {
     return;
   }
   if (!(await chargeGamePoints(cost))) return;
-  G.waterCapacity = Math.min(maxWateringCapacity(), (G.waterCapacity || 0) + 5);
+  G.waterCapacity = maxWateringCapacity();
   renderWateringCapacity();
   updatePts();
   await saveGardenToSE();
-  toast(`Regador cheio em +5 águas! (${G.waterCapacity}/${maxWateringCapacity()})`, 2800);
+  toast(`Regador cheio! (${G.waterCapacity}/${maxWateringCapacity()})`, 2800);
 }
 
 // ─── TOOLS ───────────────────────────────────────────────
@@ -4424,7 +4466,13 @@ function closeInventory() {
     G.inventoryTargetPlot = null;
   }, 180);
 }
+function goToShopFromInventory() {
+  closeInventory();
+  setTimeout(() => openShop(), 190);
+}
 function openShop() {
+  document.getElementById('shop-cart')?.classList.remove('shop-cart-closed');
+  document.getElementById('shop-cart')?.classList.add('side-cart');
   // Atualizar badge da estação
   const badge = document.getElementById('shop-season-badge');
   if (badge) {
@@ -4457,6 +4505,12 @@ function mascotOpeningAnimation(kind) {
 }
 function closeShop() {
   document.getElementById('shop-overlay')?.classList.add('hidden');
+  document.getElementById('shop-cart')?.classList.remove('side-cart');
+  document.getElementById('shop-cart')?.classList.add('shop-cart-closed');
+}
+function goToInventoryFromShop() {
+  closeShop();
+  setTimeout(() => openInventory(), 190);
 }
 function openPremium() {
   document.getElementById('premium-overlay')?.classList.remove('hidden');
@@ -4993,8 +5047,15 @@ function missionProgress(id, amount = 1) {
     G.missions.claimed[id] = true;
     G.pts += def.rewardPts;
     const missionEl = document.getElementById('missions-modal-bar') || document.getElementById('missions-btn');
+    const missionXpBefore = G.xp;
     G.xp += def.rewardXP;
+    const missionLevelBefore = getLevelData(missionXpBefore).current;
+    const missionLevelAfter = getLevelData(G.xp).current;
     renderLevelWidget();
+    if (missionLevelAfter.lv > missionLevelBefore.lv) {
+      const levelUpDelay = typeof isLocalPreview !== 'undefined' && isLocalPreview ? 0 : 400;
+      setTimeout(() => triggerLevelUp(missionLevelAfter), levelUpDelay);
+    }
     updatePts();
     toast(`📋 Missão completa: ${def.name}! +${def.rewardPts} pts +${def.rewardXP} xp 🎉`, 4000, true);
     unlockAchievement('first_mission');
@@ -6100,6 +6161,10 @@ async function onPlotClick(idx) {
     plot.waterCount = Math.min(maxW, plot.waterCount + 1);
     const waterPct = plot.waterCount / maxW;
     const justFull = plot.waterCount >= maxW;
+    if (isLocalPreview && justFull) {
+      plot.growCount = effectiveMaxGrowWithSkill(plot.type);
+      renderPlots();
+    }
 
     // Animate plant SVG (stays at current grow progress, just bounces)
     const plantEl = document.getElementById(`plant-${idx}`);
@@ -7246,6 +7311,10 @@ async function loadGardenFromSE(username) {
   G.upgrades        = new Set(save.upgrades || []);
   G.goldenHarvested = save.goldenHarvested || {};
     G.upgradeLevels   = save.upgradeLevels || {};
+    // A melhoria antiga do regador não existe mais: a capacidade agora é
+    // determinada exclusivamente pelo nível do jogador.
+    G.upgrades.delete('watering_capacity');
+    delete G.upgradeLevels.watering_capacity;
     G.waterCapacity = Number(save.waterCapacity ?? 5);
     G.waterCapacityLastRefill = Number(save.waterCapacityLastRefill || Date.now());
     G.seasonIdx       = save.seasonIdx        ?? 0;
@@ -7708,6 +7777,7 @@ if (isLocalPreview) {
   G.isSubscriber = true;
   sessionStorage.setItem('twitch_is_subscriber', 'true');
   G.pts = 100000;
+  G.xp = LEVELS[9].minXP - 1;
   G.unlockedPlots = 6;
   G.previewUnlocks = true;
   G.welcomeBonusClaimed = true;
@@ -7717,6 +7787,7 @@ if (isLocalPreview) {
   document.getElementById('twitch-btn').innerHTML = '👤 Visitante';
   document.getElementById('garden-name').textContent = G.gardenName || 'Jardim da Mistty';
   updatePts();
+  renderLevelWidget();
   renderPremiumBenefits();
   renderUpgradeShop();
   // A prévia já foi testada; não reabrir o bônus de boas-vindas automaticamente.

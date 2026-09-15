@@ -4970,6 +4970,7 @@ function renderRankingPage() {
     const ownFarmName = isMe ? document.getElementById('garden-name')?.textContent?.trim() : '';
     const farmName = ownFarmName || u.farmName || defaultFarmName(username);
     const userLevel = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
+    const levelIcon = LEVELS.find(levelData => levelData.lv === userLevel)?.emoji || '🌱';
     const dailyPhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
     const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
     const rankingFrame = isMe ? (G.profileFrame || u.profileFrame || u.frame) : (u.profileFrame || u.frame);
@@ -4985,7 +4986,7 @@ function renderRankingPage() {
       ? `<span class="ranking-place ranking-place-${pos}" aria-label="${pos}º lugar"><span>${pos}</span></span>`
       : `<span style="font-size:20px;font-weight:800;color:var(--text2)">${pos}</span>`;
     return `<div class="ranking-item ${topClass} ${isMe ? 'me' : ''}" role="button" tabindex="0" aria-label="Abrir perfil de ${farmName}" onclick="openRankingProfile(${rankingPage * pageSize + i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRankingProfile(${rankingPage * pageSize + i})}">
-      <div class="ranking-pos">${medal}</div><div class="ranking-frame" data-frame="${frame}" aria-hidden="true">🌱</div>
+      <div class="ranking-pos">${medal}</div><div class="ranking-frame" data-frame="${frame}" aria-label="Nível ${userLevel}" title="Nível ${userLevel}" aria-hidden="false">${levelIcon}</div>
       <div class="ranking-name"><div class="ranking-farm-title"><div class="ranking-farm-name">${farmName}</div></div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
       <div class="ranking-pts">${rankingMode === 'level' ? `⭐ Nível ${userLevel}` : `<img class="points-token" src="points-sprout.svg" width="20" height="20" alt="" aria-hidden="true"> ${pts.toLocaleString()}`}</div>
     </div>`;
@@ -5481,6 +5482,7 @@ function openRankingProfile(index) {
   const isMe = seUser?.username && username.toLowerCase() === seUser.username.toLowerCase();
   const farmName = u.farmName || (isMe ? document.getElementById('garden-name')?.textContent : '') || defaultFarmName(username);
   const level = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
+  const levelIcon = LEVELS.find(levelData => levelData.lv === level)?.emoji || '🌱';
   const profilePhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
   const stats = u.stats || {};
   const ownStats = isMe ? (G.achievStats || {}) : {};
@@ -5506,7 +5508,7 @@ function openRankingProfile(index) {
   overlay.id = 'ranking-profile-overlay';
   overlay.innerHTML = `<div class="mail-modal" style="max-width:360px"><button class="popup-close-x" aria-label="Fechar perfil" onclick="this.closest('#ranking-profile-overlay').remove()">×</button>
     <div class="mail-modal-title">🌱 Perfil do fazendeiro</div>
-    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-hidden="true">🌱</div><div class="ranking-profile-main"><div class="ranking-farm-title"><strong>${farmName}</strong></div><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
+    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-label="Nível ${level}" title="Nível ${level}">${levelIcon}</div><div class="ranking-profile-main"><div class="ranking-farm-title"><strong>${farmName}</strong></div><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
     <div class="profile-label">Estatísticas da fazenda</div><div class="ranking-profile-stats">${statsHtml}</div><div class="profile-label">Badges desbloqueados</div><div class="ranking-profile-badges">${badgeHtml}</div><button class="mail-close-btn" onclick="this.closest('#ranking-profile-overlay').remove()">Fechar</button></div>`;
   document.body.appendChild(overlay);
 }

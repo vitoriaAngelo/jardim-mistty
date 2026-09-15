@@ -2029,6 +2029,7 @@ body.dark-mode .profile-current-value { color:#f1f5e9; }
 .plot-water-bar { height: 4px; background: #d7cfbb; }
 .plot-water-fill { background: #8fb8c3; box-shadow: none; }
 .plot-grow-label { color: #597346 !important; }
+.growth-countdown { margin-left: 5px; font-size: 9px; font-weight: 700; opacity: .75; white-space: nowrap; }
 .plot-label { text-shadow: none; }
 .plot-label span { color: #f8f1e2 !important; }
 .empty-slot-hint { opacity: .75; }
@@ -3253,7 +3254,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     <div class="update-news-item"><span>🌱</span><div><strong>Pontos retroativos</strong><br>Já tem nível? Seus pontos de habilidade já estão disponíveis! Acesse o botão 🌿 no topo para distribuí-los.</div></div>
     <div class="update-news-item"><span>🧺</span><div><strong>Colheita gratuita</strong><br>Colher plantas prontas agora é de graça! Somente a pá (retirar muda antes de crescer) tem custo.</div></div>
     <div class="update-news-item"><span>📋</span><div><strong>Missões no painel lateral</strong><br>O botão de missões saiu do topo e agora fica no painel lateral, abaixo do Ranking.</div></div>
-    <div class="update-news-item"><span>⏱️</span><div><strong>Crescimento ajustado</strong><br>Cada tick de crescimento agora leva 1 minuto e 30 segundos após a planta estar totalmente regada.</div></div>
+    <div class="update-news-item"><span>⏱️</span><div><strong>Crescimento ajustado</strong><br>Cada tick de crescimento agora leva 10 segundos após a planta estar totalmente regada.</div></div>
   </div></div>
 </div>
 
@@ -3785,16 +3786,16 @@ function effectiveSellValue(type, epicOverride) {
 }
 function effectiveHarvestBonus() { return ['orange','premium'].includes(G.selectedMascot) ? 1 : 0; }
 function effectiveWaterRefillAmount() { return ['strawberry','premium'].includes(G.selectedMascot) ? 2 : 1; }
-// 90 seg real = 1 grow tick. Solo Vivo reduz até -12%.
+// 10 seg reais = 1 grow tick. Solo Vivo reduz até -12%.
 function effectiveGrowInterval() {
-  return Math.round(90000 * (1 - skillGrowReduction()));
+  return Math.round(10000 * (1 - skillGrowReduction()));
 }
 // Solo Vivo: reduz o maxGrow efetivo (menos ticks necessários = cresce mais rápido)
 function effectiveMaxGrowWithSkill(type) {
   const base = effectiveMaxGrow(type);
   return Math.max(1, Math.round(base * (1 - skillGrowReduction())));
 }
-const GROW_INTERVAL_MS = 90000;
+const GROW_INTERVAL_MS = 10000;
 let growAwaySince = null;
 
 function renderUpgradeShop() {
@@ -5828,7 +5829,9 @@ function buildPlotEl(plot, idx) {
       const growLbl = document.createElement('div');
       growLbl.className = 'plot-grow-label';
       growLbl.style.cssText = 'font-size:10px;font-weight:800;color:rgba(160,220,120,.95);margin-top:1px;';
-      growLbl.textContent = waterFull ? `🌱 ${plot.growCount}/${maxG}` : `🌱 0/${maxG}`;
+      growLbl.innerHTML = waterFull
+        ? `🌱 ${plot.growCount}/${maxG}<span class="growth-countdown" data-growth-countdown="${idx}"></span>`
+        : `🌱 0/${maxG}`;
       div.appendChild(growLbl);
     }
   } else {
@@ -7970,7 +7973,20 @@ async function upgradeSkillNode(nodeId, branchId) {
   );
 }
 
-// Every GROW_INTERVAL_MS: plots with water full grow 1 stage
+function updateGrowthCountdowns() {
+  const seconds = Math.ceil((GROW_INTERVAL_MS - (Date.now() % GROW_INTERVAL_MS)) / 1000);
+  document.querySelectorAll('[data-growth-countdown]').forEach(el => {
+    const idx = Number(el.dataset.growthCountdown);
+    const plot = G.plots[idx];
+    if (!plot || plot.waterCount < effectiveMaxWater(plot.type) || isReady(plot)) {
+      el.textContent = '';
+      return;
+    }
+    el.textContent = `· ${seconds}s`;
+  });
+}
+
+// Every 10 seconds: plots with water full grow 1 stage
 function growTick() {
   if (!gardenHydrated) return;
   let anyGrew = false;
@@ -8015,6 +8031,9 @@ function growTick() {
 G.growTimer = setInterval(() => {
   if (!document.hidden) growTick();
 }, GROW_INTERVAL_MS);
+setInterval(() => {
+  if (!document.hidden) updateGrowthCountdowns();
+}, 250);
 </script>
 <footer style="
   width: 100%; max-width: 900px;

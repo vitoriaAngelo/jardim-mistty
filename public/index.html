@@ -5021,6 +5021,12 @@ function claimAllPremium() {
 let gardenOrders = G.orders || [];
 const ORDER_NAMES = ['Bia do bairro','Seu Zeca','Luna Flores','Dona Cida','Theo da horta','Maya Verde','Nina Sementes','João Colheita'];
 function orderSeasonKey() { return `${G.seasonIdx || 0}`; }
+function updateOrdersButton() {
+  const button = document.querySelector('.market-orders-btn');
+  if (!button) return;
+  const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1);
+  button.innerHTML = `📬 Pedidos <small style="display:block;font-size:9px;font-weight:800;opacity:.78">${G.orderSearches || 0}/3 · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}</small>`;
+}
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'normal',label:'Normal',mult:1, min:1, max:12} : roll < .94 ? {id:'epic',label:'Épico',mult:2.2, min:8, max:26} : {id:'legendary',label:'Lendário',mult:4.5, min:20, max:40}; }
 function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; gardenOrders = []; }
@@ -5037,6 +5043,7 @@ function refreshOrders() {
   });
   G.orders = gardenOrders;
   renderOrders();
+  updateOrdersButton();
 }
 function renderOrders() {
   const list = document.getElementById('orders-list');
@@ -5048,6 +5055,7 @@ function renderOrders() {
   }).join('');
   const refresh = document.getElementById('orders-refresh-btn');
   if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 clientes procurados nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
+  updateOrdersButton();
 }
 async function deliverOrder(id) {
   const order = gardenOrders.find(item => item.id === id);
@@ -5679,6 +5687,7 @@ function renderSeasonWidget() {
   const fill = document.getElementById('season-bar-fill');
   fill.style.width = ((G.seasonDay / SEASON_DAYS_LEN) * 100) + '%';
   fill.style.background = s.barColor;
+  updateOrdersButton();
 }
 
 function openRankingProfile(index) {

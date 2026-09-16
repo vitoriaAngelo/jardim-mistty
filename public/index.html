@@ -228,7 +228,7 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .latest-sales-feed { position:relative; width:170px; min-height:30px; box-sizing:border-box; padding:5px 8px; border:1px solid #e4cfa8; border-radius:14px; background:linear-gradient(135deg,#fffaf0 0%,#f8efd9 100%); color:#7b6a54; font:700 11px/1.25 'Nunito',sans-serif; box-shadow:0 2px 0 #dfc99f, 0 5px 12px rgba(117,91,52,.1); }
 .latest-sales-feed::before, .latest-sales-feed::after { content:none; }
 .latest-sales-coin { width:15px; height:15px; margin:0 2px 0 3px; vertical-align:-3px; filter:drop-shadow(0 1px 1px rgba(89,66,34,.2)); }
-.latest-sales-strip { width:min(390px,calc(100% - 32px)); min-height:30px; margin:8px auto 0; display:flex; align-items:center; justify-content:center; text-align:center; }
+.latest-sales-strip { width:100%; min-height:30px; margin:0 0 10px; display:flex; align-items:center; justify-content:center; text-align:center; }
 .latest-sales-feed strong { color:#5f744e; font-size:11px; }
 .watering-refill-offer { display:none; position:absolute; left:calc(100% + 9px); top:50%; transform:translateY(-50%); width:150px; padding:8px 9px; border:1px solid #e3c98f; border-radius:12px; background:#fff7df; color:#80652e; font-size:10px; font-weight:800; line-height:1.25; text-align:center; cursor:pointer; box-shadow:0 3px 0 #dec58d, 0 5px 12px rgba(117,91,52,.12); z-index:8; }
 .watering-refill-offer::before { content:''; position:absolute; right:100%; top:50%; border:6px solid transparent; border-right-color:#e3c98f; transform:translateY(-50%); }
@@ -2905,8 +2905,6 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     </div>
   </div>
 </header>
-<div class="latest-sales-feed latest-sales-strip" id="latest-sales-feed" aria-live="polite"><span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span></div>
-
 <!-- GAME -->
 <div class="game-wrap">
   <div class="inventory-side-panel">
@@ -2995,6 +2993,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 
   <div class="garden-section">
 
+    <div class="latest-sales-feed latest-sales-strip" id="latest-sales-feed" aria-live="polite"><span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span></div>
     <div class="card">
       <div class="card-title">
         <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="9" width="14" height="6" rx="2" fill="#7a4f2e"/><rect x="2" y="10" width="12" height="4" rx="1.5" fill="#9b6840"/></svg>

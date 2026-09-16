@@ -2242,8 +2242,11 @@ body.dark-mode .sell-confirm-items .shop-cart-row { color:#e1ecd9; }
 .popup-close-x:hover { background: #e8eee0; transform: translateY(-1px); }
 .inventory-shop-link { border: 1px solid var(--cozy-line); border-radius: 999px; background: var(--cream2); color: var(--cozy-ink); padding: 7px 12px; font: 800 12px 'Nunito',sans-serif; cursor:pointer; box-shadow: 0 2px 0 var(--cozy-line); transition: transform .16s ease, background .16s ease; }
 .inventory-shop-link:hover { background: #fff4cf; transform: translateY(-1px); }
+.shop-bonus-link { border:1px solid #d5a83e; border-radius:999px; background:linear-gradient(135deg,#ffe99b,#f2c85c); color:#654b28; padding:8px 14px; font:900 12px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 3px 0 #b58a35,0 0 0 2px #fff0b455; transition:transform .16s ease,filter .16s ease,box-shadow .16s ease; }
+.shop-bonus-link:hover { transform:translateY(-2px) scale(1.02); filter:saturate(1.12); box-shadow:0 5px 0 #b58a35,0 0 0 3px #ffe69a66; }
 body.dark-mode .inventory-shop-link { background: #4b5f49; border-color: #71856b; color: #f4f5df; box-shadow: 0 2px 0 #29382a; }
 body.dark-mode .inventory-shop-link:hover { background: #5f7659; }
+body.dark-mode .shop-bonus-link { background:linear-gradient(135deg,#b9953f,#d9b957); border-color:#f0d27a; color:#2c321f; box-shadow:0 3px 0 #80652e,0 0 0 2px #f4d99033; }
 /* Cozy vegetable cards: preserve the grid and shapes, soften the presentation. */
 .shop-grid-inner { gap: 12px; }
 .shop-item {
@@ -3360,6 +3363,7 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:2px">
       <div class="mail-modal-title" style="margin:0">🛒 Loja</div>
       <button class="inventory-shop-link" type="button" onclick="goToInventoryFromShop()">🎒 Ir para o inventário</button>
+      <button class="shop-bonus-link" type="button" onclick="closeShop();setTimeout(() => openBonusShop(), 190)">✨ Comprar bônus</button>
       <div id="shop-season-badge" style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
     </div>
     <div class="shop-tabs">
@@ -8264,7 +8268,7 @@ const SKILL_BRANCHES = [
     id: 'cultivo', name: 'Cultivo', icon: '🌱',
     desc: 'Melhore solo e manejo das plantas',
     nodes: [
-      { id:'mao_verde',    emoji:'🖐️', name:'Mão Verde',       effect:'+3% chance de colheita em dobro por nível', max:5, maxLabel:'máx. +15%', req:null,         reqMin:0 },
+      { id:'mao_verde',    emoji:'🖐️', name:'Mão Verde',       effect:'+2% chance de colheita em dobro por nível', max:5, maxLabel:'máx. +10%', req:null,         reqMin:0 },
       { id:'solo_vivo',    emoji:'🪱', name:'Solo Vivo',        effect:'-3% tempo de crescimento por nível',        max:4, maxLabel:'máx. -12%', req:'mao_verde',   reqMin:3 },
       { id:'irrigacao',    emoji:'💧', name:'Irrigação',         effect:'-1 de água por ciclo e +1 na recuperação de água do regador.', max:2, maxLabel:'máx. -2 água e +2 de recuperação', req:'solo_vivo', reqMin:3 },
       { id:'compostagem',  emoji:'🪣', name:'Compostagem',       effect:'+1 adubo aleat. a cada 20 colheitas',      max:3, maxLabel:'máx. 3 adubos', req:'irrigacao', reqMin:3 },
@@ -8274,7 +8278,7 @@ const SKILL_BRANCHES = [
     id: 'colheita', name: 'Colheita', icon: '🧺',
     desc: 'Aprimore suas técnicas de colheita',
     nodes: [
-      { id:'colheita_precisa', emoji:'🎯', name:'Colheita Precisa', effect:'+5% chance de colheita dupla por nível',        max:5, maxLabel:'máx. +25%', req:null,               reqMin:0 },
+      { id:'colheita_precisa', emoji:'🎯', name:'Colheita Precisa', effect:'+3% chance de colheita dupla por nível',        max:5, maxLabel:'máx. +15%', req:null,               reqMin:0 },
       { id:'olho_aguia',       emoji:'🦅', name:'Olho de Águia',    effect:'+4% chance de achar adubo ao colher',           max:5, maxLabel:'máx. +20%', req:'colheita_precisa', reqMin:3 },
       { id:'maos_ligeiras',    emoji:'⚡', name:'Mãos Ligeiras',    effect:'+3% chance de colher e encher +1 no regador',   max:5, maxLabel:'máx. +15%', req:'olho_aguia',        reqMin:3 },
       { id:'sementes_fortes',  emoji:'🌾', name:'Sementes Fortes',  effect:'+2% chance de recuperar semente ao colher',     max:5, maxLabel:'máx. +10%', req:'maos_ligeiras',    reqMin:3 },
@@ -8306,11 +8310,11 @@ function skillNodeUnlocked(node) {
 function skillCurrentLabel(node, level) {
   const value = Number(level) || 0;
   const labels = {
-    mao_verde: `Atual: +${value * 3}% de chance de colheita em dobro`,
+    mao_verde: `Atual: +${value * 2}% de chance de colheita em dobro`,
     solo_vivo: `Atual: -${value * 3}% no tempo de crescimento`,
     irrigacao: `Atual: -${value} de água por ciclo e +${value} de recuperação`,
     compostagem: `Atual: +${value} adubo aleatório a cada 20 colheitas`,
-    colheita_precisa: `Atual: +${value * 5}% de chance de colheita dupla`,
+    colheita_precisa: `Atual: +${value * 3}% de chance de colheita dupla`,
     olho_aguia: `Atual: +${value * 4}% de chance de achar adubo`,
     maos_ligeiras: `Atual: +${value * 3}% de chance de colher e encher +1 no regador`,
     sementes_fortes: `Atual: +${value * 2}% de chance de recuperar semente`,
@@ -8326,8 +8330,8 @@ function skillCurrentLabel(node, level) {
 
 // Retorna bônus de colheita dupla (Mão Verde + Colheita Precisa)
 function skillDoubleHarvestChance() {
-  const mao = (G.skillNodes['mao_verde'] || 0) * 3;
-  const prec = (G.skillNodes['colheita_precisa'] || 0) * 5;
+  const mao = (G.skillNodes['mao_verde'] || 0) * 2;
+  const prec = (G.skillNodes['colheita_precisa'] || 0) * 3;
   return (mao + prec) / 100;
 }
 // Retorna redução de tempo de crescimento (Solo Vivo)

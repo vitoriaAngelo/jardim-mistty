@@ -8921,6 +8921,27 @@ setInterval(() => {
 </footer>
 
 <script>
+// Fechamento padrão de popups: clique fora ou tecla Esc.
+function closePopupOverlay(overlay) {
+  if (!overlay || overlay.id === 'login-overlay') return;
+  if (overlay.classList.contains('levelup-overlay')) {
+    overlay.classList.remove('show');
+    overlay.classList.add('hidden');
+  } else {
+    overlay.classList.add('hidden');
+    overlay.classList.remove('show', 'closing');
+  }
+}
+document.addEventListener('click', event => {
+  const overlay = event.target.closest?.('.mail-overlay, .modal-overlay, .help-overlay, .profile-overlay, .levelup-overlay');
+  if (overlay && event.target === overlay) closePopupOverlay(overlay);
+});
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  const openOverlays = [...document.querySelectorAll('.mail-overlay:not(.hidden), .modal-overlay:not(.hidden), .help-overlay:not(.hidden), .profile-overlay:not(.hidden), .levelup-overlay.show')].filter(el => el.id !== 'login-overlay');
+  closePopupOverlay(openOverlays.at(-1));
+});
+
   // Preview-only: show the game screen locally without requiring login.
   if (location.hostname === 'localhost' && new URLSearchParams(location.search).has('preview')) {
     document.getElementById('login-overlay')?.classList.add('hidden');

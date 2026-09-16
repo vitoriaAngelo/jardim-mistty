@@ -1262,8 +1262,11 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .orders-reset-buy { margin-top:8px; border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:8px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; }
 .orders-reset-buy:disabled { opacity:.5; cursor:not-allowed; }
 .orders-reset-buy { position:relative; }
-.orders-reset-buy::after { content:attr(data-tooltip); display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:230px; padding:10px 13px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:13px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 8px 24px #4b573326; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.orders-reset-buy::after { content:attr(data-tooltip); display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:230px; padding:10px 13px; border:1px solid #53624d; border-radius:13px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
 .orders-reset-buy:hover::after, .orders-reset-buy:focus-visible::after { display:block; }
+.season-info-tooltip { position:relative; }
+.season-info-tooltip::after { content:attr(data-tooltip); display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:220px; padding:10px 13px; border:1px solid #53624d; border-radius:13px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.season-info-tooltip:hover::after, .season-info-tooltip:focus-visible::after { display:block; }
 .order-card { display:grid; grid-template-columns:46px 1fr auto; align-items:center; gap:10px; padding:11px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:15px; background:linear-gradient(135deg,#fffaf0,#f1f4e5); box-shadow:0 3px 0 #dfd2b5; }
 .order-card img { width:40px; height:40px; object-fit:contain; }
 .order-card strong { display:block; color:var(--text); font-size:13px; }
@@ -2639,7 +2642,7 @@ body.dark-mode .profile-stat-lbl { color:#59694b !important; opacity:1; }
 .mail-close-btn:hover, .profile-save-btn:hover, .help-close:hover, .levelup-dismiss:hover { background: #687e55; box-shadow: 0 3px 0 #586e47; }
 .profile-close-btn { background: #f1f1e7; color: #59694b; border-color: #d7dccb; box-shadow: 0 2px 0 #d7dccb; }
 .levelup-new-name { background: #778b64 !important; box-shadow: none; }
-.toast, .toast.mission { background: #fffdf7; color: #414f38; border: 1px solid #d9dfcc; border-radius: 16px; box-shadow: 0 8px 28px #4b573326; width: min(620px, calc(100vw - 32px)); box-sizing:border-box; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.6; padding:13px 20px; }
+.toast, .toast.mission { background: #fffdf7; color: #414f38; border: 1px solid #d9dfcc; border-radius: 16px; box-shadow: 0 8px 28px #4b573326; width: min(760px, calc(100vw - 32px)); box-sizing:border-box; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.6; padding:13px 20px; }
 body.dark-mode .help-modal { --cream: #252b24; --cream2: #30392d; --text: #edf2e6; --text2: #c7d3be; --soil2: #c7d3be; --grass: #879b72; --grass2: #a9bd93; }
 body.dark-mode .profile-modal {
   --cream:#252b24; --cream2:#30392d; --text:#edf2e6; --text2:#c7d3be;
@@ -3465,7 +3468,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <button class="popup-close-x" aria-label="Fechar inventário" onclick="closeInventory()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between;padding-right:42px">
       <span>🎒 Inventário</span>
-      <span class="inventory-season-badge" id="inventory-season-badge" aria-label="Estação atual" title="Estação atual: plante os vegetais disponíveis nesta estação."></span>
+      <span class="inventory-season-badge season-info-tooltip" id="inventory-season-badge" aria-label="Estação atual" data-tooltip="Estação atual: plante os vegetais disponíveis nesta estação."></span>
       <button class="inventory-shop-link" type="button" onclick="goToShopFromInventory()">🛒 Ir para a loja</button>
     </div>
     <div id="inventory-filter"></div>
@@ -3483,7 +3486,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <span class="shop-points-badge" aria-label="Seu saldo de pontos"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"><span id="shop-pts-num">0</span> pts</span>
       <button class="inventory-shop-link" type="button" onclick="goToInventoryFromShop()">🎒 Ir para o inventário</button>
       <button class="shop-bonus-link" type="button" onclick="closeShop();setTimeout(() => openBonusShop(), 190)">✨ Comprar bônus</button>
-      <div id="shop-season-badge" title="Estação atual: plante os vegetais disponíveis nesta estação." style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
+      <div id="shop-season-badge" class="season-info-tooltip" data-tooltip="Estação atual: plante os vegetais disponíveis nesta estação." style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
     </div>
     <div class="shop-tabs">
       <button class="shop-tab active" id="tab-vegetais" onclick="switchShopTab('vegetais')">🥦 Vegetais</button>

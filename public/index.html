@@ -118,7 +118,7 @@ body.dark-mode .season-showcase-card.winter::before { background:linear-gradient
 .season-bar-wrap { width: 48px; height: 4px; background: rgba(0,0,0,.1); border-radius: 99px; overflow: hidden; }
 .season-bar-fill { height: 100%; border-radius: 99px; transition: width .5s; }
 #season-days { opacity: .6; font-size: 10px; }
-#season-time-left { flex-basis: 100%; margin-left: 21px; margin-top: -2px; opacity: .72; font-size: 10px; white-space: nowrap; }
+#season-time-left { display:block; flex:0 0 100%; width:100%; margin-left:21px; margin-top:-2px; opacity:.72; font-size:10px; line-height:1.2; white-space:nowrap; }
 @keyframes season-day-pop {
   0% { transform: scale(1); filter: brightness(1); }
   35% { transform: scale(1.12); filter: brightness(1.22); }

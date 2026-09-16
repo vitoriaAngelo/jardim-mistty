@@ -5153,7 +5153,9 @@ function renderOrders() {
   updateOrdersButton();
 }
 function resetOrdersForSeason(showPopup = false) {
-  G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false; gardenOrders = []; G.orders = [];
+  G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
+  gardenOrders = Array.from({length:3}, (_, i) => createOrder(i));
+  G.orders = gardenOrders;
   if (showPopup) document.getElementById('orders-reset-overlay')?.classList.remove('hidden');
 }
 function closeOrdersReset() { document.getElementById('orders-reset-overlay')?.classList.add('hidden'); }

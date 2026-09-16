@@ -7,7 +7,7 @@ exports.handler = async () => {
     if (!res.ok) throw new Error(`Supabase ${res.status}`);
     const rows = await res.json();
     const activities = rows.flatMap(row => {
-      const base = { username: row.username, farmName: row.data?.farmName || row.username };
+      const base = { username: row.username, farmName: row.data?.farmName || `Jardim de @${String(row.username || '').replace(/^@+/, '')}` };
       return [row.data?.lastSale ? { ...base, ...row.data.lastSale, activityType:'sale' } : null, row.data?.lastOrder ? { ...base, ...row.data.lastOrder, activityType:'order' } : null];
     }).filter(item => item?.at && Date.now()-Number(item.at) < 24*60*60*1000).sort((a,b)=>Number(b.at)-Number(a.at)).slice(0,8);
     return { statusCode:200, headers, body:JSON.stringify({ sales: activities }) };

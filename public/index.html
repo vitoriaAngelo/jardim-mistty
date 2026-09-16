@@ -1250,6 +1250,20 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
   display: flex; align-items: center; gap: 6px;
   padding: 4px 0;
 }
+.market-orders-btn { margin-left:8px; border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:6px 11px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; transition:transform .15s ease,filter .15s ease; }
+.market-orders-btn:hover { transform:translateY(-2px); filter:brightness(1.05); }
+.orders-list { display:grid; gap:10px; margin:14px 0; }
+.order-card { display:grid; grid-template-columns:46px 1fr auto; align-items:center; gap:10px; padding:11px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:15px; background:linear-gradient(135deg,#fffaf0,#f1f4e5); box-shadow:0 3px 0 #dfd2b5; }
+.order-card img { width:40px; height:40px; object-fit:contain; }
+.order-card strong { display:block; color:var(--text); font-size:13px; }
+.order-card small { display:block; color:var(--text2); font-size:11px; margin-top:3px; }
+.order-reward { display:flex; align-items:center; gap:3px; color:#8a5e18; font-weight:900; font-size:12px; white-space:nowrap; }
+.order-reward img { width:18px; height:18px; }
+.order-deliver { border:0; border-radius:9px; padding:7px 9px; background:var(--grass); color:#fff; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
+.order-deliver:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
+body.dark-mode .order-card { background:linear-gradient(135deg,#354332,#293528); border-color:#58684f; box-shadow:0 3px 0 #1d281e; }
+body.dark-mode .order-card strong { color:#edf4df; }
+body.dark-mode .order-card small { color:#cbd9c2; }
 .sell-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 
 .sell-row {
@@ -2951,6 +2965,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <path d="M5 2 Q8 0 11 2" stroke="#5c3820" stroke-width="1.2" fill="none" stroke-linecap="round"/>
         </svg>
         Mercado
+        <button class="market-orders-btn" type="button" onclick="openOrders(event)">📬 Pedidos</button>
         <span class="market-points-badge" aria-label="Seus pontos no Mercado">Seus pontos: <img class="points-token" src="points-sprout.svg" width="26" height="26" alt="" aria-hidden="true"> <span id="market-pts-num">0</span> pts</span>
       </div>
       <div id="harvest-bag"></div>
@@ -3491,6 +3506,16 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="update-news-item"><span>📋</span><div><strong>Missões no painel lateral</strong><br>O botão de missões saiu do topo e agora fica no painel lateral, abaixo do Ranking.</div></div>
     <div class="update-news-item"><span>⏱️</span><div><strong>Crescimento ajustado</strong><br>Cada tick de crescimento agora leva 15 segundos, com o dobro de estágios.</div></div>
   </div></div>
+</div>
+
+<div class="mail-overlay hidden" id="orders-overlay" onclick="if(event.target===this)closeOrders()">
+  <div class="mail-modal" style="max-width:540px">
+    <button class="popup-close-x" aria-label="Fechar pedidos" onclick="closeOrders()">×</button>
+    <div class="mail-modal-title">📬 Pedidos do jardim</div>
+    <p class="premium-copy">Ajude seus vizinhos entregando plantas e vegetais colhidos. Cada pedido rende pontos!</p>
+    <div class="orders-list" id="orders-list"></div>
+    <button class="inventory-shop-link" type="button" onclick="refreshOrders()">🔄 Procurar novos clientes</button>
+  </div>
 </div>
 
 <!-- MODAL (legacy, hidden) -->
@@ -4981,6 +5006,43 @@ function claimAllPremium() {
   if (!(G.premiumWateringCan && G.premiumShovel && G.premiumPlantsUnlocked && G.premiumFertilizersClaimed && G.premiumSpecialPlotClaimed)) return;
   const modal = document.getElementById('modal'); const box = modal?.querySelector('.modal'); if (box) { box.querySelectorAll('h2,p').forEach(el => el.remove()); box.querySelector('.modal-actions')?.remove(); box.insertAdjacentHTML('afterbegin', '<h2>✦ Tudo resgatado!</h2><p>Todos os itens foram resgatados, aproveite. 💜</p>'); modal.classList.remove('hidden'); }
 }
+
+let gardenOrders = [];
+const ORDER_NAMES = ['Bia do bairro','Seu Zeca','Luna Flores','Dona Cida','Theo da horta','Maya Verde','Nina Sementes','João Colheita'];
+function refreshOrders() {
+  const types = Object.keys(PLANTS).filter(type => !PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked);
+  gardenOrders = Array.from({length:3}, (_, i) => {
+    const type = types[Math.floor(Math.random() * types.length)];
+    const available = G.harvested[type] || 0;
+    const qty = Math.max(1, Math.min(available || 1, Math.floor(Math.random() * 3) + 1));
+    return { id: `${Date.now()}-${i}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, reward: Math.max(30, effectiveSellValue(type) * qty + 25) };
+  });
+  renderOrders();
+}
+function renderOrders() {
+  const list = document.getElementById('orders-list');
+  if (!list) return;
+  list.innerHTML = gardenOrders.map(order => {
+    const item = getPlantable(order.type);
+    const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
+    return `<div class="order-card"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}</strong><small>${canDeliver ? 'Tudo pronto para entregar!' : `Você tem ${G.harvested[order.type] || 0}× — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos</span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver ? '' : 'disabled'}>Entregar</button></div>`;
+  }).join('');
+}
+async function deliverOrder(id) {
+  const order = gardenOrders.find(item => item.id === id);
+  if (!order || (G.harvested[order.type] || 0) < order.qty) return;
+  G.harvested[order.type] -= order.qty;
+  G.pts += order.reward;
+  gardenOrders = gardenOrders.filter(item => item.id !== id);
+  updatePts(); renderHarvested(); renderOrders(); saveGardenToSE();
+  toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
+}
+function openOrders(event) {
+  event?.stopPropagation();
+  refreshOrders();
+  document.getElementById('orders-overlay')?.classList.remove('hidden');
+}
+function closeOrders() { document.getElementById('orders-overlay')?.classList.add('hidden'); }
 
 function renderHarvested() {
   const bag = document.getElementById('harvest-bag');

@@ -63,6 +63,8 @@ header::after { display:none; }
 header > * { position:relative; z-index:1; }
 .header-left { z-index: 2; }
 .skill-cozy-icon { width:26px; height:26px; display:block; filter:drop-shadow(0 2px 2px #718b5838); transition:transform .2s ease; }
+.deploy-info-icon { width:24px; height:24px; display:block; filter:drop-shadow(0 2px 2px #718b5838); transition:transform .2s ease; }
+.deploy-info-btn:hover .deploy-info-icon { transform:translateY(-2px) rotate(-3deg); }
 #skilltree-btn:hover .skill-cozy-icon { transform:translateY(-2px) rotate(-4deg); }
 #skilltree-btn.has-points { background:linear-gradient(145deg,#fff0c4,#f4d982); border-color:#d6af58; color:#76552c; box-shadow:0 3px 0 #b98e3c,0 0 12px #e8c96d66; animation:skill-btn-glow 2.4s ease-in-out infinite; }
 #skilltree-btn.has-points, #skilltree-btn.has-points + .header-btn-tip { z-index:50; }
@@ -2878,7 +2880,16 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <div class="header-btn-tip">Habilidades<br><span>Evolua sua fazenda com pontos de habilidade</span></div>
       </div>
       <div class="header-icon-wrap">
-        <button class="header-icon-btn" aria-label="Últimas atualizações" onclick="openDeployHistory()">ⓘ</button>
+        <button class="header-icon-btn deploy-info-btn" aria-label="Últimas atualizações" onclick="openDeployHistory()">
+          <svg class="deploy-info-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <path d="M10 9.5A3.5 3.5 0 0 1 13.5 6H31v25H13.5A3.5 3.5 0 0 0 10 34V9.5Z" fill="#f4e6bd" stroke="#806b3f" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M10 10h17.5A3.5 3.5 0 0 1 31 13.5V31H13.5A3.5 3.5 0 0 0 10 34V10Z" fill="#fff8df" opacity=".72"/>
+            <path d="M17 13h9M17 18h9M17 23h5" stroke="#9b8653" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="12" cy="10" r="3.2" fill="#9abd7e" stroke="#5f794b" stroke-width="1.2"/>
+            <path d="M12 8.7v2.8M12 13.3v.1" stroke="#fff8df" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="m32 5 .8 2.1L35 8l-2.2.9L32 11l-.8-2.1L29 8l2.2-.9Z" fill="#e9c86d" stroke="#b58b43" stroke-width=".8"/>
+          </svg>
+        </button>
         <div class="header-btn-tip">Atualizações<br><span>Veja o que mudou recentemente</span></div>
       </div>
 

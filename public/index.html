@@ -5209,8 +5209,8 @@ async function deliverOrder(id) {
 async function openOrders(event) {
   event?.stopPropagation();
   if (G.ordersSeasonKey !== orderSeasonKey()) resetOrdersForSeason(true);
-  if (!gardenOrders.length && (G.orderDeliveries || 0) < 4) {
-    gardenOrders = Array.from({length:3}, (_, i) => createOrder(i));
+  if (gardenOrders.length < 3 && (G.orderDeliveries || 0) < 4) {
+    while (gardenOrders.length < 3) gardenOrders.push(createOrder(gardenOrders.length));
     G.orders = gardenOrders;
     try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível carregar os pedidos.', 3200); }
   }

@@ -164,6 +164,9 @@ header .header-icon-wrap:has(.points-refresh:hover) > .header-btn-tip { display:
 .pts-feedback.gain { color: #9ad477; }
 .pts-feedback.loss { color: #e59a9a; }
 .market-points-badge { margin-left:auto; display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; background:var(--cream2); color:var(--text2); border:1px solid var(--cozy-line); font-size:11px; font-weight:800; white-space:nowrap; }
+.shop-points-badge { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:#fff3c7; color:#6f5730; border:1px solid #d3b765; font-size:12px; font-weight:900; white-space:nowrap; }
+.shop-points-badge .points-token { width:20px; height:20px; }
+body.dark-mode .shop-points-badge { background:#4b4228; color:#ffe7a1; border-color:#b99b4f; }
 .presence-streak { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:800; color:var(--text2); white-space:nowrap; padding:8px 10px; border:1px solid var(--cozy-line, #d8c9ac); border-radius:10px; background:var(--cream2); cursor:pointer; line-height:1.1; }
 .missions-presence { margin:12px 0 4px; }
 .presence-week { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin:0 0 14px; }
@@ -3472,6 +3475,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <button class="popup-close-x" aria-label="Fechar loja" onclick="closeShop()">×</button>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:2px">
       <div class="mail-modal-title" style="margin:0">🛒 Loja</div>
+      <span class="shop-points-badge" aria-label="Seu saldo de pontos"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"><span id="shop-pts-num">0</span> pts</span>
       <button class="inventory-shop-link" type="button" onclick="goToInventoryFromShop()">🎒 Ir para o inventário</button>
       <button class="shop-bonus-link" type="button" onclick="closeShop();setTimeout(() => openBonusShop(), 190)">✨ Comprar bônus</button>
       <div id="shop-season-badge" style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
@@ -3924,6 +3928,8 @@ function showPointsFeedback(delta) {
 function updatePts() {
   const previous = lastDisplayedPts;
   document.getElementById('pts-num').textContent = G.pts;
+  const shopPts = document.getElementById('shop-pts-num');
+  if (shopPts) shopPts.textContent = G.pts;
   const marketPts = document.getElementById('market-pts-num');
   if (marketPts) marketPts.textContent = G.pts;
   if (previous !== null && G.pts !== previous) showPointsFeedback(G.pts - previous);

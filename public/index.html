@@ -3462,7 +3462,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <button class="popup-close-x" aria-label="Fechar inventário" onclick="closeInventory()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between;padding-right:42px">
       <span>🎒 Inventário</span>
-      <span class="inventory-season-badge" id="inventory-season-badge" aria-label="Estação atual"></span>
+      <span class="inventory-season-badge" id="inventory-season-badge" aria-label="Estação atual" title="Estação atual: plante os vegetais disponíveis nesta estação."></span>
       <button class="inventory-shop-link" type="button" onclick="goToShopFromInventory()">🛒 Ir para a loja</button>
     </div>
     <div id="inventory-filter"></div>
@@ -3480,7 +3480,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <span class="shop-points-badge" aria-label="Seu saldo de pontos"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"><span id="shop-pts-num">0</span> pts</span>
       <button class="inventory-shop-link" type="button" onclick="goToInventoryFromShop()">🎒 Ir para o inventário</button>
       <button class="shop-bonus-link" type="button" onclick="closeShop();setTimeout(() => openBonusShop(), 190)">✨ Comprar bônus</button>
-      <div id="shop-season-badge" style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
+      <div id="shop-season-badge" title="Estação atual: plante os vegetais disponíveis nesta estação." style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
     </div>
     <div class="shop-tabs">
       <button class="shop-tab active" id="tab-vegetais" onclick="switchShopTab('vegetais')">🥦 Vegetais</button>

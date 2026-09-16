@@ -118,6 +118,7 @@ body.dark-mode .season-showcase-card.winter::before { background:linear-gradient
 .season-bar-wrap { width: 48px; height: 4px; background: rgba(0,0,0,.1); border-radius: 99px; overflow: hidden; }
 .season-bar-fill { height: 100%; border-radius: 99px; transition: width .5s; }
 #season-days { opacity: .6; font-size: 10px; }
+#season-time-left { opacity: .72; font-size: 10px; white-space: nowrap; }
 @keyframes season-day-pop {
   0% { transform: scale(1); filter: brightness(1); }
   35% { transform: scale(1.12); filter: brightness(1.22); }
@@ -2791,6 +2792,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <div class="season-bar-fill" id="season-bar-fill"></div>
       </div>
       <span id="season-days">Dia 1/24</span>
+      <span id="season-time-left">· muda em 3h</span>
     </div>
   </div>
 
@@ -5728,6 +5730,17 @@ function renderSeasonWidget() {
   fill.style.width = ((G.seasonDay / SEASON_DAYS_LEN) * 100) + '%';
   fill.style.background = s.barColor;
   updateOrdersButton();
+  updateSeasonCountdown();
+}
+
+function updateSeasonCountdown() {
+  const el = document.getElementById('season-time-left');
+  if (!el || typeof SEASON_DAY_MS === 'undefined') return;
+  const remaining = Math.max(0, (Math.max(0, SEASON_DAYS_LEN - Number(G.seasonDay || 1)) * SEASON_DAY_MS) + Math.max(0, seasonDayEndsAt - Date.now()));
+  const totalMinutes = Math.ceil(remaining / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  el.textContent = hours > 0 ? `· muda em ${hours}h ${String(minutes).padStart(2, '0')}min` : `· muda em ${minutes}min`;
 }
 
 function openRankingProfile(index) {
@@ -5818,6 +5831,7 @@ function scheduleSeasonDayTick(delay = SEASON_DAY_MS) {
   }, delay);
 }
 scheduleSeasonDayTick();
+setInterval(updateSeasonCountdown, 1000);
 
 // ─── FERTILIZERS ─────────────────────────────────────────
 const FERTILIZERS = {

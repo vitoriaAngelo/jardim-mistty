@@ -5021,7 +5021,7 @@ function claimAllPremium() {
 let gardenOrders = G.orders || [];
 const ORDER_NAMES = ['Bia do bairro','Seu Zeca','Luna Flores','Dona Cida','Theo da horta','Maya Verde','Nina Sementes','João Colheita'];
 function orderSeasonKey() { return `${G.seasonIdx || 0}`; }
-function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'normal',label:'Normal',mult:1} : roll < .94 ? {id:'epic',label:'Épico',mult:1.8} : {id:'legendary',label:'Lendário',mult:3}; }
+function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'normal',label:'Normal',mult:1, min:1, max:12} : roll < .94 ? {id:'epic',label:'Épico',mult:2.2, min:8, max:26} : {id:'legendary',label:'Lendário',mult:4.5, min:20, max:40}; }
 function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; gardenOrders = []; }
   if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já procurou 3 clientes nesta estação. Volte na próxima estação!', 3000); return; }
@@ -5029,10 +5029,11 @@ function refreshOrders() {
   const types = Object.keys(PLANTS).filter(type => !PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked);
   gardenOrders = Array.from({length:3}, (_, i) => {
     const type = types[Math.floor(Math.random() * types.length)];
-    const available = G.harvested[type] || 0;
-    const qty = Math.max(1, Math.min(available || 1, Math.floor(Math.random() * 3) + 1));
     const rarity = orderRarity();
-    return { id: `${Date.now()}-${i}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward: Math.round(Math.max(30, effectiveSellValue(type) * qty + 25) * rarity.mult) };
+    const qty = rarity.min + Math.floor(Math.random() * (rarity.max - rarity.min + 1));
+    // A recompensa cresce com cada item e recebe o multiplicador do tier.
+    const rewardPerItem = Math.max(12, Math.round(effectiveSellValue(type) * rarity.mult));
+    return { id: `${Date.now()}-${i}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward: Math.max(30, rewardPerItem * qty + Math.round(25 * rarity.mult)) };
   });
   G.orders = gardenOrders;
   renderOrders();

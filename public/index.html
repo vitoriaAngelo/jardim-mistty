@@ -5058,7 +5058,7 @@ function updateOrdersButton() {
   if (status && !seasonLabel && !progressLabel) status.textContent = `${season.icon} ${season.name} · ${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · ${seasonRemainingLabel()}`;
 }
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'normal',label:'Normal',mult:1, min:1, max:12} : roll < .94 ? {id:'epic',label:'Épico',mult:2.2, min:8, max:26} : {id:'legendary',label:'Lendário',mult:4.5, min:20, max:40}; }
-function refreshOrders() {
+async function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
   if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já atualizou os pedidos 3 vezes nesta estação.', 2800); return; }
   G.orderSearches = Math.min(3, (G.orderSearches || 0) + 1);
@@ -5076,6 +5076,7 @@ function refreshOrders() {
   G.orders = gardenOrders;
   renderOrders();
   updateOrdersButton();
+  try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
 }
 function renderOrders() {
   const list = document.getElementById('orders-list');
@@ -5102,7 +5103,7 @@ function closeOrdersReset() { document.getElementById('orders-reset-overlay')?.c
 async function buyOrderRefreshes() {
   if (G.orderSearches < 3 || G.orderPaidReset) return;
   if (!(await chargeGamePoints(5000))) return;
-  G.orderSearches = 0; G.orderPaidReset = true; renderOrders(); saveGardenToSE(); toast('✨ Mais 3 atualizações liberadas nesta estação!', 2800);
+  G.orderSearches = 0; G.orderPaidReset = true; renderOrders(); await saveGardenToSE(); toast('✨ Mais 3 atualizações liberadas nesta estação!', 2800);
 }
 async function deliverOrder(id) {
   const order = gardenOrders.find(item => item.id === id);
@@ -5115,7 +5116,7 @@ async function deliverOrder(id) {
   gardenOrders = gardenOrders.filter(item => item.id !== id);
   G.orders = gardenOrders;
   G.orderDeliveries = (G.orderDeliveries || 0) + 1;
-  updatePts(); renderHarvested(); renderOrders(); saveGardenToSE();
+  updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE();
   toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
 }
 function openOrders(event) {

@@ -1,6 +1,63 @@
 const SUPABASE_URL = 'https://luvjridqxqpxnljucnur.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1dmpyaWRxeHFweG5sanVjbnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDM3ODQsImV4cCI6MjEwNDgxOTc4NH0.shmGCDtE-XDPROUCezVjR27WFYD3VYfvQaE1-OVewGc';
 
+const ORDER_SEASONS = [
+  ['potato','lettuce','carrot','tomato','corn','star_radish'],
+  ['tomato','corn','pepper','eggplant','lettuce','star_radish'],
+  ['pumpkin','beetroot','broccoli','cassava','ruby_kale'],
+  ['potato','broccoli','ruby_kale','star_radish'],
+];
+const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338 };
+const ORDER_TIERS = { normal:{ mult:1,min:1,max:12 }, epic:{ mult:2.2,min:8,max:26 }, legendary:{ mult:4.5,min:20,max:40 } };
+
+function validOrder(order, seasonIdx, data) {
+  const tier = ORDER_TIERS[order?.rarity];
+  const qty = Number(order?.qty);
+  if (!tier || !ORDER_SEASONS[seasonIdx]?.includes(order?.type) || !Number.isInteger(qty) || qty < tier.min || qty > tier.max) return false;
+  const mascotBonus = ['apple','premium'].includes(data?.selectedMascot) ? 1.15 : 1;
+  const skillBonus = 1 + Number(data?.skillNodes?.etiqueta_dourada || 0) * .03;
+  const unitValue = Math.round(ORDER_VALUES[order.type] * mascotBonus * skillBonus);
+  const reward = Math.max(30, Math.max(12, Math.round(unitValue * tier.mult)) * qty + Math.round(25 * tier.mult));
+  const xp = Math.round((60 + qty * 10) * tier.mult);
+  return Number(order.reward) === reward && Number(order.xp) === xp && typeof order.id === 'string' && order.id.length <= 80;
+}
+
+function validateOrdersTransition(oldData, nextData) {
+  const seasonIdx = Number(nextData.seasonIdx || 0);
+  const searches = Number(nextData.orderSearches || 0);
+  const deliveries = Number(nextData.orderDeliveries || 0);
+  if (!Number.isInteger(searches) || searches < 0 || searches > 3) throw new Error('Limite de atualizações de pedidos inválido');
+  if (!Number.isInteger(deliveries) || deliveries < 0 || deliveries > 4) throw new Error('Limite de entregas de pedidos inválido');
+  const oldKey = String(oldData.ordersSeasonKey ?? oldData.seasonIdx ?? '0');
+  const nextKey = String(nextData.ordersSeasonKey ?? seasonIdx);
+  const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
+  const rewardState = oldKey === nextKey ? oldData : nextData;
+  if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || orders.some(order => !validOrder(order, seasonIdx, rewardState))) throw new Error('Pedido adulterado ou incompatível com a estação');
+  if (nextKey !== String(seasonIdx)) throw new Error('Estação dos pedidos inválida');
+  if (oldKey !== nextKey) return;
+  const oldSearches = Number(oldData.orderSearches || 0);
+  const oldDeliveries = Number(oldData.orderDeliveries || 0);
+  const oldPaid = oldData.orderPaidReset === true;
+  const nextPaid = nextData.orderPaidReset === true;
+  if (deliveries < oldDeliveries || deliveries - oldDeliveries > 1) throw new Error('Contador de entregas adulterado');
+  if (oldPaid && !nextPaid) throw new Error('Compra extra de pedidos não pode ser revertida');
+  const validPaidReset = !oldPaid && nextPaid && oldSearches >= 3 && searches === 0;
+  if (searches < oldSearches && !validPaidReset) throw new Error('Contador de atualizações não pode ser reduzido');
+  if (searches > oldSearches + 1) throw new Error('Atualizações de pedidos avançaram rápido demais');
+  if (!oldPaid && nextPaid && !validPaidReset) throw new Error('Compra extra de pedidos inválida');
+  if (deliveries === oldDeliveries + 1) {
+    const oldOrders = Array.isArray(oldData.orders) ? oldData.orders : [];
+    const remainingIds = new Set(orders.map(order => order.id));
+    const removed = oldOrders.filter(order => !remainingIds.has(order.id));
+    if (removed.length !== 1 || !validOrder(removed[0], seasonIdx, oldData)) throw new Error('Entrega não corresponde a um pedido válido');
+    const delivered = removed[0];
+    const oldStock = Number(oldData.harvested?.[delivered.type] || 0);
+    const newStock = Number(nextData.harvested?.[delivered.type] || 0);
+    if (oldStock < delivered.qty || newStock > oldStock - delivered.qty) throw new Error('Estoque insuficiente para a entrega');
+    if (Number(nextData.xp || 0) < Number(oldData.xp || 0) + delivered.xp) throw new Error('XP da entrega adulterado');
+  }
+}
+
 function isPlaceholderFarmName(name, username) {
   const value = String(name || '').trim().toLowerCase();
   const safeUsername = String(username || '').replace(/^@+/, '').trim().toLowerCase();
@@ -10,6 +67,8 @@ function isPlaceholderFarmName(name, username) {
     || value === `jardim de @${safeUsername}`
     || value === `jardim de ${safeUsername}`;
 }
+
+exports._test = { validOrder, validateOrdersTransition };
 
 exports.handler = async (event) => {
   const headers = {
@@ -87,6 +146,7 @@ exports.handler = async (event) => {
     if (existingRes.ok) {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
+      if (existingRows.length && (safeData.orders || existingData.orders)) validateOrdersTransition(existingData, safeData);
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {
         safeData.farmName = existingName;

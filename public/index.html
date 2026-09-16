@@ -5047,7 +5047,7 @@ function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
   if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já atualizou os pedidos 3 vezes nesta estação.', 2800); return; }
   G.orderSearches++;
-  const types = Object.keys(PLANTS).filter(type => !PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked);
+  const types = Object.keys(PLANTS).filter(type => isInSeason(type) && (!PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked));
   gardenOrders = Array.from({length:3}, (_, i) => {
     const type = types[Math.floor(Math.random() * types.length)];
     const rarity = orderRarity();

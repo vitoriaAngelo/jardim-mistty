@@ -1254,6 +1254,8 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .market-orders-btn:hover { transform:translateY(-2px); filter:brightness(1.05); }
 .orders-list { display:grid; gap:10px; margin:14px 0; }
 .orders-status { margin:8px 0 4px; padding:8px 10px; border-radius:11px; background:#f5ead0; color:#76552c; font-size:11px; font-weight:900; text-align:center; }
+.orders-reset-buy { margin-top:8px; border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:8px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; }
+.orders-reset-buy:disabled { opacity:.5; cursor:not-allowed; }
 .order-card { display:grid; grid-template-columns:46px 1fr auto; align-items:center; gap:10px; padding:11px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:15px; background:linear-gradient(135deg,#fffaf0,#f1f4e5); box-shadow:0 3px 0 #dfd2b5; }
 .order-card img { width:40px; height:40px; object-fit:contain; }
 .order-card strong { display:block; color:var(--text); font-size:13px; }
@@ -3526,6 +3528,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="orders-status" id="orders-status"></div>
     <div class="orders-list" id="orders-list"></div>
     <button class="inventory-shop-link" id="orders-refresh-btn" type="button" onclick="refreshOrders()">🔄 Procurar novos clientes</button>
+    <button class="orders-reset-buy" id="orders-reset-buy" type="button" onclick="buyOrderRefreshes()" hidden>✨ Comprar mais 3 atualizações · 5.000 pts</button>
   </div>
 </div>
 
@@ -3798,6 +3801,7 @@ const G = {
   ordersSeasonKey: '0',
   orderSearches: 0,
   orderDeliveries: 0,
+  orderPaidReset: false,
   lastOrder: null,
 };
 
@@ -5073,15 +5077,22 @@ function renderOrders() {
   }).join('');
   const refresh = document.getElementById('orders-refresh-btn');
   if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 atualizações nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
+  const buy = document.getElementById('orders-reset-buy');
+  if (buy) { buy.hidden = (G.orderSearches || 0) < 3 || G.orderPaidReset === true; buy.disabled = G.pts < 5000; }
   const status = document.getElementById('orders-status');
   if (status) { const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1); status.textContent = `${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`; }
   updateOrdersButton();
 }
 function resetOrdersForSeason(showPopup = false) {
-  G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; G.orderDeliveries = 0; gardenOrders = []; G.orders = [];
+  G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false; gardenOrders = []; G.orders = [];
   if (showPopup) document.getElementById('orders-reset-overlay')?.classList.remove('hidden');
 }
 function closeOrdersReset() { document.getElementById('orders-reset-overlay')?.classList.add('hidden'); }
+async function buyOrderRefreshes() {
+  if (G.orderSearches < 3 || G.orderPaidReset) return;
+  if (!(await chargeGamePoints(5000))) return;
+  G.orderSearches = 0; G.orderPaidReset = true; renderOrders(); saveGardenToSE(); toast('✨ Mais 3 atualizações liberadas nesta estação!', 2800);
+}
 async function deliverOrder(id) {
   const order = gardenOrders.find(item => item.id === id);
   if (!order || (G.orderDeliveries || 0) >= 4) { toast('🌿 Você já entregou 4 pedidos nesta estação.', 2800); return; }
@@ -7650,6 +7661,7 @@ async function saveGardenToSENow() {
     ordersSeasonKey:  G.ordersSeasonKey || `${G.seasonIdx}`,
     orderSearches:    G.orderSearches || 0,
     orderDeliveries:  G.orderDeliveries || 0,
+    orderPaidReset:   G.orderPaidReset === true,
     lastOrder:        G.lastOrder || null,
     missions:         G.missions,
     achievements:     [...(G.achievements || [])],
@@ -7797,7 +7809,7 @@ window.addEventListener('beforeunload', () => {
     plotFertilizers: G.plotFertilizers, plots: G.plots,
     unlockedPlots: G.unlockedPlots, harvested: G.harvested, goldenHarvested: G.goldenHarvested || {},
     upgrades: [...G.upgrades], upgradeLevels: G.upgradeLevels || {}, seasonIdx: G.seasonIdx,
-    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0, lastOrder: G.lastOrder || null,
+    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0, orderPaidReset: G.orderPaidReset === true, lastOrder: G.lastOrder || null,
     waterCapacity: G.waterCapacity ?? 5, waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
     seasonDay: G.seasonDay, missions: G.missions,
     achievements: [...(G.achievements || [])],
@@ -7927,6 +7939,7 @@ async function loadGardenFromSE(username) {
     // Normaliza contadores antigos criados quando a trava de atualizações estava desativada.
     G.orderSearches   = Math.min(3, Number(save.orderSearches || 0));
     G.orderDeliveries  = Number(save.orderDeliveries || 0);
+    G.orderPaidReset   = save.orderPaidReset === true;
     G.lastOrder        = save.lastOrder || null;
     gardenOrders      = G.orders;
     G.missions        = save.missions         || null;

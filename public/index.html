@@ -5081,7 +5081,13 @@ function claimAllPremium() {
   const modal = document.getElementById('modal'); const box = modal?.querySelector('.modal'); if (box) { box.querySelectorAll('h2,p').forEach(el => el.remove()); box.querySelector('.modal-actions')?.remove(); box.insertAdjacentHTML('afterbegin', '<h2>✦ Tudo resgatado!</h2><p>Todos os itens foram resgatados, aproveite. 💜</p>'); modal.classList.remove('hidden'); }
 }
 
-let gardenOrders = G.orders || [];
+const ORDER_TIER_LEGACY = { normal:'A', epic:'S', legendary:'SS' };
+const ORDER_TIER_LABELS = { A:'Tier A', S:'Tier S', SS:'Tier SS' };
+function normalizeOrderTier(order) {
+  const tier = ORDER_TIER_LEGACY[order?.rarity] || order?.rarity || 'A';
+  return { ...order, rarity: tier, rarityLabel: ORDER_TIER_LABELS[tier] || 'Tier A' };
+}
+let gardenOrders = (G.orders || []).map(normalizeOrderTier);
 const ORDER_NAMES = ['Bia do bairro','Seu Zeca','Luna Flores','Dona Cida','Theo da horta','Maya Verde','Nina Sementes','João Colheita'];
 function orderSeasonKey() { return `${G.seasonIdx || 0}`; }
 function updateOrdersButton() {
@@ -5121,7 +5127,8 @@ function renderOrders() {
     const item = getPlantable(order.type);
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
     const stock = G.harvested[order.type] || 0;
-    return `<div class="order-card tier-${String(order.rarity || 'A').toLowerCase()}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}<span class="order-rarity">${order.rarityLabel || 'Tier A'}</span></strong><small>${canDeliver ? `Você tem ${stock}/${order.qty} itens — pronto para entregar!` : `Você tem ${stock}/${order.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos <span class="order-xp">+${order.xp || Math.round(order.qty * 10)} XP</span></span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
+    const normalized = normalizeOrderTier(order);
+    return `<div class="order-card tier-${String(normalized.rarity).toLowerCase()}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${normalized.name} pediu ${normalized.qty}× ${item?.name || normalized.type}<span class="order-rarity">${normalized.rarityLabel}</span></strong><small>${canDeliver ? `Você tem ${stock}/${normalized.qty} itens — pronto para entregar!` : `Você tem ${stock}/${normalized.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${normalized.reward} pontos <span class="order-xp">+${normalized.xp || Math.round(normalized.qty * 10)} XP</span></span></div><button class="order-deliver" onclick="deliverOrder('${normalized.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
   }).join('') || '<div class="market-empty">📭 Nenhum pedido disponível. Clique em “Procurar novos clientes”.</div>';
   const refresh = document.getElementById('orders-refresh-btn');
   if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 atualizações nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }

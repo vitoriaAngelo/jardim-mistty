@@ -1266,6 +1266,9 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .order-xp { color:#6f4aa0; font-size:11px; font-weight:900; margin-left:8px; }
 .order-deliver { border:0; border-radius:9px; padding:7px 9px; background:var(--grass); color:#fff; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
 .order-deliver:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
+.order-actions { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
+.order-refresh { border:0; border-radius:9px; padding:7px 9px; background:#d9c28b; color:#5d4a22; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b79a5b; }
+.order-refresh:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
 body #orders-overlay .mail-modal, body #orders-overlay .mail-modal * { cursor:var(--cozy-cursor, default); }
 body #orders-overlay .mail-modal button { cursor:var(--cozy-click-cursor, pointer); }
 body #orders-overlay .mail-modal .order-deliver:disabled { cursor:var(--cozy-locked-cursor, not-allowed); }
@@ -3554,7 +3557,6 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <p class="premium-copy">Ajude seus vizinhos entregando plantas e vegetais colhidos. Cada pedido rende pontos!</p>
     <div class="orders-status" id="orders-status"><span id="orders-season-current"></span><br><span id="orders-progress-current"></span></div>
     <div class="orders-list" id="orders-list"></div>
-    <button class="inventory-shop-link" id="orders-refresh-btn" type="button" onclick="refreshOrders()">🔄 Procurar novos clientes</button>
     <button class="orders-reset-buy" id="orders-reset-buy" type="button" onclick="buyOrderRefreshes()" hidden>✨ Comprar mais 3 atualizações · 5.000 pts</button>
   </div>
 </div>
@@ -5100,25 +5102,35 @@ function updateOrdersButton() {
   if (status && !seasonLabel && !progressLabel) status.textContent = `${season.icon} ${season.name} · ${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · ${seasonRemainingLabel()}`;
 }
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'A',label:'Tier A',mult:1, min:1, max:12} : roll < .94 ? {id:'S',label:'Tier S',mult:2.2, min:8, max:26} : {id:'SS',label:'Tier SS',mult:4.5, min:20, max:40}; }
+function createOrder(index = 0) {
+  const types = Object.keys(PLANTS).filter(type => isInSeason(type) && (!PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked));
+  const type = types[Math.floor(Math.random() * types.length)];
+  const rarity = orderRarity();
+  const qty = rarity.min + Math.floor(Math.random() * (rarity.max - rarity.min + 1));
+  const rewardPerItem = Math.max(12, Math.round(effectiveSellValue(type) * rarity.mult));
+  return { id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2,8)}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward: Math.max(30, rewardPerItem * qty + Math.round(25 * rarity.mult)), xp: Math.round((60 + qty * 10) * rarity.mult) };
+}
 async function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
   if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já atualizou os pedidos 3 vezes nesta estação.', 2800); return; }
   G.orderSearches = Math.min(3, (G.orderSearches || 0) + 1);
-  const types = Object.keys(PLANTS).filter(type => isInSeason(type) && (!PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked));
-  gardenOrders = Array.from({length:3}, (_, i) => {
-    const type = types[Math.floor(Math.random() * types.length)];
-    const rarity = orderRarity();
-    const qty = rarity.min + Math.floor(Math.random() * (rarity.max - rarity.min + 1));
-    // A recompensa cresce com cada item e recebe o multiplicador do tier.
-    const rewardPerItem = Math.max(12, Math.round(effectiveSellValue(type) * rarity.mult));
-    const reward = Math.max(30, rewardPerItem * qty + Math.round(25 * rarity.mult));
-    const xp = Math.round((60 + qty * 10) * rarity.mult);
-    return { id: `${Date.now()}-${i}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward, xp };
-  });
+  gardenOrders = Array.from({length:3}, (_, i) => createOrder(i));
   G.orders = gardenOrders;
   renderOrders();
   updateOrdersButton();
   try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
+}
+async function refreshSingleOrder(id) {
+  if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); return; }
+  if ((G.orderSearches || 0) >= 3 || (G.orderDeliveries || 0) >= 4) { renderOrders(); toast('🌿 Você não tem mais atualizações disponíveis nesta estação.', 2800); return; }
+  const index = gardenOrders.findIndex(order => order.id === id);
+  if (index < 0) return;
+  G.orderSearches = Math.min(3, (G.orderSearches || 0) + 1);
+  gardenOrders[index] = createOrder(index);
+  G.orders = gardenOrders;
+  renderOrders();
+  updateOrdersButton();
+  try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível confirmar a atualização do pedido.', 3200); }
 }
 function renderOrders() {
   const list = document.getElementById('orders-list');
@@ -5131,10 +5143,9 @@ function renderOrders() {
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
     const stock = G.harvested[order.type] || 0;
     const normalized = normalizeOrderTier(order);
-    return `<div class="order-card tier-${String(normalized.rarity).toLowerCase()}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${normalized.name} pediu ${normalized.qty}× ${item?.name || normalized.type}<span class="order-rarity">${normalized.rarityLabel}</span></strong><small>${canDeliver ? `Você tem ${stock}/${normalized.qty} itens — pronto para entregar!` : `Você tem ${stock}/${normalized.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${normalized.reward} pontos <span class="order-xp">+${normalized.xp || Math.round(normalized.qty * 10)} XP</span></span></div><button class="order-deliver" onclick="deliverOrder('${normalized.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
+    const canRefresh = (G.orderSearches || 0) < 3 && (G.orderDeliveries || 0) < 4;
+    return `<div class="order-card tier-${String(normalized.rarity).toLowerCase()}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${normalized.name} pediu ${normalized.qty}× ${item?.name || normalized.type}<span class="order-rarity">${normalized.rarityLabel}</span></strong><small>${canDeliver ? `Você tem ${stock}/${normalized.qty} itens — pronto para entregar!` : `Você tem ${stock}/${normalized.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${normalized.reward} pontos <span class="order-xp">+${normalized.xp || Math.round(normalized.qty * 10)} XP</span></span></div><div class="order-actions"><button class="order-deliver" onclick="deliverOrder('${normalized.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button><button class="order-refresh" onclick="refreshSingleOrder('${normalized.id}')" ${canRefresh ? '' : 'disabled'}>🔄 Atualizar</button></div></div>`;
     }).join('') || '<div class="market-empty">📭 Nenhum pedido disponível. Clique em “Procurar novos clientes”.</div>';
-  const refresh = document.getElementById('orders-refresh-btn');
-  if (refresh) { refresh.disabled = allOrdersDelivered || (G.orderSearches || 0) >= 3; refresh.textContent = allOrdersDelivered ? '✅ Pedidos completos nesta estação' : refresh.disabled ? '🌿 3/3 atualizações nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
   const buy = document.getElementById('orders-reset-buy');
   if (buy) { buy.hidden = allOrdersDelivered || (G.orderSearches || 0) < 3 || G.orderPaidReset === true; buy.disabled = G.pts < 5000; }
   const status = document.getElementById('orders-status');

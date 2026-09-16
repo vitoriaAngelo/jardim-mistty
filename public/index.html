@@ -405,7 +405,7 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
 .twitch-connect {
   display: flex; align-items: center; gap: 6px;
   background: #9146ff; border: none; border-radius: 14px;
-  padding: 8px 16px;
+  padding: 8px 10px; max-width:98px; justify-content:center;
   font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; color: #fff;
   cursor: pointer; box-shadow: 0 3px 0 #6030cc;
   transition: transform .1s, box-shadow .1s;
@@ -7685,7 +7685,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     }
     gardenHydrated = true;
     document.getElementById('twitch-btn').innerHTML =
-      `<span class="live-dot"></span> Logado`;
+      `<span class="live-dot"></span> Online`;
     document.getElementById('twitch-btn').classList.add('connected');
 
     connectSESocket();
@@ -7697,7 +7697,6 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     // Show help on first login (no saved garden)
     if (!hadSave) setTimeout(() => openHelp(), 800);
     if (!hadSave) setTimeout(() => openFirstLoginBonus(), 1500);
-    maybeShowUpdateNews(hadSave);
 
     // Sincroniza automaticamente a cada 5 minutos com a mesma lógica do botão.
     if (syncTimer) clearInterval(syncTimer);
@@ -8204,7 +8203,7 @@ function connectSESocket() {
     seSocket.on('authenticated', () => {
       G.seConnected = true;
       document.getElementById('twitch-btn').innerHTML =
-        `<span class="live-dot"></span> Logado`;
+        `<span class="live-dot"></span> Online`;
       document.getElementById('twitch-btn').classList.add('connected');
       toast('✅ StreamElements conectado! Pontos em tempo real.', 3000);
     });

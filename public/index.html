@@ -2725,6 +2725,17 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
   #inventory-overlay.closing, #inventory-overlay.closing .inventory-modal { animation:none; }
   .tool-card, .achiev-tool-btn, .header-icon-btn, .logo, .twitch-connect, .toast, .levelup-card { animation: none; transition: none; }
 }
+.site-footer { width:100%; max-width:900px; display:flex; flex-direction:column; align-items:center; gap:10px; padding:16px 0 8px; font-family:'Nunito',sans-serif; }
+.site-footer-actions { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+.support-dev-link, .live-status-link { display:inline-flex; align-items:center; gap:8px; border-radius:99px; padding:9px 16px; font-size:12px; font-weight:900; text-decoration:none; cursor:pointer; transition:transform .16s,box-shadow .16s,filter .16s; }
+.support-dev-link { border:1px solid #d5a83e; background:linear-gradient(135deg,#ffe99b,#f2c85c); color:#654b28; box-shadow:0 3px 0 #b58a35; }
+.support-dev-link:hover, .live-status-link:hover { transform:translateY(-2px); filter:saturate(1.08); }
+.live-status-link { background:#9146ff; color:#fff; box-shadow:0 3px 0 #6120c0; }
+.site-footer-credit { padding:8px 14px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; background:var(--cozy-paper,#fffdf7); color:var(--text2); font-size:11px; font-weight:700; opacity:.9; line-height:1.6; text-align:center; box-shadow:0 2px 0 #d8c9ac55; }
+.site-footer-credit a { color:var(--grass2); text-decoration:none; font-weight:900; }
+body.dark-mode .support-dev-link { background:linear-gradient(135deg,#d6aa43,#b9852f); border-color:#f0d27a; color:#2c321f; box-shadow:0 3px 0 #80652e; }
+body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; color:#c7d3be; box-shadow:0 2px 0 #151d16; }
+@media (max-width:650px) { .site-footer { padding-top:10px; } .site-footer-actions { width:100%; } .support-dev-link, .live-status-link { flex:1 1 145px; justify-content:center; } .site-footer-credit { width:calc(100% - 18px); box-sizing:border-box; } }
 
 </style>
 <link rel="stylesheet" href="cozy-garden.css">
@@ -8707,24 +8718,16 @@ setInterval(() => {
   if (!document.hidden) updateGrowthCountdowns();
 }, 250);
 </script>
-<footer style="
-  width: 100%; max-width: 900px;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 16px 0 8px;
-  font-family: 'Nunito', sans-serif;
-">
-  <!-- Live status button -->
-  <a href="https://www.twitch.tv/misttylol" target="_blank" id="live-status-btn"
-     style="display:inline-flex;align-items:center;gap:8px;
-            background:#9146ff;color:#fff;border-radius:99px;
-            padding:8px 18px;font-size:13px;font-weight:800;
-            text-decoration:none;box-shadow:0 3px 0 #6120c0;
-            transition:transform .12s,box-shadow .12s">
+<footer class="site-footer">
+  <div class="site-footer-actions">
+  <a href="https://www.twitch.tv/misttylol" target="_blank" id="live-status-btn" class="live-status-link">
     <span id="live-dot-footer" style="width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block"></span>
     <span id="live-label-footer">Verificando live...</span>
   </a>
+  <button type="button" class="support-dev-link" onclick="openBonusShop()" aria-label="Apoiar a desenvolvedora">✨ Apoiar a dev</button>
+  </div>
 
-  <div style="font-size:12px;font-weight:700;color:var(--text2);opacity:.6;line-height:1.8">
+  <div class="site-footer-credit">
     Criado com 💚 por <strong>Vitória Paula</strong> —
     <a href="https://www.twitch.tv/misttylol" target="_blank"
        style="color:var(--grass2);text-decoration:none;font-weight:800">

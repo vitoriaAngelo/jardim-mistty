@@ -1250,7 +1250,7 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
   display: flex; align-items: center; gap: 6px;
   padding: 4px 0;
 }
-.market-orders-btn { margin-left:8px; border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:6px 11px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; transition:transform .15s ease,filter .15s ease; }
+.market-orders-btn { border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:7px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; transition:transform .15s ease,filter .15s ease; width:100%; }
 .market-orders-btn:hover { transform:translateY(-2px); filter:brightness(1.05); }
 .orders-list { display:grid; gap:10px; margin:14px 0; }
 .order-card { display:grid; grid-template-columns:46px 1fr auto; align-items:center; gap:10px; padding:11px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:15px; background:linear-gradient(135deg,#fffaf0,#f1f4e5); box-shadow:0 3px 0 #dfd2b5; }
@@ -1261,6 +1261,11 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .order-reward img { width:18px; height:18px; }
 .order-deliver { border:0; border-radius:9px; padding:7px 9px; background:var(--grass); color:#fff; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
 .order-deliver:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
+.order-card.normal { border-color:#a8c98d; background:linear-gradient(135deg,#f7fff0,#e7f2df); }
+.order-card.epic { border-color:#c39be0; background:linear-gradient(135deg,#fff7ff,#eee1fa); box-shadow:0 3px 0 #ae8bca; }
+.order-card.legendary { border-color:#e4b94d; background:linear-gradient(135deg,#fffbea,#f8e2a1); box-shadow:0 3px 0 #c79b32,0 0 14px #e8c96d55; }
+.order-rarity { display:inline-block; margin-left:5px; padding:2px 6px; border-radius:99px; font-size:9px; text-transform:uppercase; letter-spacing:.4px; background:#dcebcf; color:#4f7937; }
+.epic .order-rarity { background:#e7cff5; color:#74438f; }.legendary .order-rarity { background:#f5d77b; color:#805d13; }
 body.dark-mode .order-card { background:linear-gradient(135deg,#354332,#293528); border-color:#58684f; box-shadow:0 3px 0 #1d281e; }
 body.dark-mode .order-card strong { color:#edf4df; }
 body.dark-mode .order-card small { color:#cbd9c2; }
@@ -2965,7 +2970,6 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <path d="M5 2 Q8 0 11 2" stroke="#5c3820" stroke-width="1.2" fill="none" stroke-linecap="round"/>
         </svg>
         Mercado
-        <button class="market-orders-btn" type="button" onclick="openOrders(event)">📬 Pedidos</button>
         <span class="market-points-badge" aria-label="Seus pontos no Mercado">Seus pontos: <img class="points-token" src="points-sprout.svg" width="26" height="26" alt="" aria-hidden="true"> <span id="market-pts-num">0</span> pts</span>
       </div>
       <div id="harvest-bag"></div>
@@ -3056,6 +3060,10 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <span class="mail-badge hidden" id="missions-badge" style="position:absolute;top:6px;right:6px">0</span>
       </button>
       <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Missões do dia<br><span>Complete tarefas e ganhe recompensas</span></div>
+    </div>
+    <div class="header-icon-wrap" style="width:100%">
+      <button class="market-orders-btn" type="button" onclick="openOrders(event)" aria-label="Pedidos do jardim">📬 Pedidos</button>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Pedidos<br><span>Troque colheitas por pontos</span></div>
     </div>
 
   </div>
@@ -3514,7 +3522,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="mail-modal-title">📬 Pedidos do jardim</div>
     <p class="premium-copy">Ajude seus vizinhos entregando plantas e vegetais colhidos. Cada pedido rende pontos!</p>
     <div class="orders-list" id="orders-list"></div>
-    <button class="inventory-shop-link" type="button" onclick="refreshOrders()">🔄 Procurar novos clientes</button>
+    <button class="inventory-shop-link" id="orders-refresh-btn" type="button" onclick="refreshOrders()">🔄 Procurar novos clientes</button>
   </div>
 </div>
 
@@ -3772,6 +3780,9 @@ const G = {
   isPremium: false,
   selectedMascot: null,
   ownedMascots: {},
+  orders: [],
+  ordersSeasonKey: '0',
+  orderSearches: 0,
 };
 
 // maxWater = regas para encher (habilitar crescimento)
@@ -5007,16 +5018,23 @@ function claimAllPremium() {
   const modal = document.getElementById('modal'); const box = modal?.querySelector('.modal'); if (box) { box.querySelectorAll('h2,p').forEach(el => el.remove()); box.querySelector('.modal-actions')?.remove(); box.insertAdjacentHTML('afterbegin', '<h2>✦ Tudo resgatado!</h2><p>Todos os itens foram resgatados, aproveite. 💜</p>'); modal.classList.remove('hidden'); }
 }
 
-let gardenOrders = [];
+let gardenOrders = G.orders || [];
 const ORDER_NAMES = ['Bia do bairro','Seu Zeca','Luna Flores','Dona Cida','Theo da horta','Maya Verde','Nina Sementes','João Colheita'];
+function orderSeasonKey() { return `${G.seasonIdx || 0}`; }
+function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'normal',label:'Normal',mult:1} : roll < .94 ? {id:'epic',label:'Épico',mult:1.8} : {id:'legendary',label:'Lendário',mult:3}; }
 function refreshOrders() {
+  if (G.ordersSeasonKey !== orderSeasonKey()) { G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; gardenOrders = []; }
+  if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já procurou 3 clientes nesta estação. Volte na próxima estação!', 3000); return; }
+  G.orderSearches++;
   const types = Object.keys(PLANTS).filter(type => !PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked);
   gardenOrders = Array.from({length:3}, (_, i) => {
     const type = types[Math.floor(Math.random() * types.length)];
     const available = G.harvested[type] || 0;
     const qty = Math.max(1, Math.min(available || 1, Math.floor(Math.random() * 3) + 1));
-    return { id: `${Date.now()}-${i}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, reward: Math.max(30, effectiveSellValue(type) * qty + 25) };
+    const rarity = orderRarity();
+    return { id: `${Date.now()}-${i}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward: Math.round(Math.max(30, effectiveSellValue(type) * qty + 25) * rarity.mult) };
   });
+  G.orders = gardenOrders;
   renderOrders();
 }
 function renderOrders() {
@@ -5025,8 +5043,10 @@ function renderOrders() {
   list.innerHTML = gardenOrders.map(order => {
     const item = getPlantable(order.type);
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
-    return `<div class="order-card"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}</strong><small>${canDeliver ? 'Tudo pronto para entregar!' : `Você tem ${G.harvested[order.type] || 0}× — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos</span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver ? '' : 'disabled'}>Entregar</button></div>`;
+    return `<div class="order-card ${order.rarity || 'normal'}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}<span class="order-rarity">${order.rarityLabel || 'Normal'}</span></strong><small>${canDeliver ? 'Tudo pronto para entregar!' : `Você tem ${G.harvested[order.type] || 0}× — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos</span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver ? '' : 'disabled'}>Entregar</button></div>`;
   }).join('');
+  const refresh = document.getElementById('orders-refresh-btn');
+  if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 clientes procurados nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
 }
 async function deliverOrder(id) {
   const order = gardenOrders.find(item => item.id === id);
@@ -5034,6 +5054,7 @@ async function deliverOrder(id) {
   G.harvested[order.type] -= order.qty;
   G.pts += order.reward;
   gardenOrders = gardenOrders.filter(item => item.id !== id);
+  G.orders = gardenOrders;
   updatePts(); renderHarvested(); renderOrders(); saveGardenToSE();
   toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
 }
@@ -7585,6 +7606,9 @@ async function saveGardenToSENow() {
     waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
     seasonIdx:        G.seasonIdx,
     seasonDay:        G.seasonDay,
+    orders:           G.orders || [],
+    ordersSeasonKey:  G.ordersSeasonKey || `${G.seasonIdx}`,
+    orderSearches:    G.orderSearches || 0,
     missions:         G.missions,
     achievements:     [...(G.achievements || [])],
     achievStats:      G.achievStats || {},
@@ -7731,6 +7755,7 @@ window.addEventListener('beforeunload', () => {
     plotFertilizers: G.plotFertilizers, plots: G.plots,
     unlockedPlots: G.unlockedPlots, harvested: G.harvested, goldenHarvested: G.goldenHarvested || {},
     upgrades: [...G.upgrades], upgradeLevels: G.upgradeLevels || {}, seasonIdx: G.seasonIdx,
+    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0,
     waterCapacity: G.waterCapacity ?? 5, waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
     seasonDay: G.seasonDay, missions: G.missions,
     achievements: [...(G.achievements || [])],
@@ -7855,6 +7880,10 @@ async function loadGardenFromSE(username) {
     G.waterCapacityLastRefill = Number(save.waterCapacityLastRefill || Date.now());
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
+    G.orders          = Array.isArray(save.orders) ? save.orders : [];
+    G.ordersSeasonKey = save.ordersSeasonKey ?? `${G.seasonIdx}`;
+    G.orderSearches   = Number(save.orderSearches || 0);
+    gardenOrders      = G.orders;
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };

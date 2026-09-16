@@ -8202,7 +8202,7 @@ renderSkillTreeBadge();
 // Preview local: permite visualizar a experiência sem conectar a Twitch.
 const isLocalPreview = new URLSearchParams(window.location.search).has('preview');
 if (isLocalPreview) {
-  seUser = { username: 'preview', displayName: 'Visitante', points: 100000, isSubscriber: false, subscriptionChecked: true };
+  seUser = { username: 'preview', displayName: 'Visitante', points: 209932, isSubscriber: false, subscriptionChecked: true };
   restorePremiumClaimsCache(seUser.username);
   gardenHydrated = true;
   G.isSubscriber = false;
@@ -8219,7 +8219,7 @@ if (isLocalPreview) {
   G.bonusWaterRecoveryMinutes = 0;
   G.bonusKitLevel = 0;
   G.bonusVipUntil = 0;
-  G.pts = 100000;
+  G.pts = 209932;
   G.xp = LEVELS[9].minXP - 1;
   G.unlockedPlots = 6;
   G.previewUnlocks = true;

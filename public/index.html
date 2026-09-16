@@ -1264,6 +1264,7 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .missions-reset-info { margin:8px 0 10px; padding:8px 10px; border:1px solid var(--cozy-line); border-radius:11px; background:var(--cream2); color:var(--text2); font-size:12px; font-weight:800; line-height:1.4; text-align:center; }
 .orders-reset-buy { margin-top:8px; border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:8px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; }
 .orders-reset-buy:disabled { opacity:.5; cursor:not-allowed; }
+.orders-reset-actions { justify-content:center; }
 .orders-reset-buy { position:relative; }
 .orders-reset-buy::after { content:attr(data-tooltip); display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:230px; padding:10px 13px; border:1px solid #53624d; border-radius:13px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
 .orders-reset-buy:hover::after, .orders-reset-buy:focus-visible::after { display:block; }
@@ -3592,7 +3593,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="mail-modal-title">✨ Resetar pedidos?</div>
     <p class="premium-copy">Por 5.000 pontos, você recupera as 3 atualizações e zera as entregas desta estação.</p>
     <p class="premium-copy"><strong>Esse reset só pode ser comprado 1 vez por estação.</strong></p>
-    <div class="modal-actions"><button class="premium-claim" type="button" onclick="buyOrderRefreshes()">Confirmar por 5.000 pts</button><button class="inventory-shop-link" type="button" onclick="closeOrderResetConfirm()">Cancelar</button></div>
+    <div class="modal-actions orders-reset-actions"><button class="premium-claim" type="button" onclick="buyOrderRefreshes()">Confirmar por 5.000 pts</button><button class="inventory-shop-link" type="button" onclick="closeOrderResetConfirm()">Cancelar</button></div>
   </div>
 </div>
 

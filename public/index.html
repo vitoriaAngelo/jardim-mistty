@@ -2525,12 +2525,12 @@ body.dark-mode .st-req-badge {
 }
 .st-sp-badge {
   position:absolute; top:-6px; right:-6px;
-  background:#e84040; color:#fff;
+  background:#879b72; color:#fffdf7;
   font-size:9px; font-weight:900;
-  width:16px; height:16px; border-radius:50%;
+  min-width:16px; width:auto; height:16px; padding:0 4px; border-radius:99px;
   display:flex; align-items:center; justify-content:center;
   border:2px solid var(--cream);
-  animation: st-badge-pop .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 2px 0 #667b56;
 }
 @keyframes st-badge-pop { from { transform:scale(0); } to { transform:scale(1); } }
 

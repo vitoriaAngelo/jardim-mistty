@@ -5046,7 +5046,7 @@ function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'no
 function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
   if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já atualizou os pedidos 3 vezes nesta estação.', 2800); return; }
-  G.orderSearches++;
+  G.orderSearches = Math.min(3, (G.orderSearches || 0) + 1);
   const types = Object.keys(PLANTS).filter(type => isInSeason(type) && (!PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked));
   gardenOrders = Array.from({length:3}, (_, i) => {
     const type = types[Math.floor(Math.random() * types.length)];
@@ -7924,7 +7924,8 @@ async function loadGardenFromSE(username) {
     G.seasonDay       = save.seasonDay        ?? 1;
     G.orders          = Array.isArray(save.orders) ? save.orders : [];
     G.ordersSeasonKey = save.ordersSeasonKey ?? `${G.seasonIdx}`;
-    G.orderSearches   = Number(save.orderSearches || 0);
+    // Normaliza contadores antigos criados quando a trava de atualizações estava desativada.
+    G.orderSearches   = Math.min(3, Number(save.orderSearches || 0));
     G.orderDeliveries  = Number(save.orderDeliveries || 0);
     G.lastOrder        = save.lastOrder || null;
     gardenOrders      = G.orders;

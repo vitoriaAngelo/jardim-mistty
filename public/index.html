@@ -1261,6 +1261,7 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .market-orders-btn:hover { transform:translateY(-2px); filter:brightness(1.05); }
 .orders-list { display:grid; gap:10px; margin:14px 0; }
 .orders-status { margin:8px 0 4px; padding:8px 10px; border-radius:11px; background:#f5ead0; color:#76552c; font-size:11px; font-weight:900; line-height:1.55; text-align:center; }
+.missions-reset-info { margin:8px 0 10px; padding:8px 10px; border:1px solid var(--cozy-line); border-radius:11px; background:var(--cream2); color:var(--text2); font-size:12px; font-weight:800; line-height:1.4; text-align:center; }
 .orders-reset-buy { margin-top:8px; border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:8px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; }
 .orders-reset-buy:disabled { opacity:.5; cursor:not-allowed; }
 .orders-reset-buy { position:relative; }
@@ -3303,6 +3304,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between">
       <span>📋 Missões do Dia</span>
     </div>
+    <div class="missions-reset-info" id="missions-reset-info">⏳ Complete todas as missões para iniciar o contador de 24 horas.</div>
     <label class="presence-streak missions-presence" id="presence-streak"><input type="checkbox" id="presence-check" onchange="claimPresence()"><span class="presence-copy"><span class="presence-title" id="presence-title">Marcar presença</span><span class="presence-hint"><span id="presence-days">0 dias</span> · ganhe pontos por dia consecutivo</span></span></label>
     <div class="presence-week-help" tabindex="0" aria-label="Como funciona a presença diária"><div class="presence-week" id="presence-week" aria-label="Presença no ciclo de 7 dias"></div><div class="presence-explainer" role="tooltip">Marque diariamente e ganhe pontos. Faltou? Recomece.</div></div>
     <div id="missions-modal-bar"></div>
@@ -5658,7 +5660,11 @@ const MISSION_DEFS = [
 // missions state: { progress: {id: n}, claimed: {id: bool}, resetAt: timestamp }
 function initMissions() {
   if (!G.missions) {
-    G.missions = { progress: {}, claimed: {}, resetAt: Date.now() + MISSION_DAY_MS };
+    G.missions = { progress: {}, claimed: {}, resetAt: null };
+  } else if (!MISSION_DEFS.every(mission => G.missions.claimed?.[mission.id])) {
+    G.missions.resetAt = null;
+  } else if (!G.missions.resetAt) {
+    G.missions.resetAt = Date.now() + MISSION_DAY_MS;
   }
 }
 
@@ -5674,6 +5680,7 @@ function missionProgress(id, amount = 1) {
     const missionEl = document.getElementById('missions-modal-bar') || document.getElementById('missions-btn');
     const missionXpBefore = G.xp;
     G.xp += def.rewardXP;
+    if (MISSION_DEFS.every(mission => G.missions.claimed[mission.id])) G.missions.resetAt = Date.now() + MISSION_DAY_MS;
     const missionLevelBefore = getLevelData(missionXpBefore).current;
     const missionLevelAfter = getLevelData(G.xp).current;
     renderLevelWidget();
@@ -5710,21 +5717,23 @@ function renderMissions() {
   initMissions();
 
   // Check reset
-  if (Date.now() >= G.missions.resetAt) {
+  if (G.missions.resetAt && Date.now() >= G.missions.resetAt) {
     G.missions.progress = {};
     G.missions.claimed  = {};
-    G.missions.resetAt  = Date.now() + MISSION_DAY_MS;
+    G.missions.resetAt  = null;
     toast('📋 Missões diárias renovadas! Novas recompensas disponíveis.', 3000);
   }
 
   // Timer
-  const remaining = Math.max(0, G.missions.resetAt - Date.now());
+  const remaining = G.missions.resetAt ? Math.max(0, G.missions.resetAt - Date.now()) : 0;
   const mm = String(Math.floor(remaining / 60000)).padStart(2,'0');
   const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
   ['missions-timer','missions-modal-timer'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = `Renova em ${mm}:${ss}`;
+    if (el) el.textContent = G.missions.resetAt ? `Renova em ${mm}:${ss}` : 'Renova 24h após concluir tudo';
   });
+  const resetInfo = document.getElementById('missions-reset-info');
+  if (resetInfo) resetInfo.textContent = G.missions.resetAt ? `✅ Todas concluídas · Novas missões em ${mm}:${ss}` : '⏳ Complete todas as missões para iniciar o contador de 24 horas.';
 
   updateMissionsBadge();
 
@@ -5759,18 +5768,20 @@ function renderMissions() {
 function updateMissionsClock() {
   if (document.hidden) return;
   initMissions();
-  if (Date.now() >= G.missions.resetAt) {
+  if (G.missions.resetAt && Date.now() >= G.missions.resetAt) {
     renderMissions();
     return;
   }
-  const remaining = Math.max(0, G.missions.resetAt - Date.now());
+  const remaining = G.missions.resetAt ? Math.max(0, G.missions.resetAt - Date.now()) : 0;
   const mm = String(Math.floor(remaining / 60000)).padStart(2, '0');
   const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
-  const label = `Renova em ${mm}:${ss}`;
+  const label = G.missions.resetAt ? `Renova em ${mm}:${ss}` : 'Renova 24h após concluir tudo';
   ['missions-timer', 'missions-modal-timer'].forEach(id => {
     const el = document.getElementById(id);
     if (el && el.textContent !== label) el.textContent = label;
   });
+  const resetInfo = document.getElementById('missions-reset-info');
+  if (resetInfo) resetInfo.textContent = G.missions.resetAt ? `✅ Todas concluídas · Novas missões em ${mm}:${ss}` : '⏳ Complete todas as missões para iniciar o contador de 24 horas.';
 }
 setInterval(updateMissionsClock, 1000);
 const SEASONS = [

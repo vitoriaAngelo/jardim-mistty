@@ -5046,7 +5046,12 @@ function orderSeasonKey() { return `${G.seasonIdx || 0}`; }
 function updateOrdersButton() {
   const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1);
   const status = document.getElementById('orders-status');
-  if (status) status.textContent = `${G.orderSearches || 0}/3 clientes procurados · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`;
+  const season = currentSeason();
+  const seasonLabel = document.getElementById('orders-season-current');
+  const progressLabel = document.getElementById('orders-progress-current');
+  if (seasonLabel) seasonLabel.textContent = `${season.icon} ${season.name}`;
+  if (progressLabel) progressLabel.textContent = `${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`;
+  if (status && !seasonLabel && !progressLabel) status.textContent = `${season.icon} ${season.name} · ${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`;
 }
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'normal',label:'Normal',mult:1, min:1, max:12} : roll < .94 ? {id:'epic',label:'Épico',mult:2.2, min:8, max:26} : {id:'legendary',label:'Lendário',mult:4.5, min:20, max:40}; }
 function refreshOrders() {

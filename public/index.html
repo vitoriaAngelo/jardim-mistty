@@ -1261,6 +1261,9 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .orders-status { margin:8px 0 4px; padding:8px 10px; border-radius:11px; background:#f5ead0; color:#76552c; font-size:11px; font-weight:900; line-height:1.55; text-align:center; }
 .orders-reset-buy { margin-top:8px; border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:8px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; }
 .orders-reset-buy:disabled { opacity:.5; cursor:not-allowed; }
+.orders-reset-buy { position:relative; }
+.orders-reset-buy::after { content:attr(data-tooltip); display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:230px; padding:10px 13px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:13px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 8px 24px #4b573326; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.orders-reset-buy:hover::after, .orders-reset-buy:focus-visible::after { display:block; }
 .order-card { display:grid; grid-template-columns:46px 1fr auto; align-items:center; gap:10px; padding:11px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:15px; background:linear-gradient(135deg,#fffaf0,#f1f4e5); box-shadow:0 3px 0 #dfd2b5; }
 .order-card img { width:40px; height:40px; object-fit:contain; }
 .order-card strong { display:block; color:var(--text); font-size:13px; }
@@ -3563,7 +3566,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <p class="premium-copy">Ajude seus vizinhos entregando plantas e vegetais colhidos. Cada pedido rende pontos!</p>
     <div class="orders-status" id="orders-status"><span id="orders-season-current"></span><br><span id="orders-progress-current"></span></div>
     <div class="orders-list" id="orders-list"></div>
-    <button class="orders-reset-buy" id="orders-reset-buy" type="button" onclick="confirmOrderReset()" aria-label="Comprar mais 3 atualizações por 5.000 pontos" title="Reseta suas atualizações e entregas. Pode ser comprado apenas 1 vez por estação." hidden>✨ Comprar mais 3 atualizações · 5.000 pts</button>
+    <button class="orders-reset-buy" id="orders-reset-buy" type="button" onclick="confirmOrderReset()" aria-label="Comprar mais 3 atualizações por 5.000 pontos" data-tooltip="Reseta suas atualizações e entregas. Pode ser comprado apenas 1 vez por estação." hidden>✨ Comprar mais 3 atualizações · 5.000 pts</button>
   </div>
 </div>
 

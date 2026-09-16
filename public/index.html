@@ -1259,6 +1259,8 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
   display: flex; align-items: center; gap: 6px;
   padding: 4px 0;
 }
+.plot-tooltip.out-of-season-warning { border-color:#c94f4f; background:#fff0e8; color:#7d2929; box-shadow:0 4px 14px #9a393955; }
+body.dark-mode .plot-tooltip.out-of-season-warning { border-color:#d87575; background:#4a2929; color:#ffe1d8; }
 .market-orders-btn { border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:7px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; transition:transform .15s ease,filter .15s ease; width:100%; }
 .market-orders-btn:hover { transform:translateY(-2px); filter:brightness(1.05); }
 .orders-list { display:grid; gap:10px; margin:14px 0; }
@@ -6573,11 +6575,14 @@ function buildPlotEl(plot, idx) {
     // Tooltip
     const p = getPlantable(plot.type);
     const isReady = plot.growCount >= maxG;
+    const outOfSeason = plot.outOfSeason || !isInSeason(plot.type);
     const tooltip = document.createElement('div');
-    tooltip.className = 'plot-tooltip';
+    tooltip.className = `plot-tooltip${outOfSeason ? ' out-of-season-warning' : ''}`;
     tooltip.innerHTML = `
       <strong>${p.emoji} ${p.name}</strong><br>
-      ${isReady
+      ${outOfSeason
+        ? '⚠️ FORA DE ESTAÇÃO!<br><strong>Se colher, você perderá esta planta.</strong>'
+        : isReady
         ? '🌸 Pronta para colher!'
         : `💧 ${plot.waterCount}/${maxW} regas · 🌱 ${plot.growCount}/${maxG} estágios`
       }
@@ -6699,7 +6704,6 @@ async function onPlotClick(idx) {
   // AUTO-COLHEITA: se pronto, colhe direto ao clicar (sem custo de pts)
   if (plot && isReady(plot) && G.selectedTool !== 'shovel') {
     const type = plot.type;
-    const outOfSeason = plot.outOfSeason || !isInSeason(type);
     const plant = getPlantable(type);
     const harvestsTotal = harvestCyclesFor(type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);

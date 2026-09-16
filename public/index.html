@@ -1260,6 +1260,7 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .order-card small { display:block; color:var(--text2); font-size:11px; margin-top:3px; }
 .order-reward { display:flex; align-items:center; gap:3px; color:#8a5e18; font-weight:900; font-size:12px; white-space:nowrap; }
 .order-reward img { width:18px; height:18px; }
+.order-xp { color:#6f4aa0; font-size:11px; font-weight:900; margin-left:8px; }
 .order-deliver { border:0; border-radius:9px; padding:7px 9px; background:var(--grass); color:#fff; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
 .order-deliver:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
 .order-card.normal { border-color:#a8c98d; background:linear-gradient(135deg,#f7fff0,#e7f2df); }
@@ -5051,7 +5052,9 @@ function refreshOrders() {
     const qty = rarity.min + Math.floor(Math.random() * (rarity.max - rarity.min + 1));
     // A recompensa cresce com cada item e recebe o multiplicador do tier.
     const rewardPerItem = Math.max(12, Math.round(effectiveSellValue(type) * rarity.mult));
-    return { id: `${Date.now()}-${i}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward: Math.max(30, rewardPerItem * qty + Math.round(25 * rarity.mult)) };
+    const reward = Math.max(30, rewardPerItem * qty + Math.round(25 * rarity.mult));
+    const xp = Math.round((60 + qty * 10) * rarity.mult);
+    return { id: `${Date.now()}-${i}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward, xp };
   });
   G.orders = gardenOrders;
   renderOrders();
@@ -5063,7 +5066,8 @@ function renderOrders() {
   list.innerHTML = gardenOrders.map(order => {
     const item = getPlantable(order.type);
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
-    return `<div class="order-card ${order.rarity || 'normal'}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}<span class="order-rarity">${order.rarityLabel || 'Normal'}</span></strong><small>${canDeliver ? 'Tudo pronto para entregar!' : `Você tem ${G.harvested[order.type] || 0}× — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos</span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
+    const stock = G.harvested[order.type] || 0;
+    return `<div class="order-card ${order.rarity || 'normal'}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}<span class="order-rarity">${order.rarityLabel || 'Normal'}</span></strong><small>${canDeliver ? `Você tem ${stock}/${order.qty} itens — pronto para entregar!` : `Você tem ${stock}/${order.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos <span class="order-xp">+${order.xp || Math.round(order.qty * 10)} XP</span></span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
   }).join('');
   const refresh = document.getElementById('orders-refresh-btn');
   if (refresh) { refresh.disabled = false; refresh.textContent = `🔄 Procurar novos clientes (${G.orderSearches || 0})`; }
@@ -5082,6 +5086,7 @@ async function deliverOrder(id) {
   if ((G.harvested[order.type] || 0) < order.qty) return;
   G.harvested[order.type] -= order.qty;
   G.pts += order.reward;
+  gainXP('harvest', document.querySelector(`[onclick="deliverOrder('${order.id}')"]`), order.xp || Math.round(order.qty * 10), `+${order.xp || Math.round(order.qty * 10)} XP 📬 Pedido!`);
   gardenOrders = gardenOrders.filter(item => item.id !== id);
   G.orders = gardenOrders;
   G.orderDeliveries = (G.orderDeliveries || 0) + 1;

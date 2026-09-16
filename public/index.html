@@ -7223,6 +7223,14 @@ function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
 // ── Twitch OAuth ───────────────────────────────────────────
 function loginWithTwitch() {
   setLoginLoading(true, 'Abrindo a Twitch para você entrar…');
+  // A Twitch aceita o callback de produção já cadastrado. Guardamos a URL do
+  // Preview para devolver a pessoa ao mesmo ambiente após o login.
+  if (window.location.origin !== REDIRECT_URI) {
+    const returnUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+    if (window.location.hostname.endsWith('.netlify.app') || window.location.hostname === 'localhost') {
+      sessionStorage.setItem('twitch_oauth_return_url', returnUrl);
+    }
+  }
   const url = `https://id.twitch.tv/oauth2/authorize`
     + `?client_id=${TWITCH_CLIENT_ID}`
     + `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`
@@ -7236,6 +7244,16 @@ function loginWithTwitch() {
 async function handleTwitchCallback() {
   const hash = window.location.hash;
   if (!hash.includes('access_token')) return false;
+
+  const returnUrl = sessionStorage.getItem('twitch_oauth_return_url');
+  if (returnUrl && window.location.origin === REDIRECT_URI) {
+    sessionStorage.removeItem('twitch_oauth_return_url');
+    const target = new URL(returnUrl);
+    if ((target.hostname.endsWith('.netlify.app') || target.hostname === 'localhost') && target.origin !== window.location.origin) {
+      window.location.replace(`${target.href}${target.href.includes('?') ? '&' : '?'}oauth_return=1${hash}`);
+      return true;
+    }
+  }
 
   const params      = new URLSearchParams(hash.replace('#', ''));
   const twitchToken = params.get('access_token');

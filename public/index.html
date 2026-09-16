@@ -167,6 +167,7 @@ header .header-icon-wrap:has(.points-refresh:hover) > .header-btn-tip { display:
 .shop-points-badge { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:#fff3c7; color:#6f5730; border:1px solid #d3b765; font-size:12px; font-weight:900; white-space:nowrap; }
 .shop-points-badge .points-token { width:20px; height:20px; }
 body.dark-mode .shop-points-badge { background:#4b4228; color:#ffe7a1; border-color:#b99b4f; }
+.inventory-season-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:999px; background:var(--cream2); border:1px solid var(--cozy-line); color:var(--text2); font-size:12px; font-weight:900; white-space:nowrap; }
 .presence-streak { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:800; color:var(--text2); white-space:nowrap; padding:8px 10px; border:1px solid var(--cozy-line, #d8c9ac); border-radius:10px; background:var(--cream2); cursor:pointer; line-height:1.1; }
 .missions-presence { margin:12px 0 4px; }
 .presence-week { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin:0 0 14px; }
@@ -3461,6 +3462,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <button class="popup-close-x" aria-label="Fechar inventário" onclick="closeInventory()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between;padding-right:42px">
       <span>🎒 Inventário</span>
+      <span class="inventory-season-badge" id="inventory-season-badge" aria-label="Estação atual"></span>
       <button class="inventory-shop-link" type="button" onclick="goToShopFromInventory()">🛒 Ir para a loja</button>
     </div>
     <div id="inventory-filter"></div>
@@ -4809,6 +4811,9 @@ function harvestedProduceArt(type) {
 }
 
 function openInventory() {
+  const season = currentSeason();
+  const seasonBadge = document.getElementById('inventory-season-badge');
+  if (seasonBadge) seasonBadge.textContent = `${season.icon} ${season.name}`;
   renderInventory();
   document.getElementById('inventory-overlay')?.classList.remove('hidden', 'closing');
   if (typeof window.mascotNotify === 'function') window.mascotNotify('Vamos escolher uma sementinha para o jardim? 🎒🌱', 5000);

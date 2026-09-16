@@ -5086,7 +5086,7 @@ function renderOrders() {
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
     const stock = G.harvested[order.type] || 0;
     return `<div class="order-card ${order.rarity || 'normal'}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}<span class="order-rarity">${order.rarityLabel || 'Normal'}</span></strong><small>${canDeliver ? `Você tem ${stock}/${order.qty} itens — pronto para entregar!` : `Você tem ${stock}/${order.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos <span class="order-xp">+${order.xp || Math.round(order.qty * 10)} XP</span></span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
-  }).join('');
+  }).join('') || '<div class="market-empty">📭 Nenhum pedido disponível. Clique em “Procurar novos clientes”.</div>';
   const refresh = document.getElementById('orders-refresh-btn');
   if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 atualizações nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
   const buy = document.getElementById('orders-reset-buy');
@@ -5121,7 +5121,8 @@ async function deliverOrder(id) {
 }
 function openOrders(event) {
   event?.stopPropagation();
-  refreshOrders();
+  if (G.ordersSeasonKey !== orderSeasonKey()) resetOrdersForSeason(true);
+  renderOrders();
   document.getElementById('orders-overlay')?.classList.remove('hidden');
 }
 function closeOrders() { document.getElementById('orders-overlay')?.classList.add('hidden'); }

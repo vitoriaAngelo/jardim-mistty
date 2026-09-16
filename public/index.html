@@ -3798,6 +3798,7 @@ const G = {
   ordersSeasonKey: '0',
   orderSearches: 0,
   orderDeliveries: 0,
+  lastOrder: null,
 };
 
 // maxWater = regas para encher (habilitar crescimento)
@@ -5086,6 +5087,7 @@ async function deliverOrder(id) {
   if ((G.harvested[order.type] || 0) < order.qty) return;
   G.harvested[order.type] -= order.qty;
   G.pts += order.reward;
+  G.lastOrder = { type:'order', item:`${order.qty}× ${getPlantable(order.type)?.name || order.type}`, reward:order.reward, at:Date.now() };
   gainXP('harvest', document.querySelector(`[onclick="deliverOrder('${order.id}')"]`), order.xp || Math.round(order.qty * 10), `+${order.xp || Math.round(order.qty * 10)} XP 📬 Pedido!`);
   gardenOrders = gardenOrders.filter(item => item.id !== id);
   G.orders = gardenOrders;
@@ -7647,6 +7649,7 @@ async function saveGardenToSENow() {
     ordersSeasonKey:  G.ordersSeasonKey || `${G.seasonIdx}`,
     orderSearches:    G.orderSearches || 0,
     orderDeliveries:  G.orderDeliveries || 0,
+    lastOrder:        G.lastOrder || null,
     missions:         G.missions,
     achievements:     [...(G.achievements || [])],
     achievStats:      G.achievStats || {},
@@ -7793,7 +7796,7 @@ window.addEventListener('beforeunload', () => {
     plotFertilizers: G.plotFertilizers, plots: G.plots,
     unlockedPlots: G.unlockedPlots, harvested: G.harvested, goldenHarvested: G.goldenHarvested || {},
     upgrades: [...G.upgrades], upgradeLevels: G.upgradeLevels || {}, seasonIdx: G.seasonIdx,
-    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0,
+    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0, lastOrder: G.lastOrder || null,
     waterCapacity: G.waterCapacity ?? 5, waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
     seasonDay: G.seasonDay, missions: G.missions,
     achievements: [...(G.achievements || [])],
@@ -7922,6 +7925,7 @@ async function loadGardenFromSE(username) {
     G.ordersSeasonKey = save.ordersSeasonKey ?? `${G.seasonIdx}`;
     G.orderSearches   = Number(save.orderSearches || 0);
     G.orderDeliveries  = Number(save.orderDeliveries || 0);
+    G.lastOrder        = save.lastOrder || null;
     gardenOrders      = G.orders;
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
@@ -8331,7 +8335,10 @@ function renderLatestSale() {
   const feed = document.getElementById('latest-sales-feed');
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
   if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma venda recente</span>'; return; }
-  feed.innerHTML = `<span class="latest-sales-content sales-slide-in"><strong>${String(sale.farmName || sale.username).replace(/^@+/, '')}</strong> acabou de faturar <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
+  const who = String(sale.farmName || sale.username).replace(/^@+/, '');
+  feed.innerHTML = sale.activityType === 'order'
+    ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> entregou <b>${sale.item || 'um pedido'}</b> e ganhou <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.reward || 0).toLocaleString('pt-BR')} pontos</span>`
+    : `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> acabou de faturar <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
 }
 async function updateLatestSales() {
   const feed = document.getElementById('latest-sales-feed');

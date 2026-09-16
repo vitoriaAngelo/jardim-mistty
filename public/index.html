@@ -5074,7 +5074,7 @@ function renderOrders() {
   const refresh = document.getElementById('orders-refresh-btn');
   if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 atualizações nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
   const status = document.getElementById('orders-status');
-  if (status) { const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1); status.textContent = `${G.orderSearches || 0}/3 atualizações · ${G.orderDeliveries || 0}/4 entregas · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`; }
+  if (status) { const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1); status.textContent = `${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`; }
   updateOrdersButton();
 }
 function resetOrdersForSeason(showPopup = false) {

@@ -5195,8 +5195,9 @@ async function deliverOrder(id) {
   G.lastOrder = { type:'order', item:`${order.qty}× ${getPlantable(order.type)?.name || order.type}`, reward:order.reward, at:Date.now() };
   gainXP('harvest', document.querySelector(`[onclick="deliverOrder('${order.id}')"]`), order.xp || Math.round(order.qty * 10), `+${order.xp || Math.round(order.qty * 10)} XP 📬 Pedido!`);
   gardenOrders = gardenOrders.filter(item => item.id !== id);
-  G.orders = gardenOrders;
   G.orderDeliveries = (G.orderDeliveries || 0) + 1;
+  if (G.orderDeliveries < 4) gardenOrders.push(createOrder(gardenOrders.length));
+  G.orders = gardenOrders;
   updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE();
   toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
 }

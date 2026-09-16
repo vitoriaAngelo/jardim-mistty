@@ -5178,9 +5178,14 @@ async function deliverOrder(id) {
   updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE();
   toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
 }
-function openOrders(event) {
+async function openOrders(event) {
   event?.stopPropagation();
   if (G.ordersSeasonKey !== orderSeasonKey()) resetOrdersForSeason(true);
+  if (!gardenOrders.length && (G.orderDeliveries || 0) < 4) {
+    gardenOrders = Array.from({length:3}, (_, i) => createOrder(i));
+    G.orders = gardenOrders;
+    try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível carregar os pedidos.', 3200); }
+  }
   renderOrders();
   document.getElementById('orders-overlay')?.classList.remove('hidden');
 }

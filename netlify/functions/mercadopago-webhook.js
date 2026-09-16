@@ -17,6 +17,58 @@ function validSignature(event) {
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(params.v1));
 }
 
+const KIT_GRANTS = {
+  'Kit Jardineiro Iniciante': { rank: 1, capacity: 2, golden: 5, special: 1, specialMs: 3 * 60 * 60 * 1000, frame: 'yellow' },
+  'Kit Jardineiro Experiente': { rank: 2, capacity: 4, recovery: 1, allFertilizers: 5, special: 2, specialMs: 6 * 60 * 60 * 1000, seeds: 1, frame: 'yellow' },
+  'Kit Jardineiro Especialista': { rank: 3, capacity: 4, recovery: 1, allFertilizers: 10, special: 4, specialMs: 10 * 24 * 60 * 60 * 1000, seeds: 2, vipMs: 10 * 24 * 60 * 60 * 1000, frame: 'vip' },
+};
+
+async function deliverPaidKit(order, paymentId) {
+  const grant = KIT_GRANTS[order.kit];
+  if (!grant || !order.username) return;
+  const query = `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(order.username)}&select=data&order=updated_at.desc&limit=1`;
+  const read = await fetch(query, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+  if (!read.ok) throw new Error('Não foi possível carregar o jardim para entregar o kit.');
+  const rows = await read.json();
+  const data = rows[0]?.data || {};
+  const delivered = Array.isArray(data.paidKitOrders) ? data.paidKitOrders : [];
+  if (delivered.includes(order.order_id)) return;
+
+  const next = { ...data, paidKitOrders: [...delivered, order.order_id] };
+  const previousRank = Number(data.bonusKitLevel || 0);
+  if (grant.rank > previousRank) {
+    next.bonusKitLevel = grant.rank;
+    next.bonusRefillDiscount = true;
+    next.bonusWateringCapacity = Math.max(Number(data.bonusWateringCapacity || 0), grant.capacity || 0);
+    next.bonusWaterRecoveryMinutes = Math.max(Number(data.bonusWaterRecoveryMinutes || 0), grant.recovery || 0);
+    next.profileFrame = grant.frame || data.profileFrame;
+    next.supporterFrameUnlocked = true;
+    if (grant.vipMs) next.bonusVipUntil = Math.max(Number(data.bonusVipUntil || 0), Date.now() + grant.vipMs);
+  }
+  if (grant.golden) next.fertilizerInventory = { ...(data.fertilizerInventory || {}), golden_soil: Number(data.fertilizerInventory?.golden_soil || 0) + grant.golden };
+  if (grant.allFertilizers) {
+    next.fertilizerInventory = { ...(next.fertilizerInventory || data.fertilizerInventory || {}) };
+    ['quick_grow', 'golden_soil'].forEach(id => { next.fertilizerInventory[id] = Number(next.fertilizerInventory[id] || 0) + grant.allFertilizers; });
+  }
+  if (grant.seeds) {
+    next.inventory = { ...(data.inventory || {}) };
+    ['ruby_kale', 'star_radish', 'moon_lily', 'royal_dahlia'].forEach(id => { next.inventory[id] = Number(next.inventory[id] || 0) + grant.seeds; });
+  }
+  if (grant.special) {
+    const plots = Array.isArray(data.specialPlots) ? [...new Set(data.specialPlots)] : (Number.isInteger(data.specialPlot) ? [data.specialPlot] : []);
+    const unlocked = Number(data.unlockedPlots || 2);
+    for (let i = 0; i < unlocked && plots.length < grant.special; i++) if (!plots.includes(i)) plots.push(i);
+    next.specialPlots = plots;
+    next.specialPlot = plots[0] ?? null;
+    next.specialPlotExpiresAt = Math.max(Number(data.specialPlotExpiresAt || 0), Date.now() + grant.specialMs);
+  }
+  const saved = await fetch(`${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(order.username)}`, {
+    method: 'PATCH', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({ data: next, updated_at: new Date().toISOString() }),
+  });
+  if (!saved.ok) throw new Error(`Falha ao salvar entrega do kit (${saved.status}).`);
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method Not Allowed' });
   if (!SUPABASE_KEY || !process.env.MP_ACCESS_TOKEN) return json(503, { error: 'Pagamento não configurado.' });
@@ -33,6 +85,11 @@ exports.handler = async (event) => {
       method: 'PATCH', headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, paid_at: status === 'paid' ? new Date().toISOString() : null, webhook_payload: payment }),
     });
+    if (status === 'paid') {
+      const orderRes = await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?mercado_pago_payment_id=eq.${encodeURIComponent(paymentId)}&select=order_id,username,kit&limit=1`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+      const orders = await orderRes.json();
+      if (orders[0]) await deliverPaidKit(orders[0], paymentId);
+    }
     return json(200, { received: true });
   } catch (error) { return json(200, { received: true }); }
 };

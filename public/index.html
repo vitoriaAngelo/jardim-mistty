@@ -5123,17 +5123,20 @@ async function refreshOrders() {
 function renderOrders() {
   const list = document.getElementById('orders-list');
   if (!list) return;
-  list.innerHTML = gardenOrders.map(order => {
+  const allOrdersDelivered = (G.orderDeliveries || 0) >= 4;
+  list.innerHTML = allOrdersDelivered
+    ? '<div class="market-empty">✅ Você entregou todos os pedidos desta estação.<br><small>Espere a estação terminar para receber novos pedidos.</small></div>'
+    : gardenOrders.map(order => {
     const item = getPlantable(order.type);
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
     const stock = G.harvested[order.type] || 0;
     const normalized = normalizeOrderTier(order);
     return `<div class="order-card tier-${String(normalized.rarity).toLowerCase()}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${normalized.name} pediu ${normalized.qty}× ${item?.name || normalized.type}<span class="order-rarity">${normalized.rarityLabel}</span></strong><small>${canDeliver ? `Você tem ${stock}/${normalized.qty} itens — pronto para entregar!` : `Você tem ${stock}/${normalized.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${normalized.reward} pontos <span class="order-xp">+${normalized.xp || Math.round(normalized.qty * 10)} XP</span></span></div><button class="order-deliver" onclick="deliverOrder('${normalized.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
-  }).join('') || '<div class="market-empty">📭 Nenhum pedido disponível. Clique em “Procurar novos clientes”.</div>';
+    }).join('') || '<div class="market-empty">📭 Nenhum pedido disponível. Clique em “Procurar novos clientes”.</div>';
   const refresh = document.getElementById('orders-refresh-btn');
-  if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 atualizações nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
+  if (refresh) { refresh.disabled = allOrdersDelivered || (G.orderSearches || 0) >= 3; refresh.textContent = allOrdersDelivered ? '✅ Pedidos completos nesta estação' : refresh.disabled ? '🌿 3/3 atualizações nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
   const buy = document.getElementById('orders-reset-buy');
-  if (buy) { buy.hidden = (G.orderSearches || 0) < 3 || G.orderPaidReset === true; buy.disabled = G.pts < 5000; }
+  if (buy) { buy.hidden = allOrdersDelivered || (G.orderSearches || 0) < 3 || G.orderPaidReset === true; buy.disabled = G.pts < 5000; }
   const status = document.getElementById('orders-status');
   if (status) { const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1); const season = currentSeason(); const seasonLabel = document.getElementById('orders-season-current'); const progressLabel = document.getElementById('orders-progress-current'); if (seasonLabel) seasonLabel.textContent = `${season.icon} ${season.name}`; if (progressLabel) progressLabel.textContent = `${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`; }
   updateOrdersButton();

@@ -8,7 +8,7 @@ const ORDER_SEASONS = [
   ['potato','broccoli','ruby_kale','star_radish'],
 ];
 const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338 };
-const ORDER_TIERS = { normal:{ mult:1,min:1,max:12 }, epic:{ mult:2.2,min:8,max:26 }, legendary:{ mult:4.5,min:20,max:40 } };
+const ORDER_TIERS = { A:{ mult:1,min:1,max:12 }, S:{ mult:2.2,min:8,max:26 }, SS:{ mult:4.5,min:20,max:40 } };
 
 function validOrder(order, seasonIdx, data) {
   const tier = ORDER_TIERS[order?.rarity];

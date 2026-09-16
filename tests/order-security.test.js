@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { validateOrdersTransition } = require('../netlify/functions/garden-save')._test;
 const pageSource = require('node:fs').readFileSync('public/index.html', 'utf8');
 
-const normalOrder = { id:'order-1', type:'potato', qty:5, rarity:'normal', reward:285, xp:110 };
+const normalOrder = { id:'order-1', type:'potato', qty:5, rarity:'A', reward:285, xp:110 };
 const base = { seasonIdx:0, ordersSeasonKey:'0', orderSearches:1, orderDeliveries:0, orderPaidReset:false, orders:[normalOrder], harvested:{ potato:10 }, xp:0, skillNodes:{} };
 
 test('bloqueia limites e recompensas adulteradas dos pedidos', () => {

@@ -1269,11 +1269,11 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 body #orders-overlay .mail-modal, body #orders-overlay .mail-modal * { cursor:var(--cozy-cursor, default); }
 body #orders-overlay .mail-modal button { cursor:var(--cozy-click-cursor, pointer); }
 body #orders-overlay .mail-modal .order-deliver:disabled { cursor:var(--cozy-locked-cursor, not-allowed); }
-.order-card.normal { border-color:#a8c98d; background:linear-gradient(135deg,#f7fff0,#e7f2df); }
-.order-card.epic { border-color:#c39be0; background:linear-gradient(135deg,#fff7ff,#eee1fa); box-shadow:0 3px 0 #ae8bca; }
-.order-card.legendary { border-color:#e4b94d; background:linear-gradient(135deg,#fffbea,#f8e2a1); box-shadow:0 3px 0 #c79b32,0 0 14px #e8c96d55; }
+.order-card.tier-a { border-color:#a8c98d; background:linear-gradient(135deg,#f7fff0,#e7f2df); }
+.order-card.tier-s { border-color:#c39be0; background:linear-gradient(135deg,#fff7ff,#eee1fa); box-shadow:0 3px 0 #ae8bca; }
+.order-card.tier-ss { border-color:#e4b94d; background:linear-gradient(135deg,#fffbea,#f8e2a1); box-shadow:0 3px 0 #c79b32,0 0 14px #e8c96d55; }
 .order-rarity { display:inline-block; margin-left:5px; padding:2px 6px; border-radius:99px; font-size:9px; text-transform:uppercase; letter-spacing:.4px; background:#dcebcf; color:#4f7937; }
-.epic .order-rarity { background:#e7cff5; color:#74438f; }.legendary .order-rarity { background:#f5d77b; color:#805d13; }
+.tier-s .order-rarity { background:#e7cff5; color:#74438f; }.tier-ss .order-rarity { background:#f5d77b; color:#805d13; }
 body.dark-mode .order-card { background:linear-gradient(135deg,#354332,#293528); border-color:#58684f; box-shadow:0 3px 0 #1d281e; }
 body.dark-mode .order-card strong { color:#edf4df; }
 body.dark-mode .order-card small { color:#cbd9c2; }
@@ -3568,7 +3568,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <div class="deploy-history-item"><strong>Loja responsiva no celular</strong><small>As abas Vegetais, Flores, Adubos e Canteiros agora ficam visíveis e fáceis de tocar em telas pequenas.</small></div>
       <div class="deploy-history-item"><strong>Segurança dos pedidos</strong><small>Limites, estação, estoque, recompensas e entregas agora são validados no servidor.</small></div>
       <div class="deploy-history-item"><strong>Notificações de entregas</strong><small>O feed público também informa quem entregou cada pedido, usando o nome da fazenda.</small></div>
-      <div class="deploy-history-item"><strong>Pedidos por raridade</strong><small>Pedidos normais, épicos e lendários têm quantidades e recompensas diferentes.</small></div>
+      <div class="deploy-history-item"><strong>Pedidos por tier</strong><small>Pedidos Tier A, Tier S e Tier SS têm quantidades e recompensas diferentes.</small></div>
       <div class="deploy-history-item"><strong>Contadores e estação</strong><small>O popup mostra a estação, o tempo restante, atualizações usadas e pedidos entregues.</small></div>
       <div class="deploy-history-item"><strong>Deploy Preview disponível</strong><small>Esta versão está sendo preparada em uma prévia separada para você conferir antes da publicação final.</small></div>
     </div>
@@ -5093,7 +5093,7 @@ function updateOrdersButton() {
   if (progressLabel) progressLabel.textContent = `${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · ${seasonRemainingLabel()}`;
   if (status && !seasonLabel && !progressLabel) status.textContent = `${season.icon} ${season.name} · ${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · ${seasonRemainingLabel()}`;
 }
-function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'normal',label:'Normal',mult:1, min:1, max:12} : roll < .94 ? {id:'epic',label:'Épico',mult:2.2, min:8, max:26} : {id:'legendary',label:'Lendário',mult:4.5, min:20, max:40}; }
+function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'A',label:'Tier A',mult:1, min:1, max:12} : roll < .94 ? {id:'S',label:'Tier S',mult:2.2, min:8, max:26} : {id:'SS',label:'Tier SS',mult:4.5, min:20, max:40}; }
 async function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
   if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já atualizou os pedidos 3 vezes nesta estação.', 2800); return; }
@@ -5121,7 +5121,7 @@ function renderOrders() {
     const item = getPlantable(order.type);
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
     const stock = G.harvested[order.type] || 0;
-    return `<div class="order-card ${order.rarity || 'normal'}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}<span class="order-rarity">${order.rarityLabel || 'Normal'}</span></strong><small>${canDeliver ? `Você tem ${stock}/${order.qty} itens — pronto para entregar!` : `Você tem ${stock}/${order.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos <span class="order-xp">+${order.xp || Math.round(order.qty * 10)} XP</span></span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
+    return `<div class="order-card tier-${String(order.rarity || 'A').toLowerCase()}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}<span class="order-rarity">${order.rarityLabel || 'Tier A'}</span></strong><small>${canDeliver ? `Você tem ${stock}/${order.qty} itens — pronto para entregar!` : `Você tem ${stock}/${order.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos <span class="order-xp">+${order.xp || Math.round(order.qty * 10)} XP</span></span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
   }).join('') || '<div class="market-empty">📭 Nenhum pedido disponível. Clique em “Procurar novos clientes”.</div>';
   const refresh = document.getElementById('orders-refresh-btn');
   if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 atualizações nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }

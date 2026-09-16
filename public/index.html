@@ -5098,8 +5098,9 @@ function updateOrdersButton() {
   const seasonLabel = document.getElementById('orders-season-current');
   const progressLabel = document.getElementById('orders-progress-current');
   if (seasonLabel) seasonLabel.textContent = `${season.icon} ${season.name}`;
-  if (progressLabel) progressLabel.textContent = `${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · ${seasonRemainingLabel()}`;
-  if (status && !seasonLabel && !progressLabel) status.textContent = `${season.icon} ${season.name} · ${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · ${seasonRemainingLabel()}`;
+  const progressText = `Atualizações usadas: ${G.orderSearches || 0}/3 · Entregas feitas: ${G.orderDeliveries || 0}/4 · Muda em: ${seasonRemainingLabel()}`;
+  if (progressLabel) progressLabel.textContent = progressText;
+  if (status && !seasonLabel && !progressLabel) status.textContent = `${season.icon} ${season.name} · ${progressText}`;
 }
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'A',label:'Tier A',mult:1, min:1, max:12} : roll < .94 ? {id:'S',label:'Tier S',mult:2.2, min:8, max:26} : {id:'SS',label:'Tier SS',mult:4.5, min:20, max:40}; }
 function createOrder(index = 0) {
@@ -5149,7 +5150,7 @@ function renderOrders() {
   const buy = document.getElementById('orders-reset-buy');
   if (buy) { buy.hidden = allOrdersDelivered || (G.orderSearches || 0) < 3 || G.orderPaidReset === true; buy.disabled = G.pts < 5000; }
   const status = document.getElementById('orders-status');
-  if (status) { const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1); const season = currentSeason(); const seasonLabel = document.getElementById('orders-season-current'); const progressLabel = document.getElementById('orders-progress-current'); if (seasonLabel) seasonLabel.textContent = `${season.icon} ${season.name}`; if (progressLabel) progressLabel.textContent = `${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`; }
+  if (status) { const season = currentSeason(); const seasonLabel = document.getElementById('orders-season-current'); const progressLabel = document.getElementById('orders-progress-current'); if (seasonLabel) seasonLabel.textContent = `${season.icon} ${season.name}`; if (progressLabel) progressLabel.textContent = `Atualizações usadas: ${G.orderSearches || 0}/3 · Entregas feitas: ${G.orderDeliveries || 0}/4 · Muda em: ${seasonRemainingLabel()}`; }
   updateOrdersButton();
 }
 function resetOrdersForSeason(showPopup = false) {
@@ -5817,7 +5818,7 @@ function updateSeasonCountdown() {
   const minutes = totalMinutes % 60;
   el.textContent = hours > 0 ? `· muda em ${hours}h ${String(minutes).padStart(2, '0')}min` : `· muda em ${minutes}min`;
   const orderProgress = document.getElementById('orders-progress-current');
-  if (orderProgress) orderProgress.textContent = `${G.orderSearches || 0}/3 atualizações · Pedidos entregues: ${G.orderDeliveries || 0}/4 · ${seasonRemainingLabel()}`;
+  if (orderProgress) orderProgress.textContent = `Atualizações usadas: ${G.orderSearches || 0}/3 · Entregas feitas: ${G.orderDeliveries || 0}/4 · Muda em: ${seasonRemainingLabel()}`;
 }
 function seasonRemainingLabel() {
   const remaining = Math.max(0, (Math.max(0, SEASON_DAYS_LEN - Number(G.seasonDay || 1)) * SEASON_DAY_MS) + Math.max(0, seasonDayEndsAt - Date.now()));

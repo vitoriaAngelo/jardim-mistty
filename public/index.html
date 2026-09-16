@@ -3561,7 +3561,17 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <p class="premium-copy">Ajude seus vizinhos entregando plantas e vegetais colhidos. Cada pedido rende pontos!</p>
     <div class="orders-status" id="orders-status"><span id="orders-season-current"></span><br><span id="orders-progress-current"></span></div>
     <div class="orders-list" id="orders-list"></div>
-    <button class="orders-reset-buy" id="orders-reset-buy" type="button" onclick="buyOrderRefreshes()" hidden>✨ Comprar mais 3 atualizações · 5.000 pts</button>
+    <button class="orders-reset-buy" id="orders-reset-buy" type="button" onclick="confirmOrderReset()" hidden>✨ Comprar mais 3 atualizações · 5.000 pts</button>
+  </div>
+</div>
+
+<div class="mail-overlay hidden" id="orders-reset-confirm-overlay">
+  <div class="mail-modal" style="max-width:430px">
+    <button class="popup-close-x" aria-label="Fechar confirmação" onclick="closeOrderResetConfirm()">×</button>
+    <div class="mail-modal-title">✨ Resetar pedidos?</div>
+    <p class="premium-copy">Por 5.000 pontos, você recupera as 3 atualizações e zera as entregas desta estação.</p>
+    <p class="premium-copy"><strong>Esse reset só pode ser comprado 1 vez por estação.</strong></p>
+    <div class="modal-actions"><button class="premium-claim" type="button" onclick="buyOrderRefreshes()">Confirmar por 5.000 pts</button><button class="inventory-shop-link" type="button" onclick="closeOrderResetConfirm()">Cancelar</button></div>
   </div>
 </div>
 
@@ -5168,9 +5178,14 @@ function resetOrdersForSeason(showPopup = false) {
 function closeOrdersReset() { document.getElementById('orders-reset-overlay')?.classList.add('hidden'); }
 async function buyOrderRefreshes() {
   if (G.orderSearches < 3 || G.orderPaidReset) return;
+  closeOrderResetConfirm();
   if (!(await chargeGamePoints(5000))) return;
-  G.orderSearches = 0; G.orderPaidReset = true; renderOrders(); await saveGardenToSE(); toast('✨ Mais 3 atualizações liberadas nesta estação!', 2800);
+  G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = true; renderOrders(); await saveGardenToSE(); toast('✨ Atualizações e entregas resetadas nesta estação!', 2800);
 }
+function confirmOrderReset() {
+  if (G.orderSearches >= 3 && !G.orderPaidReset) document.getElementById('orders-reset-confirm-overlay')?.classList.remove('hidden');
+}
+function closeOrderResetConfirm() { document.getElementById('orders-reset-confirm-overlay')?.classList.add('hidden'); }
 async function deliverOrder(id) {
   const order = gardenOrders.find(item => item.id === id);
   if (!order || (G.orderDeliveries || 0) >= 4) { toast('🌿 Você já entregou 4 pedidos nesta estação.', 2800); return; }

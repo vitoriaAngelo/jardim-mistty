@@ -42,7 +42,7 @@ function validateOrdersTransition(oldData, nextData) {
   const nextPaid = nextData.orderPaidReset === true;
   if (deliveries < oldDeliveries || deliveries - oldDeliveries > 1) throw new Error('Contador de entregas adulterado');
   if (oldPaid && !nextPaid) throw new Error('Compra extra de pedidos não pode ser revertida');
-  const validPaidReset = !oldPaid && nextPaid && oldSearches >= 3 && searches === 0;
+  const validPaidReset = !oldPaid && nextPaid && oldSearches >= 3 && searches === 0 && deliveries === 0;
   if (searches < oldSearches && !validPaidReset) throw new Error('Contador de atualizações não pode ser reduzido');
   if (searches > oldSearches + 1) throw new Error('Atualizações de pedidos avançaram rápido demais');
   if (!oldPaid && nextPaid && !validPaidReset) throw new Error('Compra extra de pedidos inválida');

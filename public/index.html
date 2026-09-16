@@ -7780,6 +7780,9 @@ async function loadGardenFromSE(username) {
     G.skillPointsClaimed = save.skillPointsClaimed ?? 0;
     // Retroativo: dar pontos dos níveis ainda não concedidos
     grantRetroactiveSkillPoints();
+    // Atualiza o destaque do botão assim que os pontos salvos terminam de carregar.
+    // Antes disso ele só era recalculado ao abrir/fechar a árvore de habilidades.
+    renderSkillTreeBadge();
     // Reembolso de melhorias removidas (one-time, salvo no upgrades_refunded)
     if (!save.upgrades_refunded) {
       const REFUND_MAP = {
@@ -8223,6 +8226,7 @@ if (isLocalPreview) {
   document.getElementById('twitch-btn').innerHTML = '👤 Visitante';
   document.getElementById('garden-name').textContent = G.gardenName || 'Jardim da Mistty';
   updatePts();
+  renderSkillTreeBadge();
   renderLevelWidget();
   renderPremiumBenefits();
   renderUpgradeShop();

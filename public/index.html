@@ -2561,6 +2561,7 @@ body.dark-mode .st-req-badge {
   border:2px solid var(--cream);
   box-shadow:0 2px 0 #667b56;
 }
+.st-sp-badge.hidden { display:none !important; }
 @keyframes st-badge-pop { from { transform:scale(0); } to { transform:scale(1); } }
 
 body.dark-mode .fertilizer-buy-btn { background:#e7eddb !important; color:#34422f !important; box-shadow:0 3px 0 #b7c6a8 !important; }
@@ -8681,7 +8682,7 @@ function renderSkillTreeBadge() {
   if (skillButton) skillButton.classList.toggle('has-points', sp > 0);
   if (badge) {
     if (sp > 0) { badge.textContent = sp; badge.classList.remove('hidden'); }
-    else        { badge.classList.add('hidden'); }
+    else        { badge.textContent = ''; badge.classList.add('hidden'); }
   }
   if (spCount) spCount.textContent = sp;
 }

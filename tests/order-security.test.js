@@ -29,3 +29,12 @@ test('abrir o popup não consome uma atualização de pedidos', () => {
   assert.doesNotMatch(body, /refreshOrders\s*\(/);
   assert.match(body, /renderOrders\s*\(/);
 });
+
+test('badge de habilidades desaparece ao gastar o último ponto', () => {
+  assert.match(pageSource, /\.st-sp-badge\.hidden\s*\{\s*display\s*:\s*none\s*!important/);
+  const start = pageSource.indexOf('function renderSkillTreeBadge');
+  const end = pageSource.indexOf('\nfunction renderSkillTree', start);
+  const body = pageSource.slice(start, end);
+  assert.match(body, /badge\.textContent\s*=\s*''/);
+  assert.match(body, /badge\.classList\.add\('hidden'\)/);
+});

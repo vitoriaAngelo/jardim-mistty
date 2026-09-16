@@ -1266,9 +1266,9 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .order-xp { color:#6f4aa0; font-size:11px; font-weight:900; margin-left:8px; }
 .order-deliver { border:0; border-radius:9px; padding:7px 9px; background:var(--grass); color:#fff; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
 .order-deliver:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
-body #orders-overlay .mail-modal, body #orders-overlay .mail-modal * { cursor:default; }
-body #orders-overlay .mail-modal button { cursor:pointer; }
-body #orders-overlay .mail-modal .order-deliver:disabled { cursor:not-allowed; }
+body #orders-overlay .mail-modal, body #orders-overlay .mail-modal * { cursor:var(--cozy-cursor, default); }
+body #orders-overlay .mail-modal button { cursor:var(--cozy-click-cursor, pointer); }
+body #orders-overlay .mail-modal .order-deliver:disabled { cursor:var(--cozy-locked-cursor, not-allowed); }
 .order-card.normal { border-color:#a8c98d; background:linear-gradient(135deg,#f7fff0,#e7f2df); }
 .order-card.epic { border-color:#c39be0; background:linear-gradient(135deg,#fff7ff,#eee1fa); box-shadow:0 3px 0 #ae8bca; }
 .order-card.legendary { border-color:#e4b94d; background:linear-gradient(135deg,#fffbea,#f8e2a1); box-shadow:0 3px 0 #c79b32,0 0 14px #e8c96d55; }
@@ -1978,9 +1978,9 @@ body.dark-mode .profile-current-value { color:#f1f5e9; }
   box-shadow: 0 8px 0 #c8a878, 0 20px 60px rgba(0,0,0,.3);
   border: 2.5px solid var(--cream2);
   display: flex; flex-direction: column; gap: 14px;
-  cursor: default;
+  cursor: var(--cozy-cursor, default);
 }
-.mail-overlay, .modal-overlay, .help-overlay, .profile-overlay, .levelup-overlay { cursor: default; }
+.mail-overlay, .modal-overlay, .help-overlay, .profile-overlay, .levelup-overlay { cursor:var(--cozy-cursor, default); }
 .mail-modal-title { font-size: 18px; font-weight: 800; color: var(--text); }
 .shop-modal, .inventory-modal { width: min(760px, calc(100% - 32px)); max-width: 760px; max-height: 88vh; }
 .shop-modal .shop-tabs { flex-wrap: wrap; }

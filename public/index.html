@@ -7702,7 +7702,10 @@ async function loadGardenFromSE(username) {
     // local contém uma gravação mais nova, ele é a fonte correta para esta
     // sessão (especialmente após uma colheita, que deixa o canteiro vazio).
     const cachedData = readGardenCache(username);
-    if (cachedData && (!json?.data || Number(cachedData.savedAt || 0) > Number(json.data.savedAt || 0))) {
+    const serverData = json?.data;
+    const serverHasPaidKit = Array.isArray(serverData?.paidKitOrders) && serverData.paidKitOrders.length > 0;
+    const serverHasNewerKit = serverHasPaidKit && Number(serverData.bonusKitLevel || 0) > Number(cachedData?.bonusKitLevel || 0);
+    if (cachedData && (!serverData || (!serverHasPaidKit && !serverHasNewerKit && Number(cachedData.savedAt || 0) > Number(serverData.savedAt || 0)))) {
       json = { data: cachedData };
     }
     if (!json?.data) return loadFailed ? null : false;

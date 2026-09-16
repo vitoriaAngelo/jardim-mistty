@@ -112,13 +112,13 @@ body.dark-mode .season-showcase-card.winter::before { background:linear-gradient
 .logo-profile-icon { font-size: 11px; opacity: .45; margin-left: 2px; }
 
 .season-widget {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 5px;
+  display: flex; align-items: center; gap: 5px; position:relative;
   font-size: 11px; font-weight: 700; color: var(--text2);
 }
 .season-bar-wrap { width: 48px; height: 4px; background: rgba(0,0,0,.1); border-radius: 99px; overflow: hidden; }
 .season-bar-fill { height: 100%; border-radius: 99px; transition: width .5s; }
 #season-days { opacity: .6; font-size: 10px; }
-#season-time-left { display:block; flex:0 0 100%; width:100%; margin-left:21px; margin-top:-2px; opacity:.72; font-size:10px; line-height:1.2; white-space:nowrap; }
+#season-time-left { position:absolute; left:21px; top:100%; margin-top:2px; opacity:.72; font-size:10px; line-height:1.2; white-space:nowrap; }
 @keyframes season-day-pop {
   0% { transform: scale(1); filter: brightness(1); }
   35% { transform: scale(1.12); filter: brightness(1.22); }

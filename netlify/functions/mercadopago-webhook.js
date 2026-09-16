@@ -69,6 +69,8 @@ async function deliverPaidKit(order, paymentId) {
   if (!saved.ok) throw new Error(`Falha ao salvar entrega do kit (${saved.status}).`);
 }
 
+exports.deliverPaidKit = deliverPaidKit;
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method Not Allowed' });
   if (!SUPABASE_KEY || !process.env.MP_ACCESS_TOKEN) return json(503, { error: 'Pagamento não configurado.' });

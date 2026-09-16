@@ -3303,7 +3303,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
   <div class="mail-modal">
     <button class="popup-close-x" aria-label="Fechar missões" onclick="closeMissionsModal()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between">
-      <span>📋 Missões do Dia</span>
+      <span>📋 Missões Diárias</span>
     </div>
     <div class="missions-reset-info" id="missions-reset-info">⏳ Complete todas as missões para iniciar o contador de 24 horas.</div>
     <label class="presence-streak missions-presence" id="presence-streak"><input type="checkbox" id="presence-check" onchange="claimPresence()"><span class="presence-copy"><span class="presence-title" id="presence-title">Marcar presença</span><span class="presence-hint"><span id="presence-days">0 dias</span> · ganhe pontos por dia consecutivo</span></span></label>
@@ -8542,7 +8542,7 @@ setInterval(() => {
     latestSalesIndex = (latestSalesIndex + 1) % latestSalesItems.length;
     renderLatestSale();
   }
-}, 4500);
+}, 7000);
 selectTool('water');
 renderShop();
 renderFlowerShop();

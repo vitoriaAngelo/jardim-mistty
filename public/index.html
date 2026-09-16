@@ -2731,8 +2731,19 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
   .tool-card, .achiev-tool-btn { min-height: 86px; }
   .tool-card svg { width: 32px; height: 32px; }
   .shop-modal, .inventory-modal, #bonus-overlay .mail-modal { width: calc(100% - 12px); max-width: none; padding: 14px 10px; border-radius: 20px; }
-  .shop-modal .shop-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; }
-  .shop-modal .shop-tabs button { flex: 0 0 auto; }
+  .shop-modal .shop-tabs {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+    width:100%;
+    overflow:visible;
+    padding:2px 0 5px;
+  }
+  .shop-modal .shop-tabs button {
+    width:100%; min-width:0; min-height:42px;
+    padding:9px 5px; white-space:normal; line-height:1.2;
+    font-size:12px;
+  }
   .mail-modal-title, .help-title { font-size: 21px; }
   .mail-modal, .profile-modal { padding: 18px 14px; }
   .modal-actions { flex-wrap: wrap; }

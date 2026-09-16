@@ -3534,7 +3534,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <button class="popup-close-x" onclick="closeOrdersReset()" aria-label="Fechar aviso">×</button>
     <div style="font-size:38px;margin-bottom:8px">📬✨</div>
     <h2 style="margin-bottom:8px">Pedidos resetados!</h2>
-    <p style="font-size:13px;color:var(--cozy-muted);line-height:1.5">Uma nova estação começou. Você pode procurar <strong>3 novos clientes</strong> e entregar até <strong>4 pedidos</strong> nesta estação.</p>
+    <p style="font-size:13px;color:var(--cozy-muted);line-height:1.5">Uma nova estação começou. Seus pedidos foram renovados. Você pode entregar até <strong>4 pedidos</strong> nesta estação.</p>
     <div class="modal-actions" style="justify-content:center;margin-top:18px"><button class="btn-ok" onclick="closeOrdersReset()">Ver pedidos</button></div>
   </div>
 </div>
@@ -5043,7 +5043,6 @@ function updateOrdersButton() {
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'normal',label:'Normal',mult:1, min:1, max:12} : roll < .94 ? {id:'epic',label:'Épico',mult:2.2, min:8, max:26} : {id:'legendary',label:'Lendário',mult:4.5, min:20, max:40}; }
 function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
-  if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já procurou 3 clientes nesta estação. Volte na próxima estação!', 3000); return; }
   G.orderSearches++;
   const types = Object.keys(PLANTS).filter(type => !PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked);
   gardenOrders = Array.from({length:3}, (_, i) => {
@@ -5067,9 +5066,9 @@ function renderOrders() {
     return `<div class="order-card ${order.rarity || 'normal'}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${order.name} pediu ${order.qty}× ${item?.name || order.type}<span class="order-rarity">${order.rarityLabel || 'Normal'}</span></strong><small>${canDeliver ? 'Tudo pronto para entregar!' : `Você tem ${G.harvested[order.type] || 0}× — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${order.reward} pontos</span></div><button class="order-deliver" onclick="deliverOrder('${order.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button></div>`;
   }).join('');
   const refresh = document.getElementById('orders-refresh-btn');
-  if (refresh) { refresh.disabled = (G.orderSearches || 0) >= 3; refresh.textContent = refresh.disabled ? '🌿 3/3 clientes procurados nesta estação' : `🔄 Procurar novos clientes (${G.orderSearches || 0}/3)`; }
+  if (refresh) { refresh.disabled = false; refresh.textContent = `🔄 Procurar novos clientes (${G.orderSearches || 0})`; }
   const status = document.getElementById('orders-status');
-  if (status) { const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1); status.textContent = `${G.orderSearches || 0}/3 clientes procurados · ${G.orderDeliveries || 0}/4 entregas · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`; }
+  if (status) { const daysLeft = Math.max(1, SEASON_DAYS_LEN - Number(G.seasonDay || 1) + 1); status.textContent = `${G.orderSearches || 0} clientes procurados · ${G.orderDeliveries || 0}/4 entregas · Reseta em: ${daysLeft} dia${daysLeft === 1 ? '' : 's'}`; }
   updateOrdersButton();
 }
 function resetOrdersForSeason(showPopup = false) {

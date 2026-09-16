@@ -2562,6 +2562,10 @@ body.dark-mode .st-req-badge {
   box-shadow:0 2px 0 #667b56;
 }
 .st-sp-badge.hidden { display:none !important; }
+.deploy-history-list { display:grid; gap:9px; margin-top:4px; }
+.deploy-history-item { padding:10px 12px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:13px; background:var(--cream2); color:var(--text); }
+.deploy-history-item strong { display:block; font-size:13px; }
+.deploy-history-item small { display:block; margin-top:4px; color:var(--text2); font-size:11px; line-height:1.4; }
 @keyframes st-badge-pop { from { transform:scale(0); } to { transform:scale(1); } }
 
 body.dark-mode .fertilizer-buy-btn { background:#e7eddb !important; color:#34422f !important; box-shadow:0 3px 0 #b7c6a8 !important; }
@@ -2858,6 +2862,10 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           </svg><span class="st-sp-badge hidden" id="st-sp-badge" aria-label="Pontos disponíveis"></span>
         </button>
         <div class="header-btn-tip">Habilidades<br><span>Evolua sua fazenda com pontos de habilidade</span></div>
+      </div>
+      <div class="header-icon-wrap">
+        <button class="header-icon-btn" aria-label="Últimas atualizações" onclick="openDeployHistory()">ⓘ</button>
+        <div class="header-btn-tip">Atualizações<br><span>Veja o que mudou recentemente</span></div>
       </div>
 
       <div class="header-icon-wrap">
@@ -3548,6 +3556,21 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="orders-list" id="orders-list"></div>
     <button class="inventory-shop-link" id="orders-refresh-btn" type="button" onclick="refreshOrders()">🔄 Procurar novos clientes</button>
     <button class="orders-reset-buy" id="orders-reset-buy" type="button" onclick="buyOrderRefreshes()" hidden>✨ Comprar mais 3 atualizações · 5.000 pts</button>
+  </div>
+</div>
+
+<div class="mail-overlay hidden" id="deploy-history-overlay">
+  <div class="mail-modal" style="max-width:500px">
+    <button class="popup-close-x" aria-label="Fechar atualizações" onclick="closeDeployHistory()">×</button>
+    <div class="mail-modal-title">ⓘ Últimas atualizações</div>
+    <p class="premium-copy">Confira os últimos deploys e o que mudou no jardim.</p>
+    <div class="deploy-history-list">
+      <div class="deploy-history-item"><strong>Loja responsiva no celular</strong><small>As abas Vegetais, Flores, Adubos e Canteiros agora ficam visíveis e fáceis de tocar em telas pequenas.</small></div>
+      <div class="deploy-history-item"><strong>Segurança dos pedidos</strong><small>Limites, estação, estoque, recompensas e entregas agora são validados no servidor.</small></div>
+      <div class="deploy-history-item"><strong>Notificações de entregas</strong><small>O feed público também informa quem entregou cada pedido, usando o nome da fazenda.</small></div>
+      <div class="deploy-history-item"><strong>Pedidos por raridade</strong><small>Pedidos normais, épicos e lendários têm quantidades e recompensas diferentes.</small></div>
+      <div class="deploy-history-item"><strong>Contadores e estação</strong><small>O popup mostra a estação, o tempo restante, atualizações usadas e pedidos entregues.</small></div>
+    </div>
   </div>
 </div>
 
@@ -8940,6 +8963,9 @@ setInterval(() => {
 </footer>
 
 <script>
+function openDeployHistory() { document.getElementById('deploy-history-overlay')?.classList.remove('hidden'); }
+function closeDeployHistory() { document.getElementById('deploy-history-overlay')?.classList.add('hidden'); }
+
 // Fechamento padrão de popups: clique fora ou tecla Esc.
 function closePopupOverlay(overlay) {
   if (!overlay || overlay.id === 'login-overlay') return;

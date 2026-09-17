@@ -132,6 +132,12 @@ test('cartas do correio com IDs de texto podem ser abertas', () => {
   assert.match(html, /onclick='openLetter\(\$\{JSON\.stringify\(m\.id\)\}\)'/);
 });
 
+test('falha ao salvar título restaura a seleção anterior', () => {
+  assert.match(html, /const previousTitle = G\.selectedHarvestTitle \|\| ''/);
+  assert.match(html, /G\.selectedHarvestTitle = previousTitle;[\s\S]*?Não foi possível salvar o título/);
+  assert.match(html, /checkHarvestTitles\(\);[\s\S]*?Refresh all UI/);
+});
+
 test('perfil oferece dois títulos difíceis de desbloquear', () => {
   assert.match(html, /name:'Imperador da Colheita', target:3000/);
   assert.match(html, /name:'Eterno do Jardim', target:7500/);

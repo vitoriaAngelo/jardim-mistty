@@ -7719,12 +7719,21 @@ function checkHarvestTitles() {
 async function selectHarvestTitle(name) {
   const title = titleForName(name);
   if (!title || Number(G.achievStats?.totalHarvest || 0) < title.target) return;
+  const previousTitle = G.selectedHarvestTitle || '';
   G.selectedHarvestTitle = title.name;
   const selectedTitleEl = document.getElementById('profile-selected-title');
   if (selectedTitleEl) selectedTitleEl.textContent = `${title.icon} ${title.name}`;
   renderProfileTitles();
-  try { await saveGardenToSE(); toast(`🏅 Título escolhido: ${title.name}`, 1800); }
-  catch (e) { toast('❌ Não foi possível salvar o título.', 2400); }
+  try {
+    await saveGardenToSE();
+    toast(`🏅 Título escolhido: ${title.name}`, 1800);
+  } catch (e) {
+    G.selectedHarvestTitle = previousTitle;
+    const previous = titleForName(previousTitle);
+    if (selectedTitleEl) selectedTitleEl.textContent = previous ? `${previous.icon} ${previous.name}` : '';
+    renderProfileTitles();
+    toast('❌ Não foi possível salvar o título.', 2400);
+  }
 }
 function renderProfileTitles() {
   const container = document.getElementById('profile-titles');
@@ -8690,6 +8699,7 @@ async function loadGardenFromSE(username) {
       G_MAIL.length = 0;
       save.mail.forEach(m => G_MAIL.push(m));
     }
+    checkHarvestTitles();
     checkHarvestTitles();
 
     // Refresh all UI

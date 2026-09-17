@@ -1263,6 +1263,8 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 body.dark-mode .plot-tooltip.out-of-season-warning { border-color:#d87575; background:#4a2929; color:#ffe1d8; }
 .market-orders-btn { border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:7px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; transition:transform .15s ease,filter .15s ease; width:100%; }
 .market-orders-btn:hover { transform:translateY(-2px); filter:brightness(1.05); }
+.market-orders-btn.has-ready-order { position:relative; border-color:#d6af58; background:linear-gradient(145deg,#fff0c4,#f4d982); color:#76552c; box-shadow:0 3px 0 #b98e3c,0 0 12px #e8c96d66; animation:skill-btn-glow 2.4s ease-in-out infinite; }
+.market-orders-btn.has-ready-order::after { content:'Pedido pronto para entregar!'; position:absolute; left:50%; top:calc(100% + 10px); transform:translateX(-50%); width:150px; padding:7px 9px; border:1px solid #dfd2b5; border-radius:10px; background:#fffdf7; color:#687052; box-shadow:0 3px 9px #4b573320; font:800 10px/1.2 'Nunito',sans-serif; text-align:center; z-index:20; pointer-events:none; }
 .orders-list { display:grid; gap:10px; margin:14px 0; }
 .orders-status { margin:8px 0 4px; padding:8px 10px; border-radius:11px; background:#f5ead0; color:#76552c; font-size:11px; font-weight:900; line-height:1.55; text-align:center; }
 .missions-reset-info { margin:8px 0 10px; padding:8px 10px; border:1px solid var(--cozy-line); border-radius:11px; background:var(--cream2); color:var(--text2); font-size:12px; font-weight:800; line-height:1.4; text-align:center; }
@@ -5182,6 +5184,7 @@ function renderOrders() {
   const list = document.getElementById('orders-list');
   if (!list) return;
   const allOrdersDelivered = (G.orderDeliveries || 0) >= 4;
+  updateOrdersReadyBadge();
   list.innerHTML = allOrdersDelivered
     ? '<div class="market-empty">✅ Você entregou todos os pedidos desta estação.<br><small>Espere a estação terminar para receber novos pedidos.</small></div>'
     : gardenOrders.map(order => {
@@ -5197,6 +5200,12 @@ function renderOrders() {
   const status = document.getElementById('orders-status');
   if (status) { const season = currentSeason(); const seasonLabel = document.getElementById('orders-season-current'); const progressLabel = document.getElementById('orders-progress-current'); if (seasonLabel) seasonLabel.textContent = `${season.icon} ${season.name}`; if (progressLabel) progressLabel.textContent = `Atualizações usadas: ${G.orderSearches || 0}/3 · Entregas feitas: ${G.orderDeliveries || 0}/4 · Muda em: ${seasonRemainingLabel()}`; }
   updateOrdersButton();
+}
+function updateOrdersReadyBadge() {
+  const button = document.querySelector('.market-orders-btn');
+  if (!button) return;
+  const ready = (G.orderDeliveries || 0) < 4 && gardenOrders.some(order => (G.harvested?.[order.type] || 0) >= order.qty);
+  button.classList.toggle('has-ready-order', ready);
 }
 function resetOrdersForSeason(showPopup = false) {
   G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
@@ -5244,6 +5253,7 @@ async function openOrders(event) {
 function closeOrders() { document.getElementById('orders-overlay')?.classList.add('hidden'); }
 
 function renderHarvested() {
+  updateOrdersReadyBadge();
   const bag = document.getElementById('harvest-bag');
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
   const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);

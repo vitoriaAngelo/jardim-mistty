@@ -4084,7 +4084,7 @@ function showGardenEventSummary(finished, def) {
     <div style="font-size:44px;line-height:1;margin:4px 0 10px">${def.icon}</div>
     <div class="mail-modal-title" id="garden-event-summary-title" style="justify-content:center">${def.name} terminou!</div>
     <p class="premium-copy">${actions ? `Você participou ${actions} vez${actions === 1 ? '' : 'es'} e aproveitou o evento.` : 'Você participou um pouquinho — fique de olho no próximo evento!'}</p>
-    <div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Resumo da participação</strong>🌱 ${actions} ação${actions === 1 ? '' : 'ões'} realizada${actions === 1 ? '' : 's'}<br>✨ +${xp} XP ganhos</div>
+    <div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Resumo da participação</strong>🌱 ${actions} ${actions === 1 ? 'ação realizada' : 'ações realizadas'}<br>✨ +${xp} XP ganhos</div>
     ${reward}
     <button class="levelup-dismiss" style="margin:16px auto 0" onclick="this.closest('#garden-event-summary-overlay').remove()">Continuar no jardim 🌱</button>
   </div>`;

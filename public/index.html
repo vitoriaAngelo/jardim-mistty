@@ -9739,7 +9739,8 @@ function updateTwitchzinhoPouch(preview = false) {
     if (!tip) { tip = document.createElement('span'); tip.className = 'pouch-tip'; pouch.appendChild(tip); }
     tip.innerHTML = `<strong>Tem moedinhas! 💛</strong><span>${amount} moedas esperando por você. Clique para resgatar.</span>`;
   } else tip?.remove();
-  pouch.setAttribute('aria-label', amount > 0 ? `Resgatar ${amount} moedas` : 'Sacolinha do Twitchzinho');
+  const pouchOwner = (previewMascotType || G.selectedMascot) === 'premium' ? 'Brotinho Premium' : 'Twitchzinho';
+  pouch.setAttribute('aria-label', amount > 0 ? `Resgatar ${amount} moedas` : `Sacolinha do ${pouchOwner}`);
   pouch.removeAttribute('title');
   if (preview) animateTwitchzinhoDeposit();
 }
@@ -9752,7 +9753,16 @@ function animateTwitchzinhoDeposit() {
 }
 async function claimTwitchzinhoCoins() {
   if (!twitchzinhoBenefitActive()) {
-    toast('💜 Resgate o Twitchzinho no Premium para ativar a sacolinha.', 2800);
+    const previewOwner = document.getElementById('twitchzinho-pouch')?.dataset.preview;
+    if (previewOwner === 'premium') {
+      toast(G.ownedMascots?.premium
+        ? '💛 Selecione o Brotinho Premium em Companheiros do Jardim para ativar a sacolinha.'
+        : '💛 Esta é uma prévia! Compre o Brotinho Premium em Companheiros do Jardim para ativar a sacolinha.', 3200);
+    } else {
+      toast(G.ownedMascots?.twitchzinho
+        ? '💜 Selecione o Twitchzinho para ativar a sacolinha.'
+        : '💜 Resgate o Twitchzinho no Premium para ativar a sacolinha.', 3200);
+    }
     return;
   }
   const amount = Number(G.twitchzinhoPendingCoins || 0);
@@ -9760,11 +9770,12 @@ async function claimTwitchzinhoCoins() {
   G.twitchzinhoPendingCoins = 0;
   G.pts += amount;
   if (lastKnownSEPoints !== null) lastKnownSEPoints += amount;
-  recordPointsHistory(amount, 'Twitchzinho · moedas resgatadas');
+  const mascotName = G.selectedMascot === 'premium' ? 'Brotinho Premium' : 'Twitchzinho';
+  recordPointsHistory(amount, `${mascotName} · moedas resgatadas`);
   updatePts(); updateTwitchzinhoPouch();
   await syncPtsToSE();
   await saveGardenToSE();
-  toast(`💜 Você resgatou +${amount} moedas do Twitchzinho!`, 3200);
+  toast(`${G.selectedMascot === 'premium' ? '💛' : '💜'} Você resgatou +${amount} moedas do ${mascotName}!`, 3200);
 }
 async function checkTwitchzinhoReward() {
   if (!seUser || !gardenHydrated || !twitchzinhoBenefitActive()) { updateTwitchzinhoPouch(); return; }

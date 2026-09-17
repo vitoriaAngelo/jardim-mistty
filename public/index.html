@@ -6806,7 +6806,7 @@ function buildPlotEl(plot, idx) {
     tooltip.className = `plot-tooltip${outOfSeason ? ' out-of-season-warning' : ''}`;
     tooltip.innerHTML = `
       <strong>${p.emoji} ${p.name}</strong><br>
-      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 MUTAÇÃO ATIVA</span><br><strong>Cor alterada · +1 item e +25 XP ao colher.</strong><br>' : ''}
+      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 MUTAÇÃO ATIVA</span><br><strong>Cor alterada · +1 item e +25 XP ao colher.</strong><br><small>Combina com habilidades e outros bônus.</small><br>' : ''}
       ${outOfSeason
         ? '⚠️ FORA DE ESTAÇÃO!<br><strong>Se colher, você perderá esta planta.</strong>'
         : isReady

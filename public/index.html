@@ -5169,6 +5169,16 @@ function createOrder(index = 0) {
   const rewardPerItem = Math.max(12, Math.round(effectiveSellValue(type) * rarity.mult));
   return { id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2,8)}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward: Math.max(30, rewardPerItem * qty + Math.round(25 * rarity.mult)), xp: Math.round((60 + qty * 10) * rarity.mult) };
 }
+function orderSignature(order) { return `${order?.name}|${order?.type}|${order?.qty}|${order?.rarity}`; }
+function createDifferentOrder(previous, index = 0) {
+  let replacement = createOrder(index);
+  let attempts = 0;
+  while (orderSignature(replacement) === orderSignature(previous) && attempts < 12) {
+    replacement = createOrder(index);
+    attempts += 1;
+  }
+  return replacement;
+}
 async function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
   if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já atualizou os pedidos 3 vezes nesta estação.', 2800); return; }
@@ -5185,7 +5195,7 @@ async function refreshSingleOrder(id) {
   const index = gardenOrders.findIndex(order => order.id === id);
   if (index < 0) return;
   G.orderSearches = Math.min(3, (G.orderSearches || 0) + 1);
-  gardenOrders[index] = createOrder(index);
+  gardenOrders[index] = createDifferentOrder(gardenOrders[index], index);
   G.orders = gardenOrders;
   renderOrders();
   updateOrdersButton();

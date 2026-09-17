@@ -135,7 +135,9 @@ exports.handler = async (event) => {
           
           safeData.plots.forEach((p, i) => {
             const old = oldData.plots[i];
-            if (!old) return;
+            // Uma colheita final remove a planta e transforma o canteiro em
+            // null. Nesse caso não existe crescimento novo para validar.
+            if (!p || !old) return;
             const growDiff = (p.growCount || 0) - (old.growCount || 0);
             if (growDiff > maxPossibleGrowth + 3) {
               fraudDetected = true;

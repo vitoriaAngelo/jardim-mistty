@@ -104,6 +104,6 @@ test('conflito de gravação não deixa o login carregando infinitamente', () =>
 });
 
 test('perfil oferece dois títulos difíceis de desbloquear', () => {
-  assert.match(html, /name:'Imperador da Colheita', target:1000/);
-  assert.match(html, /name:'Eterno do Jardim', target:2500/);
+  assert.match(html, /name:'Imperador da Colheita', target:3000/);
+  assert.match(html, /name:'Eterno do Jardim', target:7500/);
 });

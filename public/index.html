@@ -3457,6 +3457,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="profile-tabs" role="tablist" aria-label="Seções do perfil">
       <button class="profile-tab active" id="profile-tab-overview" type="button" role="tab" aria-selected="true" onclick="showProfileTab('overview')">👤 Perfil</button>
       <button class="profile-tab" id="profile-tab-titles" type="button" role="tab" aria-selected="false" onclick="showProfileTab('titles')">🏅 Títulos</button>
+      <button class="profile-tab" id="profile-tab-stats" type="button" role="tab" aria-selected="false" onclick="showProfileTab('stats')">📊 Estatísticas</button>
     </div>
 
     <div id="profile-overview-panel" class="profile-tab-panel">
@@ -3469,11 +3470,6 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       </div>
       <div class="profile-label" style="margin-top:14px">Frase do dia</div>
       <div class="profile-field-row"><input id="profile-daily-phrase" type="text" maxlength="25" placeholder="Ex.: Bora plantar!" class="profile-input"/><button class="profile-save-btn" onclick="saveDailyPhrase()">Salvar</button></div>
-    </div>
-
-    <div class="profile-section">
-      <div class="profile-label">Estatísticas da Fazenda</div>
-      <div class="profile-stats" id="profile-stats"></div>
     </div>
 
     <div class="profile-section">
@@ -3495,6 +3491,13 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <div class="profile-label">Títulos de Colheita</div>
         <p class="premium-copy">Colha plantas para desbloquear novos títulos para sua fazenda.</p>
         <div class="profile-titles" id="profile-titles"></div>
+      </div>
+    </div>
+
+    <div id="profile-stats-panel" class="profile-tab-panel hidden">
+      <div class="profile-section">
+        <div class="profile-label">Estatísticas da Fazenda</div>
+        <div class="profile-stats" id="profile-stats"></div>
       </div>
     </div>
 
@@ -7704,13 +7707,18 @@ function renderProfileTitles() {
 }
 function showProfileTab(tab) {
   const overview = tab === 'overview';
+  const titles = tab === 'titles';
+  const stats = tab === 'stats';
   document.getElementById('profile-overview-panel')?.classList.toggle('hidden', !overview);
-  document.getElementById('profile-titles-panel')?.classList.toggle('hidden', overview);
+  document.getElementById('profile-titles-panel')?.classList.toggle('hidden', !titles);
+  document.getElementById('profile-stats-panel')?.classList.toggle('hidden', !stats);
   document.getElementById('profile-tab-overview')?.classList.toggle('active', overview);
-  document.getElementById('profile-tab-titles')?.classList.toggle('active', !overview);
+  document.getElementById('profile-tab-titles')?.classList.toggle('active', titles);
+  document.getElementById('profile-tab-stats')?.classList.toggle('active', stats);
   document.getElementById('profile-tab-overview')?.setAttribute('aria-selected', String(overview));
-  document.getElementById('profile-tab-titles')?.setAttribute('aria-selected', String(!overview));
-  if (!overview) renderProfileTitles();
+  document.getElementById('profile-tab-titles')?.setAttribute('aria-selected', String(titles));
+  document.getElementById('profile-tab-stats')?.setAttribute('aria-selected', String(stats));
+  if (titles) renderProfileTitles();
 }
 function openProfile() {
   document.getElementById('frame-picker')?.classList.remove('visible');

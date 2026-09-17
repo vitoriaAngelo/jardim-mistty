@@ -5770,6 +5770,10 @@ function applySelectedMascotAppearance(animate=false) {
 async function buyMascot(id, cost) {
   if (!G.ownedMascots) G.ownedMascots = {};
   const localPreview = ['localhost','127.0.0.1'].includes(window.location.hostname) && new URLSearchParams(window.location.search).has('preview');
+  if (id === 'premium' && currentLevel() < 25 && !G.ownedMascots?.premium) {
+    toast('🔒 O Brotinho Premium será liberado no nível 25.', 3200);
+    return;
+  }
   if (id === 'twitchzinho') { toast('💜 Resgate o Twitchzinho no benefício Premium.'); return; }
   if (!hasSubscriberBadge() && !localPreview && !previewAccess()) { toast('✦ Mascotes Premium são exclusivos para subscribers.'); return; }
   if (G.selectedMascot === id) { toast('🐾 Este mascote já está selecionado!'); return; }
@@ -5971,6 +5975,10 @@ async function deliverOrder(id) {
 }
 async function openOrders(event) {
   event?.stopPropagation();
+  if (currentLevel() < 5) {
+    toast('🔒 Os Pedidos do jardim serão liberados no nível 5.', 3000);
+    return;
+  }
   if (G.ordersSeasonKey !== orderSeasonKey()) resetOrdersForSeason(true);
   if (gardenOrders.length < 3 && (G.orderDeliveries || 0) < 4) {
     while (gardenOrders.length < 3) gardenOrders.push(createOrder(gardenOrders.length));

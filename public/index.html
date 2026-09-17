@@ -4788,7 +4788,7 @@ async function buyPlot(slot) {
   G.unlockedPlots = Math.max(G.unlockedPlots, slot + 1);
   renderPlots();
   renderPlotShop();
-  unlockAchievement('unlock_plot');
+  checkAchievements();
   saveGardenToSE();
   toast(`🪵 ${u.name} desbloqueado! Vai plantar? 🌱`, 3000);
 }
@@ -4990,7 +4990,7 @@ async function buyUpgrade(id) {
   renderShop();
   renderPlots();
   renderWateringCapacity();
-  unlockAchievement('buy_upgrade');
+  checkAchievements();
   saveGardenToSE();
   toast(`${u.icon} ${u.name} ativada!`, 3000);
 }
@@ -6293,11 +6293,11 @@ const ACHIEV_GROUPS = [
     name: 'Jardineiro Iniciante',
     color: '#6aaa3a',
     achievements: [
-      { id: 'first_plant',   icon: '🪴', name: 'Primeira Muda',     desc: 'Plante pela primeira vez' },
-      { id: 'first_harvest', icon: '🧺', name: 'Primeira Colheita', desc: 'Colha sua primeira planta' },
-      { id: 'buy5',          icon: '🛒', name: 'Comprador',         desc: 'Compre 5 itens na loja' },
-      { id: 'water10',       icon: '💧', name: 'Regador Fiel',      desc: 'Regue 10 vezes' },
-      { id: 'first_mission', icon: '📋', name: 'Missão Cumprida',   desc: 'Complete 1 missão diária' },
+      { id: 'first_plant',   icon: '🪴', name: 'Primeiros Brotos',   desc: 'Plante 5 vegetais ou flores' },
+      { id: 'first_harvest', icon: '🧺', name: 'Primeira Colheita',  desc: 'Colha 5 plantas' },
+      { id: 'buy5',          icon: '🛒', name: 'Comprador',          desc: 'Compre 15 itens na loja' },
+      { id: 'water10',       icon: '💧', name: 'Regador Fiel',       desc: 'Regue 30 vezes' },
+      { id: 'first_mission', icon: '📋', name: 'Missão Cumprida',    desc: 'Complete 3 missões diárias' },
     ],
   },
   {
@@ -6306,11 +6306,11 @@ const ACHIEV_GROUPS = [
     name: 'Fazendeiro Dedicado',
     color: '#e0a020',
     achievements: [
-      { id: 'harvest10',     icon: '🌾', name: 'Colheita Abundante', desc: 'Colha 10 plantas ao total' },
-      { id: 'sell500',       icon: '💰', name: 'Bom Negócio',        desc: 'Acumule 500 pts em vendas' },
-      { id: 'unlock_plot',   icon: '🪵', name: 'Mais Espaço',        desc: 'Desbloqueie um canteiro extra' },
-      { id: 'use_fert',      icon: '🧪', name: 'Cientista',          desc: 'Use um adubo num canteiro' },
-      { id: 'level5',        icon: '⭐', name: 'Experiente',         desc: 'Alcance o nível 5' },
+      { id: 'harvest10',     icon: '🌾', name: 'Colheita Abundante', desc: 'Colha 30 plantas ao total' },
+      { id: 'sell500',       icon: '💰', name: 'Bom Negócio',        desc: 'Acumule 3.000 pts em vendas' },
+      { id: 'unlock_plot',   icon: '🪵', name: 'Mais Espaço',        desc: 'Desbloqueie 2 canteiros extras' },
+      { id: 'use_fert',      icon: '🧪', name: 'Cientista',          desc: 'Use adubo 5 vezes' },
+      { id: 'level5',        icon: '⭐', name: 'Veterano',            desc: 'Alcance o nível 8' },
     ],
   },
   {
@@ -6320,17 +6320,17 @@ const ACHIEV_GROUPS = [
     color: '#9146ff',
     achievements: [
       { id: 'all_missions',  icon: '🎯', name: 'Dia Perfeito',    desc: 'Complete todas as 5 missões do dia' },
-      { id: 'harvest25',     icon: '🌽', name: 'Grande Colheita', desc: 'Colha 25 plantas ao total' },
-      { id: 'buy_upgrade',   icon: '⚗️', name: 'Melhorado',       desc: 'Compre qualquer melhoria' },
-      { id: 'sell_flowers',  icon: '🌸', name: 'Floricultor',     desc: 'Venda flores colhidas' },
-      { id: 'level10',       icon: '👑', name: 'Lendário',        desc: 'Alcance o nível 10' },
+      { id: 'harvest25',     icon: '🌽', name: 'Grande Colheita', desc: 'Colha 75 plantas ao total' },
+      { id: 'buy_upgrade',   icon: '⚗️', name: 'Melhorado',       desc: 'Compre 3 melhorias' },
+      { id: 'sell_flowers',  icon: '🌸', name: 'Floricultor',     desc: 'Venda 10 flores colhidas' },
+      { id: 'level10',       icon: '👑', name: 'Lendário',        desc: 'Alcance o nível 15' },
     ],
   },
 ];
 
 function initAchievements() {
   if (!G.achievements) G.achievements = new Set();
-  if (!G.achievStats)  G.achievStats  = { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
+  if (!G.achievStats)  G.achievStats  = { totalPlant:0, totalHarvest:0, totalBuy:0, totalWater:0, totalFertilizer:0, totalSellPts:0, totalFlowerSell:0 };
 }
 
 function unlockAchievement(id) {
@@ -6353,15 +6353,20 @@ function checkAchievements() {
   initAchievements();
   const s  = G.achievStats;
   const lv = currentLevel();
-  if (s.totalHarvest  >= 1)   unlockAchievement('first_harvest');
-  if (s.totalBuy      >= 5)   unlockAchievement('buy5');
-  if (s.totalWater    >= 10)  unlockAchievement('water10');
-  if (s.totalHarvest  >= 10)  unlockAchievement('harvest10');
-  if (s.totalHarvest  >= 25)  unlockAchievement('harvest25');
-  if (s.totalSellPts  >= 500) unlockAchievement('sell500');
-  if (s.totalFlowerSell >= 1) unlockAchievement('sell_flowers');
-  if (lv >= 5)  unlockAchievement('level5');
-  if (lv >= 10) unlockAchievement('level10');
+  if ((s.totalPlant || 0) >= 5)     unlockAchievement('first_plant');
+  if ((s.totalHarvest || 0) >= 5)   unlockAchievement('first_harvest');
+  if ((s.totalBuy || 0) >= 15)      unlockAchievement('buy5');
+  if ((s.totalWater || 0) >= 30)    unlockAchievement('water10');
+  if ((s.totalHarvest || 0) >= 30)  unlockAchievement('harvest10');
+  if ((s.totalHarvest || 0) >= 75)  unlockAchievement('harvest25');
+  if ((s.totalSellPts || 0) >= 3000) unlockAchievement('sell500');
+  if ((s.totalFlowerSell || 0) >= 10) unlockAchievement('sell_flowers');
+  if (Math.max(0, (G.unlockedPlots || 2) - 2) >= 2) unlockAchievement('unlock_plot');
+  if ((s.totalFertilizer || 0) >= 5) unlockAchievement('use_fert');
+  if ((G.upgrades?.size || 0) >= 3) unlockAchievement('buy_upgrade');
+  if (lv >= 8)  unlockAchievement('level5');
+  if (lv >= 15) unlockAchievement('level10');
+  if (G.missions && MISSION_DEFS.filter(d => G.missions.claimed?.[d.id]).length >= 3) unlockAchievement('first_mission');
   if (G.missions && MISSION_DEFS.every(d => G.missions.claimed[d.id])) unlockAchievement('all_missions');
 }
 
@@ -6401,21 +6406,21 @@ function achievementProgress(id) {
     ? MISSION_DEFS.filter(mission => G.missions.claimed?.[mission.id]).length
     : 0;
   const definitions = {
-    first_plant:   [completed ? 1 : 0, 1, 'plantio'],
-    first_harvest: [stats.totalHarvest || 0, 1, 'colheita'],
-    buy5:          [stats.totalBuy || 0, 5, 'compras'],
-    water10:       [stats.totalWater || 0, 10, 'regas'],
-    first_mission: [completed ? 1 : Math.min(claimedMissions, 1), 1, 'missão'],
-    harvest10:     [stats.totalHarvest || 0, 10, 'colheitas'],
-    sell500:       [stats.totalSellPts || 0, 500, 'pts em vendas'],
-    unlock_plot:   [Math.max(0, (G.unlockedPlots || 2) - 2), 1, 'canteiro'],
-    use_fert:      [completed ? 1 : 0, 1, 'adubo'],
-    level5:        [currentLevel(), 5, 'níveis'],
+    first_plant:   [stats.totalPlant || 0, 5, 'plantios'],
+    first_harvest: [stats.totalHarvest || 0, 5, 'colheitas'],
+    buy5:          [stats.totalBuy || 0, 15, 'compras'],
+    water10:       [stats.totalWater || 0, 30, 'regas'],
+    first_mission: [completed ? 3 : Math.min(claimedMissions, 3), 3, 'missões'],
+    harvest10:     [stats.totalHarvest || 0, 30, 'colheitas'],
+    sell500:       [stats.totalSellPts || 0, 3000, 'pts em vendas'],
+    unlock_plot:   [Math.max(0, (G.unlockedPlots || 2) - 2), 2, 'canteiros'],
+    use_fert:      [stats.totalFertilizer || 0, 5, 'adubos'],
+    level5:        [currentLevel(), 8, 'níveis'],
     all_missions:  [completed ? 5 : claimedMissions, 5, 'missões'],
-    harvest25:     [stats.totalHarvest || 0, 25, 'colheitas'],
-    buy_upgrade:   [completed ? 1 : 0, 1, 'melhoria'],
-    sell_flowers:  [stats.totalFlowerSell || 0, 1, 'venda de flor'],
-    level10:       [currentLevel(), 10, 'níveis'],
+    harvest25:     [stats.totalHarvest || 0, 75, 'colheitas'],
+    buy_upgrade:   [Math.min(3, G.upgrades?.size || 0), 3, 'melhorias'],
+    sell_flowers:  [stats.totalFlowerSell || 0, 10, 'flores vendidas'],
+    level10:       [currentLevel(), 15, 'níveis'],
   };
   const [rawCurrent, target, unit] = definitions[id] || [completed ? 1 : 0, 1, 'etapa'];
   const current = Math.max(0, Number(rawCurrent) || 0);
@@ -6523,7 +6528,7 @@ function missionProgress(id, amount = 1) {
     }
     updatePts();
     toast(`📋 Missão completa: ${def.name}! +${def.rewardPts} pts +${def.rewardXP} xp 🎉`, 4000, true);
-    unlockAchievement('first_mission');
+    checkAchievements();
     if (missionEl) spawnCoinBurst(missionEl, def.rewardPts);
   }
   renderMissions();
@@ -6975,7 +6980,7 @@ function applyFertilizer(plotIdx, fertilizerId) {
   renderInventory();
   renderPlots();
   clearSelectionIfNoAvailablePlots();
-  unlockAchievement('use_fert');
+  initAchievements(); G.achievStats.totalFertilizer = (G.achievStats.totalFertilizer || 0) + 1; checkAchievements();
 
   if (fertilizerId === 'quick_grow') {
     toast(`⚡ Adubo Rápido aplicado no canteiro ${plotIdx + 1}! A próxima planta crescerá 2× mais rápido.`);
@@ -7736,7 +7741,7 @@ async function onPlotClick(idx) {
     renderPlots();
     clearSelectionIfNoAvailablePlots();
     missionProgress('plant3');
-    initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0); unlockAchievement('first_plant');
+    initAchievements(); G.achievStats.totalPlant = (G.achievStats.totalPlant || 0) + 1; checkAchievements();
     toast(`🌱 ${getPlantable(type).name} plantada no canteiro ${idx + 1}!`);
 
     // Animação completa após o DOM atualizar
@@ -9284,7 +9289,7 @@ async function loadGardenFromSE(username) {
     }
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
-    G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
+    G.achievStats     = save.achievStats      || { totalPlant:0, totalHarvest:0, totalBuy:0, totalWater:0, totalFertilizer:0, totalSellPts:0, totalFlowerSell:0 };
     G.selectedHarvestTitle = save.selectedHarvestTitle || '';
     G.profileBackground = save.profileBackground || 'spring';
     applyProfileBackground();

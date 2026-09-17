@@ -9108,18 +9108,6 @@ function logout() {
   document.body.appendChild(overlay);
 }
 
-async function verifyGardenSavedBeforeLogout() {
-  const response = await fetch(`/garden-load?username=${encodeURIComponent(seUser.username)}&logout_check=${Date.now()}`, { cache:'no-store', headers:authenticatedHeaders() });
-  if (!response.ok) throw new Error('Não foi possível confirmar o jardim salvo.');
-  const remote = (await response.json()).data || {};
-  const same = Number(remote.xp || 0) === Number(G.xp || 0)
-    && Number(remote.farmerXP || 0) === Number(G.farmerXP || 0)
-    && JSON.stringify(remote.plots || []) === JSON.stringify(G.plots || [])
-    && JSON.stringify(remote.inventory || {}) === JSON.stringify(G.inventory || {})
-    && JSON.stringify(remote.harvested || {}) === JSON.stringify(G.harvested || {});
-  if (!same) throw new Error('O banco ainda não confirmou todo o progresso.');
-}
-
 async function completeLogout() {
   const overlay = document.getElementById('logout-confirm-overlay');
   const button = document.getElementById('logout-save-btn');
@@ -9131,7 +9119,6 @@ async function completeLogout() {
   try {
     await saveGardenToSE();
     await gardenSaveQueue;
-    await verifyGardenSavedBeforeLogout();
     overlay?.remove();
     seUser = null;
     gardenHydrated = false;

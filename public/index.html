@@ -2783,6 +2783,13 @@ body.dark-mode .user-menu-item { color: #dce8d4; }
 body.dark-mode .user-menu-item:hover { background:#e7eddb !important; color:#263426 !important; }
 body.dark-mode .profile-label { color: #c7d3be; opacity: .95; }
 body.dark-mode #logout-confirm-overlay .modal p { color: #e8f0df !important; opacity: 1; }
+.logout-saving-card { text-align:center; align-items:center; }
+.logout-saving-sprout { display:grid; place-items:center; width:64px; height:64px; margin:2px auto 4px; border-radius:50%; background:#e7efd9; font-size:32px; animation:ranking-cozy-float 1.3s ease-in-out infinite; }
+.logout-saving-bar { width:100%; height:7px; overflow:hidden; border-radius:99px; background:#dde4d5; }
+.logout-saving-bar::after { content:''; display:block; width:42%; height:100%; border-radius:inherit; background:linear-gradient(90deg,#789264,#adc98e); animation:logout-saving-progress 1.1s ease-in-out infinite alternate; }
+@keyframes logout-saving-progress { from { transform:translateX(-15%); } to { transform:translateX(155%); } }
+body.dark-mode .logout-saving-sprout { background:#3b4938; }
+body.dark-mode .logout-saving-bar { background:#202a20; }
 body.dark-mode .season-widget, body.dark-mode .xp-text,
 body.dark-mode .fertilizer-desc, body.dark-mode .fertilizer-effect, body.dark-mode .profile-stat-lbl,
 body.dark-mode .help-tab, body.dark-mode .shop-item > div[style*="color:var(--text2)"],
@@ -9120,6 +9127,7 @@ async function completeLogout() {
   if (button?.disabled) return;
   if (button) { button.disabled = true; button.textContent = 'Salvando…'; }
   if (message) message.textContent = 'Salvando plantas, inventário e XP no banco…';
+  if (overlay) overlay.innerHTML = `<div class="modal logout-saving-card" role="status" aria-live="polite"><div class="logout-saving-sprout">🌱</div><h2>Salvando sua fazenda…</h2><p>Guardando suas plantas, inventário e XP com carinho.</p><div class="logout-saving-bar" aria-hidden="true"></div></div>`;
   try {
     await saveGardenToSE();
     await gardenSaveQueue;
@@ -9148,8 +9156,7 @@ async function completeLogout() {
     toast('👋 Sessão encerrada!', 2500);
   } catch (error) {
     console.warn('Logout cancelado: progresso não confirmado.', error);
-    if (button) { button.disabled = false; button.textContent = 'Tentar salvar novamente'; }
-    if (message) message.textContent = 'Não foi possível confirmar todo o progresso. Você continua logada; tente novamente.';
+    if (overlay) overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true"><button class="popup-close-x" onclick="document.getElementById('logout-confirm-overlay')?.remove()" aria-label="Fechar">×</button><h2>Não foi possível salvar</h2><p>Você continua logada e nenhum progresso foi descartado. Tente novamente.</p><div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('logout-confirm-overlay')?.remove()">Continuar jogando</button><button class="btn-ok" id="logout-save-btn" onclick="completeLogout()">Tentar novamente</button></div></div>`;
     toast('❌ O logout foi cancelado para não perder seu progresso.', 4500);
   }
 }

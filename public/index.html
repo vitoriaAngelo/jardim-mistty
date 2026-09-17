@@ -63,12 +63,16 @@ header::after { display:none; }
 header > * { position:relative; z-index:1; }
 .header-left { z-index: 2; }
 .skill-cozy-icon { width:26px; height:26px; display:block; filter:drop-shadow(0 2px 2px #718b5838); transition:transform .2s ease; }
+.deploy-info-icon { width:24px; height:24px; display:block; filter:drop-shadow(0 2px 2px #718b5838); transition:transform .2s ease; }
+.deploy-info-btn:hover .deploy-info-icon { transform:translateY(-2px) rotate(-3deg); }
 #skilltree-btn:hover .skill-cozy-icon { transform:translateY(-2px) rotate(-4deg); }
 #skilltree-btn.has-points { background:linear-gradient(145deg,#fff0c4,#f4d982); border-color:#d6af58; color:#76552c; box-shadow:0 3px 0 #b98e3c,0 0 12px #e8c96d66; animation:skill-btn-glow 2.4s ease-in-out infinite; }
 #skilltree-btn.has-points, #skilltree-btn.has-points + .header-btn-tip { z-index:50; }
 .header-icon-wrap:has(#skilltree-btn.has-points) { z-index:60; }
 #skilltree-btn.has-points::after { content:'Você tem pontos para distribuir'; position:absolute; left:50%; top:calc(100% + 10px); transform:translateX(-50%); width:124px; padding:6px 8px; border:1px solid #dfd2b5; border-radius:10px; background:#fffdf7; color:#687052; box-shadow:0 3px 9px #4b573320; font:800 9px/1.2 'Nunito',sans-serif; text-align:left; z-index:20; pointer-events:none; animation:skill-tip-cycle 30s ease-in-out infinite; }
 #skilltree-btn.has-points::before { content:''; position:absolute; left:50%; top:calc(100% + 4px); width:8px; height:8px; background:#fffdf7; border-left:1px solid #dfd2b5; border-bottom:1px solid #dfd2b5; transform:translateX(-50%) rotate(135deg); z-index:21; pointer-events:none; animation:skill-tip-cycle 30s ease-in-out infinite; }
+.tool-card.has-new-missions { border-color:#d6af58; box-shadow:0 3px 0 #b98e3c,0 0 12px #e8c96d66; animation:skill-btn-glow 2.4s ease-in-out infinite; }
+.tool-card.has-new-missions::after { content:'Novas missões disponíveis!'; position:absolute; left:50%; top:calc(100% + 10px); transform:translateX(-50%); width:142px; padding:7px 9px; border:1px solid #dfd2b5; border-radius:10px; background:#fffdf7; color:#687052; box-shadow:0 3px 9px #4b573320; font:800 10px/1.2 'Nunito',sans-serif; text-align:center; z-index:20; pointer-events:none; }
 @keyframes skill-btn-glow { 0%,100% { box-shadow:0 3px 0 #b98e3c,0 0 8px #e8c96d44; } 50% { box-shadow:0 3px 0 #b98e3c,0 0 16px #e8c96d99; } }
 @keyframes skill-tip-cycle { 0%,4% { opacity:1; } 10%,88% { opacity:0; } 94%,100% { opacity:1; } }
 header.season-spring::before { background:radial-gradient(circle at 8% 120%,#dcecc8 0 25%,transparent 26%),linear-gradient(120deg,#fffaf0,#edf5e7 58%,#fae8eb); }
@@ -112,12 +116,13 @@ body.dark-mode .season-showcase-card.winter::before { background:linear-gradient
 .logo-profile-icon { font-size: 11px; opacity: .45; margin-left: 2px; }
 
 .season-widget {
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: 5px; position:relative;
   font-size: 11px; font-weight: 700; color: var(--text2);
 }
 .season-bar-wrap { width: 48px; height: 4px; background: rgba(0,0,0,.1); border-radius: 99px; overflow: hidden; }
 .season-bar-fill { height: 100%; border-radius: 99px; transition: width .5s; }
 #season-days { opacity: .6; font-size: 10px; }
+#season-time-left { position:absolute; left:21px; top:100%; margin-top:2px; opacity:.72; font-size:10px; line-height:1.2; white-space:nowrap; }
 @keyframes season-day-pop {
   0% { transform: scale(1); filter: brightness(1); }
   35% { transform: scale(1.12); filter: brightness(1.22); }
@@ -163,6 +168,10 @@ header .header-icon-wrap:has(.points-refresh:hover) > .header-btn-tip { display:
 .pts-feedback.gain { color: #9ad477; }
 .pts-feedback.loss { color: #e59a9a; }
 .market-points-badge { margin-left:auto; display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; background:var(--cream2); color:var(--text2); border:1px solid var(--cozy-line); font-size:11px; font-weight:800; white-space:nowrap; }
+.shop-points-badge { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:#fff3c7; color:#6f5730; border:1px solid #d3b765; font-size:12px; font-weight:900; white-space:nowrap; }
+.shop-points-badge .points-token { width:20px; height:20px; }
+body.dark-mode .shop-points-badge { background:#4b4228; color:#ffe7a1; border-color:#b99b4f; }
+.inventory-season-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:999px; background:var(--cream2); border:1px solid var(--cozy-line); color:var(--text2); font-size:12px; font-weight:900; white-space:nowrap; }
 .presence-streak { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:800; color:var(--text2); white-space:nowrap; padding:8px 10px; border:1px solid var(--cozy-line, #d8c9ac); border-radius:10px; background:var(--cream2); cursor:pointer; line-height:1.1; }
 .missions-presence { margin:12px 0 4px; }
 .presence-week { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin:0 0 14px; }
@@ -223,13 +232,52 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .latest-sales-feed { position:relative; width:170px; min-height:30px; box-sizing:border-box; padding:5px 8px; border:1px solid #e4cfa8; border-radius:14px; background:linear-gradient(135deg,#fffaf0 0%,#f8efd9 100%); color:#7b6a54; font:700 11px/1.25 'Nunito',sans-serif; box-shadow:0 2px 0 #dfc99f, 0 5px 12px rgba(117,91,52,.1); }
 .latest-sales-feed::before, .latest-sales-feed::after { content:none; }
 .latest-sales-coin { width:15px; height:15px; margin:0 2px 0 3px; vertical-align:-3px; filter:drop-shadow(0 1px 1px rgba(89,66,34,.2)); }
-.latest-sales-strip { width:min(390px,calc(100% - 32px)); min-height:30px; margin:8px auto 0; display:flex; align-items:center; justify-content:center; text-align:center; }
+.latest-sales-strip { width:100%; min-height:30px; margin:0 0 -12px; display:flex; align-items:center; justify-content:center; text-align:center; }
 .latest-sales-feed strong { color:#5f744e; font-size:11px; }
 .watering-refill-offer { display:none; position:absolute; left:calc(100% + 9px); top:50%; transform:translateY(-50%); width:150px; padding:8px 9px; border:1px solid #e3c98f; border-radius:12px; background:#fff7df; color:#80652e; font-size:10px; font-weight:800; line-height:1.25; text-align:center; cursor:pointer; box-shadow:0 3px 0 #dec58d, 0 5px 12px rgba(117,91,52,.12); z-index:8; }
 .watering-refill-offer::before { content:''; position:absolute; right:100%; top:50%; border:6px solid transparent; border-right-color:#e3c98f; transform:translateY(-50%); }
 .watering-refill-offer.visible { display:block; }
 .watering-refill-offer img { width:13px; height:13px; vertical-align:-3px; }
 .latest-sales-feed .latest-sales-content.sales-slide-in { animation:sales-slide-in .35s ease both; }
+.garden-event-banner { display:none; position:relative; overflow:hidden; margin:0 0 10px; padding:12px 16px; border:1px solid #c9b98f; border-radius:16px; background:linear-gradient(135deg,#fff9e9,#eef5dc); box-shadow:0 3px 0 #d7c8a7,0 8px 20px rgba(71,84,53,.12); color:#526342; }
+.garden-event-banner.visible { display:flex; align-items:center; gap:12px; animation:event-pop .35s ease both; }
+.garden-event-icon { font-size:28px; filter:drop-shadow(0 2px 2px rgba(50,60,40,.16)); }
+.garden-event-copy { min-width:0; flex:1; }
+.garden-event-title { font:900 14px/1.2 'Nunito',sans-serif; }
+.garden-event-subtitle { margin-top:2px; font:700 11px/1.35 'Nunito',sans-serif; opacity:.78; }
+.garden-event-timer { flex:0 0 auto; padding:6px 10px; border-radius:999px; background:#fffaf0; border:1px solid #d8c9ac; font:900 12px 'Nunito',sans-serif; }
+.garden-event-progress { position:absolute; left:0; bottom:0; height:4px; width:100%; transform-origin:left; background:#7fa66c; }
+.garden-event-layer { position:fixed; inset:0; z-index:120; pointer-events:none; overflow:hidden; }
+.event-rain-drop { position:absolute; top:-30px; color:#8ed4f5; font-size:18px; animation:event-rain 1.2s linear forwards; }
+.event-butterfly { position:fixed; z-index:121; pointer-events:auto; cursor:pointer; border:0; background:transparent; font-size:30px; filter:drop-shadow(0 3px 3px rgba(50,45,80,.25)); animation:event-fly 5s ease-in-out forwards; }
+.event-butterfly.rare { font-size:36px; filter:drop-shadow(0 0 8px #e58cff); }
+.plot.event-golden { box-shadow:0 0 0 3px #f0c95b,0 0 22px #ffd96f99 !important; animation:event-golden-pulse 1.1s ease-in-out infinite alternate; }
+.plot.event-mutated { box-shadow:0 0 0 3px #a779da,0 0 24px #b47af688 !important; }
+.plot.event-mutated .plant-container { filter:hue-rotate(52deg) saturate(1.45) brightness(1.08); }
+.plot.event-mutated::after { content:'🧬 Cristalina'; position:absolute; top:7px; left:50%; transform:translateX(-50%); z-index:5; padding:3px 7px; border-radius:9px; background:#6e4b8d; color:white; font:900 9px 'Nunito',sans-serif; white-space:nowrap; }
+.plot-mutation-label { display:inline-block; margin:2px 0; padding:2px 6px; border-radius:8px; background:#70508c; color:#fff; font-size:9px; font-weight:900; letter-spacing:.1px; }
+.mutation-tooltip-badge { display:inline-block; padding:3px 6px; border-radius:7px; background:#765292; color:#fff; font-weight:900; font-size:10px; }
+body.event-rain::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:linear-gradient(#7193aa22,#a8d7ec16); }
+body.event-moon::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:radial-gradient(circle at 78% 12%,#fffbd0 0 3%,#9d83dc33 4% 17%,#33294b44 60%); mix-blend-mode:multiply; }
+@keyframes event-pop { from{opacity:0;transform:translateY(-10px) scale(.98)} to{opacity:1;transform:none} }
+@keyframes event-rain { to{transform:translate(-35px,110vh);opacity:.15} }
+@keyframes event-fly { 0%{transform:translate(-30px,30px) rotate(-8deg);opacity:0} 12%{opacity:1} 55%{transform:translate(45px,-45px) rotate(8deg)} 100%{transform:translate(120px,-90px);opacity:0} }
+@keyframes event-golden-pulse { to{filter:brightness(1.13) saturate(1.2)} }
+body.dark-mode .garden-event-banner { background:linear-gradient(135deg,#354432,#403b2b); border-color:#728069; color:#eef4e8; box-shadow:0 3px 0 #1f2a1e; }
+body.dark-mode .garden-event-timer { background:#202a21; border-color:#71856b; color:#f4e5b0; }
+body.dark-mode #garden-event-summary-overlay .levelup-rewards { background:#30392d; border-color:#687d5f; color:#e1ecd9; box-shadow:0 3px 0 #202b20; }
+body.dark-mode #garden-event-summary-overlay .levelup-rewards strong { color:#f4d990; }
+#garden-event-summary-overlay .mail-modal { width:min(420px,calc(100% - 24px)); box-sizing:border-box; }
+#garden-event-summary-overlay .levelup-rewards { width:min(300px,100%); box-sizing:border-box; }
+@media (max-width:650px) {
+  .garden-event-banner.visible { align-items:flex-start; flex-wrap:wrap; gap:8px 10px; padding:10px 12px 12px; }
+  .garden-event-icon { font-size:23px; }
+  .garden-event-copy { flex:1 1 calc(100% - 45px); }
+  .garden-event-title { font-size:12px; }
+  .garden-event-subtitle { font-size:10px; }
+  .garden-event-timer { order:3; width:100%; box-sizing:border-box; padding:5px 8px; text-align:center; font-size:11px; }
+  #garden-event-summary-overlay .mail-modal { padding:18px 14px; }
+}
 @keyframes sales-slide-in { from { opacity:.2; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 body.dark-mode .latest-sales-feed { border-color:#677c62; background:linear-gradient(135deg,#354332 0%,#2d392d 100%); color:#d9e5d0; box-shadow:0 3px 0 #202b20, 0 7px 16px rgba(0,0,0,.2); }
 body.dark-mode .latest-sales-feed strong { color:#f0f5e8; }
@@ -401,7 +449,7 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
 .twitch-connect {
   display: flex; align-items: center; gap: 6px;
   background: #9146ff; border: none; border-radius: 14px;
-  padding: 8px 16px;
+  padding: 8px 10px; max-width:98px; justify-content:center;
   font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; color: #fff;
   cursor: pointer; box-shadow: 0 3px 0 #6030cc;
   transition: transform .1s, box-shadow .1s;
@@ -1250,6 +1298,51 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
   display: flex; align-items: center; gap: 6px;
   padding: 4px 0;
 }
+.plot-tooltip.out-of-season-warning { border-color:#c94f4f; background:#fff0e8; color:#7d2929; box-shadow:0 4px 14px #9a393955; }
+body.dark-mode .plot-tooltip.out-of-season-warning { border-color:#d87575; background:#4a2929; color:#ffe1d8; }
+.market-orders-btn { border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:7px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; transition:transform .15s ease,filter .15s ease; width:100%; }
+.market-orders-btn:hover { transform:translateY(-2px); filter:brightness(1.05); }
+.market-orders-btn.has-ready-order { position:relative; border-color:#d6af58; background:linear-gradient(145deg,#fff0c4,#f4d982); color:#76552c; box-shadow:0 3px 0 #b98e3c,0 0 12px #e8c96d66; animation:skill-btn-glow 2.4s ease-in-out infinite; }
+.market-orders-btn.has-ready-order::after { content:'Pedido pronto para entregar!'; position:absolute; left:50%; top:calc(100% + 10px); transform:translateX(-50%); width:150px; padding:7px 9px; border:1px solid #dfd2b5; border-radius:10px; background:#fffdf7; color:#687052; box-shadow:0 3px 9px #4b573320; font:800 10px/1.2 'Nunito',sans-serif; text-align:center; z-index:20; pointer-events:none; }
+.orders-list { display:grid; gap:10px; margin:14px 0; }
+.orders-status { margin:8px 0 4px; padding:8px 10px; border-radius:11px; background:#f5ead0; color:#76552c; font-size:11px; font-weight:900; line-height:1.55; text-align:center; }
+.missions-reset-info { margin:8px 0 10px; padding:8px 10px; border:1px solid var(--cozy-line); border-radius:11px; background:var(--cream2); color:var(--text2); font-size:12px; font-weight:800; line-height:1.4; text-align:center; }
+.orders-reset-buy { margin-top:8px; border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:8px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; }
+.orders-reset-buy:disabled { opacity:.5; cursor:not-allowed; }
+.orders-reset-actions { justify-content:center; }
+.orders-reset-buy { position:relative; }
+.orders-reset-buy::after { content:attr(data-tooltip); display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:230px; padding:10px 13px; border:1px solid #53624d; border-radius:13px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.orders-reset-buy:hover::after, .orders-reset-buy:focus-visible::after { display:block; }
+.season-info-tooltip { position:relative; }
+.season-info-tooltip::after { content:attr(data-tooltip); display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:220px; padding:10px 13px; border:1px solid #53624d; border-radius:13px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.season-info-tooltip:hover::after, .season-info-tooltip:focus-visible::after { display:block; }
+.inventory-season-badge::after { top:calc(100% + 8px); bottom:auto; }
+.order-card { display:grid; grid-template-columns:46px 1fr auto; align-items:center; gap:10px; padding:11px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:15px; background:linear-gradient(135deg,#fffaf0,#f1f4e5); box-shadow:0 3px 0 #dfd2b5; }
+.order-card.ready-to-deliver { border-color:#e2b94f; box-shadow:0 3px 0 #b98e3c,0 0 0 2px #e8c96d55,0 0 18px #e8c96d44; }
+.order-card.ready-to-deliver::before { content:'PRONTO'; align-self:start; justify-self:start; grid-column:1 / -1; margin-bottom:-8px; padding:3px 7px; border-radius:99px; background:#f4d77b; color:#6e501f; font:900 9px/1 'Nunito',sans-serif; letter-spacing:.4px; }
+.order-card.ready-to-deliver .order-deliver { background:#6d965b; box-shadow:0 3px 0 #4d7042; transform:scale(1.04); }
+.order-card img { width:40px; height:40px; object-fit:contain; }
+.order-card strong { display:block; color:var(--text); font-size:13px; }
+.order-card small { display:block; color:var(--text2); font-size:11px; margin-top:3px; }
+.order-reward { display:flex; align-items:center; gap:3px; color:#8a5e18; font-weight:900; font-size:12px; white-space:nowrap; }
+.order-reward img { width:18px; height:18px; }
+.order-xp { color:#6f4aa0; font-size:11px; font-weight:900; margin-left:8px; }
+.order-deliver { border:0; border-radius:9px; padding:7px 9px; background:var(--grass); color:#fff; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
+.order-deliver:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
+.order-actions { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
+.order-refresh { border:0; border-radius:9px; padding:7px 9px; background:#d9c28b; color:#5d4a22; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b79a5b; }
+.order-refresh:disabled { opacity:.45; cursor:not-allowed; box-shadow:none; }
+body #orders-overlay .mail-modal, body #orders-overlay .mail-modal * { cursor:var(--cozy-cursor, default); }
+body #orders-overlay .mail-modal button { cursor:var(--cozy-click-cursor, pointer); }
+body #orders-overlay .mail-modal .order-deliver:disabled { cursor:var(--cozy-locked-cursor, not-allowed); }
+.order-card.tier-a { border-color:#a8c98d; background:linear-gradient(135deg,#f7fff0,#e7f2df); }
+.order-card.tier-s { border-color:#c39be0; background:linear-gradient(135deg,#fff7ff,#eee1fa); box-shadow:0 3px 0 #ae8bca; }
+.order-card.tier-ss { border-color:#e4b94d; background:linear-gradient(135deg,#fffbea,#f8e2a1); box-shadow:0 3px 0 #c79b32,0 0 14px #e8c96d55; }
+.order-rarity { display:inline-block; margin-left:5px; padding:2px 6px; border-radius:99px; font-size:9px; text-transform:uppercase; letter-spacing:.4px; background:#dcebcf; color:#4f7937; }
+.tier-s .order-rarity { background:#e7cff5; color:#74438f; }.tier-ss .order-rarity { background:#f5d77b; color:#805d13; }
+body.dark-mode .order-card { background:linear-gradient(135deg,#354332,#293528); border-color:#58684f; box-shadow:0 3px 0 #1d281e; }
+body.dark-mode .order-card strong { color:#edf4df; }
+body.dark-mode .order-card small { color:#cbd9c2; }
 .sell-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 
 .sell-row {
@@ -1951,7 +2044,9 @@ body.dark-mode .profile-current-value { color:#f1f5e9; }
   box-shadow: 0 8px 0 #c8a878, 0 20px 60px rgba(0,0,0,.3);
   border: 2.5px solid var(--cream2);
   display: flex; flex-direction: column; gap: 14px;
+  cursor: var(--cozy-cursor, default);
 }
+.mail-overlay, .modal-overlay, .help-overlay, .profile-overlay, .levelup-overlay { cursor:var(--cozy-cursor, default); }
 .mail-modal-title { font-size: 18px; font-weight: 800; color: var(--text); }
 .shop-modal, .inventory-modal { width: min(760px, calc(100% - 32px)); max-width: 760px; max-height: 88vh; }
 .shop-modal .shop-tabs { flex-wrap: wrap; }
@@ -2242,8 +2337,11 @@ body.dark-mode .sell-confirm-items .shop-cart-row { color:#e1ecd9; }
 .popup-close-x:hover { background: #e8eee0; transform: translateY(-1px); }
 .inventory-shop-link { border: 1px solid var(--cozy-line); border-radius: 999px; background: var(--cream2); color: var(--cozy-ink); padding: 7px 12px; font: 800 12px 'Nunito',sans-serif; cursor:pointer; box-shadow: 0 2px 0 var(--cozy-line); transition: transform .16s ease, background .16s ease; }
 .inventory-shop-link:hover { background: #fff4cf; transform: translateY(-1px); }
+.shop-bonus-link { border:1px solid #d5a83e; border-radius:999px; background:linear-gradient(135deg,#ffe99b,#f2c85c); color:#654b28; padding:8px 14px; font:900 12px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 3px 0 #b58a35,0 0 0 2px #fff0b455; transition:transform .16s ease,filter .16s ease,box-shadow .16s ease; }
+.shop-bonus-link:hover { transform:translateY(-2px) scale(1.02); filter:saturate(1.12); box-shadow:0 5px 0 #b58a35,0 0 0 3px #ffe69a66; }
 body.dark-mode .inventory-shop-link { background: #4b5f49; border-color: #71856b; color: #f4f5df; box-shadow: 0 2px 0 #29382a; }
 body.dark-mode .inventory-shop-link:hover { background: #5f7659; }
+body.dark-mode .shop-bonus-link { background:linear-gradient(135deg,#b9953f,#d9b957); border-color:#f0d27a; color:#2c321f; box-shadow:0 3px 0 #80652e,0 0 0 2px #f4d99033; }
 /* Cozy vegetable cards: preserve the grid and shapes, soften the presentation. */
 .shop-grid-inner { gap: 12px; }
 .shop-item {
@@ -2522,13 +2620,18 @@ body.dark-mode .st-req-badge {
 }
 .st-sp-badge {
   position:absolute; top:-6px; right:-6px;
-  background:#e84040; color:#fff;
+  background:#879b72; color:#fffdf7;
   font-size:9px; font-weight:900;
-  width:16px; height:16px; border-radius:50%;
+  min-width:16px; width:auto; height:16px; padding:0 4px; border-radius:99px;
   display:flex; align-items:center; justify-content:center;
   border:2px solid var(--cream);
-  animation: st-badge-pop .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 2px 0 #667b56;
 }
+.st-sp-badge.hidden { display:none !important; }
+.deploy-history-list { display:grid; gap:9px; margin-top:4px; }
+.deploy-history-item { padding:10px 12px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:13px; background:var(--cream2); color:var(--text); }
+.deploy-history-item strong { display:block; font-size:13px; }
+.deploy-history-item small { display:block; margin-top:4px; color:var(--text2); font-size:11px; line-height:1.4; }
 @keyframes st-badge-pop { from { transform:scale(0); } to { transform:scale(1); } }
 
 body.dark-mode .fertilizer-buy-btn { background:#e7eddb !important; color:#34422f !important; box-shadow:0 3px 0 #b7c6a8 !important; }
@@ -2592,7 +2695,7 @@ body.dark-mode .profile-stat-lbl { color:#59694b !important; opacity:1; }
 .mail-close-btn:hover, .profile-save-btn:hover, .help-close:hover, .levelup-dismiss:hover { background: #687e55; box-shadow: 0 3px 0 #586e47; }
 .profile-close-btn { background: #f1f1e7; color: #59694b; border-color: #d7dccb; box-shadow: 0 2px 0 #d7dccb; }
 .levelup-new-name { background: #778b64 !important; box-shadow: none; }
-.toast, .toast.mission { background: #fffdf7; color: #414f38; border: 1px solid #d9dfcc; border-radius: 16px; box-shadow: 0 8px 28px #4b573326; white-space: normal; max-width: calc(100vw - 32px); line-height: 1.6; padding: 13px 20px; }
+.toast, .toast.mission { background: #fffdf7; color: #414f38; border: 1px solid #d9dfcc; border-radius: 16px; box-shadow: 0 8px 28px #4b573326; width: min(760px, calc(100vw - 32px)); box-sizing:border-box; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.6; padding:13px 20px; }
 body.dark-mode .help-modal { --cream: #252b24; --cream2: #30392d; --text: #edf2e6; --text2: #c7d3be; --soil2: #c7d3be; --grass: #879b72; --grass2: #a9bd93; }
 body.dark-mode .profile-modal {
   --cream:#252b24; --cream2:#30392d; --text:#edf2e6; --text2:#c7d3be;
@@ -2698,8 +2801,19 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
   .tool-card, .achiev-tool-btn { min-height: 86px; }
   .tool-card svg { width: 32px; height: 32px; }
   .shop-modal, .inventory-modal, #bonus-overlay .mail-modal { width: calc(100% - 12px); max-width: none; padding: 14px 10px; border-radius: 20px; }
-  .shop-modal .shop-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; }
-  .shop-modal .shop-tabs button { flex: 0 0 auto; }
+  .shop-modal .shop-tabs {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+    width:100%;
+    overflow:visible;
+    padding:2px 0 5px;
+  }
+  .shop-modal .shop-tabs button {
+    width:100%; min-width:0; min-height:42px;
+    padding:9px 5px; white-space:normal; line-height:1.2;
+    font-size:12px;
+  }
   .mail-modal-title, .help-title { font-size: 21px; }
   .mail-modal, .profile-modal { padding: 18px 14px; }
   .modal-actions { flex-wrap: wrap; }
@@ -2733,8 +2847,9 @@ body.dark-mode .watering-caption { color:#d4e5c9; }
 .live-status-link { background:#9146ff; color:#fff; box-shadow:0 3px 0 #6120c0; }
 .site-footer-credit { padding:8px 14px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; background:var(--cozy-paper,#fffdf7); color:var(--text2); font-size:11px; font-weight:700; opacity:.9; line-height:1.6; text-align:center; box-shadow:0 2px 0 #d8c9ac55; }
 .site-footer-credit a { color:var(--grass2); text-decoration:none; font-weight:900; }
-body.dark-mode .support-dev-link { background:linear-gradient(135deg,#d6aa43,#b9852f); border-color:#f0d27a; color:#2c321f; box-shadow:0 3px 0 #80652e; }
-body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; color:#c7d3be; box-shadow:0 2px 0 #151d16; }
+body.dark-mode .live-status-link { background:linear-gradient(135deg,#7752a2,#52356f); border:1px solid #a981c8; box-shadow:0 3px 0 #352344, 0 8px 24px #11181166; backdrop-filter:blur(8px); }
+body.dark-mode .support-dev-link { background:linear-gradient(135deg,#e4c76b99,#9c762fbb); border-color:#f6df91; color:#fff5cf; box-shadow:0 3px 0 #6b5124, 0 8px 24px #11181166; backdrop-filter:blur(8px); }
+body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc,#202a21cc); border-color:#687d5f; color:#dce8d4; box-shadow:0 5px 20px #11181166, inset 0 1px 0 #dce8d41c; backdrop-filter:blur(10px); }
 @media (max-width:650px) { .site-footer { padding-top:10px; } .site-footer-actions { width:100%; } .support-dev-link, .live-status-link { flex:1 1 145px; justify-content:center; } .site-footer-credit { width:calc(100% - 18px); box-sizing:border-box; } }
 
 </style>
@@ -2764,6 +2879,7 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
         <div class="season-bar-fill" id="season-bar-fill"></div>
       </div>
       <span id="season-days">Dia 1/24</span>
+      <span id="season-time-left">· muda em 3h</span>
     </div>
   </div>
 
@@ -2813,6 +2929,19 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
         </button>
         <div class="header-btn-tip">Habilidades<br><span>Evolua sua fazenda com pontos de habilidade</span></div>
       </div>
+      <div class="header-icon-wrap">
+        <button class="header-icon-btn deploy-info-btn" aria-label="Últimas atualizações" onclick="openDeployHistory()">
+          <svg class="deploy-info-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <path d="M10 9.5A3.5 3.5 0 0 1 13.5 6H31v25H13.5A3.5 3.5 0 0 0 10 34V9.5Z" fill="#f4e6bd" stroke="#806b3f" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M10 10h17.5A3.5 3.5 0 0 1 31 13.5V31H13.5A3.5 3.5 0 0 0 10 34V10Z" fill="#fff8df" opacity=".72"/>
+            <path d="M17 13h9M17 18h9M17 23h5" stroke="#9b8653" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="12" cy="10" r="3.2" fill="#9abd7e" stroke="#5f794b" stroke-width="1.2"/>
+            <path d="M12 8.7v2.8M12 13.3v.1" stroke="#fff8df" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="m32 5 .8 2.1L35 8l-2.2.9L32 11l-.8-2.1L29 8l2.2-.9Z" fill="#e9c86d" stroke="#b58b43" stroke-width=".8"/>
+          </svg>
+        </button>
+        <div class="header-btn-tip">Atualizações<br><span>Veja o que mudou recentemente</span></div>
+      </div>
 
       <div class="header-icon-wrap">
         <button class="header-icon-btn" aria-label="Dicas" onclick="openHelp()">
@@ -2838,8 +2967,6 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
     </div>
   </div>
 </header>
-<div class="latest-sales-feed latest-sales-strip" id="latest-sales-feed" aria-live="polite"><span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span></div>
-
 <!-- GAME -->
 <div class="game-wrap">
   <div class="inventory-side-panel">
@@ -2928,6 +3055,14 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
 
   <div class="garden-section">
 
+    <div class="latest-sales-feed latest-sales-strip" id="latest-sales-feed" aria-live="polite"><span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span></div>
+    <div class="garden-event-banner" id="garden-event-banner" role="status" aria-live="polite">
+      <span class="garden-event-icon" id="garden-event-icon">🌦️</span>
+      <div class="garden-event-copy"><div class="garden-event-title" id="garden-event-title">Um evento está chegando</div><div class="garden-event-subtitle" id="garden-event-subtitle">Continue cuidando do seu jardim.</div></div>
+      <span class="garden-event-timer" id="garden-event-timer">10s</span>
+      <span class="garden-event-progress" id="garden-event-progress"></span>
+    </div>
+    <div class="garden-event-layer" id="garden-event-layer" aria-hidden="true"></div>
     <div class="card">
       <div class="card-title">
         <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="9" width="14" height="6" rx="2" fill="#7a4f2e"/><rect x="2" y="10" width="12" height="4" rx="1.5" fill="#9b6840"/></svg>
@@ -3021,7 +3156,7 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
     </div>
 
     <div class="header-icon-wrap" style="width:100%">
-      <button class="tool-card" onclick="openMissionsModal()" aria-label="Missões do dia" style="position:relative">
+      <button class="tool-card" id="missions-btn" onclick="openMissionsModal()" aria-label="Missões Diárias" style="position:relative">
         <svg class="cozy-tool-art" width="36" height="36" viewBox="0 0 64 64" fill="none" aria-hidden="true">
           <rect x="14" y="8" width="36" height="48" rx="7" fill="#e5ebd9" stroke="#586e47" stroke-width="2"/>
           <rect x="14" y="8" width="36" height="12" rx="7" fill="#778b64" stroke="#586e47" stroke-width="2"/>
@@ -3033,10 +3168,14 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
           <circle cx="18" cy="36" r="2.5" fill="#778b64"/>
           <circle cx="18" cy="44" r="2.5" fill="#c8943a"/>
         </svg>
-        <span class="tool-label">Missões</span>
+        <span class="tool-label">Missões Diárias</span>
         <span class="mail-badge hidden" id="missions-badge" style="position:absolute;top:6px;right:6px">0</span>
       </button>
-      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Missões do dia<br><span>Complete tarefas e ganhe recompensas</span></div>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Missões Diárias<br><span>Complete tarefas e ganhe recompensas</span></div>
+    </div>
+    <div class="header-icon-wrap" style="width:100%">
+      <button class="market-orders-btn" type="button" onclick="openOrders(event)" aria-label="Pedidos do jardim">📬 Pedidos</button>
+      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Pedidos<br><span>Troque colheitas por pontos</span></div>
     </div>
 
   </div>
@@ -3219,8 +3358,9 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
   <div class="mail-modal">
     <button class="popup-close-x" aria-label="Fechar missões" onclick="closeMissionsModal()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between">
-      <span>📋 Missões do Dia</span>
+      <span>📋 Missões Diárias</span>
     </div>
+    <div class="missions-reset-info" id="missions-reset-info">⏳ Complete todas as missões para iniciar o contador de 24 horas.</div>
     <label class="presence-streak missions-presence" id="presence-streak"><input type="checkbox" id="presence-check" onchange="claimPresence()"><span class="presence-copy"><span class="presence-title" id="presence-title">Marcar presença</span><span class="presence-hint"><span id="presence-days">0 dias</span> · ganhe pontos por dia consecutivo</span></span></label>
     <div class="presence-week-help" tabindex="0" aria-label="Como funciona a presença diária"><div class="presence-week" id="presence-week" aria-label="Presença no ciclo de 7 dias"></div><div class="presence-explainer" role="tooltip">Marque diariamente e ganhe pontos. Faltou? Recomece.</div></div>
     <div id="missions-modal-bar"></div>
@@ -3397,6 +3537,7 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
     <button class="popup-close-x" aria-label="Fechar inventário" onclick="closeInventory()">×</button>
     <div class="mail-modal-title" style="display:flex;align-items:center;justify-content:space-between;padding-right:42px">
       <span>🎒 Inventário</span>
+      <span class="inventory-season-badge season-info-tooltip" id="inventory-season-badge" aria-label="Estação atual" data-tooltip="Estação atual: plante os vegetais disponíveis nesta estação."></span>
       <button class="inventory-shop-link" type="button" onclick="goToShopFromInventory()">🛒 Ir para a loja</button>
     </div>
     <div id="inventory-filter"></div>
@@ -3411,8 +3552,10 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
     <button class="popup-close-x" aria-label="Fechar loja" onclick="closeShop()">×</button>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:2px">
       <div class="mail-modal-title" style="margin:0">🛒 Loja</div>
+      <span class="shop-points-badge" aria-label="Seu saldo de pontos"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"><span id="shop-pts-num">0</span> pts</span>
       <button class="inventory-shop-link" type="button" onclick="goToInventoryFromShop()">🎒 Ir para o inventário</button>
-      <div id="shop-season-badge" style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
+      <button class="shop-bonus-link" type="button" onclick="closeShop();setTimeout(() => openBonusShop(), 190)">✨ Comprar bônus</button>
+      <div id="shop-season-badge" class="season-info-tooltip" data-tooltip="Estação atual: plante os vegetais disponíveis nesta estação." style="display:inline-flex;align-items:center;gap:6px;background:var(--cream2);border:1.5px solid var(--cozy-line);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:800;color:var(--cozy-muted)"></div>
     </div>
     <div class="shop-tabs">
       <button class="shop-tab active" id="tab-vegetais" onclick="switchShopTab('vegetais')">🥦 Vegetais</button>
@@ -3480,12 +3623,73 @@ body.dark-mode .site-footer-credit { background:#252b24; border-color:#485644; c
 </div>
 <div class="mail-overlay hidden" id="update-news-overlay">
   <div class="mail-modal"><button class="popup-close-x" aria-label="Fechar novidades" onclick="closeUpdateNews()">×</button><div class="mail-modal-title">🌿 Novidades no jardim</div><p class="premium-copy">Uma grande atualização floresceu por aqui!</p><div class="update-news-list">
+    <div class="update-news-item"><span>🎉</span><div><strong>Eventos do jardim</strong><br>Eventos agora têm resumo ao terminar, notificam a participação da fazenda e funcionam com layout responsivo no modo claro e dark.</div></div>
+    <div class="update-news-item"><span>🌧️</span><div><strong>Chuva Mágica aprimorada</strong><br>Quando a planta já está totalmente regada, cada passagem da chuva concede +1 tick de crescimento.</div></div>
     <div class="update-news-item"><span>🌿</span><div><strong>Árvore de Habilidades</strong><br>Ganhe 1 ponto de habilidade por nível e invista em 3 ramos: Cultivo, Colheita e Mercado. Quanto mais avança, mais poderosa sua fazenda fica!</div></div>
     <div class="update-news-item"><span>🌱</span><div><strong>Pontos retroativos</strong><br>Já tem nível? Seus pontos de habilidade já estão disponíveis! Acesse o botão 🌿 no topo para distribuí-los.</div></div>
     <div class="update-news-item"><span>🧺</span><div><strong>Colheita gratuita</strong><br>Colher plantas prontas agora é de graça! Somente a pá (retirar muda antes de crescer) tem custo.</div></div>
     <div class="update-news-item"><span>📋</span><div><strong>Missões no painel lateral</strong><br>O botão de missões saiu do topo e agora fica no painel lateral, abaixo do Ranking.</div></div>
     <div class="update-news-item"><span>⏱️</span><div><strong>Crescimento ajustado</strong><br>Cada tick de crescimento agora leva 15 segundos, com o dobro de estágios.</div></div>
+    <div class="update-news-item"><span>📬</span><div><strong>Pedidos por Tier</strong><br>Pedidos Tier A, S e SS têm quantidades, dificuldades e recompensas diferentes.</div></div>
+    <div class="update-news-item"><span>🔄</span><div><strong>Atualização individual</strong><br>Troque apenas o pedido que você não quiser, com até 3 atualizações por estação.</div></div>
+    <div class="update-news-item"><span>✅</span><div><strong>Pedidos prontos em destaque</strong><br>Pedidos que podem ser entregues ficam destacados e recebem reposição automática após a entrega.</div></div>
+    <div class="update-news-item"><span>📋</span><div><strong>Missões Diárias</strong><br>O reset acontece 24 horas depois que todas as missões forem concluídas, com aviso de novas missões.</div></div>
+    <div class="update-news-item"><span>🏆</span><div><strong>Ranking por nível</strong><br>O ranking por nível agora inclui corretamente a sua conta, mesmo fora dos maiores saldos.</div></div>
+    <div class="update-news-item"><span>⚠️</span><div><strong>Alerta fora de estação</strong><br>Um aviso chamativo informa quando colher uma planta fora de estação fará você perdê-la.</div></div>
+    <div class="update-news-item"><span>🎒</span><div><strong>Estação no Inventário</strong><br>A estação atual aparece no Inventário para ajudar você a escolher o que plantar.</div></div>
+    <div class="update-news-item"><span>✨</span><div><strong>Interface aprimorada</strong><br>Novos tooltips, ícones cozy, notificações maiores e melhorias de responsividade.</div></div>
   </div></div>
+</div>
+
+<div class="mail-overlay hidden" id="orders-overlay">
+  <div class="mail-modal" style="max-width:540px">
+    <button class="popup-close-x" aria-label="Fechar pedidos" onclick="closeOrders()">×</button>
+    <div class="mail-modal-title">📬 Pedidos do jardim</div>
+    <p class="premium-copy">Ajude seus vizinhos entregando plantas e vegetais colhidos. Cada pedido rende pontos!</p>
+    <div class="orders-status" id="orders-status"><span id="orders-season-current"></span><br><span id="orders-progress-current"></span></div>
+    <div class="orders-list" id="orders-list"></div>
+    <button class="orders-reset-buy" id="orders-reset-buy" type="button" onclick="confirmOrderReset()" aria-label="Comprar mais 3 atualizações por 5.000 pontos" data-tooltip="Reseta suas atualizações e entregas. Pode ser comprado apenas 1 vez por estação." hidden>✨ Comprar mais 3 atualizações · 5.000 pts</button>
+  </div>
+</div>
+
+<div class="mail-overlay hidden" id="orders-reset-confirm-overlay">
+  <div class="mail-modal" style="max-width:430px">
+    <button class="popup-close-x" aria-label="Fechar confirmação" onclick="closeOrderResetConfirm()">×</button>
+    <div class="mail-modal-title">✨ Resetar pedidos?</div>
+    <p class="premium-copy">Por 5.000 pontos, você recupera as 3 atualizações e zera as entregas desta estação.</p>
+    <p class="premium-copy"><strong>Esse reset só pode ser comprado 1 vez por estação.</strong></p>
+    <div class="modal-actions orders-reset-actions"><button class="premium-claim" type="button" onclick="buyOrderRefreshes()">Confirmar por 5.000 pts</button><button class="inventory-shop-link" type="button" onclick="closeOrderResetConfirm()">Cancelar</button></div>
+  </div>
+</div>
+
+<div class="mail-overlay hidden" id="deploy-history-overlay">
+  <div class="mail-modal" style="max-width:500px">
+    <button class="popup-close-x" aria-label="Fechar atualizações" onclick="closeDeployHistory()">×</button>
+    <div class="mail-modal-title">ⓘ Últimas atualizações</div>
+    <p class="premium-copy">Confira os últimos deploys e o que mudou no jardim.</p>
+    <div class="deploy-history-list">
+      <div class="deploy-history-item"><strong>Eventos vivos na fazenda</strong><small>Chuva Mágica, Hora Dourada, Borboletas, Lua Cheia e Mutações agora podem transformar o jardim com recompensas em tempo real.</small></div>
+      <div class="deploy-history-item"><strong>Proteção contra múltiplas telas</strong><small>Somente a sessão mais recente pode alterar o jardim. Telas antigas são pausadas automaticamente para impedir ganhos duplicados.</small></div>
+      <div class="deploy-history-item"><strong>Pontos e salvamento protegidos</strong><small>Movimentações agora exigem a conta Twitch autenticada, a sessão ativa e a versão mais recente do jardim.</small></div>
+      <div class="deploy-history-item"><strong>Loja responsiva no celular</strong><small>As abas Vegetais, Flores, Adubos e Canteiros agora ficam visíveis e fáceis de tocar em telas pequenas.</small></div>
+      <div class="deploy-history-item"><strong>Segurança dos pedidos</strong><small>Limites, estação, estoque, recompensas e entregas agora são validados no servidor.</small></div>
+      <div class="deploy-history-item"><strong>Notificações de entregas</strong><small>O feed público também informa quem entregou cada pedido, usando o nome da fazenda.</small></div>
+      <div class="deploy-history-item"><strong>Pedidos por tier</strong><small>Pedidos Tier A, Tier S e Tier SS têm quantidades e recompensas diferentes.</small></div>
+      <div class="deploy-history-item"><strong>Contadores e estação</strong><small>O popup mostra a estação, o tempo restante, atualizações usadas e pedidos entregues.</small></div>
+      <div class="deploy-history-item"><strong>Deploy Preview disponível</strong><small>Esta versão está sendo preparada em uma prévia separada para você conferir antes da publicação final.</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL (legacy, hidden) -->
+<div class="modal-overlay hidden" id="orders-reset-overlay" onclick="if(event.target===this)closeOrdersReset()">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width:390px;text-align:center">
+    <button class="popup-close-x" onclick="closeOrdersReset()" aria-label="Fechar aviso">×</button>
+    <div style="font-size:38px;margin-bottom:8px">📬✨</div>
+    <h2 style="margin-bottom:8px">Pedidos resetados!</h2>
+    <p style="font-size:13px;color:var(--cozy-muted);line-height:1.5">Uma nova estação começou. Seus pedidos foram renovados. Você pode entregar até <strong>4 pedidos</strong> nesta estação.</p>
+    <div class="modal-actions" style="justify-content:center;margin-top:18px"><button class="btn-ok" onclick="closeOrdersReset()">Ver pedidos</button></div>
+  </div>
 </div>
 
 <!-- MODAL (legacy, hidden) -->
@@ -3742,7 +3946,192 @@ const G = {
   isPremium: false,
   selectedMascot: null,
   ownedMascots: {},
+  orders: [],
+  ordersSeasonKey: '0',
+  orderSearches: 0,
+  orderDeliveries: 0,
+  orderPaidReset: false,
+  ordersGlobalResetVersion: 0,
+  lastOrder: null,
+  lastEvent: null,
+  eventNextAt: 0,
+  eventLastType: '',
+  discoveredMutations: [],
 };
+
+// ─── EVENTOS VIVOS DO JARDIM ─────────────────────────────
+const GARDEN_EVENTS = {
+  rain: { icon:'🌧️', name:'Chuva Mágica', duration:45, color:'#67a9c9', intro:'A chuva vai regar suas plantas automaticamente!' },
+  golden: { icon:'☀️', name:'Hora Dourada', duration:60, color:'#d9a82f', intro:'Colheitas feitas durante o evento rendem o dobro!' },
+  butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
+  moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
+  mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode mudar de cor!' },
+};
+let gardenEvent = null;
+let gardenEventTimer = null;
+let gardenEventRainTimer = null;
+let gardenEventButterflyTimer = null;
+
+function eventFastMode() {
+  const isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  return isLocalHost && new URLSearchParams(location.search).get('events') === 'fast';
+}
+function nextEventDelay() { return eventFastMode() ? 8000 + Math.random()*5000 : 300000 + Math.random()*180000; }
+function gardenEventDuration(type) { return eventFastMode() ? 12 : GARDEN_EVENTS[type].duration; }
+function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
+function setNextGardenEvent() { G.eventNextAt = Date.now() + nextEventDelay(); saveGardenToSE(); }
+
+function renderGardenEvent() {
+  const banner = document.getElementById('garden-event-banner');
+  if (!banner) return;
+  if (!gardenEvent) { banner.classList.remove('visible'); return; }
+  const def = GARDEN_EVENTS[gardenEvent.type];
+  const left = Math.max(0, Math.ceil((gardenEvent.endsAt - Date.now()) / 1000));
+  const total = gardenEvent.phase === 'countdown' ? 10 : gardenEventDuration(gardenEvent.type);
+  banner.classList.add('visible');
+  banner.style.borderColor = def.color;
+  document.getElementById('garden-event-icon').textContent = def.icon;
+  document.getElementById('garden-event-title').textContent = gardenEvent.phase === 'countdown' ? `${def.name} chegando!` : def.name;
+  document.getElementById('garden-event-subtitle').textContent = gardenEvent.phase === 'countdown' ? def.intro : eventLiveSubtitle();
+  document.getElementById('garden-event-timer').textContent = `${left}s`;
+  const progress = document.getElementById('garden-event-progress');
+  progress.style.background = def.color;
+  progress.style.transform = `scaleX(${Math.max(0,Math.min(1,left/total))})`;
+}
+
+function eventLiveSubtitle() {
+  if (!gardenEvent) return '';
+  const n = gardenEvent.actions || 0;
+  if (gardenEvent.type === 'rain') return `${n} planta${n===1?'':'s'} recebeu${n===1?'':'ram'} água mágica`;
+  if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
+  if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
+  if (gardenEvent.type === 'moon') return `${n} colheita${n===1?'':'s'} ao luar`;
+  return n ? 'Uma mutação de cor foi descoberta!' : 'A energia procura uma planta…';
+}
+
+function announceGardenEvent() {
+  if (!gardenHydrated || gardenEvent || Date.now() < Number(G.eventNextAt || 0)) return;
+  const keys = Object.keys(GARDEN_EVENTS).filter(key => key !== G.eventLastType);
+  // Mutação é especial e deve continuar surpreendente: 8% dos eventos.
+  const mutationChance = keys.includes('mutation') ? 0.08 : 0;
+  const regularKeys = keys.filter(key => key !== 'mutation');
+  const eventPool = regularKeys.length ? regularKeys : ['mutation'];
+  const type = Math.random() < mutationChance
+    ? 'mutation'
+    : eventPool[Math.floor(Math.random() * eventPool.length)];
+  gardenEvent = { type, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set() };
+  toast(`${GARDEN_EVENTS[type].icon} ${GARDEN_EVENTS[type].name} começa em 10 segundos!`, 5000);
+  renderGardenEvent();
+}
+
+function startGardenEvent() {
+  const def = GARDEN_EVENTS[gardenEvent.type];
+  gardenEvent.phase = 'active'; gardenEvent.endsAt = Date.now() + gardenEventDuration(gardenEvent.type)*1000;
+  G.eventLastType = gardenEvent.type;
+  G.eventNextAt = gardenEvent.endsAt + nextEventDelay();
+  document.body.classList.add(`event-${gardenEvent.type}`);
+  toast(`${def.icon} ${def.name} começou!`, 4000);
+  if (gardenEvent.type === 'rain') {
+    applyMagicRain();
+    gardenEventRainTimer = setInterval(() => { spawnEventRain(); applyMagicRain(); }, 3500);
+  }
+  if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
+  if (gardenEvent.type === 'mutation') triggerEventMutation();
+  renderPlots(); renderGardenEvent(); saveGardenToSE();
+}
+
+function applyMagicRain() {
+  G.plots.forEach((plot, idx) => {
+    if (!plot) return;
+    const max = effectiveMaxWater(plot.type);
+    if (plot.waterCount < max) {
+      plot.waterCount = Math.min(max, plot.waterCount + 1);
+      if (!gardenEvent.touched.has(idx)) { gardenEvent.touched.add(idx); gardenEvent.actions++; gardenEvent.xp += 5; }
+      spawnSkillEffect(idx, '💧', '+ água mágica', '#67a9c9');
+    } else {
+      const maxGrow = effectiveMaxGrow(plot.type);
+      if (Number(plot.growCount || 0) < maxGrow) {
+        plot.growCount = Math.min(maxGrow, Number(plot.growCount || 0) + 1);
+        spawnSkillEffect(idx, '🌱', '+1 crescimento', '#7fa66c');
+      }
+    }
+  });
+  renderPlots(); renderGardenEvent();
+}
+function spawnEventRain() {
+  const layer = document.getElementById('garden-event-layer'); if (!layer) return;
+  for (let i=0;i<18;i++) { const d=document.createElement('span'); d.className='event-rain-drop'; d.textContent='╱'; d.style.left=`${Math.random()*100}%`; d.style.animationDelay=`${Math.random()*.8}s`; layer.appendChild(d); setTimeout(()=>d.remove(),2200); }
+}
+function spawnEventButterfly() {
+  if (!activeGardenEvent('butterflies')) return;
+  const layer=document.getElementById('garden-event-layer'); if(!layer)return;
+  const rare=Math.random()<.14, b=document.createElement('button'); b.className=`event-butterfly${rare?' rare':''}`; b.textContent=rare?'🌈':'🦋'; b.style.left=`${5+Math.random()*78}%`; b.style.top=`${18+Math.random()*62}%`;
+  b.onclick=()=>{ if(!activeGardenEvent('butterflies'))return; const xp=rare?30:10; gardenEvent.actions++; gardenEvent.xp+=xp; gainXP('harvest',b,xp,`${rare?'🌈':'🦋'} +${xp} XP`); toast(rare?'🦋 Borboleta arco-íris! +30 XP':'🦋 Borboleta encontrada! +10 XP',2200); b.remove(); renderGardenEvent(); };
+  layer.appendChild(b); setTimeout(()=>b.remove(),5000);
+}
+function showGardenEventSummary(finished, def) {
+  document.getElementById('garden-event-summary-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'garden-event-summary-overlay';
+  overlay.className = 'mail-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'garden-event-summary-title');
+  const actions = finished.actions || 0;
+  const xp = finished.xp || 0;
+  const bonus = finished.bonus || 0;
+  const reward = bonus ? `<div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Recompensas extras</strong>${finished.type === 'moon' ? `🌙 ${bonus} Semente${bonus === 1 ? '' : 's'} Lunar${bonus === 1 ? '' : 'es'}` : `✨ ${bonus} bônus do evento`}</div>` : '';
+  overlay.innerHTML = `<div class="mail-modal" style="max-width:420px;text-align:center" onclick="event.stopPropagation()">
+    <button class="popup-close-x" aria-label="Fechar resumo do evento" onclick="this.closest('#garden-event-summary-overlay').remove()">×</button>
+    <div style="font-size:44px;line-height:1;margin:4px 0 10px">${def.icon}</div>
+    <div class="mail-modal-title" id="garden-event-summary-title" style="justify-content:center">${def.name} terminou!</div>
+    <p class="premium-copy">${actions ? `Você participou ${actions} vez${actions === 1 ? '' : 'es'} e aproveitou o evento.` : 'Você participou um pouquinho — fique de olho no próximo evento!'}</p>
+    <div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Resumo da participação</strong>🌱 ${actions} ${actions === 1 ? 'ação realizada' : 'ações realizadas'}<br>✨ +${xp} XP ganhos</div>
+    ${reward}
+    <button class="levelup-dismiss" style="margin:16px auto 0" onclick="this.closest('#garden-event-summary-overlay').remove()">Continuar no jardim 🌱</button>
+  </div>`;
+  overlay.onclick = event => { if (event.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
+function triggerEventMutation() {
+  const choices=G.plots.map((p,i)=>p&&!p.mutated?i:-1).filter(i=>i>=0);
+  if(!choices.length)return;
+  const idx=choices[Math.floor(Math.random()*choices.length)];
+  G.plots[idx].mutated=true;
+  G.plots[idx].harvestsRemaining = Number(G.plots[idx].harvestsRemaining || harvestCyclesFor(G.plots[idx].type)) + 1;
+  gardenEvent.actions=1;
+  const name=getPlantable(G.plots[idx].type)?.name||'planta'; if(!G.discoveredMutations.includes(G.plots[idx].type))G.discoveredMutations.push(G.plots[idx].type);
+  setTimeout(()=>toast(`🧬 Sua ${name} sofreu uma mutação de cor!`,4500),700);
+}
+
+function finishGardenEvent() {
+  const finished=gardenEvent, def=GARDEN_EVENTS[finished.type];
+  clearInterval(gardenEventRainTimer); clearInterval(gardenEventButterflyTimer);
+  gardenEventRainTimer=null; gardenEventButterflyTimer=null;
+  document.body.classList.remove(`event-${finished.type}`);
+  document.getElementById('garden-event-layer')?.replaceChildren();
+  if (finished.xp>0 && finished.type!=='butterflies') gainXP('harvest',document.getElementById('garden-event-banner'),finished.xp,`+${finished.xp} XP · ${def.name}`);
+  const summary = finished.actions ? `Você participou ${finished.actions} vez${finished.actions===1?'':'es'} e ganhou ${finished.xp} XP${finished.bonus?` + ${finished.bonus} bônus`:''}.` : 'Você participou um pouquinho — o próximo evento pode trazer novas surpresas!';
+  if (finished.actions > 0) {
+    G.lastEvent = { event: def.name, actions: finished.actions, xp: finished.xp || 0, at: Date.now() };
+    toast(`${def.icon} ${def.name} terminou!`, 2600);
+  }
+  showGardenEventSummary(finished, def);
+  gardenEvent=null; renderGardenEvent(); renderPlots(); saveGardenToSE();
+}
+
+function tickGardenEvents() {
+  if(!gardenHydrated)return;
+  if(!G.eventNextAt){ G.eventNextAt=Date.now()+nextEventDelay(); saveGardenToSE(); }
+  if(!gardenEvent){ announceGardenEvent(); return; }
+  if(Date.now()>=gardenEvent.endsAt){ if(gardenEvent.phase==='countdown')startGardenEvent(); else finishGardenEvent(); }
+  else renderGardenEvent();
+}
+function initGardenEvents(){
+  if(gardenEventTimer)clearInterval(gardenEventTimer);
+  gardenEventTimer=setInterval(tickGardenEvents,500);
+  tickGardenEvents();
+}
 
 // maxWater = regas para encher (habilitar crescimento)
 // maxGrow  = estágios de crescimento por tempo (30min cada)
@@ -3818,6 +4207,8 @@ function showPointsFeedback(delta) {
 function updatePts() {
   const previous = lastDisplayedPts;
   document.getElementById('pts-num').textContent = G.pts;
+  const shopPts = document.getElementById('shop-pts-num');
+  if (shopPts) shopPts.textContent = G.pts;
   const marketPts = document.getElementById('market-pts-num');
   if (marketPts) marketPts.textContent = G.pts;
   if (previous !== null && G.pts !== previous) showPointsFeedback(G.pts - previous);
@@ -4404,7 +4795,7 @@ const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce:
                      corn: 84, pumpkin: 108, eggplant: 94, pepper: 103, broccoli: 117,
                      rose: 85, sunflower: 99, lavender: 113, daisy: 43, tulip: 76,
                      orchid: 127, hibiscus: 118, bluebell: 95, cherry: 136, poppy: 81, jasmine: 104,
-                     ruby_kale: 335, star_radish: 338, moon_lily: 355, royal_dahlia: 383 };
+                     ruby_kale: 335, star_radish: 338, moon_lily: 1000, royal_dahlia: 383 };
 
 function cultivationCost(type) {
   const item = getPlantable(type);
@@ -4509,7 +4900,7 @@ const FLOWERS = {
   cherry:     { name:'Cerejeira',   emoji:'🌸', cost:100, maxWater:9,  maxGrow:20, color:'#f0a0c0', leafColor:'#5a9820', minLevel:10 },
   poppy:      { name:'Papoula',     emoji:'🌷', cost:55,  maxWater:4,  maxGrow:11, color:'#e04020', leafColor:'#5ab830', minLevel:4  },
   jasmine:    { name:'Jasmim',      emoji:'⚪', cost:75,  maxWater:6,  maxGrow:15, color:'#fffff0', leafColor:'#4a9820', minLevel:6  },
-  moon_lily:  { name:'Lírio Lunar', emoji:'🪷', cost:280, maxWater:7, maxGrow:10, color:'#9d8bc4', leafColor:'#5f7956', minLevel:1, subscriberOnly:true },
+  moon_lily:  { name:'Lírio Lunar', emoji:'🪷', cost:280, maxWater:7, maxGrow:10, color:'#9d8bc4', leafColor:'#5f7956', minLevel:1 },
   royal_dahlia:{ name:'Dália Real', emoji:'🌺', cost:300, maxWater:7, maxGrow:10, color:'#c66f91', leafColor:'#647f54', minLevel:1, subscriberOnly:true },
 };
 
@@ -4615,9 +5006,12 @@ function changeSellQty(type, delta) {
   renderHarvested();
 }
 
-function sellSelected() {
+let saleInFlight = false;
+async function sellSelected() {
+  if (saleInFlight) return;
   const total = sellTotal();
   if (total === 0) return;
+  saleInFlight = true;
 
   const sold = [];
   let soldQty = 0;
@@ -4643,9 +5037,19 @@ function sellSelected() {
   G.achievStats.totalSellPts = (G.achievStats.totalSellPts||0) + total;
   if (flowersSold > 0) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0) + flowersSold;
   checkAchievements();
-  giveSEPoints(total);
   renderHarvested();
-  saveGardenToSE();
+  try {
+    // Primeiro confirma o consumo do estoque no estado versionado. Só depois
+    // credita o saldo externo, impedindo repetir a venda com F5 ou outra tela.
+    await saveGardenToSE();
+    await giveSEPoints(total);
+  } catch (error) {
+    console.warn('Venda não confirmada:', error);
+    toast('❌ Não foi possível confirmar a venda. Atualize o jardim antes de tentar novamente.', 4500);
+    return;
+  } finally {
+    saleInFlight = false;
+  }
 
   // coin burst from the card
   const card = document.getElementById('harvest-card');
@@ -4687,6 +5091,9 @@ function harvestedProduceArt(type) {
 }
 
 function openInventory() {
+  const season = currentSeason();
+  const seasonBadge = document.getElementById('inventory-season-badge');
+  if (seasonBadge) seasonBadge.textContent = `${season.icon} ${season.name}`;
   renderInventory();
   document.getElementById('inventory-overlay')?.classList.remove('hidden', 'closing');
   if (typeof window.mascotNotify === 'function') window.mascotNotify('Vamos escolher uma sementinha para o jardim? 🎒🌱', 5000);
@@ -4977,7 +5384,140 @@ function claimAllPremium() {
   const modal = document.getElementById('modal'); const box = modal?.querySelector('.modal'); if (box) { box.querySelectorAll('h2,p').forEach(el => el.remove()); box.querySelector('.modal-actions')?.remove(); box.insertAdjacentHTML('afterbegin', '<h2>✦ Tudo resgatado!</h2><p>Todos os itens foram resgatados, aproveite. 💜</p>'); modal.classList.remove('hidden'); }
 }
 
+const ORDER_TIER_LEGACY = { normal:'A', epic:'S', legendary:'SS' };
+const ORDER_TIER_LABELS = { A:'Tier A', S:'Tier S', SS:'Tier SS' };
+function normalizeOrderTier(order) {
+  const tier = ORDER_TIER_LEGACY[order?.rarity] || order?.rarity || 'A';
+  return { ...order, rarity: tier, rarityLabel: ORDER_TIER_LABELS[tier] || 'Tier A' };
+}
+let gardenOrders = (G.orders || []).map(normalizeOrderTier);
+const ORDER_NAMES = ['Bia do bairro','Seu Zeca','Luna Flores','Dona Cida','Theo da horta','Maya Verde','Nina Sementes','João Colheita'];
+function orderSeasonKey() { return `${G.seasonIdx || 0}`; }
+function updateOrdersButton() {
+  const status = document.getElementById('orders-status');
+  const season = currentSeason();
+  const seasonLabel = document.getElementById('orders-season-current');
+  const progressLabel = document.getElementById('orders-progress-current');
+  if (seasonLabel) seasonLabel.textContent = `${season.icon} ${season.name}`;
+  const progressText = `Atualizações usadas: ${G.orderSearches || 0}/3 · Entregas feitas: ${G.orderDeliveries || 0}/4 · Muda em: ${seasonRemainingLabel()}`;
+  if (progressLabel) progressLabel.textContent = progressText;
+  if (status && !seasonLabel && !progressLabel) status.textContent = `${season.icon} ${season.name} · ${progressText}`;
+}
+function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'A',label:'Tier A',mult:1, min:1, max:12} : roll < .94 ? {id:'S',label:'Tier S',mult:2.2, min:8, max:26} : {id:'SS',label:'Tier SS',mult:4.5, min:20, max:40}; }
+function createOrder(index = 0) {
+  const types = Object.keys(PLANTS).filter(type => isInSeason(type) && (!PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked));
+  const type = types[Math.floor(Math.random() * types.length)];
+  const rarity = orderRarity();
+  const qty = rarity.min + Math.floor(Math.random() * (rarity.max - rarity.min + 1));
+  const rewardPerItem = Math.max(12, Math.round(effectiveSellValue(type) * rarity.mult));
+  return { id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2,8)}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward: Math.max(30, rewardPerItem * qty + Math.round(25 * rarity.mult)), xp: Math.round((60 + qty * 10) * rarity.mult) };
+}
+function orderSignature(order) { return `${order?.name}|${order?.type}|${order?.qty}|${order?.rarity}`; }
+function createDifferentOrder(previous, index = 0) {
+  let replacement = createOrder(index);
+  let attempts = 0;
+  while (orderSignature(replacement) === orderSignature(previous) && attempts < 12) {
+    replacement = createOrder(index);
+    attempts += 1;
+  }
+  return replacement;
+}
+async function refreshOrders() {
+  if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
+  if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já atualizou os pedidos 3 vezes nesta estação.', 2800); return; }
+  G.orderSearches = Math.min(3, (G.orderSearches || 0) + 1);
+  gardenOrders = Array.from({length:3}, (_, i) => createOrder(i));
+  G.orders = gardenOrders;
+  renderOrders();
+  updateOrdersButton();
+  try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
+}
+async function refreshSingleOrder(id) {
+  if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); return; }
+  if ((G.orderSearches || 0) >= 3 || (G.orderDeliveries || 0) >= 4) { renderOrders(); toast('🌿 Você não tem mais atualizações disponíveis nesta estação.', 2800); return; }
+  const index = gardenOrders.findIndex(order => order.id === id);
+  if (index < 0) return;
+  G.orderSearches = Math.min(3, (G.orderSearches || 0) + 1);
+  gardenOrders[index] = createDifferentOrder(gardenOrders[index], index);
+  G.orders = gardenOrders;
+  renderOrders();
+  updateOrdersButton();
+  try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível confirmar a atualização do pedido.', 3200); }
+}
+function renderOrders() {
+  const list = document.getElementById('orders-list');
+  if (!list) return;
+  const allOrdersDelivered = (G.orderDeliveries || 0) >= 4;
+  updateOrdersReadyBadge();
+  list.innerHTML = allOrdersDelivered
+    ? '<div class="market-empty">✅ Você entregou todos os pedidos desta estação.<br><small>Espere a estação terminar para receber novos pedidos.</small></div>'
+    : gardenOrders.map(order => {
+    const item = getPlantable(order.type);
+    const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
+    const stock = G.harvested[order.type] || 0;
+    const normalized = normalizeOrderTier(order);
+    const canRefresh = (G.orderSearches || 0) < 3 && (G.orderDeliveries || 0) < 4;
+    return `<div class="order-card tier-${String(normalized.rarity).toLowerCase()}${canDeliver ? ' ready-to-deliver' : ''}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${normalized.name} pediu ${normalized.qty}× ${item?.name || normalized.type}<span class="order-rarity">${normalized.rarityLabel}</span></strong><small>${canDeliver ? `Você tem ${stock}/${normalized.qty} itens — pronto para entregar!` : `Você tem ${stock}/${normalized.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${normalized.reward} pontos <span class="order-xp">+${normalized.xp || Math.round(normalized.qty * 10)} XP</span></span></div><div class="order-actions"><button class="order-deliver" onclick="deliverOrder('${normalized.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button><button class="order-refresh" onclick="refreshSingleOrder('${normalized.id}')" ${canRefresh ? '' : 'disabled'}>🔄 Atualizar</button></div></div>`;
+    }).join('') || '<div class="market-empty">📭 Nenhum pedido disponível. Clique em “Procurar novos clientes”.</div>';
+  const buy = document.getElementById('orders-reset-buy');
+  if (buy) { buy.hidden = allOrdersDelivered || (G.orderSearches || 0) < 3 || G.orderPaidReset === true; buy.disabled = G.pts < 5000; }
+  const status = document.getElementById('orders-status');
+  if (status) { const season = currentSeason(); const seasonLabel = document.getElementById('orders-season-current'); const progressLabel = document.getElementById('orders-progress-current'); if (seasonLabel) seasonLabel.textContent = `${season.icon} ${season.name}`; if (progressLabel) progressLabel.textContent = `Atualizações usadas: ${G.orderSearches || 0}/3 · Entregas feitas: ${G.orderDeliveries || 0}/4 · Muda em: ${seasonRemainingLabel()}`; }
+  updateOrdersButton();
+}
+function updateOrdersReadyBadge() {
+  const button = document.querySelector('.market-orders-btn');
+  if (!button) return;
+  const ready = (G.orderDeliveries || 0) < 4 && gardenOrders.some(order => (G.harvested?.[order.type] || 0) >= order.qty);
+  button.classList.toggle('has-ready-order', ready);
+}
+function resetOrdersForSeason(showPopup = false) {
+  G.ordersSeasonKey = orderSeasonKey(); G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
+  gardenOrders = Array.from({length:3}, (_, i) => createOrder(i));
+  G.orders = gardenOrders;
+  if (showPopup) document.getElementById('orders-reset-overlay')?.classList.remove('hidden');
+}
+function closeOrdersReset() { document.getElementById('orders-reset-overlay')?.classList.add('hidden'); }
+async function buyOrderRefreshes() {
+  if (G.orderSearches < 3 || G.orderPaidReset) return;
+  closeOrderResetConfirm();
+  if (!(await chargeGamePoints(5000))) return;
+  G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = true; renderOrders(); await saveGardenToSE(); toast('✨ Atualizações e entregas resetadas nesta estação!', 2800);
+}
+function confirmOrderReset() {
+  if (G.orderSearches >= 3 && !G.orderPaidReset) document.getElementById('orders-reset-confirm-overlay')?.classList.remove('hidden');
+}
+function closeOrderResetConfirm() { document.getElementById('orders-reset-confirm-overlay')?.classList.add('hidden'); }
+async function deliverOrder(id) {
+  const order = gardenOrders.find(item => item.id === id);
+  if (!order || (G.orderDeliveries || 0) >= 4) { toast('🌿 Você já entregou 4 pedidos nesta estação.', 2800); return; }
+  if ((G.harvested[order.type] || 0) < order.qty) return;
+  G.harvested[order.type] -= order.qty;
+  G.pts += order.reward;
+  G.lastOrder = { type:'order', item:`${order.qty}× ${getPlantable(order.type)?.name || order.type}`, reward:order.reward, at:Date.now() };
+  gainXP('harvest', document.querySelector(`[onclick="deliverOrder('${order.id}')"]`), order.xp || Math.round(order.qty * 10), `+${order.xp || Math.round(order.qty * 10)} XP 📬 Pedido!`);
+  gardenOrders = gardenOrders.filter(item => item.id !== id);
+  G.orderDeliveries = (G.orderDeliveries || 0) + 1;
+  if (G.orderDeliveries < 4) gardenOrders.push(createOrder(gardenOrders.length));
+  G.orders = gardenOrders;
+  updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE();
+  toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
+}
+async function openOrders(event) {
+  event?.stopPropagation();
+  if (G.ordersSeasonKey !== orderSeasonKey()) resetOrdersForSeason(true);
+  if (gardenOrders.length < 3 && (G.orderDeliveries || 0) < 4) {
+    while (gardenOrders.length < 3) gardenOrders.push(createOrder(gardenOrders.length));
+    G.orders = gardenOrders;
+    try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível carregar os pedidos.', 3200); }
+  }
+  renderOrders();
+  document.getElementById('orders-overlay')?.classList.remove('hidden');
+}
+function closeOrders() { document.getElementById('orders-overlay')?.classList.add('hidden'); }
+
 function renderHarvested() {
+  updateOrdersReadyBadge();
   const bag = document.getElementById('harvest-bag');
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
   const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
@@ -5072,7 +5612,7 @@ function validBadgeIds(values) {
 function renderRankingPage() {
   const users = [...rankingUsers].sort((a, b) => rankingMode === 'level'
     ? (Number(b.level ?? b.lv ?? 1) - Number(a.level ?? a.lv ?? 1)) || (Number(b.points || 0) - Number(a.points || 0))
-    : Number(b.points || 0) - Number(a.points || 0)).slice(0, 10);
+    : Number(b.points || 0) - Number(a.points || 0));
   const pageSize = 5;
   const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
   rankingPage = Math.min(rankingPage, totalPages - 1);
@@ -5148,7 +5688,7 @@ async function openRanking() {
 
       // O leaderboard do StreamElements fornece o saldo de pontos, mas os
       // dados do jogo (XP/nível, estatísticas, badges etc.) ficam no JSON do
-      // jogador. Enriquecemos os 10 usuários exibidos com esse estado salvo.
+      // jogador. Enriquecemos todos os usuários carregados com esse estado salvo.
       users = await Promise.all(users.map(async (user) => {
         const username = user.username || user._id;
         if (!username) return user;
@@ -5188,6 +5728,13 @@ async function openRanking() {
           return user;
         }
       }));
+    }
+
+    // Garante que a própria pessoa apareça mesmo que esteja fora dos 100
+    // maiores saldos de pontos retornados pela API.
+    const myUsername = seUser?.username;
+    if (myUsername && !users.some(user => String(user.username || user._id || '').toLowerCase() === myUsername.toLowerCase())) {
+      users.push({ username: myUsername, points: Number(G.pts || seUser.points || 0), level: currentLevel(), farmName: document.getElementById('garden-name')?.textContent?.trim() || defaultFarmName(myUsername), xp: G.xp });
     }
 
     if (loadId !== rankingLoadId) return;
@@ -5399,7 +5946,11 @@ const MISSION_DEFS = [
 // missions state: { progress: {id: n}, claimed: {id: bool}, resetAt: timestamp }
 function initMissions() {
   if (!G.missions) {
-    G.missions = { progress: {}, claimed: {}, resetAt: Date.now() + MISSION_DAY_MS };
+    G.missions = { progress: {}, claimed: {}, resetAt: null };
+  } else if (!MISSION_DEFS.every(mission => G.missions.claimed?.[mission.id])) {
+    G.missions.resetAt = null;
+  } else if (!G.missions.resetAt) {
+    G.missions.resetAt = Date.now() + MISSION_DAY_MS;
   }
 }
 
@@ -5415,6 +5966,7 @@ function missionProgress(id, amount = 1) {
     const missionEl = document.getElementById('missions-modal-bar') || document.getElementById('missions-btn');
     const missionXpBefore = G.xp;
     G.xp += def.rewardXP;
+    if (MISSION_DEFS.every(mission => G.missions.claimed[mission.id])) G.missions.resetAt = Date.now() + MISSION_DAY_MS;
     const missionLevelBefore = getLevelData(missionXpBefore).current;
     const missionLevelAfter = getLevelData(G.xp).current;
     renderLevelWidget();
@@ -5431,6 +5983,8 @@ function missionProgress(id, amount = 1) {
 }
 
 function openMissionsModal() {
+  initMissions();
+  G.missions.newNotice = false;
   renderMissions();
   document.getElementById('missions-overlay').classList.remove('hidden');
 }
@@ -5445,27 +5999,31 @@ function updateMissionsBadge() {
   if (!badge) return;
   badge.textContent = incomplete;
   badge.classList.toggle('hidden', incomplete === 0);
+  document.getElementById('missions-btn')?.classList.toggle('has-new-missions', G.missions.newNotice === true);
 }
 
 function renderMissions() {
   initMissions();
 
   // Check reset
-  if (Date.now() >= G.missions.resetAt) {
+  if (G.missions.resetAt && Date.now() >= G.missions.resetAt) {
     G.missions.progress = {};
     G.missions.claimed  = {};
-    G.missions.resetAt  = Date.now() + MISSION_DAY_MS;
+    G.missions.resetAt  = null;
+    G.missions.newNotice = true;
     toast('📋 Missões diárias renovadas! Novas recompensas disponíveis.', 3000);
   }
 
   // Timer
-  const remaining = Math.max(0, G.missions.resetAt - Date.now());
+  const remaining = G.missions.resetAt ? Math.max(0, G.missions.resetAt - Date.now()) : 0;
   const mm = String(Math.floor(remaining / 60000)).padStart(2,'0');
   const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
   ['missions-timer','missions-modal-timer'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = `Renova em ${mm}:${ss}`;
+    if (el) el.textContent = G.missions.resetAt ? `Renova em ${mm}:${ss}` : 'Renova 24h após concluir tudo';
   });
+  const resetInfo = document.getElementById('missions-reset-info');
+  if (resetInfo) resetInfo.textContent = G.missions.resetAt ? `✅ Todas concluídas · Novas missões em ${mm}:${ss}` : '⏳ Complete todas as missões para iniciar o contador de 24 horas.';
 
   updateMissionsBadge();
 
@@ -5500,18 +6058,20 @@ function renderMissions() {
 function updateMissionsClock() {
   if (document.hidden) return;
   initMissions();
-  if (Date.now() >= G.missions.resetAt) {
+  if (G.missions.resetAt && Date.now() >= G.missions.resetAt) {
     renderMissions();
     return;
   }
-  const remaining = Math.max(0, G.missions.resetAt - Date.now());
+  const remaining = G.missions.resetAt ? Math.max(0, G.missions.resetAt - Date.now()) : 0;
   const mm = String(Math.floor(remaining / 60000)).padStart(2, '0');
   const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
-  const label = `Renova em ${mm}:${ss}`;
+  const label = G.missions.resetAt ? `Renova em ${mm}:${ss}` : 'Renova 24h após concluir tudo';
   ['missions-timer', 'missions-modal-timer'].forEach(id => {
     const el = document.getElementById(id);
     if (el && el.textContent !== label) el.textContent = label;
   });
+  const resetInfo = document.getElementById('missions-reset-info');
+  if (resetInfo) resetInfo.textContent = G.missions.resetAt ? `✅ Todas concluídas · Novas missões em ${mm}:${ss}` : '⏳ Complete todas as missões para iniciar o contador de 24 horas.';
 }
 setInterval(updateMissionsClock, 1000);
 const SEASONS = [
@@ -5590,6 +6150,27 @@ function renderSeasonWidget() {
   const fill = document.getElementById('season-bar-fill');
   fill.style.width = ((G.seasonDay / SEASON_DAYS_LEN) * 100) + '%';
   fill.style.background = s.barColor;
+  updateOrdersButton();
+  updateSeasonCountdown();
+}
+
+function updateSeasonCountdown() {
+  const el = document.getElementById('season-time-left');
+  if (!el || typeof SEASON_DAY_MS === 'undefined') return;
+  const remaining = Math.max(0, (Math.max(0, SEASON_DAYS_LEN - Number(G.seasonDay || 1)) * SEASON_DAY_MS) + Math.max(0, seasonDayEndsAt - Date.now()));
+  const totalMinutes = Math.ceil(remaining / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  el.textContent = hours > 0 ? `· muda em ${hours}h ${String(minutes).padStart(2, '0')}min` : `· muda em ${minutes}min`;
+  const orderProgress = document.getElementById('orders-progress-current');
+  if (orderProgress) orderProgress.textContent = `Atualizações usadas: ${G.orderSearches || 0}/3 · Entregas feitas: ${G.orderDeliveries || 0}/4 · Muda em: ${seasonRemainingLabel()}`;
+}
+function seasonRemainingLabel() {
+  const remaining = Math.max(0, (Math.max(0, SEASON_DAYS_LEN - Number(G.seasonDay || 1)) * SEASON_DAY_MS) + Math.max(0, seasonDayEndsAt - Date.now()));
+  const totalMinutes = Math.ceil(remaining / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours > 0 ? `Muda em: ${hours}h ${String(minutes).padStart(2, '0')}min` : `Muda em: ${minutes}min`;
 }
 
 function openRankingProfile(index) {
@@ -5644,6 +6225,7 @@ function advanceSeasonDay() {
   if (G.seasonDay > SEASON_DAYS_LEN) {
     G.seasonDay = 1;
     G.seasonIdx = (G.seasonIdx + 1) % 4;
+    resetOrdersForSeason(true);
     const s = currentSeason();
     toast(`${s.icon} Nova estação: ${s.name}! ${s.msg}`, 5000);
     // Re-render shop to lock/unlock plants by season
@@ -5679,6 +6261,7 @@ function scheduleSeasonDayTick(delay = SEASON_DAY_MS) {
   }, delay);
 }
 scheduleSeasonDayTick();
+setInterval(updateSeasonCountdown, 1000);
 
 // ─── FERTILIZERS ─────────────────────────────────────────
 const FERTILIZERS = {
@@ -6204,7 +6787,10 @@ function renderPlots() {
 function buildPlotEl(plot, idx) {
   const locked = idx >= G.unlockedPlots;
   const div = document.createElement('div');
-  div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty') + (plot?.goldenPlot || isSpecialPlotActive(idx) ? ' special-plot' : '');
+  div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty')
+    + (plot?.goldenPlot || isSpecialPlotActive(idx) ? ' special-plot' : '')
+    + (plot && activeGardenEvent('golden') && isReady(plot) ? ' event-golden' : '')
+    + (plot?.mutated ? ' event-mutated' : '');
   div.dataset.idx = idx;
 
   // LOCKED
@@ -6273,11 +6859,15 @@ function buildPlotEl(plot, idx) {
     // Tooltip
     const p = getPlantable(plot.type);
     const isReady = plot.growCount >= maxG;
+    const outOfSeason = plot.outOfSeason || !isInSeason(plot.type);
     const tooltip = document.createElement('div');
-    tooltip.className = 'plot-tooltip';
+    tooltip.className = `plot-tooltip${outOfSeason ? ' out-of-season-warning' : ''}`;
     tooltip.innerHTML = `
       <strong>${p.emoji} ${p.name}</strong><br>
-      ${isReady
+      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 MUTAÇÃO ATIVA</span><br><strong>Cor alterada · +1 item, +1 colheita e +25 XP.</strong><br><small>Combina com habilidades e outros bônus.</small><br>' : ''}
+      ${outOfSeason
+        ? '⚠️ FORA DE ESTAÇÃO!<br><strong>Se colher, você perderá esta planta.</strong>'
+        : isReady
         ? '🌸 Pronta para colher!'
         : `💧 ${plot.waterCount}/${maxW} regas · 🌱 ${plot.growCount}/${maxG} estágios`
       }
@@ -6347,13 +6937,14 @@ function buildPlotEl(plot, idx) {
     const harvestTotal = harvestCyclesFor(plot.type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestTotal);
     const harvestInfo = harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
+    const mutationInfo = plot.mutated ? '<div class="plot-mutation-label">🧬 mutação cristalina ativa</div>' : '';
     const specialDays = G.specialPlotExpiresAt ? Math.max(1, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS)) : 1;
     const specialLabel = `${specialDays.toLocaleString('pt-BR')} dia${specialDays > 1 ? 's' : ''}`;
     const specialInfo = isSpecialPlotActive(idx) ? `<div class="plot-harvest-count">${specialPlotIcon()} especial - ${specialLabel} restante${specialDays > 1 ? 's' : ''}</div>` : '';
     if (growReady) {
-      lbl.innerHTML = `✅ pronto!${harvestInfo}${specialInfo}`;
+      lbl.innerHTML = `✅ pronto!${mutationInfo}${harvestInfo}${specialInfo}`;
     } else {
-      lbl.innerHTML = `<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}${specialInfo}`;
+      lbl.innerHTML = `${mutationInfo}<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}${specialInfo}`;
       const growLbl = document.createElement('div');
       growLbl.className = 'plot-grow-label';
       growLbl.style.cssText = 'font-size:10px;font-weight:800;color:rgba(160,220,120,.95);margin-top:1px;';
@@ -6378,6 +6969,7 @@ async function onPlotClick(idx) {
   const plot = G.plots[idx];
   const tool = G.selectedTool;
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);
+  const outOfSeason = plot ? (plot.outOfSeason || !isInSeason(plot.type)) : false;
 
   if (G.specialPlotPending) {
     if (plot) { toast('Escolha um canteiro vazio para o upgrade.'); return; }
@@ -6399,7 +6991,6 @@ async function onPlotClick(idx) {
   // AUTO-COLHEITA: se pronto, colhe direto ao clicar (sem custo de pts)
   if (plot && isReady(plot) && G.selectedTool !== 'shovel') {
     const type = plot.type;
-    const outOfSeason = plot.outOfSeason || !isInSeason(type);
     const plant = getPlantable(type);
     const harvestsTotal = harvestCyclesFor(type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);
@@ -6413,20 +7004,34 @@ async function onPlotClick(idx) {
       G.plots[idx] = null;
     }
     spawnSparkles(idx);
-    gainXP('harvest', plotEl, harvestXP(type), `+${harvestXP(type)} XP 🧺 Colheita!`);
     if (outOfSeason) {
       toast(`🥀 ${getPlantable(type).name} perdida! Cresceu fora da estação — não pode ser vendida.`, 4000);
       updatePts();
       saveGardenToSE();
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     } else {
+      gainXP('harvest', plotEl, harvestXP(type), `+${harvestXP(type)} XP 🧺 Colheita!`);
       const qty = (hasGolden ? 2 : 1) + effectiveHarvestBonus(); // golden_soil_plus removido
       const harvestQty = qty * (plot.goldenPlot ? 3 : 1);
 
       // Skill: Colheita Dupla (Mão Verde + Colheita Precisa)
       const doubleChance = skillDoubleHarvestChance();
       const gotDouble = doubleChance > 0 && Math.random() < doubleChance;
-      const finalQty = gotDouble ? harvestQty * 2 : harvestQty;
+      let finalQty = gotDouble ? harvestQty * 2 : harvestQty;
+      if (activeGardenEvent('golden')) {
+        gardenEvent.actions++; gardenEvent.bonus += finalQty; gardenEvent.xp += 10; finalQty *= 2;
+        spawnSkillEffect(idx, '☀️', 'DOBRO!', '#d9a82f'); renderGardenEvent();
+      }
+      if (activeGardenEvent('moon')) {
+        gardenEvent.actions++; gardenEvent.xp += 8;
+        if (Math.random() < .35) { G.inventory.moon_lily = (G.inventory.moon_lily || 0) + 1; gardenEvent.bonus++; toast('🌙 Semente Lunar encontrada!',3000); }
+        renderGardenEvent();
+      }
+      if (plot.mutated) {
+        finalQty += 1;
+        gainXP('harvest', plotEl, 25, '🧬 +25 XP Mutação');
+        toast(`🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
+      }
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
       if (gotDouble) {
         spawnSkillEffect(idx, '🧺🧺', '×2 Colheita Dupla!', '#778b64');
@@ -6521,7 +7126,7 @@ async function onPlotClick(idx) {
     G.inventory[type]--;
     if (G.inventory[type] <= 0) G.selectedSeed = null;
     updateHeldItemCursor();
-    const newPlot = { type, waterCount: 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: isSpecialPlotActive(idx) };
+    const newPlot = { type, waterCount: activeGardenEvent('rain') ? 1 : 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: isSpecialPlotActive(idx) };
     // Apply any pre-applied fertilizer on this slot
     if (G.plotFertilizers && G.plotFertilizers[idx]) {
       const fid = G.plotFertilizers[idx];
@@ -6530,6 +7135,7 @@ async function onPlotClick(idx) {
       delete G.plotFertilizers[idx];
     }
     G.plots[idx] = newPlot;
+    if (activeGardenEvent('rain')) { gardenEvent.actions++; gardenEvent.xp += 5; gardenEvent.touched.add(idx); toast('🌧️ A muda já recebeu água mágica!',2200); renderGardenEvent(); }
     renderInventory();
     renderPlots();
     clearSelectionIfNoAvailablePlots();
@@ -7249,7 +7855,6 @@ function switchHelpTab(tab) {
 }
 
 // ─── STREAMELEMENTS INTEGRATION ──────────────────────────
-const SE_JWT      = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjaXRhZGVsIiwiZXhwIjoxNzkxNjg4NTYzLCJqdGkiOiIxNmEwZmE2My0zNDZkLTQ3MjMtOWFmMy0yODE2MTQzNWZmY2EiLCJjaGFubmVsIjoiNWI5YTdlZmUxNWNkMjgwZjA0ZjU4OTFiIiwicm9sZSI6Im93bmVyIiwiYXV0aFRva2VuIjoiUzRnb1A1ekhXRFdPNmFhQ1lJWlEiLCJ1c2VyIjoiNWI5YTdlZmUxNWNkMjgzMDY5ZjU4OTFhIiwidXNlcl9pZCI6IjFjOGFkMWQzLTQ0NDUtNGZjZS04ODZmLTRjNDcwYWU3OTRlOSIsInVzZXJfcm9sZSI6ImNyZWF0b3IiLCJwcm92aWRlciI6InR3aXRjaCIsInByb3ZpZGVyX2lkIjoiNjE1MDIyMTMiLCJjaGFubmVsX2lkIjoiYjk1MDk3ZmYtMWQ3ZS00ZTgyLTg0YTYtMzdhYzY1MGQ1M2VlIiwiY3JlYXRvcl9pZCI6IjljN2UyZTU0LWFiNzktNGM5YS05ODdjLWRjZTZlZjllMDVjMCJ9.qdEeG4tKYt8VBhP6j6Ep-EZTo0vaEZkJdXQfCOuZLNg';
 const SE_CHANNEL  = '5b9a7efe15cd280f04f5891b';
 const SE_API      = '/se-proxy?path=';
 const TWITCH_CLIENT_ID = '5vs8ms3nlbs1blwlot6j0fx1diabhp';
@@ -7260,6 +7865,36 @@ let seUser    = null;
 let saveTimer = null;
 let syncTimer = null;
 let gardenHydrated = false;
+let twitchAuthToken = sessionStorage.getItem('twitch_access_token') || '';
+let gardenRevision = null;
+// Sempre único por carregamento: abas duplicadas não podem herdar a mesma sessão.
+// Um F5 assume uma nova sessão e invalida com segurança a página anterior.
+const gardenSessionId = crypto.randomUUID();
+
+function authenticatedHeaders(extra = {}) {
+  return { ...extra, Authorization: `Bearer ${twitchAuthToken}`, 'X-Garden-Session': gardenSessionId };
+}
+
+function handleGardenSessionConflict(message = 'Seu jardim foi aberto em outra tela.') {
+  gardenHydrated = false;
+  if (saveTimer) clearInterval(saveTimer);
+  if (syncTimer) clearInterval(syncTimer);
+  document.getElementById('login-overlay')?.classList.remove('hidden');
+  const status = document.getElementById('login-status');
+  if (status) status.textContent = `🌿 ${message} Entre novamente para continuar nesta tela.`;
+  toast('🌿 Jardim ativo em outro dispositivo. As ações desta tela foram pausadas.', 5000);
+}
+
+async function claimGardenSession(username) {
+  const response = await fetch('/garden-session', {
+    method: 'POST',
+    headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ username, sessionId: gardenSessionId }),
+  });
+  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Não foi possível iniciar uma sessão segura.');
+  const result = await response.json();
+  gardenRevision = result.revision || null;
+}
 
 function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
   const overlay = document.getElementById('login-overlay');
@@ -7309,6 +7944,8 @@ async function handleTwitchCallback() {
   const params      = new URLSearchParams(hash.replace('#', ''));
   const twitchToken = params.get('access_token');
   if (!twitchToken) return false;
+  twitchAuthToken = twitchToken;
+  sessionStorage.setItem('twitch_access_token', twitchToken);
 
   // Clean URL
   history.replaceState(null, '', window.location.pathname);
@@ -7371,7 +8008,10 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
   gardenHydrated = false;
 
   try {
-    const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}`, {});
+    twitchAuthToken = twitchAccessToken || twitchAuthToken;
+    if (!twitchAuthToken) throw new Error('Sua sessão expirou. Entre novamente com a Twitch.');
+    await claimGardenSession(username);
+    const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}`, { headers: authenticatedHeaders() });
 
     if (res.status === 404) {
       // New viewer — start with 0 pts, garden will be created fresh
@@ -7392,6 +8032,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
 
     sessionStorage.setItem('se_username', username);
     sessionStorage.setItem('se_display',  displayName);
+    sessionStorage.setItem('twitch_access_token', twitchAuthToken);
 
     const hadSave = await loadGardenFromSE(username);
     if (hadSave === null) throw new Error('Não foi possível carregar seu jardim salvo. Tente novamente sem perder seu progresso.');
@@ -7425,8 +8066,9 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
       document.getElementById('garden-name').textContent = `Jardim de ${displayName}`;
     }
     gardenHydrated = true;
+    initGardenEvents();
     document.getElementById('twitch-btn').innerHTML =
-      `<span class="live-dot"></span> Logado`;
+      `<span class="live-dot"></span> Online`;
     document.getElementById('twitch-btn').classList.add('connected');
 
     connectSESocket();
@@ -7438,7 +8080,6 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     // Show help on first login (no saved garden)
     if (!hadSave) setTimeout(() => openHelp(), 800);
     if (!hadSave) setTimeout(() => openFirstLoginBonus(), 1500);
-    maybeShowUpdateNews(hadSave);
 
     // Sincroniza automaticamente a cada 5 minutos com a mesma lógica do botão.
     if (syncTimer) clearInterval(syncTimer);
@@ -7518,6 +8159,17 @@ async function saveGardenToSENow() {
     waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
     seasonIdx:        G.seasonIdx,
     seasonDay:        G.seasonDay,
+    orders:           G.orders || [],
+    ordersGlobalResetVersion: G.ordersGlobalResetVersion || 0,
+    ordersSeasonKey:  G.ordersSeasonKey || `${G.seasonIdx}`,
+    orderSearches:    G.orderSearches || 0,
+    orderDeliveries:  G.orderDeliveries || 0,
+    orderPaidReset:   G.orderPaidReset === true,
+    lastOrder:        G.lastOrder || null,
+    lastEvent:        G.lastEvent || null,
+    eventNextAt:      Number(G.eventNextAt || 0),
+    eventLastType:    G.eventLastType || '',
+    discoveredMutations: G.discoveredMutations || [],
     missions:         G.missions,
     achievements:     [...(G.achievements || [])],
     achievStats:      G.achievStats || {},
@@ -7572,8 +8224,8 @@ async function saveGardenToSENow() {
   try {
     const response = await fetch('/garden-save', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: seUser.username, data: saveData }),
+      headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ username: seUser.username, data: saveData, sessionId: gardenSessionId, expectedRevision: gardenRevision }),
     });
     if (!response.ok) {
       const errBody = await response.text().catch(() => '');
@@ -7582,8 +8234,14 @@ async function saveGardenToSENow() {
         // Não lança erro: save é ignorado silenciosamente para não afetar o jogador legítimo
         return;
       }
+      if (response.status === 409) {
+        const conflict = JSON.parse(errBody || '{}');
+        handleGardenSessionConflict(conflict.error);
+      }
       throw new Error(`Save failed: ${response.status}`);
     }
+    const saved = await response.json();
+    gardenRevision = saved.revision || gardenRevision;
     writeGardenCache(seUser.username, saveData);
     console.log('💾 Jardim salvo no Supabase!');
   } catch(e) {
@@ -7605,7 +8263,7 @@ async function syncPtsToSEOnce() {
     // Wait for purchases/sales already updating the remote balance.
     await sePointsMutationQueue;
     // Fetch current SE points
-    const res     = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {});
+    const res     = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, { headers: authenticatedHeaders() });
     if (res.status !== 404 && !res.ok) return false;
     const data    = res.status === 404 ? { points: 0 } : await res.json();
     const current = Number(data.points) || 0;
@@ -7625,7 +8283,7 @@ async function syncPtsToSEOnce() {
     // O endpoint de pontos do StreamElements usa PUT; valores positivos
     // adicionam e valores negativos descontam o saldo.
     syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
-      method: 'PUT'
+      method: 'PUT', headers: authenticatedHeaders()
     });
     if (!syncRes.ok) return false;
     const merged = current + diff;
@@ -7651,72 +8309,8 @@ async function syncPtsToSE() {
   }
 }
 
-// ── Save + sync on page close / tab hide ──────────────────
-window.addEventListener('beforeunload', () => {
-  if (!seUser || !gardenHydrated) return;
-  // Use sendBeacon for reliable delivery on page close
-  const saveData = {
-    xp: G.xp,
-    farmerXP: G.farmerXP || 0,
-    farmName: document.getElementById('garden-name')?.textContent || '',
-    inventory: G.inventory,
-    fertilizerInventory: G.fertilizerInventory,
-    plotFertilizers: G.plotFertilizers, plots: G.plots,
-    unlockedPlots: G.unlockedPlots, harvested: G.harvested, goldenHarvested: G.goldenHarvested || {},
-    upgrades: [...G.upgrades], upgradeLevels: G.upgradeLevels || {}, seasonIdx: G.seasonIdx,
-    waterCapacity: G.waterCapacity ?? 5, waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
-    seasonDay: G.seasonDay, missions: G.missions,
-    achievements: [...(G.achievements || [])],
-    achievStats: G.achievStats || {},
-    achievSeen: G.achievSeen || 0,
-    presenceStreak: G.presenceStreak || 0,
-    presenceLastDay: G.presenceLastDay || '',
-    presenceBonusDate: G.presenceBonusDate || '',
-    presenceDays: G.presenceDays || [],
-    specialPlot: G.specialPlot,
-    specialPlots: G.specialPlots || [],
-    specialPlotExpiresAt: G.specialPlotExpiresAt || 0,
-    specialistPlotDurationFixed: G.specialistPlotDurationFixed === true,
-    bonusRefillDiscount: G.bonusRefillDiscount === true,
-    bonusWateringCapacity: Number(G.bonusWateringCapacity || 0),
-    bonusWaterRecoveryMinutes: Number(G.bonusWaterRecoveryMinutes || 0),
-    bonusKitLevel: Number(G.bonusKitLevel || 0),
-    bonusVipUntil: Number(G.bonusVipUntil || 0),
-    specialPlotPending: G.specialPlotPending || false,
-    premiumWateringCan: G.premiumWateringCan === true,
-    premiumShovel: G.premiumShovel === true,
-    premiumPlantsUnlocked: G.premiumPlantsUnlocked === true,
-    premiumFertilizersClaimed: G.premiumFertilizersClaimed === true,
-    premiumSpecialPlotClaimed: G.premiumSpecialPlotClaimed === true,
-    isPremium: G.isPremium === true,
-    selectedMascot: G.selectedMascot || null,
-    ownedMascots: G.ownedMascots || {},
-    profileFrame: G.profileFrame || 'red',
-    supporterFrameUnlocked: G.supporterFrameUnlocked === true,
-    dailyPhrase: G.dailyPhrase || '',
-    isSubscriber: hasSubscriberBadge(),
-    welcomeBonusClaimed: G.welcomeBonusClaimed === true,
-    skillPoints: G.skillPoints || 0,
-    skillNodes:  G.skillNodes  || {},
-    skillPointsClaimed: G.skillPointsClaimed || 0,
-    upgrades_refunded: G.upgrades_refunded || false,
-    stats: {
-      xp: G.xp,
-      harvested: G.achievStats?.totalHarvest || 0,
-      purchased: G.achievStats?.totalBuy || 0,
-      watered: G.achievStats?.totalWater || 0,
-      soldPoints: G.achievStats?.totalSellPts || 0,
-      presence: G.presenceStreak || 0,
-    },
-    shopCart: SHOP_CART,
-    mail: G_MAIL,
-    savedAt: Date.now(),
-  };
-  const blob = new Blob([JSON.stringify({ username: seUser.username, data: saveData })], { type: 'application/json' });
-  writeGardenCache(seUser.username, saveData);
-  writePremiumClaimsCache(seUser.username);
-  navigator.sendBeacon('/garden-save', blob);
-});
+// O evento de visibilidade abaixo salva pela fila normal. Evitamos um segundo
+// envio paralelo ao fechar a aba, pois ele poderia disputar a mesma versão.
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && seUser && gardenHydrated) {
@@ -7739,8 +8333,8 @@ async function loadGardenFromSE(username) {
     let json = null;
     let loadFailed = false;
     try {
-      const res = await fetch(`/garden-load?username=${encodeURIComponent(username)}`, { cache: 'no-store' });
-      if (res.ok) json = await res.json();
+      const res = await fetch(`/garden-load?username=${encodeURIComponent(username)}`, { cache: 'no-store', headers: authenticatedHeaders() });
+      if (res.ok) { json = await res.json(); gardenRevision = json.revision || gardenRevision; }
       else { json = { data: readGardenCache(username) }; loadFailed = res.status !== 404; }
     } catch (networkError) {
       json = { data: readGardenCache(username) };
@@ -7753,10 +8347,10 @@ async function loadGardenFromSE(username) {
     const serverData = json?.data;
     const serverHasPaidKit = Array.isArray(serverData?.paidKitOrders) && serverData.paidKitOrders.length > 0;
     const serverHasNewerKit = serverHasPaidKit && Number(serverData.bonusKitLevel || 0) > Number(cachedData?.bonusKitLevel || 0);
-    if (cachedData && (!serverData || (!serverHasPaidKit && !serverHasNewerKit && Number(cachedData.savedAt || 0) > Number(serverData.savedAt || 0)))) {
+    if (cachedData && !serverData) {
       json = { data: cachedData };
     }
-    if (!json?.data) return loadFailed ? null : false;
+    if (!json?.data || json.data._isSessionShell === true) return loadFailed ? null : false;
     hadSave = true;
 
     const save = json.data;
@@ -7788,6 +8382,25 @@ async function loadGardenFromSE(username) {
     G.waterCapacityLastRefill = Number(save.waterCapacityLastRefill || Date.now());
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
+    G.orders          = Array.isArray(save.orders) ? save.orders : [];
+    G.ordersSeasonKey = save.ordersSeasonKey ?? `${G.seasonIdx}`;
+    // Normaliza contadores antigos criados quando a trava de atualizações estava desativada.
+    G.orderSearches   = Math.min(3, Number(save.orderSearches || 0));
+    G.orderDeliveries  = Number(save.orderDeliveries || 0);
+    G.orderPaidReset   = save.orderPaidReset === true;
+    G.ordersGlobalResetVersion = Number(save.ordersGlobalResetVersion || 0);
+    G.lastOrder        = save.lastOrder || null;
+    G.lastEvent        = save.lastEvent || null;
+    G.eventNextAt      = Number(save.eventNextAt || 0);
+    G.eventLastType    = save.eventLastType || '';
+    G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
+    gardenOrders      = G.orders;
+    if (G.ordersGlobalResetVersion < 1) {
+      G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
+      gardenOrders = Array.from({ length: 3 }, (_, i) => createOrder(i));
+      G.orders = gardenOrders; G.ordersGlobalResetVersion = 1;
+      setTimeout(() => saveGardenToSE(), 250);
+    }
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
@@ -7930,7 +8543,7 @@ function connectSESocket() {
     seSocket.on('authenticated', () => {
       G.seConnected = true;
       document.getElementById('twitch-btn').innerHTML =
-        `<span class="live-dot"></span> Logado`;
+        `<span class="live-dot"></span> Online`;
       document.getElementById('twitch-btn').classList.add('connected');
       toast('✅ StreamElements conectado! Pontos em tempo real.', 3000);
     });
@@ -7961,11 +8574,11 @@ function queueSEPointsMutation(amount, method) {
   const seAmount = Math.abs(Number(amount) || 0);
   const operation = sePointsMutationQueue.then(async () => {
     const basePath = `${SE_API}/points/${SE_CHANNEL}/${seUser.username}`;
-    let res = await fetch(`${basePath}/${seAmount}`, { method });
+    let res = await fetch(`${basePath}/${seAmount}`, { method, headers: authenticatedHeaders() });
     // StreamElements installations differ: some accept DELETE, while older
     // point endpoints expect a negative PUT for deductions.
     if (!res.ok && method === 'DELETE') {
-      res = await fetch(`${basePath}/-${seAmount}`, { method: 'PUT' });
+      res = await fetch(`${basePath}/-${seAmount}`, { method: 'PUT', headers: authenticatedHeaders() });
     }
     if (!res.ok) throw new Error(`Points update failed: ${res.status}`);
     if (lastKnownSEPoints !== null) {
@@ -8101,6 +8714,7 @@ function completeLogout() {
     gardenHydrated = false;
     sessionStorage.removeItem('se_username');
     sessionStorage.removeItem('se_display');
+    sessionStorage.removeItem('twitch_access_token');
     if (saveTimer) clearInterval(saveTimer);
     if (syncTimer) clearInterval(syncTimer);
     if (seSocket)  seSocket.disconnect();
@@ -8196,7 +8810,12 @@ function renderLatestSale() {
   const feed = document.getElementById('latest-sales-feed');
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
   if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma venda recente</span>'; return; }
-  feed.innerHTML = `<span class="latest-sales-content sales-slide-in"><strong>${String(sale.farmName || sale.username).replace(/^@+/, '')}</strong> acabou de faturar <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
+  const who = String(sale.farmName || `Jardim de @${sale.username || ''}`).trim();
+  feed.innerHTML = sale.activityType === 'event'
+    ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> participou do evento <b>${sale.event || 'do jardim'}</b></span>`
+    : sale.activityType === 'order'
+    ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> entregou <b>${sale.item || 'um pedido'}</b> e ganhou <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.reward || 0).toLocaleString('pt-BR')} pontos</span>`
+    : `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> acabou de faturar <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
 }
 async function updateLatestSales() {
   const feed = document.getElementById('latest-sales-feed');
@@ -8231,7 +8850,7 @@ setInterval(() => {
     latestSalesIndex = (latestSalesIndex + 1) % latestSalesItems.length;
     renderLatestSale();
   }
-}, 4500);
+}, 7000);
 selectTool('water');
 renderShop();
 renderFlowerShop();
@@ -8253,7 +8872,7 @@ renderSkillTreeBadge();
 // Preview local: permite visualizar a experiência sem conectar a Twitch.
 const isLocalPreview = new URLSearchParams(window.location.search).has('preview');
 if (isLocalPreview) {
-  seUser = { username: 'preview', displayName: 'Visitante', points: 100000, isSubscriber: false, subscriptionChecked: true };
+  seUser = { username: 'preview', displayName: 'Visitante', points: 209932, isSubscriber: false, subscriptionChecked: true };
   restorePremiumClaimsCache(seUser.username);
   gardenHydrated = true;
   G.isSubscriber = false;
@@ -8270,7 +8889,7 @@ if (isLocalPreview) {
   G.bonusWaterRecoveryMinutes = 0;
   G.bonusKitLevel = 0;
   G.bonusVipUntil = 0;
-  G.pts = 100000;
+  G.pts = 209932;
   G.xp = LEVELS[9].minXP - 1;
   G.unlockedPlots = 6;
   G.previewUnlocks = true;
@@ -8285,6 +8904,7 @@ if (isLocalPreview) {
   renderLevelWidget();
   renderPremiumBenefits();
   renderUpgradeShop();
+  initGardenEvents();
   // A prévia já foi testada; não reabrir o bônus de boas-vindas automaticamente.
   if (new URLSearchParams(window.location.search).has('seasons')) {
     const showcase = document.createElement('div');
@@ -8344,7 +8964,7 @@ const SKILL_BRANCHES = [
     id: 'cultivo', name: 'Cultivo', icon: '🌱',
     desc: 'Melhore solo e manejo das plantas',
     nodes: [
-      { id:'mao_verde',    emoji:'🖐️', name:'Mão Verde',       effect:'+3% chance de colheita em dobro por nível', max:5, maxLabel:'máx. +15%', req:null,         reqMin:0 },
+      { id:'mao_verde',    emoji:'🖐️', name:'Mão Verde',       effect:'+2% chance de colheita em dobro por nível', max:5, maxLabel:'máx. +10%', req:null,         reqMin:0 },
       { id:'solo_vivo',    emoji:'🪱', name:'Solo Vivo',        effect:'-3% tempo de crescimento por nível',        max:4, maxLabel:'máx. -12%', req:'mao_verde',   reqMin:3 },
       { id:'irrigacao',    emoji:'💧', name:'Irrigação',         effect:'-1 de água por ciclo e +1 na recuperação de água do regador.', max:2, maxLabel:'máx. -2 água e +2 de recuperação', req:'solo_vivo', reqMin:3 },
       { id:'compostagem',  emoji:'🪣', name:'Compostagem',       effect:'+1 adubo aleat. a cada 20 colheitas',      max:3, maxLabel:'máx. 3 adubos', req:'irrigacao', reqMin:2 },
@@ -8354,7 +8974,7 @@ const SKILL_BRANCHES = [
     id: 'colheita', name: 'Colheita', icon: '🧺',
     desc: 'Aprimore suas técnicas de colheita',
     nodes: [
-      { id:'colheita_precisa', emoji:'🎯', name:'Colheita Precisa', effect:'+5% chance de colheita dupla por nível',        max:5, maxLabel:'máx. +25%', req:null,               reqMin:0 },
+      { id:'colheita_precisa', emoji:'🎯', name:'Colheita Precisa', effect:'+3% chance de colheita dupla por nível',        max:5, maxLabel:'máx. +15%', req:null,               reqMin:0 },
       { id:'olho_aguia',       emoji:'🦅', name:'Olho de Águia',    effect:'+4% chance de achar adubo ao colher',           max:5, maxLabel:'máx. +20%', req:'colheita_precisa', reqMin:3 },
       { id:'maos_ligeiras',    emoji:'⚡', name:'Mãos Ligeiras',    effect:'+3% chance de colher e encher +1 no regador',   max:5, maxLabel:'máx. +15%', req:'olho_aguia',        reqMin:3 },
       { id:'sementes_fortes',  emoji:'🌾', name:'Sementes Fortes',  effect:'+2% chance de recuperar semente ao colher',     max:5, maxLabel:'máx. +10%', req:'maos_ligeiras',    reqMin:3 },
@@ -8386,11 +9006,11 @@ function skillNodeUnlocked(node) {
 function skillCurrentLabel(node, level) {
   const value = Number(level) || 0;
   const labels = {
-    mao_verde: `Atual: +${value * 3}% de chance de colheita em dobro`,
+    mao_verde: `Atual: +${value * 2}% de chance de colheita em dobro`,
     solo_vivo: `Atual: -${value * 3}% no tempo de crescimento`,
     irrigacao: `Atual: -${value} de água por ciclo e +${value} de recuperação`,
     compostagem: `Atual: +${value} adubo aleatório a cada 20 colheitas`,
-    colheita_precisa: `Atual: +${value * 5}% de chance de colheita dupla`,
+    colheita_precisa: `Atual: +${value * 3}% de chance de colheita dupla`,
     olho_aguia: `Atual: +${value * 4}% de chance de achar adubo`,
     maos_ligeiras: `Atual: +${value * 3}% de chance de colher e encher +1 no regador`,
     sementes_fortes: `Atual: +${value * 2}% de chance de recuperar semente`,
@@ -8406,8 +9026,8 @@ function skillCurrentLabel(node, level) {
 
 // Retorna bônus de colheita dupla (Mão Verde + Colheita Precisa)
 function skillDoubleHarvestChance() {
-  const mao = (G.skillNodes['mao_verde'] || 0) * 3;
-  const prec = (G.skillNodes['colheita_precisa'] || 0) * 5;
+  const mao = (G.skillNodes['mao_verde'] || 0) * 2;
+  const prec = (G.skillNodes['colheita_precisa'] || 0) * 3;
   return (mao + prec) / 100;
 }
 // Retorna redução de tempo de crescimento (Solo Vivo)
@@ -8490,7 +9110,7 @@ function renderSkillTreeBadge() {
   if (skillButton) skillButton.classList.toggle('has-points', sp > 0);
   if (badge) {
     if (sp > 0) { badge.textContent = sp; badge.classList.remove('hidden'); }
-    else        { badge.classList.add('hidden'); }
+    else        { badge.textContent = ''; badge.classList.add('hidden'); }
   }
   if (spCount) spCount.textContent = sp;
 }
@@ -8737,6 +9357,30 @@ setInterval(() => {
 </footer>
 
 <script>
+function openDeployHistory() { document.getElementById('deploy-history-overlay')?.classList.remove('hidden'); }
+function closeDeployHistory() { document.getElementById('deploy-history-overlay')?.classList.add('hidden'); }
+
+// Fechamento padrão de popups: clique fora ou tecla Esc.
+function closePopupOverlay(overlay) {
+  if (!overlay || overlay.id === 'login-overlay') return;
+  if (overlay.classList.contains('levelup-overlay')) {
+    overlay.classList.remove('show');
+    overlay.classList.add('hidden');
+  } else {
+    overlay.classList.add('hidden');
+    overlay.classList.remove('show', 'closing');
+  }
+}
+document.addEventListener('click', event => {
+  const overlay = event.target.closest?.('.mail-overlay, .modal-overlay, .help-overlay, .profile-overlay, .levelup-overlay');
+  if (overlay && event.target === overlay) closePopupOverlay(overlay);
+});
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  const openOverlays = [...document.querySelectorAll('.mail-overlay:not(.hidden), .modal-overlay:not(.hidden), .help-overlay:not(.hidden), .profile-overlay:not(.hidden), .levelup-overlay.show')].filter(el => el.id !== 'login-overlay');
+  closePopupOverlay(openOverlays.at(-1));
+});
+
   // Preview-only: show the game screen locally without requiring login.
   if (location.hostname === 'localhost' && new URLSearchParams(location.search).has('preview')) {
     document.getElementById('login-overlay')?.classList.add('hidden');
@@ -8772,6 +9416,6 @@ setInterval(() => {
 
 <!-- ── ANTI-FRAUDE: Proteção via servidor (garden-save.js) ── -->
 
-<script src="garden-mascot.js?v=9"></script>
+<script src="garden-mascot.js?v=10"></script>
 </body>
 </html>

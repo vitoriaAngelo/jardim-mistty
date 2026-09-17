@@ -9096,14 +9096,35 @@ function logout() {
     <button class="popup-close-x" onclick="document.getElementById('logout-confirm-overlay')?.remove()" aria-label="Fechar">×</button>
     <h2 id="logout-confirm-title">Sair da conta?</h2>
     <p>Seu progresso será salvo antes de encerrar a sessão.</p>
-    <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('logout-confirm-overlay')?.remove()">Cancelar</button><button class="btn-ok" onclick="document.getElementById('logout-confirm-overlay')?.remove(); completeLogout()">Sair e salvar</button></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('logout-confirm-overlay')?.remove()">Cancelar</button><button class="btn-ok" id="logout-save-btn" onclick="completeLogout()">Sair e salvar</button></div>
   </div>`;
   document.body.appendChild(overlay);
 }
 
-function completeLogout() {
-  // Save garden before leaving
-  saveGardenToSE().finally(() => {
+async function verifyGardenSavedBeforeLogout() {
+  const response = await fetch(`/garden-load?username=${encodeURIComponent(seUser.username)}&logout_check=${Date.now()}`, { cache:'no-store', headers:authenticatedHeaders() });
+  if (!response.ok) throw new Error('Não foi possível confirmar o jardim salvo.');
+  const remote = (await response.json()).data || {};
+  const same = Number(remote.xp || 0) === Number(G.xp || 0)
+    && Number(remote.farmerXP || 0) === Number(G.farmerXP || 0)
+    && JSON.stringify(remote.plots || []) === JSON.stringify(G.plots || [])
+    && JSON.stringify(remote.inventory || {}) === JSON.stringify(G.inventory || {})
+    && JSON.stringify(remote.harvested || {}) === JSON.stringify(G.harvested || {});
+  if (!same) throw new Error('O banco ainda não confirmou todo o progresso.');
+}
+
+async function completeLogout() {
+  const overlay = document.getElementById('logout-confirm-overlay');
+  const button = document.getElementById('logout-save-btn');
+  const message = overlay?.querySelector('p');
+  if (button?.disabled) return;
+  if (button) { button.disabled = true; button.textContent = 'Salvando…'; }
+  if (message) message.textContent = 'Salvando plantas, inventário e XP no banco…';
+  try {
+    await saveGardenToSE();
+    await gardenSaveQueue;
+    await verifyGardenSavedBeforeLogout();
+    overlay?.remove();
     seUser = null;
     gardenHydrated = false;
     sessionStorage.removeItem('se_username');
@@ -9125,7 +9146,12 @@ function completeLogout() {
     document.getElementById('login-status').textContent = '';
     document.getElementById('garden-name').textContent = 'Jardim da Mistty';
     toast('👋 Sessão encerrada!', 2500);
-  });
+  } catch (error) {
+    console.warn('Logout cancelado: progresso não confirmado.', error);
+    if (button) { button.disabled = false; button.textContent = 'Tentar salvar novamente'; }
+    if (message) message.textContent = 'Não foi possível confirmar todo o progresso. Você continua logada; tente novamente.';
+    toast('❌ O logout foi cancelado para não perder seu progresso.', 4500);
+  }
 }
 
 // ─── LIVE STATUS ─────────────────────────────────────────

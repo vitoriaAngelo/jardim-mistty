@@ -228,6 +228,7 @@ exports.handler = async (event) => {
         safeData.orderSearches = existingData.orderSearches;
         safeData.orderDeliveries = existingData.orderDeliveries;
         safeData.orderPaidReset = existingData.orderPaidReset;
+        safeData.ordersGlobalResetVersion = existingData.ordersGlobalResetVersion;
       }
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {

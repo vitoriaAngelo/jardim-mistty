@@ -4744,7 +4744,7 @@ const PLOT_UPGRADES = [
 function renderPlotShop() {
   const grid = document.getElementById('plot-shop-grid');
   grid.innerHTML = PLOT_UPGRADES.map(u => {
-    const owned = G.unlockedPlots > u.slot || (u.slot === 5 && G.premiumSpecialPlotClaimed === true);
+    const owned = G.unlockedPlots > u.slot || (u.slot === 5 && premiumSpecialPlotAccess());
     const lv = currentLevel();
     const previewAccess = G.previewUnlocks || (window.location.hostname === 'localhost' && new URLSearchParams(window.location.search).has('preview'));
     const subscriberLocked = u.subscriberOnly && !hasSubscriberBadge();
@@ -5018,7 +5018,13 @@ function isReady(plot) {
   if (!plot) return false;
   return plot.growCount >= effectiveMaxGrowWithSkill(plot.type);
 }
+function premiumSpecialPlotAccess() {
+  return G.premiumSpecialPlotClaimed === true && hasSubscriberBadge();
+}
 function isSpecialPlotActive(index) {
+  // O canteiro 6 resgatado no Premium é permanente enquanto o usuário
+  // continuar subscriber; ele não usa expiração por dias.
+  if (index === 5 && premiumSpecialPlotAccess()) return true;
   if (G.specialPlotExpiresAt && Date.now() >= G.specialPlotExpiresAt) {
     G.specialPlots = [];
     G.specialPlot = null;
@@ -7343,7 +7349,7 @@ function renderPlots() {
 }
 
 function buildPlotEl(plot, idx) {
-  const locked = idx >= G.unlockedPlots && !(idx === 5 && G.premiumSpecialPlotClaimed === true);
+  const locked = idx >= G.unlockedPlots && !(idx === 5 && premiumSpecialPlotAccess());
   const div = document.createElement('div');
   div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty')
     + (plot?.goldenPlot || isSpecialPlotActive(idx) ? ' special-plot' : '')
@@ -7498,7 +7504,7 @@ function buildPlotEl(plot, idx) {
     const mutationInfo = plot.mutated ? '<div class="plot-mutation-label">🧬 mutação cristalina ativa</div>' : '';
     const specialDays = G.specialPlotExpiresAt ? Math.max(1, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS)) : 1;
     const specialLabel = `${specialDays.toLocaleString('pt-BR')} dia${specialDays > 1 ? 's' : ''}`;
-    const specialInfo = isSpecialPlotActive(idx) ? `<div class="plot-harvest-count">${specialPlotIcon()} especial - ${specialLabel} restante${specialDays > 1 ? 's' : ''}</div>` : '';
+    const specialInfo = isSpecialPlotActive(idx) ? `<div class="plot-harvest-count">${specialPlotIcon()} ${idx === 5 && G.premiumSpecialPlotClaimed === true ? 'especial · benefício do Sub' : `especial - ${specialLabel} restante${specialDays > 1 ? 's' : ''}`}</div>` : '';
     if (growReady) {
       lbl.innerHTML = `✅ pronto!${mutationInfo}${harvestInfo}${specialInfo}`;
     } else {
@@ -7514,7 +7520,7 @@ function buildPlotEl(plot, idx) {
   } else {
     const specialDays = G.specialPlotExpiresAt ? Math.max(1, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS)) : 1;
     const specialLabel = `${specialDays.toLocaleString('pt-BR')} dia${specialDays > 1 ? 's' : ''}`;
-    lbl.innerHTML = isSpecialPlotActive(idx) ? `<span class="plot-special-expiry">${specialPlotIcon()} especial - <strong>${specialLabel} restante${specialDays > 1 ? 's' : ''}</strong></span>` : 'vazio';
+    lbl.innerHTML = isSpecialPlotActive(idx) ? `<span class="plot-special-expiry">${specialPlotIcon()} ${idx === 5 && G.premiumSpecialPlotClaimed === true ? '<strong>especial · benefício do Sub</strong>' : `especial - <strong>${specialLabel} restante${specialDays > 1 ? 's' : ''}</strong>`}</span>` : 'vazio';
   }
   div.appendChild(lbl);
 
@@ -7523,7 +7529,7 @@ function buildPlotEl(plot, idx) {
 }
 
 async function onPlotClick(idx) {
-  if (idx >= G.unlockedPlots && !(idx === 5 && G.premiumSpecialPlotClaimed === true)) return;
+  if (idx >= G.unlockedPlots && !(idx === 5 && premiumSpecialPlotAccess())) return;
   const plot = G.plots[idx];
   const tool = G.selectedTool;
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);

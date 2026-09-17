@@ -7335,8 +7335,8 @@ async function onPlotClick(idx) {
     if (lostToSeason) {
       toast(`🥀 ${getPlantable(type).name} perdida! Cresceu fora da estação — não pode ser vendida.`, 4000);
       updatePts();
-      await saveGardenToSE();
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
+      saveGardenToSE(); // background
     } else {
       gainXP('harvest', plotEl, harvestXP(type), `+${harvestXP(type)} XP 🧺 Colheita!`);
       const qty = (hasGolden ? 2 : 1) + effectiveHarvestBonus(); // golden_soil_plus removido
@@ -7406,14 +7406,17 @@ async function onPlotClick(idx) {
       checkHarvestTitles();
       if (FLOWERS[type]) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0); // tracked at sell
       checkAchievements();
-      await saveGardenToSE();
-      // Atualizar inventário e regador após aplicar bônus de skills
+
+      // Feedback visual imediato — não espera o servidor responder
       renderInventory();
       renderFertilizerInventory();
       const toastMsg = gotDouble ? `🧺🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} COLHEITA DUPLA!` :
         `🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!${plot.goldenPlot ? ' ✨ Canteiro Especial: planta dourada vale 3x!' : hasGolden ? ' ✨ Terra Dourada: +1 unidade extra!' : ''}`;
       toast(regrows ? `${toastMsg} 🌱 Ela continuará plantada — regue novamente! (${plot.harvestsRemaining} colheita${plot.harvestsRemaining > 1 ? 's' : ''} restante${plot.harvestsRemaining > 1 ? 's' : ''})` : toastMsg);
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
+
+      // Save em background — não bloqueia a interface
+      saveGardenToSE();
     }
     return;
   }

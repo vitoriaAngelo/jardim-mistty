@@ -4495,6 +4495,11 @@ const PLANTS = {
   broccoli: { name:'Brócolis',    emoji:'🥦', cost:85,  maxWater:8,  maxGrow:17, color:'#2a8030', leafColor:'#1a6020', minLevel:8  },
   ruby_kale: { name:'Couve Rubi', emoji:'🥬', cost:240, maxWater:7, maxGrow:10, color:'#a44768', leafColor:'#526f48', minLevel:1, subscriberOnly:true },
   star_radish:{ name:'Rabanete Estelar', emoji:'🫜', cost:260, maxWater:7, maxGrow:10, color:'#cf7893', leafColor:'#668658', minLevel:1, subscriberOnly:true },
+  purple_cabbage:{ name:'Repolho Roxo', emoji:'🥬', cost:115, maxWater:8, maxGrow:19, color:'#704b91', leafColor:'#496d3b', minLevel:8 },
+  crystal_kale:{ name:'Couve Cristalina', emoji:'🥬', cost:180, maxWater:9, maxGrow:22, color:'#9fe7d0', leafColor:'#3e8062', minLevel:12 },
+  yellow_eggplant:{ name:'Berinjela Amarela', emoji:'🍆', cost:130, maxWater:7, maxGrow:17, color:'#e7c84b', leafColor:'#5d873d', minLevel:10 },
+  pink_cucumber:{ name:'Pepino Rosa', emoji:'🥒', cost:145, maxWater:8, maxGrow:20, color:'#e98aa9', leafColor:'#4b8d48', minLevel:11 },
+  green_mushroom:{ name:'Cogumelo Esverdeado', emoji:'🍄', cost:165, maxWater:9, maxGrow:21, color:'#8ebc78', leafColor:'#52734a', minLevel:13 },
 };
 
 // ─── UTILS ───────────────────────────────────────────────
@@ -5155,7 +5160,9 @@ function renderInventory() {
 const SELL = { potato: 0, carrot: 0, tomato: 0, beetroot: 0, lettuce: 0, cassava: 0,
                corn: 0, pumpkin: 0, eggplant: 0, pepper: 0, broccoli: 0,
                rose: 0, sunflower: 0, lavender: 0, daisy: 0, tulip: 0,
-               orchid: 0, hibiscus: 0, bluebell: 0, cherry: 0, poppy: 0, jasmine: 0 };
+               orchid: 0, hibiscus: 0, bluebell: 0, cherry: 0, poppy: 0, jasmine: 0,
+               cherry_blossom: 0, orange_blossom: 0, moon_flower: 0, sun_flower: 0, guarana_flower: 0,
+               purple_cabbage: 0, crystal_kale: 0, yellow_eggplant: 0, pink_cucumber: 0, green_mushroom: 0 };
 
 // Venda base já cobre: semente (rega e colheita são gratuitas)
 // mantendo uma margem cozy de lucro para cada cultivo. (rega não tem custo)
@@ -5163,6 +5170,8 @@ const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce:
                      corn: 84, pumpkin: 108, eggplant: 94, pepper: 103, broccoli: 117,
                      rose: 85, sunflower: 99, lavender: 113, daisy: 43, tulip: 76,
                      orchid: 127, hibiscus: 118, bluebell: 95, cherry: 136, poppy: 81, jasmine: 104,
+                     cherry_blossom: 170, orange_blossom: 178, moon_flower: 260, sun_flower: 235, guarana_flower: 198,
+                     purple_cabbage: 155, crystal_kale: 245, yellow_eggplant: 178, pink_cucumber: 205, green_mushroom: 225,
                      ruby_kale: 335, star_radish: 338, moon_lily: 1000, royal_dahlia: 383 };
 
 function cultivationCost(type) {
@@ -5281,6 +5290,11 @@ const FLOWERS = {
   cherry:     { name:'Cerejeira',   emoji:'🌸', cost:100, maxWater:9,  maxGrow:20, color:'#f0a0c0', leafColor:'#5a9820', minLevel:10 },
   poppy:      { name:'Papoula',     emoji:'🌷', cost:55,  maxWater:4,  maxGrow:11, color:'#e04020', leafColor:'#5ab830', minLevel:4  },
   jasmine:    { name:'Jasmim',      emoji:'⚪', cost:75,  maxWater:6,  maxGrow:15, color:'#fffff0', leafColor:'#4a9820', minLevel:6  },
+  cherry_blossom:{ name:'Flor de Cerejeira', emoji:'🌸', cost:125, maxWater:7, maxGrow:19, color:'#f3a7c2', leafColor:'#5a9820', minLevel:6 },
+  orange_blossom:{ name:'Flor de Laranjeira', emoji:'🍊', cost:135, maxWater:7, maxGrow:18, color:'#fff2cf', leafColor:'#4f8b2f', minLevel:7 },
+  moon_flower:{ name:'Flor da Lua', emoji:'🌙', cost:210, maxWater:8, maxGrow:23, color:'#b8a9e8', leafColor:'#53648b', minLevel:14 },
+  sun_flower:{ name:'Flor do Sol', emoji:'🌞', cost:190, maxWater:8, maxGrow:21, color:'#f7c84b', leafColor:'#5d8c31', minLevel:12 },
+  guarana_flower:{ name:'Flor de Guaraná', emoji:'🌺', cost:155, maxWater:7, maxGrow:20, color:'#e95c79', leafColor:'#46783b', minLevel:9 },
   moon_lily:  { name:'Lírio Lunar', emoji:'🪷', cost:280, maxWater:7, maxGrow:10, color:'#9d8bc4', leafColor:'#5f7956', minLevel:1, eventOnly:true },
   royal_dahlia:{ name:'Dália Real', emoji:'🌺', cost:300, maxWater:7, maxGrow:10, color:'#c66f91', leafColor:'#647f54', minLevel:1, subscriberOnly:true },
 };
@@ -6469,29 +6483,29 @@ const SEASONS = [
   {
     id: 'spring', name: 'Primavera', icon: '🌸', color: '#f0a0c0',
     barColor: '#e060a0',
-    vegetables: ['lettuce','carrot','potato','ruby_kale','star_radish'],
-    flowers:    ['daisy','tulip','cherry','jasmine','moon_lily','royal_dahlia'],
+    vegetables: ['lettuce','carrot','potato','ruby_kale','star_radish','purple_cabbage','crystal_kale'],
+    flowers:    ['daisy','tulip','cherry','jasmine','cherry_blossom','orange_blossom','moon_lily','royal_dahlia'],
     msg: 'A primavera chegou! Plantas de verão e outono não crescem agora.',
   },
   {
     id: 'summer', name: 'Verão', icon: '☀️', color: '#f8c030',
     barColor: '#e08000',
-    vegetables: ['tomato','corn','pepper','eggplant','star_radish'],
-    flowers:    ['sunflower','hibiscus','bluebell','poppy','daisy','royal_dahlia'],
+    vegetables: ['tomato','corn','pepper','eggplant','star_radish','yellow_eggplant','pink_cucumber'],
+    flowers:    ['sunflower','hibiscus','bluebell','poppy','daisy','orange_blossom','sun_flower','guarana_flower','royal_dahlia'],
     msg: 'O verão chegou! Aproveite para cultivar plantas do calor.',
   },
   {
     id: 'autumn', name: 'Outono', icon: '🍂', color: '#e07030',
     barColor: '#c04000',
-    vegetables: ['pumpkin','beetroot','broccoli','cassava','ruby_kale'],
-    flowers:    ['rose','lavender','orchid','moon_lily','royal_dahlia'],
+    vegetables: ['pumpkin','beetroot','broccoli','cassava','ruby_kale','purple_cabbage','green_mushroom'],
+    flowers:    ['rose','lavender','orchid','cherry_blossom','guarana_flower','moon_flower','moon_lily','royal_dahlia'],
     msg: 'O outono chegou! Hora das abóboras e flores mais densas.',
   },
   {
     id: 'winter', name: 'Inverno', icon: '❄️', color: '#80c0e0',
     barColor: '#2060a0',
-    vegetables: ['potato','broccoli','ruby_kale','star_radish'],
-    flowers:    ['moon_lily'],
+    vegetables: ['potato','broccoli','ruby_kale','star_radish','crystal_kale','green_mushroom'],
+    flowers:    ['moon_flower','moon_lily'],
     msg: 'O inverno chegou! Poucas plantas sobrevivem ao frio.',
   },
 ];
@@ -7662,7 +7676,7 @@ function plantSVG(type, progress) {
   const bud = clamp((t-.58)/.42,0,1);
   if(bud>0) {
     if(isFlower) {
-      const petal = {daisy:'#f2e8bb',rose:'#c78291',tulip:'#ce9ab0',sunflower:'#ddba70',lavender:'#a69ac1',orchid:'#bd98bb',hibiscus:'#d89280',bluebell:'#94a9cb',cherry:'#dfb2bc',poppy:'#d18b74',jasmine:'#faf4de',moon_lily:'#aaa0cc',royal_dahlia:'#d08aa5'}[type];
+      const petal = {daisy:'#f2e8bb',rose:'#c78291',tulip:'#ce9ab0',sunflower:'#ddba70',lavender:'#a69ac1',orchid:'#bd98bb',hibiscus:'#d89280',bluebell:'#94a9cb',cherry:'#dfb2bc',poppy:'#d18b74',jasmine:'#faf4de',cherry_blossom:'#f3a7c2',orange_blossom:'#fff2cf',moon_flower:'#b8a9e8',sun_flower:'#f7c84b',guarana_flower:'#e95c79',moon_lily:'#aaa0cc',royal_dahlia:'#d08aa5'}[type] || plant.color;
       body += '<g transform="translate(40 '+top+') scale('+(.35+bud*.65)+')"><path d="M0 8C-17 2-14-15-7-19L0-14L7-19C15-10 16 2 0 8Z" fill="'+petal+'"/><path d="M0 8Q-5-3 0-14" stroke="#fff9e4" stroke-width="1.3" opacity=".55" fill="none"/><path d="M-9 3 0 11 9 3" stroke="#758a5a" stroke-width="3" stroke-linecap="round" fill="none"/></g>';
     } else {
       body += '<g transform="translate(40 '+(top+8)+') scale('+bud+')"><ellipse rx="10" ry="9" fill="'+plant.color+'"/><path d="M-6-7 0-4 5-8" stroke="#7c945f" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="-3" cy="-2" rx="2" ry="3" fill="#fff4cf" opacity=".4"/></g>';

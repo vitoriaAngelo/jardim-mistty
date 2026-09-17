@@ -89,8 +89,10 @@ function validateOrdersTransition(oldData, nextData) {
   }
 }
 
-function orderStateChanged(oldData, nextData) {
-  const fields = ['orders','ordersGlobalResetVersion','ordersSeasonKey','orderSearches','orderDeliveries','orderPaidReset'];
+function orderActionChanged(oldData, nextData) {
+  // A colheita/plantio pode reenviar uma cópia local dos pedidos. Isso não é
+  // uma ação de pedido e não deve disparar a validação de recompensas.
+  const fields = ['ordersGlobalResetVersion','ordersSeasonKey','orderSearches','orderDeliveries','orderPaidReset'];
   return fields.some((field) => JSON.stringify(oldData?.[field] ?? null) !== JSON.stringify(nextData?.[field] ?? null));
 }
 
@@ -203,7 +205,7 @@ exports.handler = async (event) => {
       // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
       // só precisam ser revalidados quando o estado dos pedidos realmente muda;
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
-      if (existingRows.length && orderStateChanged(existingData, safeData)) validateOrdersTransition(existingData, safeData);
+      if (existingRows.length && orderActionChanged(existingData, safeData)) validateOrdersTransition(existingData, safeData);
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {
         safeData.farmName = existingName;

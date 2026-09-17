@@ -8891,19 +8891,30 @@ async function syncPtsToSE() {
 // O evento de visibilidade abaixo salva pela fila normal. Evitamos um segundo
 // envio paralelo ao fechar a aba, pois ele poderia disputar a mesma versão.
 
+function markGardenAway() {
+  if (!seUser || !gardenHydrated || growAwaySince) return;
+  // Celulares congelam timers quando o app vai para segundo plano.
+  // Guardamos o instante real para recuperar o crescimento ao retornar.
+  growAwaySince = Date.now();
+  saveGardenToSE();
+}
+
+function resumeGardenAfterAway() {
+  if (!seUser || !gardenHydrated || !growAwaySince) return;
+  applyOfflineProgress(growAwaySince);
+  growAwaySince = null;
+  renderPlots();
+  renderSeasonWidget();
+  saveGardenToSE();
+}
+
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden' && seUser && gardenHydrated) {
-    // Browsers can freeze timers in background tabs; keep the real start time.
-    growAwaySince = Date.now();
-    saveGardenToSE();
-  } else if (document.visibilityState === 'visible' && growAwaySince && gardenHydrated) {
-    applyOfflineProgress(growAwaySince);
-    growAwaySince = null;
-    renderPlots();
-    renderSeasonWidget();
-    saveGardenToSE();
-  }
+  if (document.visibilityState === 'hidden') markGardenAway();
+  else resumeGardenAfterAway();
 });
+window.addEventListener('pagehide', markGardenAway);
+window.addEventListener('pageshow', resumeGardenAfterAway);
+window.addEventListener('focus', resumeGardenAfterAway);
 
 // ── Load garden state from Supabase ──────────────────────
 async function loadGardenFromSE(username) {

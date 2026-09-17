@@ -215,7 +215,18 @@ exports.handler = async (event) => {
       // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
       // só precisam ser revalidados quando o estado dos pedidos realmente muda;
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
-      if (existingRows.length && orderActionChanged(existingData, safeData) && ordersMeaningfullyChanged(existingData, safeData)) validateOrdersTransition(existingData, safeData);
+      const hasOrderAction = orderActionChanged(existingData, safeData);
+      if (existingRows.length && hasOrderAction && ordersMeaningfullyChanged(existingData, safeData)) {
+        validateOrdersTransition(existingData, safeData);
+      } else if (existingRows.length && !hasOrderAction) {
+        // Salvamentos de plantas/XP/logout não carregam intenção de alterar
+        // pedidos. Preserva o estado canônico do banco e evita falsos bloqueios.
+        safeData.orders = existingData.orders;
+        safeData.ordersSeasonKey = existingData.ordersSeasonKey;
+        safeData.orderSearches = existingData.orderSearches;
+        safeData.orderDeliveries = existingData.orderDeliveries;
+        safeData.orderPaidReset = existingData.orderPaidReset;
+      }
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {
         safeData.farmName = existingName;

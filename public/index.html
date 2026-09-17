@@ -7869,11 +7869,20 @@ async function saveProfileName() {
 
 async function saveDailyPhrase() {
   const input = document.getElementById('profile-daily-phrase');
-  G.dailyPhrase = (input?.value || '').trim().slice(0, 25);
+  const previousPhrase = G.dailyPhrase || '';
+  const nextPhrase = (input?.value || '').trim().slice(0, 25);
+  if (!seUser || !gardenHydrated) {
+    toast('⏳ Aguarde o jardim terminar de carregar.', 2400);
+    if (input) input.value = previousPhrase;
+    return;
+  }
+  G.dailyPhrase = nextPhrase;
   try {
     await saveGardenToSE();
     toast('✅ Frase do dia salva!', 1800);
   } catch (e) {
+    G.dailyPhrase = previousPhrase;
+    if (input) input.value = previousPhrase;
     toast('❌ Não foi possível salvar a frase.', 2400);
   }
 }
@@ -8363,7 +8372,7 @@ async function saveGardenToSENow(retryStale = true) {
         }
         if (conflict.code === 'SESSION_CONFLICT') {
           handleGardenSessionConflict(conflict.error);
-          return;
+          throw new Error('Sessão do jardim encerrada por outra tela.');
         }
       }
       throw new Error(`Save failed: ${response.status}`);

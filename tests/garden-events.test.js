@@ -101,6 +101,13 @@ test('conflito de gravação não deixa o login carregando infinitamente', () =>
   assert.match(html, /function handleGardenSessionConflict[\s\S]*?setLoginLoading\(false\)/);
   assert.match(html, /conflict\.code === 'STALE_STATE'[\s\S]*?saveGardenToSENow\(false\)/);
   assert.match(html, /conflict\.code === 'SESSION_CONFLICT'[\s\S]*?handleGardenSessionConflict/);
+  assert.match(html, /handleGardenSessionConflict\(conflict\.error\);\s*throw new Error\('Sessão do jardim encerrada por outra tela\.'/);
+});
+
+test('frase do dia só confirma após salvar e restaura o valor em caso de falha', () => {
+  assert.match(html, /const previousPhrase = G\.dailyPhrase \|\| ''/);
+  assert.match(html, /if \(!seUser \|\| !gardenHydrated\)/);
+  assert.match(html, /G\.dailyPhrase = previousPhrase;[\s\S]*?Não foi possível salvar a frase/);
 });
 
 test('perfil oferece dois títulos difíceis de desbloquear', () => {

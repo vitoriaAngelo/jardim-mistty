@@ -2821,6 +2821,12 @@ body.dark-mode .points-history-item.loss .points-history-value { color:#ffb8aa !
 .pouch-art svg>path:first-of-type { fill:#e2d4ed; stroke:#ac96bc; stroke-width:1.5; }
 .pouch-art svg>path:nth-of-type(2) { stroke:#fff9f2; opacity:.55; }
 .pouch-art svg>ellipse:nth-of-type(2) { fill:#9581a7; }
+.twitchzinho-pouch.premium-pouch .pouch-art svg>path:first-of-type { fill:#eddaaa; stroke:#b59a63; }
+.twitchzinho-pouch.premium-pouch .pouch-art svg>path:nth-of-type(2) { stroke:#fff8df; }
+.twitchzinho-pouch.premium-pouch .pouch-art svg>ellipse:nth-of-type(2) { fill:#a78c55; }
+.twitchzinho-pouch.premium-pouch .pouch-art svg>path:nth-of-type(3),
+.twitchzinho-pouch.premium-pouch .pouch-art svg>path:nth-of-type(4) { stroke:#fff1c9; }
+.twitchzinho-pouch.premium-pouch:focus-visible { outline-color:#c9ac68; }
 .pouch-coin { position:absolute; top:0; left:25px; width:21px; height:21px; opacity:0; pointer-events:none; }
 .twitchzinho-pouch.deposit .pouch-coin { animation:pouch-coin-drop 1.1s ease-in both; }
 .twitchzinho-pouch.deposit .pouch-coin:nth-of-type(2) { animation-delay:.28s; }
@@ -5741,8 +5747,8 @@ function renderMascotShop() {
 }
 function previewMascot(id) {
   if (typeof window.setGardenMascot === 'function') window.setGardenMascot(id, true);
-  if (id === 'twitchzinho') {
-    updateTwitchzinhoPouch(true);
+  if (id === 'twitchzinho' || id === 'premium') {
+    updateTwitchzinhoPouch(id);
   } else {
     const pouch = document.getElementById('twitchzinho-pouch');
     if (pouch) pouch.dataset.preview = 'false';
@@ -9719,8 +9725,10 @@ function updateTwitchzinhoPouch(preview = false) {
     pouch.onclick = claimTwitchzinhoCoins;
     document.body.appendChild(pouch);
   }
-  if (preview) pouch.dataset.preview = 'true';
-  const active = twitchzinhoBenefitActive() || pouch.dataset.preview === 'true';
+  if (preview) pouch.dataset.preview = preview === 'premium' ? 'premium' : 'twitchzinho';
+  const previewMascotType = ['premium', 'twitchzinho'].includes(pouch.dataset.preview) ? pouch.dataset.preview : null;
+  const active = twitchzinhoBenefitActive() || Boolean(previewMascotType);
+  pouch.classList.toggle('premium-pouch', (previewMascotType || G.selectedMascot) === 'premium');
   const amount = Number(G.twitchzinhoPendingCoins || 0);
   pouch.classList.toggle('visible', active);
   pouch.classList.toggle('ready', amount > 0);

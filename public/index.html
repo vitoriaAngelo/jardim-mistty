@@ -6323,7 +6323,7 @@ const ACHIEV_GROUPS = [
       { id: 'harvest25',     icon: '🌽', name: 'Grande Colheita', desc: 'Colha 75 plantas ao total' },
       { id: 'buy_upgrade',   icon: '⚗️', name: 'Melhorado',       desc: 'Compre 3 melhorias' },
       { id: 'sell_flowers',  icon: '🌸', name: 'Floricultor',     desc: 'Venda 10 flores colhidas' },
-      { id: 'level10',       icon: '👑', name: 'Lendário',        desc: 'Alcance o nível 15' },
+      { id: 'level10',       icon: '👑', name: 'Lendário',        desc: 'Alcance o nível 30' },
     ],
   },
 ];
@@ -6365,7 +6365,7 @@ function checkAchievements() {
   if ((s.totalFertilizer || 0) >= 5) unlockAchievement('use_fert');
   if ((G.upgrades?.size || 0) >= 3) unlockAchievement('buy_upgrade');
   if (lv >= 8)  unlockAchievement('level5');
-  if (lv >= 15) unlockAchievement('level10');
+  if (lv >= 30) unlockAchievement('level10');
   if (G.missions && MISSION_DEFS.filter(d => G.missions.claimed?.[d.id]).length >= 3) unlockAchievement('first_mission');
   if (G.missions && MISSION_DEFS.every(d => G.missions.claimed[d.id])) unlockAchievement('all_missions');
 }
@@ -6420,7 +6420,7 @@ function achievementProgress(id) {
     harvest25:     [stats.totalHarvest || 0, 75, 'colheitas'],
     buy_upgrade:   [Math.min(3, G.upgrades?.size || 0), 3, 'melhorias'],
     sell_flowers:  [stats.totalFlowerSell || 0, 10, 'flores vendidas'],
-    level10:       [currentLevel(), 15, 'níveis'],
+    level10:       [currentLevel(), 30, 'níveis'],
   };
   const [rawCurrent, target, unit] = definitions[id] || [completed ? 1 : 0, 1, 'etapa'];
   const current = Math.max(0, Number(rawCurrent) || 0);

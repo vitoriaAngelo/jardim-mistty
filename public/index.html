@@ -4265,6 +4265,36 @@ let gardenEvent = null;
 let gardenEventTimer = null;
 let gardenEventRainTimer = null;
 let gardenEventButterflyTimer = null;
+let eventAudioContext = null;
+
+function unlockEventAudio() {
+  if (!eventAudioContext) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    eventAudioContext = new AudioContext();
+  }
+  if (eventAudioContext.state === 'suspended') eventAudioContext.resume().catch(() => {});
+}
+
+function playEventStartSound() {
+  unlockEventAudio();
+  if (!eventAudioContext || eventAudioContext.state !== 'running') return;
+  const now = eventAudioContext.currentTime;
+  [523.25, 659.25, 783.99].forEach((frequency, index) => {
+    const oscillator = eventAudioContext.createOscillator();
+    const gain = eventAudioContext.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, now + index * 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.09, now + index * 0.1 + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.1 + 0.42);
+    oscillator.connect(gain).connect(eventAudioContext.destination);
+    oscillator.start(now + index * 0.1);
+    oscillator.stop(now + index * 0.1 + 0.45);
+  });
+}
+
+document.addEventListener('pointerdown', unlockEventAudio, { once: true, passive: true });
 
 function eventFastMode() {
   const isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -4324,6 +4354,7 @@ function startGardenEvent() {
   G.eventLastType = gardenEvent.type;
   G.eventNextAt = gardenEvent.endsAt + nextEventDelay();
   document.body.classList.add(`event-${gardenEvent.type}`);
+  playEventStartSound();
   toast(`${def.icon} ${def.name} começou!`, 4000);
   if (gardenEvent.type === 'rain') {
     applyMagicRain();

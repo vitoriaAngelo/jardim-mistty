@@ -110,6 +110,12 @@ test('frase do dia só confirma após salvar e restaura o valor em caso de falha
   assert.match(html, /G\.dailyPhrase = previousPhrase;[\s\S]*?Não foi possível salvar a frase/);
 });
 
+test('nome da fazenda só confirma após salvar e não exibe sucesso e erro juntos', () => {
+  assert.match(html, /const previousName = G\.farmName/);
+  assert.match(html, /await saveGardenToSE\(\);[\s\S]*?Nome da fazenda alterado!/);
+  assert.match(html, /G\.farmName = previousName;[\s\S]*?Não foi possível salvar o perfil/);
+});
+
 test('perfil oferece dois títulos difíceis de desbloquear', () => {
   assert.match(html, /name:'Imperador da Colheita', target:3000/);
   assert.match(html, /name:'Eterno do Jardim', target:7500/);

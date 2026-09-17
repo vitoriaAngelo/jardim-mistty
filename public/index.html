@@ -7855,13 +7855,26 @@ async function saveProfileName() {
     else toast('🌿 O nome da fazenda não pode ficar em branco.', 2400);
     return;
   }
+  const previousName = G.farmName || document.getElementById('garden-name')?.textContent || '';
+  const previousPhrase = G.dailyPhrase || '';
+  if (!seUser || !gardenHydrated) {
+    if (typeof window.mascotNotify === 'function') window.mascotNotify('Aguarde o jardim terminar de carregar.', 2400);
+    else toast('⏳ Aguarde o jardim terminar de carregar.', 2400);
+    return;
+  }
+  G.farmName = val;
   G.dailyPhrase = (phraseInput?.value || '').trim().slice(0, 25);
   document.getElementById('garden-name').textContent = val;
-  if (typeof window.mascotNotify === 'function') window.mascotNotify('Nome da fazenda alterado!', 2000);
-  else toast('🌿 Nome da fazenda alterado!', 2000);
   try {
     await saveGardenToSE();
+    if (typeof window.mascotNotify === 'function') window.mascotNotify('Nome da fazenda alterado!', 2000);
+    else toast('🌿 Nome da fazenda alterado!', 2000);
   } catch (e) {
+    G.farmName = previousName;
+    G.dailyPhrase = previousPhrase;
+    document.getElementById('garden-name').textContent = previousName;
+    if (input) input.value = previousName;
+    if (phraseInput) phraseInput.value = previousPhrase;
     if (typeof window.mascotNotify === 'function') window.mascotNotify('Não foi possível salvar o perfil.', 2400);
     else toast('❌ Não foi possível salvar o perfil.', 2400);
   }

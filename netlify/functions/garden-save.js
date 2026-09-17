@@ -25,6 +25,21 @@ function validOrder(order, seasonIdx, data) {
   return Number(order.reward) === reward && Number(order.xp) === xp && typeof order.id === 'string' && order.id.length <= 80;
 }
 
+function sameStoredOrder(a, b) {
+  return Boolean(a && b)
+    && String(a.id) === String(b.id)
+    && String(a.type) === String(b.type)
+    && Number(a.qty) === Number(b.qty)
+    && String(ORDER_TIER_LEGACY[a.rarity] || a.rarity) === String(ORDER_TIER_LEGACY[b.rarity] || b.rarity)
+    && Number(a.reward) === Number(b.reward)
+    && Number(a.xp) === Number(b.xp);
+}
+
+function orderWasAlreadyStored(order, oldData) {
+  const storedOrders = Array.isArray(oldData?.orders) ? oldData.orders : [];
+  return storedOrders.some(stored => sameStoredOrder(stored, order));
+}
+
 function validateOrdersTransition(oldData, nextData) {
   const oldGlobalReset = Number(oldData.ordersGlobalResetVersion || 0);
   const nextGlobalReset = Number(nextData.ordersGlobalResetVersion || 0);
@@ -37,7 +52,12 @@ function validateOrdersTransition(oldData, nextData) {
   const nextKey = String(nextData.ordersSeasonKey ?? seasonIdx);
   const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
   const rewardState = oldKey === nextKey ? oldData : nextData;
-  if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || orders.some(order => !validOrder(order, seasonIdx, rewardState))) throw new Error('Pedido adulterado ou incompatível com a estação');
+  const canKeepStoredOrders = oldKey === nextKey;
+  const hasInvalidOrder = orders.some(order => {
+    if (canKeepStoredOrders && orderWasAlreadyStored(order, oldData)) return false;
+    return !validOrder(order, seasonIdx, rewardState);
+  });
+  if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');
   if (nextKey !== String(seasonIdx)) throw new Error('Estação dos pedidos inválida');
   if (nextGlobalReset > oldGlobalReset) {
     if (nextGlobalReset !== 1 || oldGlobalReset !== 0 || searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
@@ -59,7 +79,7 @@ function validateOrdersTransition(oldData, nextData) {
     const oldOrders = Array.isArray(oldData.orders) ? oldData.orders : [];
     const remainingIds = new Set(orders.map(order => order.id));
     const removed = oldOrders.filter(order => !remainingIds.has(order.id));
-    if (removed.length !== 1 || !validOrder(removed[0], seasonIdx, oldData)) throw new Error('Entrega não corresponde a um pedido válido');
+    if (removed.length !== 1 || !orderWasAlreadyStored(removed[0], oldData)) throw new Error('Entrega não corresponde a um pedido válido');
     const delivered = removed[0];
     const oldStock = Number(oldData.harvested?.[delivered.type] || 0);
     const newStock = Number(nextData.harvested?.[delivered.type] || 0);

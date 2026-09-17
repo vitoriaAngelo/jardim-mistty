@@ -4692,7 +4692,7 @@ const PLOT_UPGRADES = [
   { slot: 2, name: 'Canteiro 3',   desc: 'Terceiro espaço para plantar',      cost: 300,  minLevel: 2 },
   { slot: 3, name: 'Canteiro 4',   desc: 'Quarto espaço — o jardim cresce!',  cost: 600,  minLevel: 4 },
   { slot: 4, name: 'Canteiro 5',   desc: 'Quinto espaço para cultivar',       cost: 1000, minLevel: 6 },
-  { slot: 5, name: 'Canteiro 6',   desc: 'Canteiro final — jardim completo!', cost: 1500, minLevel: 8 },
+  { slot: 5, name: 'Canteiro 6',   desc: 'Canteiro final — jardim completo!', cost: 1500, minLevel: 8, subscriberOnly: true },
 ];
 
 function renderPlotShop() {
@@ -4701,20 +4701,23 @@ function renderPlotShop() {
     const owned = G.unlockedPlots > u.slot;
     const lv = currentLevel();
     const previewAccess = G.previewUnlocks || (window.location.hostname === 'localhost' && new URLSearchParams(window.location.search).has('preview'));
+    const subscriberLocked = u.subscriberOnly && !hasSubscriberBadge();
     const levelLocked = !owned && !previewAccess && lv < u.minLevel;
     const canAfford = previewAccess || G.pts >= u.cost;
     const unavailable = !previewAccess && !owned && G.unlockedPlots < u.slot;
-    const disabled = !owned && (levelLocked || !canAfford || unavailable);
+    const disabled = !owned && (subscriberLocked || levelLocked || !canAfford || unavailable);
     return `
       <div class="plot-shop-item ${owned ? 'owned' : disabled ? 'cant-afford' : ''}" onclick="buyPlot(${u.slot})">
-        <div class="plot-shop-icon">${owned ? '🪵' : levelLocked ? '🔒' : unavailable ? '🔒' : '🪵'}</div>
+        <div class="plot-shop-icon">${owned ? '🪵' : subscriberLocked ? '✦' : levelLocked ? '🔒' : unavailable ? '🔒' : '🪵'}</div>
         <div class="plot-shop-info">
           <div class="plot-shop-name">${u.name}</div>
-          <div class="plot-shop-desc">${owned ? '✅ Desbloqueado!' : levelLocked ? `Requer nível ${u.minLevel}` : unavailable ? 'Desbloqueie o anterior primeiro' : u.desc}</div>
+          <div class="plot-shop-desc">${owned ? '✅ Desbloqueado!' : subscriberLocked ? '✦ Exclusivo para subscribers' : levelLocked ? `Requer nível ${u.minLevel}` : unavailable ? 'Desbloqueie o anterior primeiro' : u.desc}</div>
         </div>
         <div class="plot-shop-right">
           ${owned
             ? `<div class="plot-owned-badge">✔ Possui</div>`
+            : subscriberLocked
+              ? `<div class="cozy-level-chip" style="font-size:11px;font-weight:800;background:#80629c;color:#fff;border-radius:99px;padding:3px 10px">✦ Exclusivo Sub</div>`
             : levelLocked
               ? `<div class="cozy-level-chip" style="font-size:11px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:3px 10px">🔒 Nível ${u.minLevel}</div>`
               : `<div class="plot-shop-price"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${u.cost}</div>`
@@ -4728,6 +4731,7 @@ async function buyPlot(slot) {
   const u = PLOT_UPGRADES.find(p => p.slot === slot);
   if (!u) return;
   if (G.unlockedPlots > slot) { toast('Você já tem esse canteiro! 🪵'); return; }
+  if (u.subscriberOnly && !hasSubscriberBadge()) { toast('✦ O Canteiro 6 é exclusivo para subscribers.'); return; }
   if (!previewAccess() && G.unlockedPlots < slot) { toast('Desbloqueie os canteiros anteriores primeiro!'); return; }
   if (!previewAccess() && currentLevel() < u.minLevel) { toast(`🔒 Precisa ser nível ${u.minLevel} para este canteiro!`); return; }
   if (!previewAccess() && G.pts < u.cost) { toast(`✨ Faltam ${u.cost - G.pts} pts para comprar esse canteiro!`); return; }

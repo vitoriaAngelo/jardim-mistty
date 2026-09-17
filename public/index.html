@@ -5828,7 +5828,14 @@ function updateOrdersButton() {
 }
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'A',label:'Tier A',mult:1, min:1, max:12} : roll < .94 ? {id:'S',label:'Tier S',mult:2.2, min:8, max:26} : {id:'SS',label:'Tier SS',mult:4.5, min:20, max:40}; }
 function createOrder(index = 0) {
-  const types = Object.keys(PLANTS).filter(type => isInSeason(type) && (!PLANTS[type].subscriberOnly || G.premiumPlantsUnlocked));
+  const catalog = Object.entries({ ...PLANTS, ...FLOWERS })
+    .filter(([, plant]) => !plant.eventOnly && (!plant.subscriberOnly || G.premiumPlantsUnlocked))
+    .map(([type]) => type);
+  const seasonal = catalog.filter(isInSeason);
+  // A estação tem preferência (aprox. 75%), mas qualquer item do catálogo
+  // continua podendo aparecer para que os pedidos não fiquem previsíveis.
+  const priorityPool = [...seasonal, ...seasonal, ...seasonal, ...catalog];
+  const types = priorityPool.length ? priorityPool : catalog;
   const type = types[Math.floor(Math.random() * types.length)];
   const rarity = orderRarity();
   const qty = rarity.min + Math.floor(Math.random() * (rarity.max - rarity.min + 1));

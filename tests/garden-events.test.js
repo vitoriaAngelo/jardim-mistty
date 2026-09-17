@@ -34,10 +34,17 @@ test('planta perdida fora da estação não concede XP de colheita', () => {
   const harvestStart = html.indexOf('// AUTO-COLHEITA:');
   const harvestEnd = html.indexOf('// APLICAR ADUBO:', harvestStart);
   const harvestSource = html.slice(harvestStart, harvestEnd);
-  const seasonCheck = harvestSource.indexOf('if (outOfSeason)');
+  const seasonCheck = harvestSource.indexOf('if (lostToSeason)');
   const rewardBranch = harvestSource.indexOf("gainXP('harvest'", seasonCheck);
   assert.ok(seasonCheck >= 0 && rewardBranch > seasonCheck, 'XP deve ficar somente no ramo de colheita válida');
   assert.doesNotMatch(harvestSource.slice(seasonCheck, harvestSource.indexOf('} else {', seasonCheck)), /gainXP\(/);
+});
+
+test('mutação cristalina protege a planta fora da estação até a última colheita', () => {
+  assert.match(html, /const mutationProtectsSeason = outOfSeason && plot\.mutated === true/);
+  assert.match(html, /const lostToSeason = outOfSeason && !mutationProtectsSeason/);
+  assert.match(html, /const regrows = !lostToSeason && harvestsRemaining > 1/);
+  assert.match(html, /Planta cristalina protegida da estação/);
 });
 
 test('planta mutada fica identificada no card e no tooltip', () => {

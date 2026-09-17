@@ -7312,7 +7312,9 @@ async function onPlotClick(idx) {
     const plant = getPlantable(type);
     const harvestsTotal = harvestCyclesFor(type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);
-    const regrows = !outOfSeason && harvestsRemaining > 1;
+    const mutationProtectsSeason = outOfSeason && plot.mutated === true;
+    const lostToSeason = outOfSeason && !mutationProtectsSeason;
+    const regrows = !lostToSeason && harvestsRemaining > 1;
     const hasGolden = plot.goldenSoil;
     if (regrows) {
       plot.harvestsRemaining = harvestsRemaining - 1;
@@ -7322,7 +7324,7 @@ async function onPlotClick(idx) {
       G.plots[idx] = null;
     }
     spawnSparkles(idx);
-    if (outOfSeason) {
+    if (lostToSeason) {
       toast(`🥀 ${getPlantable(type).name} perdida! Cresceu fora da estação — não pode ser vendida.`, 4000);
       updatePts();
       await saveGardenToSE();
@@ -7348,7 +7350,9 @@ async function onPlotClick(idx) {
       if (plot.mutated) {
         finalQty += 1;
         gainXP('harvest', plotEl, 25, '🧬 +25 XP Mutação');
-        toast(`🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
+        toast(mutationProtectsSeason
+          ? `💎 Planta cristalina protegida da estação! +1 ${getPlantable(type).name}`
+          : `🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
       }
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
       if (gotDouble) {

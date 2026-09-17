@@ -150,7 +150,7 @@
     hideTimer = setTimeout(close, 9000);
   }
   function blocked() {
-    return document.hidden || !!document.querySelector('.modal-overlay:not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(#garden-event-summary-overlay):not(#bonus-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
+    return document.hidden || !!document.querySelector('.modal-overlay:not(#skilltree-overlay):not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(#garden-event-summary-overlay):not(#bonus-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
   }
   window.mascotNotify = (text, duration = 2400) => {
     syncVisibility();

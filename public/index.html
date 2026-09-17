@@ -1851,6 +1851,32 @@ body:has(.login-overlay:not(.hidden)) { overflow: hidden; }
 .login-rituals b { font-size: 18px; font-weight: 400; }
 .login-footer { padding-top: 20px; font-size: 10px; line-height: 1.9; color: #797c6f; }
 .login-footer a { color: #596b48; text-underline-offset: 3px; }
+/* Login enxuto: o acesso é o foco principal, sem excesso de mensagens. */
+.login-overlay { background:radial-gradient(circle at 50% 15%,#f4f0d9 0,#dfe7d6 42%,#b6c4b0 100%); }
+.login-box { display:block; width:min(460px,100%); max-width:460px; overflow:hidden; border:1px solid #d3dbc6; background:linear-gradient(160deg,#fffdf7 0%,#f6f3e6 100%); box-shadow:0 12px 0 #aab9a4,0 24px 55px #4f614a33; }
+.login-art { display:none; }
+.login-content { padding:44px 44px 32px; }
+.login-content::before { content:'🌱'; display:block; margin-bottom:12px; font-size:30px; filter:drop-shadow(0 3px 2px #687c5433); }
+.login-welcome { margin-bottom:18px; background:#f0f5e8; border-color:#d3dfc9; color:#5f754f; }
+.login-event-note, .login-build-note, .login-rituals { display:none; }
+.login-content h1 { font-size:48px; color:#334b31; }
+.login-description { margin:16px auto 24px; max-width:300px; color:#5d6d58; line-height:1.65; }
+.login-twitch-btn { padding:16px 14px; border-radius:14px; font-size:15px; box-shadow:0 4px 0 #64497e; }
+.login-note { color:#687461; }
+.login-footer { padding-top:18px; border-top:1px solid #e3e6d9; }
+body.dark-mode .login-overlay { background:radial-gradient(circle at 50% 15%,#354532 0,#1d2a20 55%,#111a14 100%); }
+body.dark-mode .login-box { border-color:#52684f; background:linear-gradient(160deg,#29362a 0%,#202a21 100%); box-shadow:0 12px 0 #111a14,0 24px 55px #0008; }
+body.dark-mode .login-welcome { background:#354a35; border-color:#61795c; color:#e0edcf; }
+body.dark-mode .login-content h1 { color:#f2f5df; }
+body.dark-mode .login-description, body.dark-mode .login-note { color:#cbd8c2; }
+body.dark-mode .login-footer { border-color:#40523d; color:#aebfa5; }
+@media (max-width:650px) {
+  .login-overlay { padding:16px 10px; }
+  .login-box { width:100%; max-width:390px; border-radius:24px; }
+  .login-content { padding:30px 22px 24px; }
+  .login-content h1 { font-size:40px; }
+  .login-description { font-size:13px; max-width:270px; }
+}
 @media (max-width: 680px) {
   .login-overlay { overflow-y: auto; padding: 22px 16px; align-items: flex-start; }
   .login-box { max-width: 420px; grid-template-columns: 1fr; border-radius: 22px; }

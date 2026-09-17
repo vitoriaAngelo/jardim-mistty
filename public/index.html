@@ -1608,6 +1608,16 @@ body.dark-mode .order-card small { color:#cbd9c2; }
   margin-bottom: 7px; transition: all .15s;
 }
 .ranking-item.me { background: #f0ffe8; border-color: var(--grass); }
+.ranking-item[class*="ranking-bg-"] { background-size:cover; }
+.ranking-item.ranking-bg-spring { background:linear-gradient(135deg,#f4f6e8,#f3dfe8); }
+.ranking-item.ranking-bg-sunny { background:linear-gradient(135deg,#fff1ba,#e8c66f); }
+.ranking-item.ranking-bg-rain { background:linear-gradient(135deg,#dceceb,#9bbfc0); }
+.ranking-item.ranking-bg-night { background:linear-gradient(135deg,#d1d8e8,#aeb6d4); }
+.ranking-item.ranking-bg-autumn { background:linear-gradient(135deg,#f3d9b7,#c78a68); }
+.ranking-item.ranking-bg-winter { background:linear-gradient(135deg,#e9f4f2,#bddce8); }
+.ranking-item.ranking-bg-rainbow { background:linear-gradient(110deg,#f5d4d4,#f5e6b2,#cfe6c9,#cedcf0); }
+.ranking-item.ranking-bg-forest { background:linear-gradient(135deg,#c4d4ae,#b8afc9); }
+.ranking-custom-title { display:inline-block; margin-top:2px; color:#806532; font-size:10px; font-weight:900; }
 .ranking-item[role="button"] { position:relative; cursor:pointer; }
 .ranking-item[role="button"]::after { content:'Clique para ver o perfil'; display:none; position:absolute; z-index:35; left:50%; bottom:calc(100% + 7px); transform:translateX(-50%); padding:7px 10px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:11px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 7px 20px #4b573326; font:700 11px/1.2 'Nunito',sans-serif; white-space:nowrap; pointer-events:none; }
 .ranking-item[role="button"]:hover::after, .ranking-item[role="button"]:focus-visible::after { display:block; }
@@ -1707,6 +1717,19 @@ body.dark-mode .ranking-item[role="button"]::after { background:#303a30; border-
 .ranking-profile-badges .ranking-badge-tip::after { left:17px; transform:none; }
 .ranking-profile-info { display:flex; align-items:center; gap:14px; margin:10px 0 16px; padding:12px; border:1px solid var(--cozy-line); border-radius:15px; background:var(--cream2); }
 .ranking-profile-frame { width:64px; height:64px; font-size:30px; }
+.ranking-profile-modal { width:min(470px,calc(100% - 24px)) !important; max-width:470px !important; }
+.ranking-profile-modal[data-profile-background="spring"] { background:linear-gradient(135deg,#fffdf7,#edf5e7 62%,#fae8eb); }
+.ranking-profile-modal[data-profile-background="sunny"] { background:linear-gradient(135deg,#fffdf7,#f8efcf 62%,#f2d98a); }
+.ranking-profile-modal[data-profile-background="rain"] { background:linear-gradient(135deg,#f5faf8,#d8e8e7 62%,#b5ced0); }
+.ranking-profile-modal[data-profile-background="night"] { background:linear-gradient(135deg,#eef0e7,#c9d0e3 45%,#9ca4c7); }
+.ranking-profile-modal[data-profile-background="autumn"] { background:linear-gradient(135deg,#fff7e9,#f4e5d2 62%,#dda87a); }
+.ranking-profile-modal[data-profile-background="winter"] { background:linear-gradient(135deg,#fffdf7,#e8f0ed 62%,#c1dce8); }
+.ranking-profile-modal[data-profile-background="rainbow"] { background:linear-gradient(135deg,#fff1dc,#f6dce9 40%,#dcebd5 72%,#d7e3f5); }
+.ranking-profile-modal[data-profile-background="forest"] { background:linear-gradient(135deg,#e8efdf,#c5d4b0 52%,#b5a9c7); }
+body.dark-mode .ranking-profile-modal { color:#edf2e6; }
+body.dark-mode .ranking-profile-modal[data-profile-background="spring"] { background:linear-gradient(135deg,#252b24,#303b2d 62%,#49343f); }
+body.dark-mode .ranking-profile-modal[data-profile-background="night"] { background:linear-gradient(135deg,#1d2534,#27344c 52%,#3b4262); }
+body.dark-mode .ranking-profile-modal[data-profile-background="forest"] { background:linear-gradient(135deg,#29352a,#35462f 52%,#443b52); }
 .ranking-profile-main { min-width:0; }
 .ranking-profile-main strong { display:block; font-size:18px; color:var(--text); }
 .ranking-profile-main small { display:block; margin-top:3px; color:var(--text2); font-weight:700; }
@@ -5754,6 +5777,9 @@ function renderRankingPage() {
     const userLevel = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
     const levelIcon = LEVELS.find(levelData => levelData.lv === userLevel)?.emoji || '🌱';
     const dailyPhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
+    const profileBackground = isMe ? (G.profileBackground || u.profileBackground) : (u.profileBackground || 'spring');
+    const selectedTitle = isMe ? (G.selectedHarvestTitle || u.selectedHarvestTitle) : (u.selectedHarvestTitle || '');
+    const bgClass = PROFILE_BACKGROUNDS.some(([id]) => id === profileBackground) ? `ranking-bg-${profileBackground}` : 'ranking-bg-spring';
     const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
     const rankingFrame = isMe ? (G.profileFrame || u.profileFrame || u.frame) : (u.profileFrame || u.frame);
     const frame = ['purple','pink','blue','red','yellow','vip'].includes(rankingFrame) ? rankingFrame : 'red';
@@ -5767,9 +5793,9 @@ function renderRankingPage() {
     const medal = pos <= 3
       ? `<span class="ranking-place ranking-place-${pos}" aria-label="${pos}º lugar"><span>${pos}</span></span>`
       : `<span style="font-size:20px;font-weight:800;color:var(--text2)">${pos}</span>`;
-    return `<div class="ranking-item ${topClass} ${isMe ? 'me' : ''}" role="button" tabindex="0" aria-label="Abrir perfil de ${farmName}" onclick="openRankingProfile(${rankingPage * pageSize + i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRankingProfile(${rankingPage * pageSize + i})}">
+    return `<div class="ranking-item ${topClass} ${isMe ? 'me' : ''} ${bgClass}" role="button" tabindex="0" aria-label="Abrir perfil de ${farmName}" onclick="openRankingProfile(${rankingPage * pageSize + i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRankingProfile(${rankingPage * pageSize + i})}">
       <div class="ranking-pos">${medal}</div><div class="ranking-frame" data-frame="${frame}" aria-label="Nível ${userLevel}" title="Nível ${userLevel}" aria-hidden="false">${levelIcon}</div>
-      <div class="ranking-name"><div class="ranking-farm-title"><div class="ranking-farm-name">${farmName}</div></div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
+      <div class="ranking-name"><div class="ranking-farm-title"><div class="ranking-farm-name">${farmName}</div></div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${selectedTitle ? `<div class="ranking-custom-title">🏅 ${selectedTitle}</div>` : ''}${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
       <div class="ranking-pts">${rankingMode === 'level' ? `⭐ Nível ${userLevel}` : `<img class="points-token" src="points-sprout.svg" width="20" height="20" alt="" aria-hidden="true"> ${pts.toLocaleString()}`}</div>
     </div>`;
   }).join('');
@@ -5836,6 +5862,8 @@ async function openRanking() {
               : (!isPlaceholderFarmName(user.farmName, username) ? user.farmName : defaultFarmName(username)),
             dailyPhrase: save.dailyPhrase || user.dailyPhrase,
             profileFrame: save.profileFrame || user.profileFrame,
+            profileBackground: save.profileBackground || user.profileBackground,
+            selectedHarvestTitle: save.selectedHarvestTitle || user.selectedHarvestTitle || '',
             isSubscriber: save.isSubscriber === true || user.isSubscriber === true,
             isPremium: save.isPremium === true,
             badges: save.achievements || user.badges,
@@ -6307,6 +6335,8 @@ function openRankingProfile(index) {
   const level = Number(u.level ?? u.lv ?? (isMe ? currentLevel() : 1)) || 1;
   const levelIcon = LEVELS.find(levelData => levelData.lv === level)?.emoji || '🌱';
   const profilePhrase = u.dailyPhrase || u.phrase || (isMe ? G.dailyPhrase : '') || '';
+  const profileBackground = isMe ? (G.profileBackground || u.profileBackground) : (u.profileBackground || 'spring');
+  const selectedTitle = isMe ? (G.selectedHarvestTitle || u.selectedHarvestTitle) : (u.selectedHarvestTitle || '');
   const stats = u.stats || {};
   const ownStats = isMe ? (G.achievStats || {}) : {};
   const statItems = [
@@ -6329,9 +6359,9 @@ function openRankingProfile(index) {
   const overlay = document.createElement('div');
   overlay.className = 'mail-overlay';
   overlay.id = 'ranking-profile-overlay';
-  overlay.innerHTML = `<div class="mail-modal" style="max-width:360px"><button class="popup-close-x" aria-label="Fechar perfil" onclick="this.closest('#ranking-profile-overlay').remove()">×</button>
+  overlay.innerHTML = `<div class="mail-modal ranking-profile-modal" data-profile-background="${profileBackground}"><button class="popup-close-x" aria-label="Fechar perfil" onclick="this.closest('#ranking-profile-overlay').remove()">×</button>
     <div class="mail-modal-title">🌱 Perfil do fazendeiro</div>
-    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-label="Nível ${level}" title="Nível ${level}">${levelIcon}</div><div class="ranking-profile-main"><div class="ranking-farm-title"><strong>${farmName}</strong></div><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
+    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-label="Nível ${level}" title="Nível ${level}">${levelIcon}</div><div class="ranking-profile-main"><div class="ranking-farm-title"><strong>${farmName}</strong></div><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${selectedTitle ? `<small class="ranking-custom-title">🏅 ${selectedTitle}</small>` : ''}${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
     <div class="profile-label">Estatísticas da fazenda</div><div class="ranking-profile-stats">${statsHtml}</div><div class="profile-label">Badges desbloqueados</div><div class="ranking-profile-badges">${badgeHtml}</div><button class="mail-close-btn" onclick="this.closest('#ranking-profile-overlay').remove()">Fechar</button></div>`;
   document.body.appendChild(overlay);
 }

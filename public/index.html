@@ -5479,7 +5479,7 @@ function spawnCoinBurst(el, pts) {
 function harvestedProduceArt(type) {
   const item = getPlantable(type);
   const isFlower = Boolean(FLOWERS[type]);
-  return `<div class="harvested-produce-art ${isFlower ? 'flower' : 'vegetable'}" aria-hidden="true">
+  return `<div class="harvested-produce-art ${isFlower ? 'flower' : 'vegetable'} crop-${type}" aria-hidden="true">
     <span class="produce-leaf produce-leaf-left">❧</span>
     <span class="produce-emoji">${item?.emoji || '🌱'}</span>
     <span class="produce-leaf produce-leaf-right">❧</span>
@@ -7731,6 +7731,21 @@ function bloomSVG(type, lc, pc) {
     <line x1="35" y1="4" x2="33" y2="-2" stroke="${lc}" stroke-width="2.5" stroke-linecap="round"/>
     <line x1="40" y1="2" x2="40" y2="-4" stroke="${lc}" stroke-width="2.5" stroke-linecap="round"/>
     <line x1="45" y1="4" x2="47" y2="-2" stroke="${lc}" stroke-width="2.5" stroke-linecap="round"/>`);
+
+  if (type === 'purple_cabbage') return wrap(`${stem('56')}
+    <ellipse cx="22" cy="66" rx="16" ry="10" fill="#3c5c36" transform="rotate(-28 22 66)"/>
+    <ellipse cx="58" cy="70" rx="16" ry="10" fill="#3c5c36" transform="rotate(28 58 70)"/>
+    <ellipse cx="28" cy="40" rx="22" ry="18" fill="#4d286b" transform="rotate(-22 28 40)"/>
+    <ellipse cx="52" cy="40" rx="22" ry="18" fill="#633987" transform="rotate(22 52 40)"/>
+    <ellipse cx="40" cy="30" rx="19" ry="17" fill="#8b5ca8"/>
+    <path d="M40 18Q30 31 40 48Q50 31 40 18M25 34Q35 39 40 48M55 34Q45 39 40 48" stroke="#d8b8e8" stroke-width="2" fill="none" opacity=".8"/>`);
+
+  if (type === 'crystal_kale') return wrap(`${stem('48')}
+    <ellipse cx="23" cy="63" rx="16" ry="10" fill="#477d62" transform="rotate(-30 23 63)"/>
+    <ellipse cx="57" cy="67" rx="16" ry="10" fill="#477d62" transform="rotate(30 57 67)"/>
+    <path d="M40 53Q17 47 18 30Q30 25 40 39Q50 25 62 30Q63 47 40 53Z" fill="#8ed8bd"/>
+    <path d="M40 48V25M40 42L25 33M40 42L55 33" stroke="#e7fff4" stroke-width="2" fill="none" opacity=".9"/>
+    <path d="M40 21L46 31L40 40L34 31Z" fill="#c8fff0" opacity=".85" stroke="#6fc5a4" stroke-width="1.5"/>`);
 
   if (type === 'lettuce') return wrap(`
     <line x1="40" y1="100" x2="40" y2="55" stroke="#2a5c10" stroke-width="5" stroke-linecap="round"/>

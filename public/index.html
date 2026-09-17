@@ -8080,7 +8080,7 @@ async function saveProfileName() {
   G.dailyPhrase = (phraseInput?.value || '').trim().slice(0, 25);
   document.getElementById('garden-name').textContent = val;
   try {
-    await saveGardenToSE();
+    await saveProfilePreferences({ farmName:val, dailyPhrase:G.dailyPhrase });
     if (typeof window.mascotNotify === 'function') window.mascotNotify('Nome da fazenda alterado!', 2000);
     else toast('🌿 Nome da fazenda alterado!', 2000);
   } catch (e) {
@@ -8105,7 +8105,7 @@ async function saveDailyPhrase() {
   }
   G.dailyPhrase = nextPhrase;
   try {
-    await saveGardenToSE();
+    await saveProfilePreferences({ dailyPhrase:nextPhrase });
     toast('✅ Frase do dia salva!', 1800);
   } catch (e) {
     G.dailyPhrase = previousPhrase;

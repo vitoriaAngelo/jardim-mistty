@@ -16,7 +16,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
   try {
-    const { username, sessionId, profileBackground, selectedHarvestTitle } = JSON.parse(event.body || '{}');
+    const { username, sessionId, profileBackground, selectedHarvestTitle, farmName, dailyPhrase } = JSON.parse(event.body || '{}');
     if (!username || !sessionId) return { statusCode: 400, headers, body: JSON.stringify({ error:'Dados inválidos' }) };
     const auth = await authenticateTwitch(event);
     requireSameUser(auth, username);
@@ -32,6 +32,16 @@ exports.handler = async (event) => {
     if (selectedHarvestTitle !== undefined) {
       if (!VALID_TITLES.has(selectedHarvestTitle)) return { statusCode:400, headers, body:JSON.stringify({ error:'Título inválido' }) };
       next.selectedHarvestTitle = selectedHarvestTitle;
+    }
+    if (farmName !== undefined) {
+      const value = String(farmName || '').trim();
+      if (!value || value.length > 20) return { statusCode:400, headers, body:JSON.stringify({ error:'Nome da fazenda inválido' }) };
+      next.farmName = value;
+    }
+    if (dailyPhrase !== undefined) {
+      const value = String(dailyPhrase || '').trim();
+      if (value.length > 25) return { statusCode:400, headers, body:JSON.stringify({ error:'Frase do dia inválida' }) };
+      next.dailyPhrase = value;
     }
     next._sessionLeaseUntil = Date.now() + (2 * 60 * 1000);
     const updated = await conditionalPatch(auth.username, current.updated_at, next);

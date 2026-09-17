@@ -22,6 +22,17 @@ test('acelera automaticamente o primeiro evento apenas no Deploy Preview', () =>
   assert.match(html, /location\.hostname\.startsWith\('deploy-preview-'\)/);
   assert.match(html, /eventFastMode\(\) \? 8000 \+ Math\.random\(\)\*5000/);
   assert.match(html, /G\.eventNextAt = Date\.now\(\)\+5000/);
+  assert.match(html, /gardenEventDuration\(type\) \{ return eventFastMode\(\) \? 12/);
+});
+
+test('planta perdida fora da estação não concede XP de colheita', () => {
+  const harvestStart = html.indexOf('// AUTO-COLHEITA:');
+  const harvestEnd = html.indexOf('// APLICAR ADUBO:', harvestStart);
+  const harvestSource = html.slice(harvestStart, harvestEnd);
+  const seasonCheck = harvestSource.indexOf('if (outOfSeason)');
+  const rewardBranch = harvestSource.indexOf("gainXP('harvest'", seasonCheck);
+  assert.ok(seasonCheck >= 0 && rewardBranch > seasonCheck, 'XP deve ficar somente no ramo de colheita válida');
+  assert.doesNotMatch(harvestSource.slice(seasonCheck, harvestSource.indexOf('} else {', seasonCheck)), /gainXP\(/);
 });
 
 test('persiste o próximo evento para impedir repetição por F5', () => {

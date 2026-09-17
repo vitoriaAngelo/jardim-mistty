@@ -3958,6 +3958,7 @@ function eventFastMode() {
   return isPreviewHost || (isLocalHost && new URLSearchParams(location.search).get('events') === 'fast');
 }
 function nextEventDelay() { return eventFastMode() ? 8000 + Math.random()*5000 : 300000 + Math.random()*180000; }
+function gardenEventDuration(type) { return eventFastMode() ? 12 : GARDEN_EVENTS[type].duration; }
 function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
 function setNextGardenEvent() { G.eventNextAt = Date.now() + nextEventDelay(); saveGardenToSE(); }
 
@@ -3967,7 +3968,7 @@ function renderGardenEvent() {
   if (!gardenEvent) { banner.classList.remove('visible'); return; }
   const def = GARDEN_EVENTS[gardenEvent.type];
   const left = Math.max(0, Math.ceil((gardenEvent.endsAt - Date.now()) / 1000));
-  const total = gardenEvent.phase === 'countdown' ? 10 : def.duration;
+  const total = gardenEvent.phase === 'countdown' ? 10 : gardenEventDuration(gardenEvent.type);
   banner.classList.add('visible');
   banner.style.borderColor = def.color;
   document.getElementById('garden-event-icon').textContent = def.icon;
@@ -4000,7 +4001,7 @@ function announceGardenEvent() {
 
 function startGardenEvent() {
   const def = GARDEN_EVENTS[gardenEvent.type];
-  gardenEvent.phase = 'active'; gardenEvent.endsAt = Date.now() + def.duration*1000;
+  gardenEvent.phase = 'active'; gardenEvent.endsAt = Date.now() + gardenEventDuration(gardenEvent.type)*1000;
   G.eventLastType = gardenEvent.type;
   G.eventNextAt = gardenEvent.endsAt + nextEventDelay();
   document.body.classList.add(`event-${gardenEvent.type}`);
@@ -6940,13 +6941,13 @@ async function onPlotClick(idx) {
       G.plots[idx] = null;
     }
     spawnSparkles(idx);
-    gainXP('harvest', plotEl, harvestXP(type), `+${harvestXP(type)} XP 🧺 Colheita!`);
     if (outOfSeason) {
       toast(`🥀 ${getPlantable(type).name} perdida! Cresceu fora da estação — não pode ser vendida.`, 4000);
       updatePts();
       saveGardenToSE();
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
     } else {
+      gainXP('harvest', plotEl, harvestXP(type), `+${harvestXP(type)} XP 🧺 Colheita!`);
       const qty = (hasGolden ? 2 : 1) + effectiveHarvestBonus(); // golden_soil_plus removido
       const harvestQty = qty * (plot.goldenPlot ? 3 : 1);
 

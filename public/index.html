@@ -5698,6 +5698,10 @@ function applyBonusKit(name) {
   const premiumSeedTypes = ['ruby_kale', 'star_radish', 'moon_lily', 'royal_dahlia'];
   if (kit.seeds) premiumSeedTypes.forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + kit.seeds; });
   if (isUpgrade && kit.special) {
+    // Kits comprados no início já abrem os slots necessários para receber
+    // todos os canteiros especiais do pacote. O limite 5 preserva o slot 6,
+    // que continua reservado ao benefício Premium de subscriber.
+    G.unlockedPlots = Math.max(Number(G.unlockedPlots || 2), Math.min(5, kit.special));
     const durationMs = kit.specialRealDays ? kit.specialRealDays * 24 * 60 * 60 * 1000 : (kit.specialDays ? SEASON_DAY_MS * kit.specialDays : (kit.special === 1 ? SEASON_TOTAL_MS : kit.special === 2 ? SEASON_TOTAL_MS * 2 : SEASON_TOTAL_MS * 3));
     // O benefício é por canteiro, não apenas por canteiro vazio. Assim, um
     // pacote comprado depois de uma melhoria antiga completa a quantidade
@@ -5716,7 +5720,6 @@ function applyBonusKit(name) {
     }
   }
   renderInventory(); renderFertilizerInventory(); renderPlots(); renderWateringCapacity(); updatePts();
-  if (kit.special && (G.specialPlots || []).length < kit.special) toast(`🌱 O pacote precisa de ${kit.special} canteiros desbloqueados para aplicar tudo.`, 3500);
   saveGardenToSE();
   toast(`✨ ${name} aplicado na prévia!`, 3500);
 }

@@ -4999,7 +4999,16 @@ async function buyWaterRefillFromNotice() {
     toast(`💧 O regador já está cheio! (${maxWateringCapacity()}/${maxWateringCapacity()})`, 2500);
     return;
   }
-  if (!(await chargeGamePoints(cost))) return;
+  // Reconcile o saldo real antes da cobrança. Isso evita rejeição quando a
+  // pontuação mudou em outro dispositivo ou acabou de ser atualizada no SE.
+  if (seUser && !previewAccess()) {
+    const synced = await syncPtsToSE();
+    if (!synced) {
+      toast('❌ Não foi possível confirmar seus pontos no StreamElements. Tente novamente.', 3600);
+      return;
+    }
+  }
+  if (!(await chargeGamePoints(cost, 'Recarga do regador'))) return;
   G.waterCapacity = maxWateringCapacity();
   renderWateringCapacity();
   updatePts();

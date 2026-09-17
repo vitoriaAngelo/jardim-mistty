@@ -52,9 +52,10 @@ function validateOrdersTransition(oldData, nextData) {
   const nextKey = String(nextData.ordersSeasonKey ?? seasonIdx);
   const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
   const rewardState = oldKey === nextKey ? oldData : nextData;
-  const canKeepStoredOrders = oldKey === nextKey;
   const hasInvalidOrder = orders.some(order => {
-    if (canKeepStoredOrders && orderWasAlreadyStored(order, oldData)) return false;
+    // Pedidos que já estão persistidos podem atravessar a troca de estação:
+    // colher uma planta fora de estação não deve invalidar o logout.
+    if (orderWasAlreadyStored(order, oldData)) return false;
     return !validOrder(order, seasonIdx, rewardState);
   });
   if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');

@@ -89,3 +89,10 @@ test('eventos têm contraste no modo escuro e layout responsivo', () => {
   assert.match(html, /\.garden-event-banner\.visible \{ align-items:flex-start; flex-wrap:wrap/);
   assert.match(html, /\.garden-event-timer \{ order:3; width:100%/);
 });
+
+test('Lírio Lunar é exclusivo do evento e tem saquinho especial', () => {
+  assert.match(html, /moon_lily:.*eventOnly:true/);
+  assert.match(html, /Object\.entries\(FLOWERS\)\.filter\(\(\[, p\]\) => !p\.eventOnly\)/);
+  assert.match(html, /product\?\.eventOnly/);
+  assert.match(html, /const lunar = type === 'moon_lily'/);
+});

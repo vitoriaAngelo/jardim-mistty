@@ -4842,6 +4842,10 @@ function cartUnitCost(type) {
 }
 function addToShopCart(type, sourceEvent) {
   const product = cartProduct(type);
+  if (product?.eventOnly) {
+    toast('🌙 O Lírio Lunar só pode ser encontrado durante a Lua Cheia.', 3000);
+    return;
+  }
   if (product?.subscriberOnly && !hasSubscriberBadge()) {
     toast('✦ Este cultivo é exclusivo para subscribers.', 2800);
     return;
@@ -4930,7 +4934,7 @@ const FLOWERS = {
   cherry:     { name:'Cerejeira',   emoji:'🌸', cost:100, maxWater:9,  maxGrow:20, color:'#f0a0c0', leafColor:'#5a9820', minLevel:10 },
   poppy:      { name:'Papoula',     emoji:'🌷', cost:55,  maxWater:4,  maxGrow:11, color:'#e04020', leafColor:'#5ab830', minLevel:4  },
   jasmine:    { name:'Jasmim',      emoji:'⚪', cost:75,  maxWater:6,  maxGrow:15, color:'#fffff0', leafColor:'#4a9820', minLevel:6  },
-  moon_lily:  { name:'Lírio Lunar', emoji:'🪷', cost:280, maxWater:7, maxGrow:10, color:'#9d8bc4', leafColor:'#5f7956', minLevel:1 },
+  moon_lily:  { name:'Lírio Lunar', emoji:'🪷', cost:280, maxWater:7, maxGrow:10, color:'#9d8bc4', leafColor:'#5f7956', minLevel:1, eventOnly:true },
   royal_dahlia:{ name:'Dália Real', emoji:'🌺', cost:300, maxWater:7, maxGrow:10, color:'#c66f91', leafColor:'#647f54', minLevel:1, subscriberOnly:true },
 };
 
@@ -4945,7 +4949,7 @@ function renderFlowerShop() {
     { key: 'sell_desc',  label: '📈 Maior venda'  },
   ];
 
-  let entries = Object.entries(FLOWERS);
+  let entries = Object.entries(FLOWERS).filter(([, p]) => !p.eventOnly);
   if (shopSeasonFilter === 'promo') {
     entries = entries.filter(([type]) => isOutOfSeason(type));
   } else if (shopSeasonFilter !== 'all') {
@@ -6674,10 +6678,11 @@ function seedBagSVG(type, locked = false) {
   const seasons = p && typeof SEASONS !== 'undefined'
     ? SEASONS.filter(s => s.vegetables.includes(type) || s.flowers.includes(type))
     : [];
-  const bagColor = locked ? '#b0a090' : '#f5e8c8';
-  const bagStroke = locked ? '#8a7868' : '#c8a060';
-  const bagDark = locked ? '#9a8878' : '#d4b870';
-  const labelColor = locked ? '#e0d8c8' : '#fdfaf0';
+  const lunar = type === 'moon_lily';
+  const bagColor = locked ? '#b0a090' : lunar ? '#d9c8f0' : '#f5e8c8';
+  const bagStroke = locked ? '#8a7868' : lunar ? '#765292' : '#c8a060';
+  const bagDark = locked ? '#9a8878' : lunar ? '#a98bd0' : '#d4b870';
+  const labelColor = locked ? '#e0d8c8' : lunar ? '#f7f0ff' : '#fdfaf0';
 
   return `<div style="position:relative;width:60px;height:68px;flex-shrink:0">
     <svg width="60" height="68" viewBox="0 0 60 68" fill="none">
@@ -6768,6 +6773,7 @@ function renderShop() {
 async function buyPlant(type, el) {
   const p = getPlantable(type);
   const qty = SHOP_QTY[type] || 1;
+  if (p?.eventOnly) { toast('🌙 O Lírio Lunar só pode ser encontrado durante a Lua Cheia.', 3000); return; }
   // Skill: Negociador (-3% por nível, não se aplica a itens em promoção)
   const basePrice = seasonPrice(type);
   const discount = isOutOfSeason(type) ? 0 : skillBuyDiscount();

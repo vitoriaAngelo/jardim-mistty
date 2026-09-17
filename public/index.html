@@ -8908,14 +8908,32 @@ async function loadGardenFromSE(username) {
     G.eventLastType    = save.eventLastType || '';
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
     gardenOrders      = G.orders;
-    if (G.ordersGlobalResetVersion < 2) {
-      // Reset global de pedidos (versão 2): zera rolls, entregas e gera novos pedidos.
-      G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
+    if (G.ordersGlobalResetVersion < 3) {
+      // Reset completo (versão 3): nova temporada começando do zero.
+      G.plots = Array(6).fill(null);
+      G.harvested = {};
+      G.inventory = {};
+      G.fertilizerInventory = {};
+      G.pts = 0;
+      G.xp = 0;
+      G.level = 1;
+      G.waterCount = 0;
+      G.waterCapacity = 5;
+      G.seasonIdx = 0;
+      G.seasonDay = 1;
+      G.orderSearches = 0;
+      G.orderDeliveries = 0;
+      G.orderPaidReset = false;
+      G.skillNodes = {};
+      G.skillPoints = 0;
+      G.achievements = [];
+      G.achievStats = { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
       gardenOrders = Array.from({ length: 3 }, (_, i) => createOrder(i));
       G.orders = gardenOrders;
       G.ordersSeasonKey = orderSeasonKey();
-      G.ordersGlobalResetVersion = 2;
-      setTimeout(() => saveGardenToSE(), 250);
+      G.ordersGlobalResetVersion = 3;
+      toast('🌱 Nova temporada! Seu jardim foi resetado. Vamos começar do zero!', 5000);
+      setTimeout(() => { saveGardenToSE(); renderAll(); }, 250);
     }
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);

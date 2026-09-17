@@ -3913,7 +3913,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <div>🟣 <strong>Pá Premium</strong><span>Fica roxa e custa só 25 pontos.</span><button class="premium-claim" onclick="claimPremium('shovel')">Resgatar</button></div>
       <div>🌱 <strong>4 cultivos exclusivos</strong><span>Desbloqueia as novas flores e vegetais.</span><button class="premium-claim" onclick="claimPremium('plants')">Resgatar</button></div>
       <div>🧪 <strong>Kit de adubos</strong><span>Receba 4 saquinhos de cada adubo.</span><button class="premium-claim" onclick="claimPremium('fertilizers')">Resgatar</button></div>
-      <div>✨ <strong>Canteiro Especial</strong><span>Surge diretamente no seu jardim.</span><button class="premium-claim" onclick="claimPremium('plot')">Resgatar</button></div>
+      <div>✨ <strong>Canteiro 6 Especial</strong><span>Exclusivo para subscribers. Ao resgatar, o último canteiro é desbloqueado e já vem como Canteiro Especial.</span><button class="premium-claim" onclick="claimPremium('plot')">Resgatar</button></div>
       <div>💜 <strong>Twitchzinho</strong><span>Um Brotinho roxinho exclusivo para acompanhar sua fazenda.</span><button class="premium-claim" onclick="claimPremium('mascot')">Resgatar</button></div>
     </div>
     <button class="premium-claim-all" onclick="claimAllPremium()">✦ Resgatar tudo!</button>
@@ -4694,7 +4694,7 @@ const PLOT_UPGRADES = [
   { slot: 2, name: 'Canteiro 3',   desc: 'Terceiro espaço para plantar',      cost: 300,  minLevel: 2 },
   { slot: 3, name: 'Canteiro 4',   desc: 'Quarto espaço — o jardim cresce!',  cost: 600,  minLevel: 4 },
   { slot: 4, name: 'Canteiro 5',   desc: 'Quinto espaço para cultivar',       cost: 1000, minLevel: 6 },
-  { slot: 5, name: 'Canteiro 6',   desc: 'Canteiro final — jardim completo!', cost: 1500, minLevel: 8, subscriberOnly: true },
+  { slot: 5, name: 'Canteiro 6',   desc: 'Exclusivo para subscribers — desbloqueia também o Canteiro Especial!', cost: 1500, minLevel: 8, subscriberOnly: true },
 ];
 
 function renderPlotShop() {
@@ -5778,7 +5778,15 @@ function claimPremium(kind) {
   if (kind === 'shovel') G.premiumShovel = true;
   if (kind === 'plants') G.premiumPlantsUnlocked = true;
   if (kind === 'fertilizers') { Object.keys(FERTILIZERS).forEach(id => G.fertilizerInventory[id] = (G.fertilizerInventory[id] || 0) + 4); G.premiumFertilizersClaimed = true; renderFertilizerInventory(); }
-  if (kind === 'plot') { const idx = G.plots.findIndex((p,i) => i < G.unlockedPlots && !p); if (idx < 0) { toast('🌱 Libere um canteiro vazio para receber o especial.'); return; } G.specialPlot = idx; G.upgrades.add('special_plot'); G.premiumSpecialPlotClaimed = true; renderPlots(); }
+  if (kind === 'plot') {
+    // O Premium sempre entrega o sexto canteiro; o especial não é mais aleatório.
+    G.unlockedPlots = Math.max(Number(G.unlockedPlots || 2), 6);
+    G.specialPlot = 5;
+    G.upgrades.add('special_plot');
+    G.premiumSpecialPlotClaimed = true;
+    renderPlots();
+    renderPlotShop();
+  }
   if (kind === 'mascot') { G.ownedMascots = G.ownedMascots || {}; G.ownedMascots.twitchzinho = true; G.selectedMascot = 'twitchzinho'; applySelectedMascotAppearance(true); renderMascotShop(); }
   updatePts(); renderPremiumBenefits(); renderWateringCapacity(); refreshShovelTool(); saveGardenToSE(); toast('✦ Presente Premium resgatado! Aproveite seu mimo do jardim 💜', 3200);
 }
@@ -7253,16 +7261,16 @@ function buildPlotEl(plot, idx) {
     inner.className = 'plot-inner';
     inner.innerHTML = `<div class="lock-hint">
       <div class="lock-icon">🔒</div>
-      <span>${u ? `<img class="points-token" style="width:16px;height:16px" src="points-sprout.svg" alt="" aria-hidden="true"> ${u.cost} pts` : 'bloqueado'}</span>
+      <span>${u?.subscriberOnly ? '✦ Exclusivo Sub · Resgate no Premium' : u ? `<img class="points-token" style="width:16px;height:16px" src="points-sprout.svg" alt="" aria-hidden="true"> ${u.cost} pts` : 'bloqueado'}</span>
     </div>`;
     div.appendChild(inner);
     const lbl = document.createElement('div');
     lbl.className = 'plot-label';
-    lbl.textContent = 'bloqueado';
+    lbl.textContent = u?.subscriberOnly ? 'exclusivo para sub' : 'bloqueado';
     div.appendChild(lbl);
     div.addEventListener('click', () => {
       switchShopTab('canteiros');
-      toast('💡 Compre esse canteiro na loja!');
+      toast(u?.subscriberOnly ? '✦ O Canteiro 6 é exclusivo para subscribers e vem como Canteiro Especial ao resgatar o Premium!' : '💡 Compre esse canteiro na loja!');
     });
     return div;
   }

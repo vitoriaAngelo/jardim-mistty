@@ -5598,6 +5598,7 @@ function goToInventoryFromShop() {
 }
 function openBonusShop() {
   document.getElementById('bonus-overlay')?.classList.remove('hidden');
+  window.dispatchEvent(new Event('garden-bonus-state-change'));
   document.querySelectorAll('#bonus-overlay .premium-benefits > div > span').forEach(el => {
     el.innerHTML = el.innerHTML.replace(/(?<!-\s)(?:⏱️\s*)?1 minuto(?: de espera para recuperar o regador| no carregamento do regador)/g, '- 1 minuto no carregamento do regador');
     el.innerHTML = el.innerHTML.replace(/Moldura VIP por 30 dias/g, 'Moldura VIP por 10 dias');

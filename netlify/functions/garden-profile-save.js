@@ -21,7 +21,8 @@ exports.handler = async (event) => {
     const auth = await authenticateTwitch(event);
     requireSameUser(auth, username);
     const current = await readGarden(auth.username);
-    if (!current || !activeSession(current.data, sessionId)) return { statusCode:409, headers, body:JSON.stringify({ error:'Este jardim está ativo em outra tela', code:'SESSION_CONFLICT' }) };
+    const sameSession = Boolean(current && current.data?._activeSessionId === sessionId);
+    if (!current || (!sameSession && !activeSession(current.data, sessionId))) return { statusCode:409, headers, body:JSON.stringify({ error:'Este jardim está ativo em outra tela', code:'SESSION_CONFLICT' }) };
 
     const next = { ...current.data };
     if (profileBackground !== undefined) {

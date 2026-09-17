@@ -8442,8 +8442,8 @@ async function saveDailyPhrase() {
 const G_MAIL = [];
 
 function mailRewardForLevel(lv) {
-  // Base 20pts no nível 2, +15pts por nível adicional
-  return 20 + (lv - 2) * 15;
+  // Recompensas dobradas: 40 pts no nível 2, +30 por nível adicional.
+  return 40 + (lv - 2) * 30;
 }
 
 function addLevelMail(lv) {
@@ -9252,7 +9252,11 @@ async function loadGardenFromSE(username) {
     // Restore mail
     if (save.mail && Array.isArray(save.mail)) {
       G_MAIL.length = 0;
-      save.mail.forEach(m => G_MAIL.push(m));
+      save.mail.forEach(m => G_MAIL.push(
+        !m.opened && Number.isInteger(m.lv) && m.lv >= 2
+          ? { ...m, reward: Math.max(Number(m.reward || 0), mailRewardForLevel(m.lv)) }
+          : m
+      ));
     }
     checkHarvestTitles();
     checkHarvestTitles();

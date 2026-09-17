@@ -4175,6 +4175,8 @@ function renderLevelWidget() {
 function levelUnlockText(level) {
   const unlocks = [];
   if (level === 10) unlocks.push('🪣 Regador maior: sua capacidade aumenta de 5 para 7 águas (0/7).');
+  const special = specialLevelReward(level);
+  if (special) unlocks.push(`🎁 Recompensa especial: ${special.text}. Ela estará disponível no Correio.`);
   const crops = typeof PLANTS !== 'undefined' ? Object.values(PLANTS) : [];
   const flowers = typeof FLOWERS !== 'undefined' ? Object.values(FLOWERS) : [];
   const names = [...crops, ...flowers]
@@ -4305,6 +4307,7 @@ const G = {
   ownedMascots: {},
   twitchzinhoNextRewardAt: 0,
   twitchzinhoPendingCoins: 0,
+  crystalFruits: 0,
   orders: [],
   ordersSeasonKey: '0',
   orderSearches: 0,
@@ -8530,17 +8533,62 @@ function mailRewardForLevel(lv) {
 
 function addLevelMail(lv) {
   const reward = mailRewardForLevel(lv);
+  const specialReward = specialLevelReward(lv);
   const lvData = LEVELS.find(l => l.lv === lv) || { name: `Nível ${lv}`, emoji: '🌱' };
   G_MAIL.unshift({
     id: Date.now(),
     lv,
     emoji: lvData.emoji,
     title: `Parabéns pelo nível ${lv}!`,
-    msg: `Você chegou ao nível ${lv} — ${lvData.name}! O jardim está cada vez mais florido. Aqui está uma pequena recompensa pela dedicação!`,
+    msg: `Você chegou ao nível ${lv} — ${lvData.name}! O jardim está cada vez mais florido.${specialReward ? ` Recompensa especial: ${specialReward.text}` : ''}`,
     reward,
+    specialReward,
     opened: false,
   });
   updateMailBadge();
+}
+
+function specialLevelReward(lv) {
+  const rewards = {
+    5:  { text:'3x de cada adubo e 2x Margaridas', fertilizers:3, seeds:{ daisy:2 } },
+    10: { text:'5x de cada adubo e 3 flores aleatórias', fertilizers:5, randomFlowers:3 },
+    15: { text:'300 XP e 2.000 moedas', xp:300, pts:2000 },
+    20: { text:'+2 de capacidade permanente no Regador', waterCapacity:2 },
+    25: { text:'3x Frutas Cristalinas', crystalFruits:3 },
+    30: { text:'1x semente de cada cultivo', allSeeds:1 },
+  };
+  return rewards[lv] ? { ...rewards[lv] } : null;
+}
+
+function applySpecialLevelReward(reward) {
+  if (!reward) return [];
+  const received = [];
+  if (reward.fertilizers) {
+    Object.keys(FERTILIZERS).forEach(id => { G.fertilizerInventory[id] = (G.fertilizerInventory[id] || 0) + reward.fertilizers; });
+    received.push(`${reward.fertilizers}x de cada adubo`);
+  }
+  if (reward.seeds) {
+    Object.entries(reward.seeds).forEach(([id, qty]) => { G.inventory[id] = (G.inventory[id] || 0) + qty; });
+    received.push('2x Margaridas');
+  }
+  if (reward.randomFlowers) {
+    const flowers = Object.keys(FLOWERS);
+    for (let i = 0; i < reward.randomFlowers; i += 1) {
+      const id = flowers[Math.floor(Math.random() * flowers.length)];
+      G.inventory[id] = (G.inventory[id] || 0) + 1;
+    }
+    received.push(`${reward.randomFlowers} flores aleatórias`);
+  }
+  if (reward.xp) { G.xp += reward.xp; received.push(`+${reward.xp} XP`); }
+  if (reward.pts) { G.pts += reward.pts; recordPointsHistory(reward.pts, 'Recompensa especial de nível'); received.push(`+${reward.pts.toLocaleString('pt-BR')} moedas`); }
+  if (reward.waterCapacity) { G.bonusWateringCapacity = Number(G.bonusWateringCapacity || 0) + reward.waterCapacity; received.push('+2 de capacidade no Regador'); }
+  if (reward.crystalFruits) { G.crystalFruits = Number(G.crystalFruits || 0) + reward.crystalFruits; received.push(`${reward.crystalFruits}x Frutas Cristalinas`); }
+  if (reward.allSeeds) {
+    [...Object.keys(PLANTS), ...Object.keys(FLOWERS)].forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + 1; });
+    received.push('1x semente de cada cultivo');
+  }
+  renderLevelWidget(); renderInventory(); renderFertilizerInventory(); renderWateringCapacity(); updatePts();
+  return received;
 }
 
 function updateMailBadge() {
@@ -8569,6 +8617,7 @@ async function openLetter(id) {
   letter.opened = true;
   G.pts += letter.reward;
   recordPointsHistory(letter.reward, `Correio: ${letter.title}`);
+  const specialReceived = applySpecialLevelReward(letter.specialReward);
   updatePts();
   updateMailBadge();
   renderMailList();
@@ -8579,7 +8628,7 @@ async function openLetter(id) {
     return;
   }
   spawnCoinBurst(document.getElementById('mail-overlay'), letter.reward);
-  toast(`🌟 +${letter.reward} pts recebidos pelo correio!`, 3000);
+  toast(`🌟 +${letter.reward} pts recebidos!${specialReceived.length ? ` ${specialReceived.join(' · ')}` : ''}`, 4200);
 }
 
 function renderMailList() {
@@ -8606,7 +8655,7 @@ function renderMailList() {
         <div class="mail-letter">
           ${m.emoji} ${m.msg}
           <br><br>
-          <div class="mail-reward-badge">🌟 +${m.reward} pts</div>
+          <div class="mail-reward-badge">🌟 +${m.reward} pts${m.specialReward ? `<br>🎁 ${m.specialReward.text}` : ''}</div>
         </div>
       </div>
     </div>`).join('');
@@ -8962,6 +9011,7 @@ async function saveGardenToSENow(retryStale = true) {
     presenceLastDay:  G.presenceLastDay || '',
     presenceBonusDate:G.presenceBonusDate || '',
     presenceDays:     G.presenceDays || [],
+    crystalFruits:    Number(G.crystalFruits || 0),
     specialPlot:      G.specialPlot,
     specialPlots:     G.specialPlots || [],
     specialPlotExpiresAt: G.specialPlotExpiresAt || 0,
@@ -9245,6 +9295,7 @@ async function loadGardenFromSE(username) {
     G.presenceLastDay = save.presenceLastDay || '';
     G.presenceBonusDate = save.presenceBonusDate || '';
     G.presenceDays = save.presenceDays || [];
+    G.crystalFruits = Number(save.crystalFruits || 0);
     G.specialPlot = save.specialPlot ?? null;
     G.specialPlots = Array.isArray(save.specialPlots) ? save.specialPlots : (Number.isInteger(G.specialPlot) ? [G.specialPlot] : []);
     G.specialPlotExpiresAt = Number(save.specialPlotExpiresAt || 0);

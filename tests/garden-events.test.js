@@ -156,6 +156,10 @@ test('perfil não exibe o título Agora na seção de informações', () => {
   assert.doesNotMatch(html, /<div class="profile-label">Agora<\/div>/);
 });
 
+test('cabeçalho do perfil exibe o nome da fazenda', () => {
+  assert.match(html, /profile-level-name'\)\.textContent = document\.getElementById\('garden-name'\)/);
+});
+
 test('perfil oferece dois títulos difíceis de desbloquear', () => {
   assert.match(html, /name:'Imperador da Colheita', target:3000/);
   assert.match(html, /name:'Eterno do Jardim', target:7500/);

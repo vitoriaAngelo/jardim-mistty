@@ -7845,7 +7845,7 @@ function openProfile() {
   document.querySelectorAll('.frame-picker-btn').forEach(btn => btn.classList.toggle('selected', btn.dataset.frame === displayedFrame));
   document.getElementById('subscriber-label').classList.toggle('visible', subscriber);
   document.getElementById('profile-level-badge').textContent = `Nível ${current.lv}`;
-  document.getElementById('profile-level-name').textContent = current.name;
+  document.getElementById('profile-level-name').textContent = document.getElementById('garden-name')?.textContent || 'Meu jardim';
   const selectedTitle = titleForName(G.selectedHarvestTitle);
   document.getElementById('profile-selected-title').textContent = selectedTitle ? `${selectedTitle.icon} ${selectedTitle.name}` : '';
   checkHarvestTitles();

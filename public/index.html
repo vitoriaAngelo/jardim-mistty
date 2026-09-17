@@ -239,6 +239,28 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .watering-refill-offer.visible { display:block; }
 .watering-refill-offer img { width:13px; height:13px; vertical-align:-3px; }
 .latest-sales-feed .latest-sales-content.sales-slide-in { animation:sales-slide-in .35s ease both; }
+.garden-event-banner { display:none; position:relative; overflow:hidden; margin:0 0 10px; padding:12px 16px; border:1px solid #c9b98f; border-radius:16px; background:linear-gradient(135deg,#fff9e9,#eef5dc); box-shadow:0 3px 0 #d7c8a7,0 8px 20px rgba(71,84,53,.12); color:#526342; }
+.garden-event-banner.visible { display:flex; align-items:center; gap:12px; animation:event-pop .35s ease both; }
+.garden-event-icon { font-size:28px; filter:drop-shadow(0 2px 2px rgba(50,60,40,.16)); }
+.garden-event-copy { min-width:0; flex:1; }
+.garden-event-title { font:900 14px/1.2 'Nunito',sans-serif; }
+.garden-event-subtitle { margin-top:2px; font:700 11px/1.35 'Nunito',sans-serif; opacity:.78; }
+.garden-event-timer { flex:0 0 auto; padding:6px 10px; border-radius:999px; background:#fffaf0; border:1px solid #d8c9ac; font:900 12px 'Nunito',sans-serif; }
+.garden-event-progress { position:absolute; left:0; bottom:0; height:4px; width:100%; transform-origin:left; background:#7fa66c; }
+.garden-event-layer { position:fixed; inset:0; z-index:120; pointer-events:none; overflow:hidden; }
+.event-rain-drop { position:absolute; top:-30px; color:#8ed4f5; font-size:18px; animation:event-rain 1.2s linear forwards; }
+.event-butterfly { position:fixed; z-index:121; pointer-events:auto; cursor:pointer; border:0; background:transparent; font-size:30px; filter:drop-shadow(0 3px 3px rgba(50,45,80,.25)); animation:event-fly 5s ease-in-out forwards; }
+.event-butterfly.rare { font-size:36px; filter:drop-shadow(0 0 8px #e58cff); }
+.plot.event-golden { box-shadow:0 0 0 3px #f0c95b,0 0 22px #ffd96f99 !important; animation:event-golden-pulse 1.1s ease-in-out infinite alternate; }
+.plot.event-mutated { box-shadow:0 0 0 3px #a779da,0 0 24px #b47af688 !important; }
+.plot.event-mutated::after { content:'🧬 Cristalina'; position:absolute; top:7px; left:50%; transform:translateX(-50%); z-index:5; padding:3px 7px; border-radius:9px; background:#6e4b8d; color:white; font:900 9px 'Nunito',sans-serif; white-space:nowrap; }
+body.event-rain::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:linear-gradient(#7193aa22,#a8d7ec16); }
+body.event-moon::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:radial-gradient(circle at 78% 12%,#fffbd0 0 3%,#9d83dc33 4% 17%,#33294b44 60%); mix-blend-mode:multiply; }
+@keyframes event-pop { from{opacity:0;transform:translateY(-10px) scale(.98)} to{opacity:1;transform:none} }
+@keyframes event-rain { to{transform:translate(-35px,110vh);opacity:.15} }
+@keyframes event-fly { 0%{transform:translate(-30px,30px) rotate(-8deg);opacity:0} 12%{opacity:1} 55%{transform:translate(45px,-45px) rotate(8deg)} 100%{transform:translate(120px,-90px);opacity:0} }
+@keyframes event-golden-pulse { to{filter:brightness(1.13) saturate(1.2)} }
+body.dark-mode .garden-event-banner { background:linear-gradient(135deg,#354432,#403b2b); border-color:#728069; color:#eef4e8; box-shadow:0 3px 0 #1f2a1e; }
 @keyframes sales-slide-in { from { opacity:.2; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 body.dark-mode .latest-sales-feed { border-color:#677c62; background:linear-gradient(135deg,#354332 0%,#2d392d 100%); color:#d9e5d0; box-shadow:0 3px 0 #202b20, 0 7px 16px rgba(0,0,0,.2); }
 body.dark-mode .latest-sales-feed strong { color:#f0f5e8; }
@@ -3017,6 +3039,13 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
   <div class="garden-section">
 
     <div class="latest-sales-feed latest-sales-strip" id="latest-sales-feed" aria-live="polite"><span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span></div>
+    <div class="garden-event-banner" id="garden-event-banner" role="status" aria-live="polite">
+      <span class="garden-event-icon" id="garden-event-icon">🌦️</span>
+      <div class="garden-event-copy"><div class="garden-event-title" id="garden-event-title">Um evento está chegando</div><div class="garden-event-subtitle" id="garden-event-subtitle">Continue cuidando do seu jardim.</div></div>
+      <span class="garden-event-timer" id="garden-event-timer">10s</span>
+      <span class="garden-event-progress" id="garden-event-progress"></span>
+    </div>
+    <div class="garden-event-layer" id="garden-event-layer" aria-hidden="true"></div>
     <div class="card">
       <div class="card-title">
         <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="9" width="14" height="6" rx="2" fill="#7a4f2e"/><rect x="2" y="10" width="12" height="4" rx="1.5" fill="#9b6840"/></svg>
@@ -3620,6 +3649,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="mail-modal-title">ⓘ Últimas atualizações</div>
     <p class="premium-copy">Confira os últimos deploys e o que mudou no jardim.</p>
     <div class="deploy-history-list">
+      <div class="deploy-history-item"><strong>Eventos vivos na fazenda</strong><small>Chuva Mágica, Hora Dourada, Borboletas, Lua Cheia e Mutações agora podem transformar o jardim com recompensas em tempo real.</small></div>
       <div class="deploy-history-item"><strong>Proteção contra múltiplas telas</strong><small>Somente a sessão mais recente pode alterar o jardim. Telas antigas são pausadas automaticamente para impedir ganhos duplicados.</small></div>
       <div class="deploy-history-item"><strong>Pontos e salvamento protegidos</strong><small>Movimentações agora exigem a conta Twitch autenticada, a sessão ativa e a versão mais recente do jardim.</small></div>
       <div class="deploy-history-item"><strong>Loja responsiva no celular</strong><small>As abas Vegetais, Flores, Adubos e Canteiros agora ficam visíveis e fáceis de tocar em telas pequenas.</small></div>
@@ -3904,7 +3934,133 @@ const G = {
   orderPaidReset: false,
   ordersGlobalResetVersion: 0,
   lastOrder: null,
+  eventNextAt: 0,
+  eventLastType: '',
+  discoveredMutations: [],
 };
+
+// ─── EVENTOS VIVOS DO JARDIM ─────────────────────────────
+const GARDEN_EVENTS = {
+  rain: { icon:'🌧️', name:'Chuva Mágica', duration:45, color:'#67a9c9', intro:'A chuva vai regar suas plantas automaticamente!' },
+  golden: { icon:'☀️', name:'Hora Dourada', duration:60, color:'#d9a82f', intro:'Colheitas feitas durante o evento rendem o dobro!' },
+  butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
+  moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
+  mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode se transformar em uma versão cristalina!' },
+};
+let gardenEvent = null;
+let gardenEventTimer = null;
+let gardenEventRainTimer = null;
+let gardenEventButterflyTimer = null;
+
+function eventFastMode() { return new URLSearchParams(location.search).get('events') === 'fast'; }
+function nextEventDelay() { return eventFastMode() ? 25000 + Math.random()*20000 : 300000 + Math.random()*180000; }
+function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
+function setNextGardenEvent() { G.eventNextAt = Date.now() + nextEventDelay(); saveGardenToSE(); }
+
+function renderGardenEvent() {
+  const banner = document.getElementById('garden-event-banner');
+  if (!banner) return;
+  if (!gardenEvent) { banner.classList.remove('visible'); return; }
+  const def = GARDEN_EVENTS[gardenEvent.type];
+  const left = Math.max(0, Math.ceil((gardenEvent.endsAt - Date.now()) / 1000));
+  const total = gardenEvent.phase === 'countdown' ? 10 : def.duration;
+  banner.classList.add('visible');
+  banner.style.borderColor = def.color;
+  document.getElementById('garden-event-icon').textContent = def.icon;
+  document.getElementById('garden-event-title').textContent = gardenEvent.phase === 'countdown' ? `${def.name} chegando!` : def.name;
+  document.getElementById('garden-event-subtitle').textContent = gardenEvent.phase === 'countdown' ? def.intro : eventLiveSubtitle();
+  document.getElementById('garden-event-timer').textContent = `${left}s`;
+  const progress = document.getElementById('garden-event-progress');
+  progress.style.background = def.color;
+  progress.style.transform = `scaleX(${Math.max(0,Math.min(1,left/total))})`;
+}
+
+function eventLiveSubtitle() {
+  if (!gardenEvent) return '';
+  const n = gardenEvent.actions || 0;
+  if (gardenEvent.type === 'rain') return `${n} planta${n===1?'':'s'} recebeu${n===1?'':'ram'} água mágica`;
+  if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
+  if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
+  if (gardenEvent.type === 'moon') return `${n} colheita${n===1?'':'s'} ao luar`;
+  return n ? 'Uma mutação cristalina foi descoberta!' : 'A energia procura uma planta…';
+}
+
+function announceGardenEvent() {
+  if (!gardenHydrated || gardenEvent || Date.now() < Number(G.eventNextAt || 0)) return;
+  const keys = Object.keys(GARDEN_EVENTS).filter(key => key !== G.eventLastType);
+  const type = keys[Math.floor(Math.random()*keys.length)];
+  gardenEvent = { type, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set() };
+  toast(`${GARDEN_EVENTS[type].icon} ${GARDEN_EVENTS[type].name} começa em 10 segundos!`, 5000);
+  renderGardenEvent();
+}
+
+function startGardenEvent() {
+  const def = GARDEN_EVENTS[gardenEvent.type];
+  gardenEvent.phase = 'active'; gardenEvent.endsAt = Date.now() + def.duration*1000;
+  G.eventLastType = gardenEvent.type;
+  G.eventNextAt = gardenEvent.endsAt + nextEventDelay();
+  document.body.classList.add(`event-${gardenEvent.type}`);
+  toast(`${def.icon} ${def.name} começou!`, 4000);
+  if (gardenEvent.type === 'rain') {
+    applyMagicRain();
+    gardenEventRainTimer = setInterval(() => { spawnEventRain(); applyMagicRain(); }, 3500);
+  }
+  if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
+  if (gardenEvent.type === 'mutation') triggerEventMutation();
+  renderPlots(); renderGardenEvent(); saveGardenToSE();
+}
+
+function applyMagicRain() {
+  G.plots.forEach((plot, idx) => {
+    if (!plot) return;
+    const max = effectiveMaxWater(plot.type);
+    if (plot.waterCount < max) {
+      plot.waterCount = Math.min(max, plot.waterCount + 1);
+      if (!gardenEvent.touched.has(idx)) { gardenEvent.touched.add(idx); gardenEvent.actions++; gardenEvent.xp += 5; }
+      spawnSkillEffect(idx, '💧', '+ água mágica', '#67a9c9');
+    }
+  });
+  renderPlots(); renderGardenEvent();
+}
+function spawnEventRain() {
+  const layer = document.getElementById('garden-event-layer'); if (!layer) return;
+  for (let i=0;i<18;i++) { const d=document.createElement('span'); d.className='event-rain-drop'; d.textContent='╱'; d.style.left=`${Math.random()*100}%`; d.style.animationDelay=`${Math.random()*.8}s`; layer.appendChild(d); setTimeout(()=>d.remove(),2200); }
+}
+function spawnEventButterfly() {
+  if (!activeGardenEvent('butterflies')) return;
+  const layer=document.getElementById('garden-event-layer'); if(!layer)return;
+  const rare=Math.random()<.14, b=document.createElement('button'); b.className=`event-butterfly${rare?' rare':''}`; b.textContent=rare?'🌈':'🦋'; b.style.left=`${5+Math.random()*78}%`; b.style.top=`${18+Math.random()*62}%`;
+  b.onclick=()=>{ if(!activeGardenEvent('butterflies'))return; const xp=rare?30:10; gardenEvent.actions++; gardenEvent.xp+=xp; gainXP('harvest',b,xp,`${rare?'🌈':'🦋'} +${xp} XP`); toast(rare?'🦋 Borboleta arco-íris! +30 XP':'🦋 Borboleta encontrada! +10 XP',2200); b.remove(); renderGardenEvent(); };
+  layer.appendChild(b); setTimeout(()=>b.remove(),5000);
+}
+function triggerEventMutation() {
+  const choices=G.plots.map((p,i)=>p&&!p.mutated?i:-1).filter(i=>i>=0);
+  if(!choices.length)return;
+  const idx=choices[Math.floor(Math.random()*choices.length)]; G.plots[idx].mutated=true; gardenEvent.actions=1;
+  const name=getPlantable(G.plots[idx].type)?.name||'planta'; if(!G.discoveredMutations.includes(G.plots[idx].type))G.discoveredMutations.push(G.plots[idx].type);
+  setTimeout(()=>toast(`🧬 Sua ${name} virou uma ${name} Cristalina!`,4500),700);
+}
+
+function finishGardenEvent() {
+  const finished=gardenEvent, def=GARDEN_EVENTS[finished.type];
+  clearInterval(gardenEventRainTimer); clearInterval(gardenEventButterflyTimer);
+  gardenEventRainTimer=null; gardenEventButterflyTimer=null;
+  document.body.classList.remove(`event-${finished.type}`);
+  document.getElementById('garden-event-layer')?.replaceChildren();
+  if (finished.xp>0 && finished.type!=='butterflies') gainXP('harvest',document.getElementById('garden-event-banner'),finished.xp,`+${finished.xp} XP · ${def.name}`);
+  const summary = finished.actions ? `Você participou ${finished.actions} vez${finished.actions===1?'':'es'} e ganhou ${finished.xp} XP${finished.bonus?` + ${finished.bonus} bônus`:''}.` : 'Você participou um pouquinho — o próximo evento pode trazer novas surpresas!';
+  toast(`${def.icon} ${def.name} terminou! ${summary}`,6000);
+  gardenEvent=null; renderGardenEvent(); renderPlots(); saveGardenToSE();
+}
+
+function tickGardenEvents() {
+  if(!gardenHydrated)return;
+  if(!G.eventNextAt){ G.eventNextAt=Date.now()+nextEventDelay(); saveGardenToSE(); }
+  if(!gardenEvent){ announceGardenEvent(); return; }
+  if(Date.now()>=gardenEvent.endsAt){ if(gardenEvent.phase==='countdown')startGardenEvent(); else finishGardenEvent(); }
+  else renderGardenEvent();
+}
+function initGardenEvents(){ if(gardenEventTimer)clearInterval(gardenEventTimer); gardenEventTimer=setInterval(tickGardenEvents,500); tickGardenEvents(); }
 
 // maxWater = regas para encher (habilitar crescimento)
 // maxGrow  = estágios de crescimento por tempo (30min cada)
@@ -6560,7 +6716,10 @@ function renderPlots() {
 function buildPlotEl(plot, idx) {
   const locked = idx >= G.unlockedPlots;
   const div = document.createElement('div');
-  div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty') + (plot?.goldenPlot || isSpecialPlotActive(idx) ? ' special-plot' : '');
+  div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty')
+    + (plot?.goldenPlot || isSpecialPlotActive(idx) ? ' special-plot' : '')
+    + (plot && activeGardenEvent('golden') && isReady(plot) ? ' event-golden' : '')
+    + (plot?.mutated ? ' event-mutated' : '');
   div.dataset.idx = idx;
 
   // LOCKED
@@ -6785,7 +6944,20 @@ async function onPlotClick(idx) {
       // Skill: Colheita Dupla (Mão Verde + Colheita Precisa)
       const doubleChance = skillDoubleHarvestChance();
       const gotDouble = doubleChance > 0 && Math.random() < doubleChance;
-      const finalQty = gotDouble ? harvestQty * 2 : harvestQty;
+      let finalQty = gotDouble ? harvestQty * 2 : harvestQty;
+      if (activeGardenEvent('golden')) {
+        gardenEvent.actions++; gardenEvent.bonus += finalQty; gardenEvent.xp += 10; finalQty *= 2;
+        spawnSkillEffect(idx, '☀️', 'DOBRO!', '#d9a82f'); renderGardenEvent();
+      }
+      if (activeGardenEvent('moon')) {
+        gardenEvent.actions++; gardenEvent.xp += 8;
+        if (Math.random() < .35) { G.inventory[type] = (G.inventory[type] || 0) + 1; gardenEvent.bonus++; toast(`🌙 Semente lunar de ${getPlantable(type).name} encontrada!`,3000); }
+        renderGardenEvent();
+      }
+      if (plot.mutated) {
+        finalQty += 2; gainXP('harvest',plotEl,25,'🧬 +25 XP Cristalina');
+        toast(`🧬 Colheita cristalina! +2 ${getPlantable(type).name}`,3000);
+      }
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
       if (gotDouble) {
         spawnSkillEffect(idx, '🧺🧺', '×2 Colheita Dupla!', '#778b64');
@@ -6880,7 +7052,7 @@ async function onPlotClick(idx) {
     G.inventory[type]--;
     if (G.inventory[type] <= 0) G.selectedSeed = null;
     updateHeldItemCursor();
-    const newPlot = { type, waterCount: 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: isSpecialPlotActive(idx) };
+    const newPlot = { type, waterCount: activeGardenEvent('rain') ? 1 : 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: isSpecialPlotActive(idx) };
     // Apply any pre-applied fertilizer on this slot
     if (G.plotFertilizers && G.plotFertilizers[idx]) {
       const fid = G.plotFertilizers[idx];
@@ -6889,6 +7061,7 @@ async function onPlotClick(idx) {
       delete G.plotFertilizers[idx];
     }
     G.plots[idx] = newPlot;
+    if (activeGardenEvent('rain')) { gardenEvent.actions++; gardenEvent.xp += 5; gardenEvent.touched.add(idx); toast('🌧️ A muda já recebeu água mágica!',2200); renderGardenEvent(); }
     renderInventory();
     renderPlots();
     clearSelectionIfNoAvailablePlots();
@@ -7819,6 +7992,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
       document.getElementById('garden-name').textContent = `Jardim de ${displayName}`;
     }
     gardenHydrated = true;
+    initGardenEvents();
     document.getElementById('twitch-btn').innerHTML =
       `<span class="live-dot"></span> Online`;
     document.getElementById('twitch-btn').classList.add('connected');
@@ -7918,6 +8092,9 @@ async function saveGardenToSENow() {
     orderDeliveries:  G.orderDeliveries || 0,
     orderPaidReset:   G.orderPaidReset === true,
     lastOrder:        G.lastOrder || null,
+    eventNextAt:      Number(G.eventNextAt || 0),
+    eventLastType:    G.eventLastType || '',
+    discoveredMutations: G.discoveredMutations || [],
     missions:         G.missions,
     achievements:     [...(G.achievements || [])],
     achievStats:      G.achievStats || {},
@@ -8138,6 +8315,9 @@ async function loadGardenFromSE(username) {
     G.orderPaidReset   = save.orderPaidReset === true;
     G.ordersGlobalResetVersion = Number(save.ordersGlobalResetVersion || 0);
     G.lastOrder        = save.lastOrder || null;
+    G.eventNextAt      = Number(save.eventNextAt || 0);
+    G.eventLastType    = save.eventLastType || '';
+    G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
     gardenOrders      = G.orders;
     if (G.ordersGlobalResetVersion < 1) {
       G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
@@ -8646,6 +8826,7 @@ if (isLocalPreview) {
   renderLevelWidget();
   renderPremiumBenefits();
   renderUpgradeShop();
+  initGardenEvents();
   // A prévia já foi testada; não reabrir o bônus de boas-vindas automaticamente.
   if (new URLSearchParams(window.location.search).has('seasons')) {
     const showcase = document.createElement('div');

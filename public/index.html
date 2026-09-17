@@ -2779,6 +2779,20 @@ body.dark-mode .st-req-badge {
 .deploy-history-item { padding:10px 12px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:13px; background:var(--cream2); color:var(--text); }
 .deploy-history-item strong { display:block; font-size:13px; }
 .deploy-history-item small { display:block; margin-top:4px; color:var(--text2); font-size:11px; line-height:1.4; }
+.points-history-list { display:grid; gap:8px; max-height:min(58vh,430px); overflow-y:auto; padding:2px; }
+.points-history-item { display:grid; grid-template-columns:42px minmax(0,1fr) auto; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; background:var(--cream2); }
+.points-history-sign { display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:12px; font:900 17px 'Nunito',sans-serif; }
+.points-history-item.gain .points-history-sign { background:#dcebd2; color:#47713c; }
+.points-history-item.loss .points-history-sign { background:#f2d9d4; color:#a04f43; }
+.points-history-copy { min-width:0; }
+.points-history-copy strong { display:block; color:var(--text); font-size:12px; }
+.points-history-copy small { color:var(--text2); font-size:10px; }
+.points-history-value { white-space:nowrap; font:900 13px 'Nunito',sans-serif; }
+.points-history-item.gain .points-history-value { color:#4f7c42; }
+.points-history-item.loss .points-history-value { color:#a65347; }
+body.dark-mode .points-history-item { background:#303a30; border-color:#53604f; }
+body.dark-mode .points-history-item.gain .points-history-sign { background:#40563a; color:#d9efcf; }
+body.dark-mode .points-history-item.loss .points-history-sign { background:#5a3d39; color:#ffd9d2; }
 @keyframes st-badge-pop { from { transform:scale(0); } to { transform:scale(1); } }
 
 body.dark-mode .fertilizer-buy-btn { background:#e7eddb !important; color:#34422f !important; box-shadow:0 3px 0 #b7c6a8 !important; }
@@ -3191,6 +3205,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <button class="user-menu-item" onclick="openProfile(); document.getElementById('user-menu').classList.add('hidden');">👤 Abrir perfil</button>
         <button class="user-menu-item user-menu-mail-item" onclick="openMailbox(); document.getElementById('user-menu').classList.add('hidden');"><span>✉️ Correio</span><span class="user-menu-mail-badge hidden" id="mail-menu-badge">0</span></button>
         <button class="user-menu-item user-menu-mail-item" onclick="openAchievements(); document.getElementById('user-menu').classList.add('hidden');"><span>🏆 Conquistas</span><span class="user-menu-mail-badge hidden" id="achiev-menu-badge">0</span></button>
+        <button class="user-menu-item" onclick="openPointsHistory(); document.getElementById('user-menu').classList.add('hidden');">📒 Histórico de pontos</button>
         <button class="user-menu-item" onclick="logout()">🚪 Sair</button>
       </div>
     </div>
@@ -3680,6 +3695,16 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
   </div>
 </div>
 
+<div class="mail-overlay hidden" id="points-history-overlay">
+  <div class="mail-modal" style="max-width:460px">
+    <button class="popup-close-x" aria-label="Fechar histórico de pontos" onclick="closePointsHistory()">×</button>
+    <div class="mail-modal-title">📒 Histórico de pontos</div>
+    <p class="premium-copy">Seus ganhos e gastos mais recentes no jardim.</p>
+    <div class="points-history-list" id="points-history-list"></div>
+    <button class="mail-close-btn" onclick="closePointsHistory()">Fechar</button>
+  </div>
+</div>
+
 <!-- LEVEL UP OVERLAY -->
 <div class="levelup-overlay hidden" id="levelup-overlay">
   <div class="levelup-card" id="levelup-card">
@@ -4139,6 +4164,7 @@ function spawnConfetti() {
 // ════════════════════════════════════════════════════════════
 const G = {
   pts: 0,
+  pointsHistory: [],
   xp: 0,
   selectedTool: 'water',
   selectedSeed: null,
@@ -4448,6 +4474,27 @@ let lastDisplayedPts = null;
 let lastKnownSEPoints = null;
 let sePointsMutationQueue = Promise.resolve();
 let pointsFeedbackTimer = null;
+function recordPointsHistory(amount, reason) {
+  const value = Number(amount) || 0;
+  if (!value) return;
+  G.pointsHistory = [{ id:crypto.randomUUID(), amount:value, reason:String(reason || (value > 0 ? 'Pontos recebidos' : 'Pontos utilizados')), at:Date.now() }, ...(G.pointsHistory || [])].slice(0, 100);
+}
+function renderPointsHistory() {
+  const list = document.getElementById('points-history-list');
+  if (!list) return;
+  const history = Array.isArray(G.pointsHistory) ? G.pointsHistory : [];
+  if (!history.length) {
+    list.innerHTML = '<div class="mail-empty-message" style="text-align:center;padding:24px 8px">🌱 Nenhuma movimentação registrada ainda.</div>';
+    return;
+  }
+  list.innerHTML = history.map(entry => {
+    const amount = Number(entry.amount) || 0;
+    const date = new Date(Number(entry.at) || Date.now()).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return `<div class="points-history-item ${amount >= 0 ? 'gain' : 'loss'}"><div class="points-history-sign">${amount >= 0 ? '↑' : '↓'}</div><div class="points-history-copy"><strong>${entry.reason || 'Movimentação de pontos'}</strong><small>${date}</small></div><div class="points-history-value">${amount > 0 ? '+' : ''}${amount.toLocaleString('pt-BR')} pts</div></div>`;
+  }).join('');
+}
+function openPointsHistory() { renderPointsHistory(); document.getElementById('points-history-overlay')?.classList.remove('hidden'); }
+function closePointsHistory() { document.getElementById('points-history-overlay')?.classList.add('hidden'); }
 function showPointsFeedback(delta) {
   const feedback = document.getElementById('pts-feedback');
   if (!feedback || !delta) return;
@@ -4521,6 +4568,7 @@ function claimPresence() {
   G.presenceDays = [...new Set([...(G.presenceDays || []), today])].slice(-60);
   const bonus = Math.min(10 + Math.max(0, G.presenceStreak - 1) * 5, 50);
   G.pts += bonus;
+  recordPointsHistory(bonus, 'Presença diária');
   G.presenceBonusDate = today;
   updatePts();
   renderPresence();
@@ -5284,6 +5332,7 @@ async function sellSelected() {
   });
 
   G.pts += total;
+  recordPointsHistory(total, 'Venda no mercado');
   G.lastSale = { items: sold.join(' '), total, at: Date.now() };
   // XP de fazendeiro é separado do XP de nível e fica reservado para a evolução futura.
   G.farmerXP = (G.farmerXP || 0) + Math.max(1, Math.floor((total + soldQty) / 10));
@@ -5750,6 +5799,7 @@ async function deliverOrder(id) {
   if ((G.harvested[order.type] || 0) < order.qty) return;
   G.harvested[order.type] -= order.qty;
   G.pts += order.reward;
+  recordPointsHistory(order.reward, `Pedido entregue para ${order.name}`);
   G.lastOrder = { type:'order', item:`${order.qty}× ${getPlantable(order.type)?.name || order.type}`, reward:order.reward, at:Date.now() };
   gainXP('harvest', document.querySelector(`[onclick="deliverOrder('${order.id}')"]`), order.xp || Math.round(order.qty * 10), `+${order.xp || Math.round(order.qty * 10)} XP 📬 Pedido!`);
   gardenOrders = gardenOrders.filter(item => item.id !== id);
@@ -6226,6 +6276,7 @@ function missionProgress(id, amount = 1) {
   if (G.missions.progress[id] >= def.target && !G.missions.claimed[id]) {
     G.missions.claimed[id] = true;
     G.pts += def.rewardPts;
+    recordPointsHistory(def.rewardPts, `Missão concluída: ${def.name}`);
     const missionEl = document.getElementById('missions-modal-bar') || document.getElementById('missions-btn');
     const missionXpBefore = G.xp;
     G.xp += def.rewardXP;
@@ -8222,6 +8273,7 @@ async function openLetter(id) {
   if (!letter || letter.opened) return;
   letter.opened = true;
   G.pts += letter.reward;
+  recordPointsHistory(letter.reward, `Correio: ${letter.title}`);
   updatePts();
   updateMailBadge();
   renderMailList();
@@ -8468,6 +8520,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     if (!G.welcomeBonusClaimed) {
       if (!hadSave) {
         G.pts += 120;
+        recordPointsHistory(120, 'Bônus de boas-vindas');
         await giveSEPoints(120);
         seUser.points = G.pts;
         toast('🎁 Primeira conexão! Você ganhou +120 pontos!', 4000, true);
@@ -8634,6 +8687,7 @@ async function saveGardenToSENow(retryStale = true) {
     skillPoints: G.skillPoints || 0,
     skillNodes:  G.skillNodes  || {},
     skillPointsClaimed: G.skillPointsClaimed || 0,
+    pointsHistory:     (G.pointsHistory || []).slice(0, 100),
     upgrades_refunded: G.upgrades_refunded || false,
     stats: {
       xp:          G.xp,
@@ -8888,6 +8942,7 @@ async function loadGardenFromSE(username) {
     G.skillPoints = save.skillPoints ?? 0;
     G.skillNodes  = save.skillNodes  || {};
     G.skillPointsClaimed = save.skillPointsClaimed ?? 0;
+    G.pointsHistory = Array.isArray(save.pointsHistory) ? save.pointsHistory.slice(0, 100) : [];
     // Retroativo: dar pontos dos níveis ainda não concedidos
     grantRetroactiveSkillPoints();
     // Atualiza o destaque do botão assim que os pontos salvos terminam de carregar.
@@ -8915,6 +8970,7 @@ async function loadGardenFromSE(username) {
       });
       if (refundTotal > 0) {
         G.pts += refundTotal;
+        recordPointsHistory(refundTotal, 'Reembolso de melhorias antigas');
         // Dar os pontos de reembolso no SE também
         giveSEPoints(refundTotal).catch(e => console.warn('Reembolso SE falhou:', e));
         console.log(`💰 Reembolso de melhorias: +${refundTotal} pts`);
@@ -8997,6 +9053,7 @@ function connectSESocket() {
       if (data.type === 'pointsevent' && data.data?.username === seUser?.username) {
         const gained = data.data.amount || 0;
         G.pts += gained;
+        recordPointsHistory(gained, 'Pontos recebidos no canal');
         if (lastKnownSEPoints !== null) lastKnownSEPoints += gained;
         updatePts();
         saveGardenToSE();
@@ -9263,6 +9320,7 @@ async function chargeGamePoints(amount) {
       }
     }
     G.pts -= cost;
+    recordPointsHistory(-cost, 'Compra no jardim');
     updatePts();
     return true;
   } finally {
@@ -9398,6 +9456,7 @@ if (isLocalPreview) {
 setInterval(() => {
   const bonus = 20 + (hasUpgrade('golden_sun') ? 1 : 0);
   G.pts += bonus;
+  recordPointsHistory(bonus, 'Bônus por tempo no jardim');
   updatePts();
 }, 600000);
 

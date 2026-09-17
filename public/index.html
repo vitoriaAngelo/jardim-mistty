@@ -2049,7 +2049,10 @@ body.dark-mode .profile-selected-title { color:#e6c978; }
 .profile-background-option { min-height:52px; padding:8px 7px; border:1px solid var(--cozy-line); border-radius:12px; color:var(--text); font:800 11px/1.15 'Nunito',sans-serif; cursor:pointer; }
 .profile-background-option.selected { outline:2px solid var(--grass2); outline-offset:1px; }
 .profile-background-option.locked { filter:grayscale(.35); opacity:.68; cursor:default; }
-.profile-background-option .profile-background-tip { display:none; }
+.profile-background-option { position:relative; }
+.profile-background-option::after { content:attr(data-tooltip); display:none; position:absolute; z-index:60; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:210px; padding:8px 10px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:11px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 7px 20px #4b573326; font:700 10px/1.3 'Nunito',sans-serif; text-align:center; pointer-events:none; }
+.profile-background-option:hover::after, .profile-background-option:focus-visible::after { display:block; }
+body.dark-mode .profile-background-option::after { background:#303a30; border-color:#53604f; color:#edf2e6; }
 .profile-background-option.spring { background:linear-gradient(135deg,#eef4dd,#f7dfe7); }
 .profile-background-option.sunny { background:linear-gradient(135deg,#f9edb7,#e9c66d); }
 .profile-background-option.rain { background:linear-gradient(135deg,#d8e8e7,#8caeb0); }
@@ -7847,7 +7850,7 @@ function clearProfileBackgroundPreview() { applyProfileBackground(); }
 function renderProfileBackgrounds() {
   const grid = document.getElementById('profile-background-grid');
   if (!grid) return;
-  grid.innerHTML = PROFILE_BACKGROUNDS.map(([id, label]) => { const unlocked = profileBackgroundUnlocked(id); return `<button type="button" class="profile-background-option ${id} ${unlocked ? '' : 'locked'} ${G.profileBackground === id ? 'selected' : ''}" ${unlocked ? `onclick="selectProfileBackground('${id}')"` : ''} onmouseenter="previewProfileBackground('${id}')" onmouseleave="clearProfileBackgroundPreview()" title="${PROFILE_BACKGROUND_RULES[id]}" aria-label="${label}. ${PROFILE_BACKGROUND_RULES[id]}" aria-disabled="${!unlocked}" aria-pressed="${G.profileBackground === id}">${label}<small style="display:block;margin-top:4px;font-size:9px;font-weight:700;opacity:.8">${unlocked ? (G.profileBackground === id ? '✓ Em uso' : 'Clique para usar') : `🔒 ${PROFILE_BACKGROUND_RULES[id]}`}</small></button>`; }).join('');
+  grid.innerHTML = PROFILE_BACKGROUNDS.map(([id, label]) => { const unlocked = profileBackgroundUnlocked(id); return `<button type="button" class="profile-background-option ${id} ${unlocked ? '' : 'locked'} ${G.profileBackground === id ? 'selected' : ''}" ${unlocked ? `onclick="selectProfileBackground('${id}')"` : ''} onmouseenter="previewProfileBackground('${id}')" onmouseleave="clearProfileBackgroundPreview()" data-tooltip="${PROFILE_BACKGROUND_RULES[id]}" aria-label="${label}. ${PROFILE_BACKGROUND_RULES[id]}" aria-disabled="${!unlocked}" aria-pressed="${G.profileBackground === id}">${label}<small style="display:block;margin-top:4px;font-size:9px;font-weight:700;opacity:.8">${unlocked ? (G.profileBackground === id ? '✓ Em uso' : 'Clique para usar') : `🔒 ${PROFILE_BACKGROUND_RULES[id]}`}</small></button>`; }).join('');
 }
 async function selectProfileBackground(id) {
   if (!PROFILE_BACKGROUNDS.some(([bg]) => bg === id) || !profileBackgroundUnlocked(id)) return;

@@ -4746,7 +4746,7 @@ const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce:
                      corn: 84, pumpkin: 108, eggplant: 94, pepper: 103, broccoli: 117,
                      rose: 85, sunflower: 99, lavender: 113, daisy: 43, tulip: 76,
                      orchid: 127, hibiscus: 118, bluebell: 95, cherry: 136, poppy: 81, jasmine: 104,
-                     ruby_kale: 335, star_radish: 338, moon_lily: 355, royal_dahlia: 383 };
+                     ruby_kale: 335, star_radish: 338, moon_lily: 1000, royal_dahlia: 383 };
 
 function cultivationCost(type) {
   const item = getPlantable(type);
@@ -4851,7 +4851,7 @@ const FLOWERS = {
   cherry:     { name:'Cerejeira',   emoji:'🌸', cost:100, maxWater:9,  maxGrow:20, color:'#f0a0c0', leafColor:'#5a9820', minLevel:10 },
   poppy:      { name:'Papoula',     emoji:'🌷', cost:55,  maxWater:4,  maxGrow:11, color:'#e04020', leafColor:'#5ab830', minLevel:4  },
   jasmine:    { name:'Jasmim',      emoji:'⚪', cost:75,  maxWater:6,  maxGrow:15, color:'#fffff0', leafColor:'#4a9820', minLevel:6  },
-  moon_lily:  { name:'Lírio Lunar', emoji:'🪷', cost:280, maxWater:7, maxGrow:10, color:'#9d8bc4', leafColor:'#5f7956', minLevel:1, subscriberOnly:true },
+  moon_lily:  { name:'Lírio Lunar', emoji:'🪷', cost:280, maxWater:7, maxGrow:10, color:'#9d8bc4', leafColor:'#5f7956', minLevel:1 },
   royal_dahlia:{ name:'Dália Real', emoji:'🌺', cost:300, maxWater:7, maxGrow:10, color:'#c66f91', leafColor:'#647f54', minLevel:1, subscriberOnly:true },
 };
 
@@ -6975,7 +6975,7 @@ async function onPlotClick(idx) {
       }
       if (activeGardenEvent('moon')) {
         gardenEvent.actions++; gardenEvent.xp += 8;
-        if (Math.random() < .35) { G.inventory[type] = (G.inventory[type] || 0) + 1; gardenEvent.bonus++; toast(`🌙 Semente lunar de ${getPlantable(type).name} encontrada!`,3000); }
+        if (Math.random() < .35) { G.inventory.moon_lily = (G.inventory.moon_lily || 0) + 1; gardenEvent.bonus++; toast('🌙 Semente Lunar encontrada!',3000); }
         renderGardenEvent();
       }
       if (plot.mutated) {

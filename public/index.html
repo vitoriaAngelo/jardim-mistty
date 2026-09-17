@@ -8908,10 +8908,13 @@ async function loadGardenFromSE(username) {
     G.eventLastType    = save.eventLastType || '';
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
     gardenOrders      = G.orders;
-    if (G.ordersGlobalResetVersion < 1) {
+    if (G.ordersGlobalResetVersion < 2) {
+      // Reset global de pedidos (versão 2): zera rolls, entregas e gera novos pedidos.
       G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
       gardenOrders = Array.from({ length: 3 }, (_, i) => createOrder(i));
-      G.orders = gardenOrders; G.ordersGlobalResetVersion = 1;
+      G.orders = gardenOrders;
+      G.ordersSeasonKey = orderSeasonKey();
+      G.ordersGlobalResetVersion = 2;
       setTimeout(() => saveGardenToSE(), 250);
     }
     G.missions        = save.missions         || null;

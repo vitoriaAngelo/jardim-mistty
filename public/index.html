@@ -6568,14 +6568,15 @@ function renderMissions() {
 
   // Timer
   const remaining = G.missions.resetAt ? Math.max(0, G.missions.resetAt - Date.now()) : 0;
-  const mm = String(Math.floor(remaining / 60000)).padStart(2,'0');
-  const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
+  const hours = Math.floor(remaining / 3600000);
+  const minutes = Math.floor((remaining % 3600000) / 60000);
+  const timeLabel = `${hours}h ${String(minutes).padStart(2, '0')}min`;
   ['missions-timer','missions-modal-timer'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.textContent = G.missions.resetAt ? `Renova em ${mm}:${ss}` : 'Renova 24h após concluir tudo';
+    if (el) el.textContent = G.missions.resetAt ? `Renova em ${timeLabel}` : 'Renova 24h após concluir tudo';
   });
   const resetInfo = document.getElementById('missions-reset-info');
-  if (resetInfo) resetInfo.textContent = G.missions.resetAt ? `✅ Todas concluídas · Novas missões em ${mm}:${ss}` : '⏳ Complete todas as missões para iniciar o contador de 24 horas.';
+  if (resetInfo) resetInfo.textContent = G.missions.resetAt ? `✅ Todas concluídas · Novas missões em ${timeLabel}` : '⏳ Complete todas as missões para iniciar o contador de 24 horas.';
 
   updateMissionsBadge();
 
@@ -6615,15 +6616,16 @@ function updateMissionsClock() {
     return;
   }
   const remaining = G.missions.resetAt ? Math.max(0, G.missions.resetAt - Date.now()) : 0;
-  const mm = String(Math.floor(remaining / 60000)).padStart(2, '0');
-  const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
-  const label = G.missions.resetAt ? `Renova em ${mm}:${ss}` : 'Renova 24h após concluir tudo';
+  const hours = Math.floor(remaining / 3600000);
+  const minutes = Math.floor((remaining % 3600000) / 60000);
+  const timeLabel = `${hours}h ${String(minutes).padStart(2, '0')}min`;
+  const label = G.missions.resetAt ? `Renova em ${timeLabel}` : 'Renova 24h após concluir tudo';
   ['missions-timer', 'missions-modal-timer'].forEach(id => {
     const el = document.getElementById(id);
     if (el && el.textContent !== label) el.textContent = label;
   });
   const resetInfo = document.getElementById('missions-reset-info');
-  if (resetInfo) resetInfo.textContent = G.missions.resetAt ? `✅ Todas concluídas · Novas missões em ${mm}:${ss}` : '⏳ Complete todas as missões para iniciar o contador de 24 horas.';
+  if (resetInfo) resetInfo.textContent = G.missions.resetAt ? `✅ Todas concluídas · Novas missões em ${timeLabel}` : '⏳ Complete todas as missões para iniciar o contador de 24 horas.';
 }
 setInterval(updateMissionsClock, 1000);
 const SEASONS = [

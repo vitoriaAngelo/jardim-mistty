@@ -2034,6 +2034,9 @@ body.dark-mode .profile-selected-title { color:#e6c978; }
 .profile-background-option.rainbow { background:linear-gradient(110deg,#f5c7c7,#f4e0a6,#c9e4c0,#c9d8ef); }
 .profile-background-option.forest { background:linear-gradient(135deg,#b9c99c,#665d83); color:#fff; }
 body.dark-mode .profile-background-option { border-color:#53604f; }
+body.dark-mode .profile-background-option { color:#293326 !important; }
+body.dark-mode .profile-background-option.night { background:linear-gradient(135deg,#aeb8cf,#c9cde0); }
+body.dark-mode .profile-background-option.forest { background:linear-gradient(135deg,#becfa9,#c9bfd4); }
 
 .profile-section { display: flex; flex-direction: column; gap: 8px; }
 .profile-label {
@@ -3503,10 +3506,6 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 
     <div id="profile-overview-panel" class="profile-tab-panel">
     <div class="profile-section">
-      <div class="profile-label">🖼️ Plano de fundo do perfil</div>
-      <div class="profile-background-grid" id="profile-background-grid"></div>
-    </div>
-    <div class="profile-section">
       <div class="profile-label">Nome da Fazenda</div>
       <div class="profile-field-row">
         <input id="profile-farm-name" type="text" maxlength="20" placeholder="Meu Jardim"
@@ -3515,6 +3514,10 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       </div>
       <div class="profile-label" style="margin-top:14px">Frase do dia</div>
       <div class="profile-field-row"><input id="profile-daily-phrase" type="text" maxlength="25" placeholder="Ex.: Bora plantar!" class="profile-input"/><button class="profile-save-btn" onclick="saveDailyPhrase()">Salvar</button></div>
+    </div>
+    <div class="profile-section">
+      <div class="profile-label">🖼️ Plano de fundo do perfil</div>
+      <div class="profile-background-grid" id="profile-background-grid"></div>
     </div>
 
     <div class="profile-section">

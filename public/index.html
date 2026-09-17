@@ -1778,6 +1778,9 @@ body.dark-mode .ranking-pagination button { border-color:#52624d; background:#30
 .profile-titles { display:flex; flex-direction:column; gap:9px; }
 .profile-title-card { display:grid; grid-template-columns:40px minmax(0,1fr); gap:9px; align-items:center; padding:10px 11px; border:1px solid var(--cozy-line); border-radius:14px; background:var(--cozy-paper); box-shadow:0 2px 0 #d8c9ac66; }
 .profile-title-card.locked { filter:saturate(.55); opacity:.75; }
+.profile-title-card { width:100%; text-align:left; font:inherit; cursor:var(--cozy-cursor, default); }
+.profile-title-card.unlocked:hover { transform:translateY(-1px); box-shadow:0 3px 0 #d8c9ac66; }
+.profile-title-card.selected { outline:2px solid var(--grass2); outline-offset:1px; }
 .profile-title-icon { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:#e8dfc1; font-size:22px; }
 .profile-title-card.unlocked .profile-title-icon { background:#f1d47d; box-shadow:0 2px 0 #c09a45; }
 .profile-title-name { color:var(--text); font-size:13px; font-weight:900; }
@@ -2016,6 +2019,8 @@ body.dark-mode .frame-picker-toggle, body.dark-mode .frame-picker-btn { backgrou
 .profile-level-name {
   font-size: 16px; font-weight: 800; color: var(--text);
 }
+.profile-selected-title { min-height:14px; margin-top:2px; color:#8d6d35; font-size:11px; font-weight:900; }
+body.dark-mode .profile-selected-title { color:#e6c978; }
 
 .profile-section { display: flex; flex-direction: column; gap: 8px; }
 .profile-label {
@@ -3440,6 +3445,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <div class="profile-info">
         <div class="profile-level-badge" id="profile-level-badge">Nível 1</div>
         <div class="profile-level-name" id="profile-level-name">Sementinha</div>
+        <div class="profile-selected-title" id="profile-selected-title"></div>
         <div class="subscriber-label" id="subscriber-label">✦ Subscriber</div>
         <div class="profile-daily-phrase" id="profile-daily-phrase-display"></div>
       </div>
@@ -4010,6 +4016,7 @@ const G = {
   supporterFrameUnlocked: false,
   bonusKitLevel: 0,
   dailyPhrase: '',
+  selectedHarvestTitle: '',
   isSubscriber: false,
   welcomeBonusClaimed: false,
   previewUnlocks: false,
@@ -7158,6 +7165,7 @@ async function onPlotClick(idx) {
       missionProgress('harvest2');
       initAchievements();
       G.achievStats.totalHarvest = (G.achievStats.totalHarvest||0) + qty;
+      checkHarvestTitles();
       if (FLOWERS[type]) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0); // tracked at sell
       checkAchievements();
       saveGardenToSE();
@@ -7695,6 +7703,26 @@ const HARVEST_TITLES = [
   { icon:'🏆', name:'Imperador da Colheita', target:3000 },
   { icon:'💎', name:'Eterno do Jardim', target:7500 },
 ];
+function titleForName(name) { return HARVEST_TITLES.find(t => t.name === name) || null; }
+function checkHarvestTitles() {
+  initAchievements();
+  const harvested = Number(G.achievStats?.totalHarvest || 0);
+  HARVEST_TITLES.forEach(title => {
+    if (harvested < title.target) return;
+    const id = `title_${title.name}`;
+    if (G_MAIL.some(mail => mail.id === id)) return;
+    G_MAIL.unshift({ id, emoji:title.icon, title:`Novo título desbloqueado: ${title.name}`, msg:`Parabéns! Você colheu ${title.target.toLocaleString('pt-BR')} itens e desbloqueou o título “${title.name}”. Escolha-o na aba Títulos do seu perfil.`, reward:0, opened:false });
+  });
+  updateMailBadge();
+}
+async function selectHarvestTitle(name) {
+  const title = titleForName(name);
+  if (!title || Number(G.achievStats?.totalHarvest || 0) < title.target) return;
+  G.selectedHarvestTitle = title.name;
+  renderProfileTitles();
+  try { await saveGardenToSE(); toast(`🏅 Título escolhido: ${title.name}`, 1800); }
+  catch (e) { toast('❌ Não foi possível salvar o título.', 2400); }
+}
 function renderProfileTitles() {
   const container = document.getElementById('profile-titles');
   if (!container) return;
@@ -7702,7 +7730,7 @@ function renderProfileTitles() {
   container.innerHTML = HARVEST_TITLES.map(title => {
     const unlocked = harvested >= title.target;
     const progress = Math.min(100, Math.round(harvested / title.target * 100));
-    return `<div class="profile-title-card ${unlocked ? 'unlocked' : 'locked'}"><div class="profile-title-icon">${title.icon}</div><div><div class="profile-title-name">${title.name} ${unlocked ? '✓' : '🔒'}</div><div class="profile-title-requirement">${unlocked ? 'Título desbloqueado' : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`}</div><div class="profile-title-progress"><span style="width:${progress}%"></span></div></div></div>`;
+    return `<button type="button" class="profile-title-card ${unlocked ? 'unlocked' : 'locked'} ${G.selectedHarvestTitle === title.name ? 'selected' : ''}" ${unlocked ? `onclick="selectHarvestTitle('${title.name}')"` : 'disabled'}><div class="profile-title-icon">${title.icon}</div><div><div class="profile-title-name">${title.name} ${G.selectedHarvestTitle === title.name ? '⭐' : (unlocked ? '✓' : '🔒')}</div><div class="profile-title-requirement">${G.selectedHarvestTitle === title.name ? 'Título equipado' : (unlocked ? 'Clique para escolher' : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`)}</div><div class="profile-title-progress"><span style="width:${progress}%"></span></div></div></button>`;
   }).join('');
 }
 function showProfileTab(tab) {
@@ -7744,6 +7772,9 @@ function openProfile() {
   document.getElementById('subscriber-label').classList.toggle('visible', subscriber);
   document.getElementById('profile-level-badge').textContent = `Nível ${current.lv}`;
   document.getElementById('profile-level-name').textContent = current.name;
+  const selectedTitle = titleForName(G.selectedHarvestTitle);
+  document.getElementById('profile-selected-title').textContent = selectedTitle ? `${selectedTitle.icon} ${selectedTitle.name}` : '';
+  checkHarvestTitles();
 
   document.getElementById('profile-farm-name').value =
     document.getElementById('garden-name').textContent;
@@ -8316,6 +8347,7 @@ async function saveGardenToSENow(retryStale = true) {
     missions:         G.missions,
     achievements:     [...(G.achievements || [])],
     achievStats:      G.achievStats || {},
+    selectedHarvestTitle: G.selectedHarvestTitle || '',
     achievSeen:       G.achievSeen  || 0,
     presenceStreak:   G.presenceStreak || 0,
     presenceLastDay:  G.presenceLastDay || '',
@@ -8554,6 +8586,7 @@ async function loadGardenFromSE(username) {
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
+    G.selectedHarvestTitle = save.selectedHarvestTitle || '';
     G.achievSeen      = save.achievSeen       || 0;
     G.presenceStreak  = save.presenceStreak  || 0;
     G.presenceLastDay = save.presenceLastDay || '';
@@ -8654,6 +8687,7 @@ async function loadGardenFromSE(username) {
       G_MAIL.length = 0;
       save.mail.forEach(m => G_MAIL.push(m));
     }
+    checkHarvestTitles();
 
     // Refresh all UI
     updatePts();

@@ -116,6 +116,14 @@ test('nome da fazenda só confirma após salvar e não exibe sucesso e erro junt
   assert.match(html, /G\.farmName = previousName;[\s\S]*?Não foi possível salvar o perfil/);
 });
 
+test('títulos desbloqueados podem ser escolhidos e avisam pelo correio', () => {
+  assert.match(html, /selectedHarvestTitle: ''/);
+  assert.match(html, /function selectHarvestTitle\(name\)/);
+  assert.match(html, /Novo título desbloqueado:/);
+  assert.match(html, /G_MAIL\.some\(mail => mail\.id === id\)/);
+  assert.match(html, /selectedHarvestTitle: G\.selectedHarvestTitle \|\| ''/);
+});
+
 test('perfil oferece dois títulos difíceis de desbloquear', () => {
   assert.match(html, /name:'Imperador da Colheita', target:3000/);
   assert.match(html, /name:'Eterno do Jardim', target:7500/);

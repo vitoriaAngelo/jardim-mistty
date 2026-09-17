@@ -7839,10 +7839,15 @@ function applyProfileBackground() {
   const modal = document.querySelector('#profile-overlay .profile-modal');
   if (modal) modal.dataset.profileBackground = PROFILE_BACKGROUNDS.some(([id]) => id === G.profileBackground) ? G.profileBackground : 'spring';
 }
+function previewProfileBackground(id) {
+  const modal = document.querySelector('#profile-overlay .profile-modal');
+  if (modal && PROFILE_BACKGROUNDS.some(([bg]) => bg === id)) modal.dataset.profileBackground = id;
+}
+function clearProfileBackgroundPreview() { applyProfileBackground(); }
 function renderProfileBackgrounds() {
   const grid = document.getElementById('profile-background-grid');
   if (!grid) return;
-  grid.innerHTML = PROFILE_BACKGROUNDS.map(([id, label]) => { const unlocked = profileBackgroundUnlocked(id); return `<button type="button" class="profile-background-option ${id} ${unlocked ? '' : 'locked'} ${G.profileBackground === id ? 'selected' : ''}" ${unlocked ? `onclick="selectProfileBackground('${id}')"` : 'disabled'} title="${PROFILE_BACKGROUND_RULES[id]}" aria-label="${label}. ${PROFILE_BACKGROUND_RULES[id]}" aria-pressed="${G.profileBackground === id}">${label}<small style="display:block;margin-top:4px;font-size:9px;font-weight:700;opacity:.8">${unlocked ? (G.profileBackground === id ? '✓ Em uso' : 'Clique para usar') : `🔒 ${PROFILE_BACKGROUND_RULES[id]}`}</small></button>`; }).join('');
+  grid.innerHTML = PROFILE_BACKGROUNDS.map(([id, label]) => { const unlocked = profileBackgroundUnlocked(id); return `<button type="button" class="profile-background-option ${id} ${unlocked ? '' : 'locked'} ${G.profileBackground === id ? 'selected' : ''}" ${unlocked ? `onclick="selectProfileBackground('${id}')"` : 'disabled'} onmouseenter="previewProfileBackground('${id}')" onmouseleave="clearProfileBackgroundPreview()" title="${PROFILE_BACKGROUND_RULES[id]}" aria-label="${label}. ${PROFILE_BACKGROUND_RULES[id]}" aria-pressed="${G.profileBackground === id}">${label}<small style="display:block;margin-top:4px;font-size:9px;font-weight:700;opacity:.8">${unlocked ? (G.profileBackground === id ? '✓ Em uso' : 'Clique para usar') : `🔒 ${PROFILE_BACKGROUND_RULES[id]}`}</small></button>`; }).join('');
 }
 async function selectProfileBackground(id) {
   if (!PROFILE_BACKGROUNDS.some(([bg]) => bg === id) || !profileBackgroundUnlocked(id)) return;

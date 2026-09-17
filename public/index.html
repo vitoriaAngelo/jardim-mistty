@@ -8361,6 +8361,12 @@ let seUser    = null;
 let saveTimer = null;
 let syncTimer = null;
 let gardenHydrated = false;
+// Troque esta versão para invalidar todas as sessões abertas no lançamento.
+const GLOBAL_SESSION_VERSION = 'launch-1.0';
+if (sessionStorage.getItem('mistty-session-version') !== GLOBAL_SESSION_VERSION) {
+  ['se_username', 'se_display', 'twitch_access_token', 'twitch_is_subscriber', 'twitch_oauth_return_url'].forEach((key) => sessionStorage.removeItem(key));
+  sessionStorage.setItem('mistty-session-version', GLOBAL_SESSION_VERSION);
+}
 let twitchAuthToken = sessionStorage.getItem('twitch_access_token') || '';
 let gardenRevision = null;
 // Sempre único por carregamento: abas duplicadas não podem herdar a mesma sessão.

@@ -40,10 +40,11 @@ test('planta mutada fica identificada no card e no tooltip', () => {
   assert.match(html, /mutation-tooltip-badge/);
   assert.match(html, /plot\?\.mutated \? ' event-mutated'/);
   assert.match(html, /hue-rotate\(52deg\)/);
-  assert.match(html, /Cor alterada · \+1 item e \+25 XP ao colher/);
+  assert.match(html, /Cor alterada · \+1 item, \+1 colheita e \+25 XP/);
   assert.match(html, /finalQty \+= 1/);
   assert.match(html, /\+25 XP Mutação/);
   assert.match(html, /Combina com habilidades e outros bônus/);
+  assert.match(html, /harvestsRemaining = Number\(G\.plots\[idx\]\.harvestsRemaining/);
   assert.match(html, /if \(plot\.mutated\)/);
   assert.doesNotMatch(html, /const wasMutated = plot\.mutated === true/);
 });

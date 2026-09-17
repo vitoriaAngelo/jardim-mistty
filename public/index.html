@@ -4044,7 +4044,10 @@ function spawnEventButterfly() {
 function triggerEventMutation() {
   const choices=G.plots.map((p,i)=>p&&!p.mutated?i:-1).filter(i=>i>=0);
   if(!choices.length)return;
-  const idx=choices[Math.floor(Math.random()*choices.length)]; G.plots[idx].mutated=true; gardenEvent.actions=1;
+  const idx=choices[Math.floor(Math.random()*choices.length)];
+  G.plots[idx].mutated=true;
+  G.plots[idx].harvestsRemaining = Number(G.plots[idx].harvestsRemaining || harvestCyclesFor(G.plots[idx].type)) + 1;
+  gardenEvent.actions=1;
   const name=getPlantable(G.plots[idx].type)?.name||'planta'; if(!G.discoveredMutations.includes(G.plots[idx].type))G.discoveredMutations.push(G.plots[idx].type);
   setTimeout(()=>toast(`🧬 Sua ${name} sofreu uma mutação de cor!`,4500),700);
 }
@@ -6806,7 +6809,7 @@ function buildPlotEl(plot, idx) {
     tooltip.className = `plot-tooltip${outOfSeason ? ' out-of-season-warning' : ''}`;
     tooltip.innerHTML = `
       <strong>${p.emoji} ${p.name}</strong><br>
-      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 MUTAÇÃO ATIVA</span><br><strong>Cor alterada · +1 item e +25 XP ao colher.</strong><br><small>Combina com habilidades e outros bônus.</small><br>' : ''}
+      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 MUTAÇÃO ATIVA</span><br><strong>Cor alterada · +1 item, +1 colheita e +25 XP.</strong><br><small>Combina com habilidades e outros bônus.</small><br>' : ''}
       ${outOfSeason
         ? '⚠️ FORA DE ESTAÇÃO!<br><strong>Se colher, você perderá esta planta.</strong>'
         : isReady

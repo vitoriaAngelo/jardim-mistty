@@ -3785,10 +3785,18 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="login-build-note">💚 O site ainda pode passar por instabilidades. Tudo está sendo feito com muito amor e, logo logo, estará prontinho.</div>
     <h1>Jardim<br><em>dos Encantos</em></h1>
     <p class="login-description">A comunidade da live tem um jardim especial para você.<br>Entre, cuide do seu cantinho e junte pontos para trocar por dinheiro e vários outros prêmios.</p>
-    <button class="login-twitch-btn login-disabled" type="button" aria-disabled="true" disabled onclick="loginWithTwitch()">
+    <button id="login-twitch-button" class="login-twitch-btn login-disabled" type="button" aria-disabled="true" disabled onclick="loginWithTwitch()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
       Entrar com Twitch
     </button>
+    <script>
+      if (/^deploy-preview-\d+--/.test(window.location.hostname)) {
+        const previewLoginButton = document.getElementById('login-twitch-button');
+        previewLoginButton?.removeAttribute('disabled');
+        previewLoginButton?.removeAttribute('aria-disabled');
+        previewLoginButton?.classList.remove('login-disabled');
+      }
+    </script>
     <p class="login-note">Use sua conta Twitch para entrar no jardim.</p>
     <p class="login-launch-warning">A corrida começa dia 18/09 às 08:30 da manhã.</p>
     <div id="login-status" role="status" aria-live="polite"></div>
@@ -8408,8 +8416,7 @@ function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
 
 // ── Twitch OAuth ───────────────────────────────────────────
 function loginWithTwitch() {
-  return;
-  /* Login temporariamente bloqueado até o lançamento da corrida. */
+  if (!/^deploy-preview-\d+--/.test(window.location.hostname)) return;
   setLoginLoading(true, 'Abrindo a Twitch para você entrar…');
   // A Twitch aceita o callback de produção já cadastrado. Guardamos a URL do
   // Preview para devolver a pessoa ao mesmo ambiente após o login.

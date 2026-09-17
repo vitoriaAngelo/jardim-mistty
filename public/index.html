@@ -8844,10 +8844,16 @@ async function loadGardenFromSE(username) {
     // sessão (especialmente após uma colheita, que deixa o canteiro vazio).
     const cachedData = readGardenCache(username);
     const serverData = json?.data;
+    const serverSavedAt = Number(serverData?.savedAt || (json?.revision ? Date.parse(json.revision) : 0));
+    const cachedSavedAt = Number(cachedData?.savedAt || 0);
     const serverHasPaidKit = Array.isArray(serverData?.paidKitOrders) && serverData.paidKitOrders.length > 0;
     const serverHasNewerKit = serverHasPaidKit && Number(serverData.bonusKitLevel || 0) > Number(cachedData?.bonusKitLevel || 0);
-    if (cachedData && !serverData) {
+    // Se o F5 ocorreu durante um autosave, o cache pode conter a versão mais
+    // nova que ainda não apareceu na resposta do banco. Nunca regride para o
+    // estado anterior nesse intervalo; a próxima gravação sincroniza o banco.
+    if (cachedData && (!serverData || cachedSavedAt > serverSavedAt)) {
       json = { data: cachedData };
+      if (cachedSavedAt > serverSavedAt) setTimeout(() => saveGardenToSE(), 250);
     }
     if (!json?.data || json.data._isSessionShell === true) return loadFailed ? null : false;
     hadSave = true;

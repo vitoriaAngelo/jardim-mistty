@@ -3445,7 +3445,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 </svg>
         <span>Ranking</span>
       </button>
-      <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Ranking<br><span>Top 10 espectadores do canal</span></div>
+      <div class="header-btn-tip" id="ranking-tool-tip" style="left:50%;transform:translateX(-50%)">Ranking<br><span>Disponível a partir do nível 10</span></div>
     </div>
 
     <div class="header-icon-wrap" style="width:100%">
@@ -6122,6 +6122,10 @@ function renderRankingPage() {
 }
 
 async function openRanking() {
+  if (currentLevel() < 10) {
+    toast(`🔒 O Ranking será liberado no nível 10. Você está no nível ${currentLevel()}.`, 3000);
+    return;
+  }
   const loadId = ++rankingLoadId;
   document.getElementById('ranking-overlay').classList.remove('hidden');
   document.getElementById('ranking-list').innerHTML =

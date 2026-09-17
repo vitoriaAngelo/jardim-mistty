@@ -4735,7 +4735,7 @@ const PLOT_UPGRADES = [
 function renderPlotShop() {
   const grid = document.getElementById('plot-shop-grid');
   grid.innerHTML = PLOT_UPGRADES.map(u => {
-    const owned = G.unlockedPlots > u.slot;
+    const owned = G.unlockedPlots > u.slot || (u.slot === 5 && G.premiumSpecialPlotClaimed === true);
     const lv = currentLevel();
     const previewAccess = G.previewUnlocks || (window.location.hostname === 'localhost' && new URLSearchParams(window.location.search).has('preview'));
     const subscriberLocked = u.subscriberOnly && !hasSubscriberBadge();
@@ -5831,8 +5831,8 @@ function claimPremium(kind) {
   if (kind === 'plants') G.premiumPlantsUnlocked = true;
   if (kind === 'fertilizers') { Object.keys(FERTILIZERS).forEach(id => G.fertilizerInventory[id] = (G.fertilizerInventory[id] || 0) + 4); G.premiumFertilizersClaimed = true; renderFertilizerInventory(); }
   if (kind === 'plot') {
-    // O Premium sempre entrega o sexto canteiro; o especial não é mais aleatório.
-    G.unlockedPlots = Math.max(Number(G.unlockedPlots || 2), 6);
+    // O Premium entrega apenas o sexto slot especial; os demais continuam
+    // seguindo os desbloqueios normais por pontos e nível.
     G.specialPlot = 5;
     G.upgrades.add('special_plot');
     G.premiumSpecialPlotClaimed = true;
@@ -7313,7 +7313,7 @@ function renderPlots() {
 }
 
 function buildPlotEl(plot, idx) {
-  const locked = idx >= G.unlockedPlots;
+  const locked = idx >= G.unlockedPlots && !(idx === 5 && G.premiumSpecialPlotClaimed === true);
   const div = document.createElement('div');
   div.className = 'plot' + (locked ? ' locked' : plot ? '' : ' empty')
     + (plot?.goldenPlot || isSpecialPlotActive(idx) ? ' special-plot' : '')
@@ -7493,7 +7493,7 @@ function buildPlotEl(plot, idx) {
 }
 
 async function onPlotClick(idx) {
-  if (idx >= G.unlockedPlots) return;
+  if (idx >= G.unlockedPlots && !(idx === 5 && G.premiumSpecialPlotClaimed === true)) return;
   const plot = G.plots[idx];
   const tool = G.selectedTool;
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);
@@ -9192,6 +9192,13 @@ async function loadGardenFromSE(username) {
     G.premiumPlantsUnlocked = save.premiumPlantsUnlocked === true;
     G.premiumFertilizersClaimed = save.premiumFertilizersClaimed === true;
     G.premiumSpecialPlotClaimed = save.premiumSpecialPlotClaimed === true;
+    // Corrige saves criados pela versão que liberava os seis slots ao
+    // resgatar o Premium. O sexto continua especial e independente.
+    const premiumPlotMigration = G.premiumSpecialPlotClaimed === true
+      && Number(G.unlockedPlots) === 6
+      && Number(G.specialPlot) === 5
+      && G.plots.slice(2, 5).every(plot => !plot);
+    if (premiumPlotMigration) G.unlockedPlots = 2;
     if (normalizeSpecialPlotsByEntitlement() || repairSpecialistPlotDuration()) saveGardenToSE();
     G.isPremium = save.isPremium === true || G.premiumWateringCan || G.premiumShovel || G.premiumPlantsUnlocked || G.premiumFertilizersClaimed || G.premiumSpecialPlotClaimed;
     restorePremiumClaimsCache(username);

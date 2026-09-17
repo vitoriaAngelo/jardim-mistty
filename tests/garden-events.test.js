@@ -18,6 +18,12 @@ test('usa aviso de 10 segundos e frequência normal de 5 a 8 minutos', () => {
   assert.match(html, /300000 \+ Math\.random\(\)\*180000/);
 });
 
+test('acelera automaticamente o primeiro evento apenas no Deploy Preview', () => {
+  assert.match(html, /location\.hostname\.startsWith\('deploy-preview-'\)/);
+  assert.match(html, /eventFastMode\(\) \? 8000 \+ Math\.random\(\)\*5000/);
+  assert.match(html, /G\.eventNextAt = Date\.now\(\)\+5000/);
+});
+
 test('persiste o próximo evento para impedir repetição por F5', () => {
   assert.match(html, /eventNextAt:\s+Number\(G\.eventNextAt \|\| 0\)/);
   assert.match(html, /G\.eventNextAt\s+= Number\(save\.eventNextAt \|\| 0\)/);

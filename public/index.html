@@ -3953,10 +3953,11 @@ let gardenEventRainTimer = null;
 let gardenEventButterflyTimer = null;
 
 function eventFastMode() {
-  const allowed = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.startsWith('deploy-preview-');
-  return allowed && new URLSearchParams(location.search).get('events') === 'fast';
+  const isPreviewHost = location.hostname.startsWith('deploy-preview-');
+  const isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  return isPreviewHost || (isLocalHost && new URLSearchParams(location.search).get('events') === 'fast');
 }
-function nextEventDelay() { return eventFastMode() ? 25000 + Math.random()*20000 : 300000 + Math.random()*180000; }
+function nextEventDelay() { return eventFastMode() ? 8000 + Math.random()*5000 : 300000 + Math.random()*180000; }
 function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
 function setNextGardenEvent() { G.eventNextAt = Date.now() + nextEventDelay(); saveGardenToSE(); }
 
@@ -4063,7 +4064,12 @@ function tickGardenEvents() {
   if(Date.now()>=gardenEvent.endsAt){ if(gardenEvent.phase==='countdown')startGardenEvent(); else finishGardenEvent(); }
   else renderGardenEvent();
 }
-function initGardenEvents(){ if(gardenEventTimer)clearInterval(gardenEventTimer); gardenEventTimer=setInterval(tickGardenEvents,500); tickGardenEvents(); }
+function initGardenEvents(){
+  if (eventFastMode() && (!G.eventNextAt || G.eventNextAt > Date.now()+13000)) G.eventNextAt = Date.now()+5000;
+  if(gardenEventTimer)clearInterval(gardenEventTimer);
+  gardenEventTimer=setInterval(tickGardenEvents,500);
+  tickGardenEvents();
+}
 
 // maxWater = regas para encher (habilitar crescimento)
 // maxGrow  = estágios de crescimento por tempo (30min cada)

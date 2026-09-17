@@ -5054,6 +5054,20 @@ function normalizeSpecialPlotsByEntitlement() {
   if (!G.unlockedPlots) return false;
   const kitPlots = { 1: 1, 2: 2, 3: 4 }[Number(G.bonusKitLevel || 0)] || 0;
   const twitchPlots = G.premiumSpecialPlotClaimed === true ? 1 : 0;
+  // Após um reset, não reaproveite índices antigos de kits que já não existem.
+  // O Premium pode manter somente o slot 6 (índice 5).
+  if (kitPlots === 0) {
+    const expected = twitchPlots ? [5] : [];
+    const current = Array.isArray(G.specialPlots) ? G.specialPlots : [];
+    const changed = current.some(index => !expected.includes(index))
+      || current.length !== expected.length
+      || G.specialPlot !== (expected[0] ?? null)
+      || Boolean(G.specialPlotExpiresAt);
+    G.specialPlots = expected;
+    G.specialPlot = expected[0] ?? null;
+    G.specialPlotExpiresAt = 0;
+    return Boolean(changed);
+  }
   const entitled = Math.min(G.unlockedPlots, kitPlots + twitchPlots);
   const current = Array.isArray(G.specialPlots) ? [...new Set(G.specialPlots.filter(index => index < G.unlockedPlots))] : [];
   if (Number.isInteger(G.specialPlot) && G.specialPlot < G.unlockedPlots && !current.includes(G.specialPlot)) current.push(G.specialPlot);

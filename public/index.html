@@ -9791,7 +9791,11 @@ async function claimTwitchzinhoCoins() {
     return;
   }
   const amount = Number(G.twitchzinhoPendingCoins || 0);
-  if (!amount || !seUser || !gardenHydrated) return;
+  if (!seUser || !gardenHydrated) return;
+  if (amount <= 0) {
+    toast('🪙 A sacolinha ainda está vazia! Estou juntando moedinhas para você. Novas moedas chegam a cada 5 minutos.', 4000);
+    return;
+  }
   G.twitchzinhoPendingCoins = 0;
   G.pts += amount;
   if (lastKnownSEPoints !== null) lastKnownSEPoints += amount;

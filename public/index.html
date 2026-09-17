@@ -8488,7 +8488,9 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     connectSESocket();
     toast(`🌱 Bem-vinda, ${displayName}! Você tem ${seUser.points} pts 🌟`, 4000);
     if (saveTimer) clearInterval(saveTimer);
-    saveTimer = setInterval(() => { saveGardenToSE(); }, 30000);
+    // Mantém a fazenda persistida mesmo sem logout. O timestamp salvo permite
+    // recalcular o crescimento que ocorreu enquanto a pessoa esteve ausente.
+    saveTimer = setInterval(() => { if (seUser && gardenHydrated) saveGardenToSE(); }, 15000);
     if (!hadSave) await saveGardenToSE();
 
     // Show help on first login (no saved garden)
@@ -9820,6 +9822,10 @@ function closePopupOverlay(overlay) {
 document.addEventListener('click', event => {
   const overlay = event.target.closest?.('.mail-overlay, .modal-overlay, .help-overlay, .profile-overlay, .levelup-overlay');
   if (overlay && event.target === overlay) closePopupOverlay(overlay);
+});
+
+window.addEventListener('pagehide', () => {
+  if (seUser && gardenHydrated) saveGardenToSE();
 });
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;

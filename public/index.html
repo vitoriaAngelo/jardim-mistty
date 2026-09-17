@@ -5109,6 +5109,7 @@ function cultivationCost(type) {
 const SHOP_QTY = {};
 const SHOP_CART = {};
 let SHOP_CART_OPEN = false;
+let shopPurchaseInFlight = false;
 function cartProduct(type) { return getPlantable(type) || (typeof FERTILIZERS !== 'undefined' ? FERTILIZERS[type] : null); }
 function cartUnitCost(type) {
   const p = cartProduct(type); if (!p) return 0;
@@ -5162,11 +5163,15 @@ function renderShopCart() {
   const count = entries.reduce((sum, [, qty]) => sum + qty, 0);
   el.classList.remove('empty');
   const details = `<div class="shop-cart-items">${entries.map(([type, qty]) => { const p = cartProduct(type); return `<div class="shop-cart-row"><span>${p.emoji} ${p.name}</span><div class="shop-cart-row-controls"><button onclick="event.stopPropagation();adjustCartQty('${type}',-1)" aria-label="Retirar ${p.name}">−</button><span>×${qty}</span><button onclick="event.stopPropagation();adjustCartQty('${type}',1)" aria-label="Adicionar ${p.name}">+</button></div></div>`; }).join('')}</div>`;
-  el.innerHTML = `<div><div class="shop-cart-toggle">🛍️ Sacola · ${count} item${count > 1 ? 's' : ''}</div>${details}<div class="shop-cart-total">Total = <img class="points-token" src="points-sprout.svg" width="22" height="22" alt="" aria-hidden="true"> ${total} pts</div></div><button class="shop-cart-buy" onclick="event.stopPropagation();buyShopCart()">Comprar</button><button class="popup-close-x" style="position:static;width:24px;height:24px" onclick="event.stopPropagation();clearShopCart()" aria-label="Esvaziar sacola">×</button>`;
+  el.innerHTML = `<div><div class="shop-cart-toggle">🛍️ Sacola · ${count} item${count > 1 ? 's' : ''}</div>${details}<div class="shop-cart-total">Total = <img class="points-token" src="points-sprout.svg" width="22" height="22" alt="" aria-hidden="true"> ${total} pts</div></div><button class="shop-cart-buy" ${shopPurchaseInFlight ? 'disabled' : ''} onclick="event.stopPropagation();buyShopCart()">${shopPurchaseInFlight ? 'Confirmando…' : 'Comprar'}</button><button class="popup-close-x" style="position:static;width:24px;height:24px" onclick="event.stopPropagation();clearShopCart()" aria-label="Esvaziar sacola">×</button>`;
 }
 async function buyShopCart() {
+  if (shopPurchaseInFlight) return;
   const entries = Object.entries(SHOP_CART).filter(([, qty]) => qty > 0);
   if (!entries.length) return;
+  shopPurchaseInFlight = true;
+  renderShopCart();
+  try {
   let total = 0;
   for (const [type, qty] of entries) {
     const p = cartProduct(type);
@@ -5181,6 +5186,10 @@ async function buyShopCart() {
   updatePts(); renderInventory(); initAchievements(); G.achievStats.totalBuy = (G.achievStats.totalBuy||0) + entries.reduce((sum, [, qty]) => sum + qty, 0); checkAchievements();
   saveGardenToSE();
   clearShopCart(); toast(`🛍️ Compra concluída! ${entries.reduce((s,[,q])=>s+q,0)} item${entries.length > 1 ? 's' : ''} adicionados.`);
+  } finally {
+    shopPurchaseInFlight = false;
+    renderShopCart();
+  }
 }
 function adjustShopQty(type, delta) {
   SHOP_QTY[type] = Math.max(1, Math.min(99, (SHOP_QTY[type] || 1) + delta));

@@ -2022,6 +2022,18 @@ body.dark-mode .frame-picker-toggle, body.dark-mode .frame-picker-btn { backgrou
 }
 .profile-selected-title { min-height:14px; margin-top:2px; color:#8d6d35; font-size:11px; font-weight:900; }
 body.dark-mode .profile-selected-title { color:#e6c978; }
+.profile-background-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+.profile-background-option { min-height:52px; padding:8px 7px; border:1px solid var(--cozy-line); border-radius:12px; color:var(--text); font:800 11px/1.15 'Nunito',sans-serif; cursor:pointer; }
+.profile-background-option.selected { outline:2px solid var(--grass2); outline-offset:1px; }
+.profile-background-option.spring { background:linear-gradient(135deg,#eef4dd,#f7dfe7); }
+.profile-background-option.sunny { background:linear-gradient(135deg,#f9edb7,#e9c66d); }
+.profile-background-option.rain { background:linear-gradient(135deg,#d8e8e7,#8caeb0); }
+.profile-background-option.night { background:linear-gradient(135deg,#27344c,#5e6485); color:#fff; }
+.profile-background-option.autumn { background:linear-gradient(135deg,#f1d1a8,#bd7957); }
+.profile-background-option.winter { background:linear-gradient(135deg,#eaf5f4,#b7d8e8); }
+.profile-background-option.rainbow { background:linear-gradient(110deg,#f5c7c7,#f4e0a6,#c9e4c0,#c9d8ef); }
+.profile-background-option.forest { background:linear-gradient(135deg,#b9c99c,#665d83); color:#fff; }
+body.dark-mode .profile-background-option { border-color:#53604f; }
 
 .profile-section { display: flex; flex-direction: column; gap: 8px; }
 .profile-label {
@@ -2792,6 +2804,14 @@ body.dark-mode.season-spring .profile-modal { background:radial-gradient(circle 
 body.dark-mode.season-summer .profile-modal { background:radial-gradient(circle at 100% 0,#8a6d3533 0 20%,transparent 21%),linear-gradient(135deg,#252b24,#303126 62%,#393225) !important; }
 body.dark-mode.season-autumn .profile-modal { background:radial-gradient(circle at 100% 0,#85513b33 0 20%,transparent 21%),linear-gradient(135deg,#252b24,#302b25 62%,#382925) !important; }
 body.dark-mode.season-winter .profile-modal { background:radial-gradient(circle at 100% 0,#57798633 0 20%,transparent 21%),linear-gradient(135deg,#252b24,#272e30 62%,#302e3a) !important; }
+#profile-overlay .profile-modal[data-profile-background="spring"] { background:linear-gradient(135deg,#fffdf7,#edf5e7 62%,#fae8eb) !important; }
+#profile-overlay .profile-modal[data-profile-background="sunny"] { background:linear-gradient(135deg,#fffdf7,#f8efcf 62%,#f2d98a) !important; }
+#profile-overlay .profile-modal[data-profile-background="rain"] { background:linear-gradient(135deg,#f5faf8,#d8e8e7 62%,#b5ced0) !important; }
+#profile-overlay .profile-modal[data-profile-background="night"] { background:linear-gradient(135deg,#eef0e7,#c9d0e3 45%,#9ca4c7) !important; }
+#profile-overlay .profile-modal[data-profile-background="autumn"] { background:linear-gradient(135deg,#fff7e9,#f4e5d2 62%,#dda87a) !important; }
+#profile-overlay .profile-modal[data-profile-background="winter"] { background:linear-gradient(135deg,#fffdf7,#e8f0ed 62%,#c1dce8) !important; }
+#profile-overlay .profile-modal[data-profile-background="rainbow"] { background:linear-gradient(135deg,#fff1dc,#f6dce9 40%,#dcebd5 72%,#d7e3f5) !important; }
+#profile-overlay .profile-modal[data-profile-background="forest"] { background:linear-gradient(135deg,#e8efdf,#c5d4b0 52%,#b5a9c7) !important; }
 .profile-season-art { position:absolute; z-index:0; pointer-events:none; user-select:none; white-space:nowrap; opacity:.22; filter:saturate(.8); }
 .profile-season-art.top { top:18px; right:48px; font-size:20px; letter-spacing:7px; transform:rotate(2deg); }
 .profile-season-art.bottom { right:20px; bottom:14px; font-size:17px; letter-spacing:6px; transform:rotate(-2deg); opacity:.16; }
@@ -3469,6 +3489,10 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 
     <div id="profile-overview-panel" class="profile-tab-panel">
     <div class="profile-section">
+      <div class="profile-label">🖼️ Plano de fundo do perfil</div>
+      <div class="profile-background-grid" id="profile-background-grid"></div>
+    </div>
+    <div class="profile-section">
       <div class="profile-label">Nome da Fazenda</div>
       <div class="profile-field-row">
         <input id="profile-farm-name" type="text" maxlength="20" placeholder="Meu Jardim"
@@ -4018,6 +4042,7 @@ const G = {
   bonusKitLevel: 0,
   dailyPhrase: '',
   selectedHarvestTitle: '',
+  profileBackground: 'spring',
   isSubscriber: false,
   welcomeBonusClaimed: false,
   previewUnlocks: false,
@@ -7705,6 +7730,28 @@ const HARVEST_TITLES = [
   { icon:'💎', name:'Eterno do Jardim', target:7500 },
 ];
 function titleForName(name) { return HARVEST_TITLES.find(t => t.name === name) || null; }
+const PROFILE_BACKGROUNDS = [
+  ['spring','🌱 Jardim de primavera'], ['sunny','🌻 Campo ensolarado'], ['rain','🌧️ Dia chuvoso'], ['night','🌙 Noite estrelada'],
+  ['autumn','🍂 Outono dourado'], ['winter','❄️ Inverno mágico'], ['rainbow','🌈 Arco-íris'], ['forest','🔮 Floresta encantada'],
+];
+function applyProfileBackground() {
+  const modal = document.querySelector('#profile-overlay .profile-modal');
+  if (modal) modal.dataset.profileBackground = PROFILE_BACKGROUNDS.some(([id]) => id === G.profileBackground) ? G.profileBackground : 'spring';
+}
+function renderProfileBackgrounds() {
+  const grid = document.getElementById('profile-background-grid');
+  if (!grid) return;
+  grid.innerHTML = PROFILE_BACKGROUNDS.map(([id, label]) => `<button type="button" class="profile-background-option ${id} ${G.profileBackground === id ? 'selected' : ''}" onclick="selectProfileBackground('${id}')" aria-pressed="${G.profileBackground === id}">${label}</button>`).join('');
+}
+async function selectProfileBackground(id) {
+  if (!PROFILE_BACKGROUNDS.some(([bg]) => bg === id)) return;
+  const previous = G.profileBackground;
+  G.profileBackground = id;
+  applyProfileBackground();
+  renderProfileBackgrounds();
+  try { await saveGardenToSE(); toast('🖼️ Fundo do perfil atualizado!', 1800); }
+  catch (e) { G.profileBackground = previous; applyProfileBackground(); renderProfileBackgrounds(); toast('❌ Não foi possível salvar o fundo.', 2400); }
+}
 function checkHarvestTitles() {
   initAchievements();
   const harvested = Number(G.achievStats?.totalHarvest || 0);
@@ -7767,6 +7814,8 @@ function openProfile() {
   const season = currentSeason();
   initAchievements();
   const stats = G.achievStats;
+  applyProfileBackground();
+  renderProfileBackgrounds();
 
   document.getElementById('profile-avatar').textContent = current.emoji;
   const subscriber = Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
@@ -8360,6 +8409,7 @@ async function saveGardenToSENow(retryStale = true) {
     achievements:     [...(G.achievements || [])],
     achievStats:      G.achievStats || {},
     selectedHarvestTitle: G.selectedHarvestTitle || '',
+    profileBackground: G.profileBackground || 'spring',
     achievSeen:       G.achievSeen  || 0,
     presenceStreak:   G.presenceStreak || 0,
     presenceLastDay:  G.presenceLastDay || '',
@@ -8599,6 +8649,7 @@ async function loadGardenFromSE(username) {
     G.achievements    = new Set(save.achievements || []);
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
     G.selectedHarvestTitle = save.selectedHarvestTitle || '';
+    G.profileBackground = save.profileBackground || 'spring';
     G.achievSeen      = save.achievSeen       || 0;
     G.presenceStreak  = save.presenceStreak  || 0;
     G.presenceLastDay = save.presenceLastDay || '';

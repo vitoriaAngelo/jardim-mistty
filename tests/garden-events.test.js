@@ -138,6 +138,14 @@ test('falha ao salvar título restaura a seleção anterior', () => {
   assert.match(html, /checkHarvestTitles\(\);[\s\S]*?Refresh all UI/);
 });
 
+test('perfil permite escolher e salvar oito planos de fundo', () => {
+  assert.match(html, /Plano de fundo do perfil/);
+  assert.match(html, /PROFILE_BACKGROUNDS = \[/);
+  assert.match(html, /function selectProfileBackground\(id\)/);
+  assert.match(html, /profileBackground: G\.profileBackground \|\| 'spring'/);
+  assert.match(html, /data-profile-background="night"/);
+});
+
 test('perfil oferece dois títulos difíceis de desbloquear', () => {
   assert.match(html, /name:'Imperador da Colheita', target:3000/);
   assert.match(html, /name:'Eterno do Jardim', target:7500/);

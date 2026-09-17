@@ -6938,6 +6938,10 @@ async function onPlotClick(idx) {
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);
     const regrows = !outOfSeason && harvestsRemaining > 1;
     const hasGolden = plot.goldenSoil;
+    const wasMutated = plot.mutated === true;
+    // A mutação é consumida nesta colheita; o canteiro volta ao visual normal
+    // mesmo quando a planta continua regenerando.
+    plot.mutated = false;
     if (regrows) {
       plot.harvestsRemaining = harvestsRemaining - 1;
       plot.waterCount = 0;
@@ -6969,7 +6973,7 @@ async function onPlotClick(idx) {
         if (Math.random() < .35) { G.inventory[type] = (G.inventory[type] || 0) + 1; gardenEvent.bonus++; toast(`🌙 Semente lunar de ${getPlantable(type).name} encontrada!`,3000); }
         renderGardenEvent();
       }
-      if (plot.mutated) {
+      if (wasMutated) {
         finalQty += 1;
         gainXP('harvest', plotEl, 25, '🧬 +25 XP Mutação');
         toast(`🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);

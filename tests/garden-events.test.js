@@ -44,6 +44,8 @@ test('planta mutada fica identificada no card e no tooltip', () => {
   assert.match(html, /finalQty \+= 1/);
   assert.match(html, /\+25 XP Mutação/);
   assert.match(html, /Combina com habilidades e outros bônus/);
+  assert.match(html, /const wasMutated = plot\.mutated === true/);
+  assert.match(html, /plot\.mutated = false/);
 });
 
 test('persiste o próximo evento para impedir repetição por F5', () => {

@@ -24,6 +24,8 @@ function validOrder(order, seasonIdx, data) {
 }
 
 function validateOrdersTransition(oldData, nextData) {
+  const oldGlobalReset = Number(oldData.ordersGlobalResetVersion || 0);
+  const nextGlobalReset = Number(nextData.ordersGlobalResetVersion || 0);
   const seasonIdx = Number(nextData.seasonIdx || 0);
   const searches = Number(nextData.orderSearches || 0);
   const deliveries = Number(nextData.orderDeliveries || 0);
@@ -35,6 +37,11 @@ function validateOrdersTransition(oldData, nextData) {
   const rewardState = oldKey === nextKey ? oldData : nextData;
   if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || orders.some(order => !validOrder(order, seasonIdx, rewardState))) throw new Error('Pedido adulterado ou incompatível com a estação');
   if (nextKey !== String(seasonIdx)) throw new Error('Estação dos pedidos inválida');
+  if (nextGlobalReset > oldGlobalReset) {
+    if (nextGlobalReset !== 1 || oldGlobalReset !== 0 || searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
+    return;
+  }
+  if (nextGlobalReset < oldGlobalReset) throw new Error('Reset global de pedidos não pode ser revertido');
   if (oldKey !== nextKey) return;
   const oldSearches = Number(oldData.orderSearches || 0);
   const oldDeliveries = Number(oldData.orderDeliveries || 0);

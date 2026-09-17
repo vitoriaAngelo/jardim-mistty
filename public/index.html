@@ -3900,6 +3900,7 @@ const G = {
   orderSearches: 0,
   orderDeliveries: 0,
   orderPaidReset: false,
+  ordersGlobalResetVersion: 0,
   lastOrder: null,
 };
 
@@ -7861,6 +7862,7 @@ async function saveGardenToSENow() {
     seasonIdx:        G.seasonIdx,
     seasonDay:        G.seasonDay,
     orders:           G.orders || [],
+    ordersGlobalResetVersion: G.ordersGlobalResetVersion || 0,
     ordersSeasonKey:  G.ordersSeasonKey || `${G.seasonIdx}`,
     orderSearches:    G.orderSearches || 0,
     orderDeliveries:  G.orderDeliveries || 0,
@@ -8012,7 +8014,7 @@ window.addEventListener('beforeunload', () => {
     plotFertilizers: G.plotFertilizers, plots: G.plots,
     unlockedPlots: G.unlockedPlots, harvested: G.harvested, goldenHarvested: G.goldenHarvested || {},
     upgrades: [...G.upgrades], upgradeLevels: G.upgradeLevels || {}, seasonIdx: G.seasonIdx,
-    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0, orderPaidReset: G.orderPaidReset === true, lastOrder: G.lastOrder || null,
+    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0, orderPaidReset: G.orderPaidReset === true, ordersGlobalResetVersion: G.ordersGlobalResetVersion || 0, lastOrder: G.lastOrder || null,
     waterCapacity: G.waterCapacity ?? 5, waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
     seasonDay: G.seasonDay, missions: G.missions,
     achievements: [...(G.achievements || [])],
@@ -8143,8 +8145,15 @@ async function loadGardenFromSE(username) {
     G.orderSearches   = Math.min(3, Number(save.orderSearches || 0));
     G.orderDeliveries  = Number(save.orderDeliveries || 0);
     G.orderPaidReset   = save.orderPaidReset === true;
+    G.ordersGlobalResetVersion = Number(save.ordersGlobalResetVersion || 0);
     G.lastOrder        = save.lastOrder || null;
     gardenOrders      = G.orders;
+    if (G.ordersGlobalResetVersion < 1) {
+      G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
+      gardenOrders = Array.from({ length: 3 }, (_, i) => createOrder(i));
+      G.orders = gardenOrders; G.ordersGlobalResetVersion = 1;
+      setTimeout(() => saveGardenToSE(), 250);
+    }
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };

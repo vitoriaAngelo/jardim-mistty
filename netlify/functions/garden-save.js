@@ -19,7 +19,9 @@ function validOrder(order, seasonIdx, data) {
   if (!tier || !ORDER_SEASONS[seasonIdx]?.includes(order?.type) || !Number.isInteger(qty) || qty < tier.min || qty > tier.max) return false;
   const mascotBonus = ['apple','premium'].includes(data?.selectedMascot) ? 1.15 : 1;
   const skillBonus = 1 + Number(data?.skillNodes?.etiqueta_dourada || 0) * .03;
-  const unitValue = Math.round(ORDER_VALUES[order.type] * mascotBonus * skillBonus);
+  // O cliente arredonda primeiro o bônus do mascote e só depois aplica a
+  // habilidade Etiqueta Dourada. A mesma ordem evita diferenças de 1 ponto.
+  const unitValue = Math.round(Math.round(ORDER_VALUES[order.type] * mascotBonus) * skillBonus);
   const reward = Math.max(30, Math.max(12, Math.round(unitValue * tier.mult)) * qty + Math.round(25 * tier.mult));
   const xp = Math.round((60 + qty * 10) * tier.mult);
   return Number(order.reward) === reward && Number(order.xp) === xp && typeof order.id === 'string' && order.id.length <= 80;
@@ -217,21 +219,7 @@ exports.handler = async (event) => {
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
       const hasOrderAction = orderActionChanged(existingData, safeData);
       if (existingRows.length && hasOrderAction && ordersMeaningfullyChanged(existingData, safeData)) {
-        try {
-          validateOrdersTransition(existingData, safeData);
-        } catch (orderError) {
-          // Um pedido legado ou dessincronizado jamais deve impedir o restante
-          // da fazenda de ser salvo. Mantém o estado canônico dos pedidos e
-          // continua persistindo plantas, inventário, XP e demais progressos.
-          console.warn(`Pedido rejeitado para ${username}; preservando estado anterior:`, orderError.message);
-          safeData.orders = existingData.orders;
-          safeData.ordersGlobalResetVersion = existingData.ordersGlobalResetVersion;
-          safeData.ordersSeasonKey = existingData.ordersSeasonKey;
-          safeData.orderSearches = existingData.orderSearches;
-          safeData.orderDeliveries = existingData.orderDeliveries;
-          safeData.orderPaidReset = existingData.orderPaidReset;
-          safeData.lastOrder = existingData.lastOrder;
-        }
+        validateOrdersTransition(existingData, safeData);
       } else if (existingRows.length && !hasOrderAction) {
         // Salvamentos de plantas/XP/logout não carregam intenção de alterar
         // pedidos. Preserva o estado canônico do banco e evita falsos bloqueios.

@@ -1,10 +1,17 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { validateOrdersTransition } = require('../netlify/functions/garden-save')._test;
+const { validOrder, validateOrdersTransition } = require('../netlify/functions/garden-save')._test;
 const pageSource = require('node:fs').readFileSync('public/index.html', 'utf8');
 
 const normalOrder = { id:'order-1', type:'potato', qty:5, rarity:'A', reward:285, xp:110 };
 const base = { seasonIdx:0, ordersSeasonKey:'0', orderSearches:1, orderDeliveries:0, orderPaidReset:false, orders:[normalOrder], harvested:{ potato:10 }, xp:0, skillNodes:{} };
+
+test('calcula pedidos na mesma ordem de arredondamento do cliente', () => {
+  const state = { selectedMascot:'apple', skillNodes:{ etiqueta_dourada:1 } };
+  const daisyOrder = { id:'daisy-1', type:'daisy', qty:1, rarity:'A', reward:75, xp:70 };
+  assert.equal(validOrder(daisyOrder, 0, state), true);
+  assert.equal(validOrder({ ...daisyOrder, reward:76 }, 0, state), false);
+});
 
 test('bloqueia limites e recompensas adulteradas dos pedidos', () => {
   assert.throws(() => validateOrdersTransition(base, { ...base, orderDeliveries:5 }), /Limite de entregas/);

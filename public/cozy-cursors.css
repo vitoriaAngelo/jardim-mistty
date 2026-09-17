@@ -4,6 +4,22 @@
   --cozy-click-cursor: url('cursor-cozy-click.svg') 13 3, pointer;
   --cozy-locked-cursor: url('cursor-cozy-locked.svg') 3 3, not-allowed;
 }
+
+/* O perfil usa onclick apenas para impedir o fechamento ao clicar dentro.
+   Isso não deve transformar o cartão inteiro em uma área clicável. */
+body #profile-overlay .profile-modal,
+body #profile-overlay .profile-modal * {
+  cursor: var(--cozy-cursor) !important;
+}
+body #profile-overlay .profile-modal button,
+body #profile-overlay .profile-modal button *,
+body #profile-overlay .profile-modal input,
+body #profile-overlay .profile-modal input * {
+  cursor: var(--cozy-click-cursor) !important;
+}
+body #profile-overlay .profile-modal input[type="text"] {
+  cursor: text !important;
+}
 @media (hover: hover) and (pointer: fine) {
   html body, body * { cursor: var(--cozy-cursor); }
   body :is(button, a[href], select, summary, [role="button"], [onclick], input[type="checkbox"], input[type="radio"], input[type="range"], .plot, .inv-slot, .fert-inv-slot),

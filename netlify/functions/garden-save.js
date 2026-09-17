@@ -217,7 +217,21 @@ exports.handler = async (event) => {
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
       const hasOrderAction = orderActionChanged(existingData, safeData);
       if (existingRows.length && hasOrderAction && ordersMeaningfullyChanged(existingData, safeData)) {
-        validateOrdersTransition(existingData, safeData);
+        try {
+          validateOrdersTransition(existingData, safeData);
+        } catch (orderError) {
+          // Um pedido legado ou dessincronizado jamais deve impedir o restante
+          // da fazenda de ser salvo. Mantém o estado canônico dos pedidos e
+          // continua persistindo plantas, inventário, XP e demais progressos.
+          console.warn(`Pedido rejeitado para ${username}; preservando estado anterior:`, orderError.message);
+          safeData.orders = existingData.orders;
+          safeData.ordersGlobalResetVersion = existingData.ordersGlobalResetVersion;
+          safeData.ordersSeasonKey = existingData.ordersSeasonKey;
+          safeData.orderSearches = existingData.orderSearches;
+          safeData.orderDeliveries = existingData.orderDeliveries;
+          safeData.orderPaidReset = existingData.orderPaidReset;
+          safeData.lastOrder = existingData.lastOrder;
+        }
       } else if (existingRows.length && !hasOrderAction) {
         // Salvamentos de plantas/XP/logout não carregam intenção de alterar
         // pedidos. Preserva o estado canônico do banco e evita falsos bloqueios.

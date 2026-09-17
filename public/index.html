@@ -9353,7 +9353,7 @@ async function checkLiveStatus() {
 }
 
 let pointChargeInFlight = false;
-async function chargeGamePoints(amount) {
+async function chargeGamePoints(amount, reason = 'Compra no jardim') {
   const cost = Math.max(0, Number(amount) || 0);
   if (!cost) return true;
   if (pointChargeInFlight) {
@@ -9378,7 +9378,7 @@ async function chargeGamePoints(amount) {
       }
     }
     G.pts -= cost;
-    recordPointsHistory(-cost, 'Compra no jardim');
+    recordPointsHistory(-cost, reason);
     updatePts();
     return true;
   } finally {
@@ -9825,7 +9825,7 @@ async function upgradeSkillNode(nodeId, branchId) {
   if (G.pts < cost) { toast(`🌱 Faltam ${cost - G.pts} pts para evoluir!`); return; }
 
   // Cobrar via chargeGamePoints para sincronizar corretamente com o StreamElements
-  if (!(await chargeGamePoints(cost))) return;
+  if (!(await chargeGamePoints(cost, 'Regador cheio'))) return;
   G.skillPoints--;
   G.skillNodes[nodeId] = lvl + 1;
   // Garantir que skillPointsClaimed está atualizado para evitar re-concessão retroativa

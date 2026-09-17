@@ -7719,6 +7719,8 @@ async function selectHarvestTitle(name) {
   const title = titleForName(name);
   if (!title || Number(G.achievStats?.totalHarvest || 0) < title.target) return;
   G.selectedHarvestTitle = title.name;
+  const selectedTitleEl = document.getElementById('profile-selected-title');
+  if (selectedTitleEl) selectedTitleEl.textContent = `${title.icon} ${title.name}`;
   renderProfileTitles();
   try { await saveGardenToSE(); toast(`🏅 Título escolhido: ${title.name}`, 1800); }
   catch (e) { toast('❌ Não foi possível salvar o título.', 2400); }

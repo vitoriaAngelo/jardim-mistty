@@ -7882,20 +7882,6 @@ function openProfile() {
   const phraseDisplay = document.getElementById('profile-daily-phrase-display');
   phraseDisplay.textContent = G.dailyPhrase ? `“${G.dailyPhrase}”` : '';
   phraseDisplay.classList.toggle('visible', Boolean(G.dailyPhrase));
-  document.getElementById('profile-current-season').textContent = `${season.icon} ${season.name}`;
-  const rankingEl = document.getElementById('profile-current-ranking');
-  rankingEl.textContent = seUser?.username ? '🔄 Carregando...' : '👤 Conecte a Twitch';
-  if (seUser?.username) {
-    fetch(`${SE_API}/points/${SE_CHANNEL}/top%3Flimit%3D25`)
-      .then(r => { if (!r.ok) throw new Error('ranking'); return r.json(); })
-      .then(data => {
-        const users = data.users || data || [];
-        const idx = users.findIndex(u => (u.username || u._id || '').toLowerCase() === seUser.username.toLowerCase());
-        rankingEl.textContent = idx >= 0 ? `🏆 #${idx + 1}` : '🌱 Fora do top 25';
-      })
-      .catch(() => { rankingEl.textContent = '— Indisponível'; });
-  }
-
   document.getElementById('profile-stats').innerHTML = [
     ['✨', G.xp || 0, 'XP acumulado'],
     ['🧺', stats.totalHarvest || 0, 'Itens colhidos'],

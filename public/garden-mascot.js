@@ -86,10 +86,12 @@
     .event-moon .pet-moon{animation:premium-sparkle 3s ease-in-out infinite}
     .event-mutation .pet-mutation{animation:pet-glow 2.8s ease-in-out infinite}
     .event-mutation .mascot-body{animation:mascot-dance 3s ease-in-out infinite}
+    .garden-mascot.mascot-event-returning .mascot-button{animation:mascot-event-return 1.1s cubic-bezier(.22,1,.36,1) both}
     @keyframes pet-umbrella{50%{transform:rotate(5deg)}}
     @keyframes pet-orbit{50%{transform:translateY(-9px) rotate(9deg)}}
     @keyframes pet-float{50%{transform:translateY(-8px)}}
     @keyframes pet-glow{50%{opacity:.45;transform:scale(1.08)}}
+    @keyframes mascot-event-return{0%{opacity:.35;transform:translateY(-7px) scale(.92) rotate(-3deg)}55%{opacity:1;transform:translateY(2px) scale(1.04) rotate(2deg)}100%{opacity:1;transform:none}}
     @media(prefers-reduced-motion:reduce){.garden-mascot *{animation:none!important}}
   `;
   document.head.append(eventStyle);
@@ -148,7 +150,7 @@
     hideTimer = setTimeout(close, 9000);
   }
   function blocked() {
-    return document.hidden || !!document.querySelector('.modal-overlay:not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
+    return document.hidden || !!document.querySelector('.modal-overlay:not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(#garden-event-summary-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
   }
   window.mascotNotify = (text, duration = 2400) => {
     syncVisibility();
@@ -235,6 +237,13 @@
     if (!loggedIn) { close(); return; }
     if (blocked()) { close(); return; }
   }
+  window.mascotEventReturn = () => {
+    mascot.classList.remove('mascot-event-returning');
+    void mascot.offsetWidth;
+    mascot.classList.add('mascot-event-returning');
+    setTimeout(() => mascot.classList.remove('mascot-event-returning'), 1200);
+    syncVisibility();
+  };
   document.addEventListener('visibilitychange', syncVisibility);
   window.addEventListener('focus', syncVisibility);
   window.addEventListener('garden-login-state-change', syncVisibility);

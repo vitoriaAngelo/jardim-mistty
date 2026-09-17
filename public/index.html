@@ -4491,6 +4491,7 @@ function finishGardenEvent() {
   clearInterval(gardenEventRainTimer); clearInterval(gardenEventButterflyTimer);
   gardenEventRainTimer=null; gardenEventButterflyTimer=null;
   document.body.classList.remove(`event-${finished.type}`);
+  window.mascotEventReturn?.();
   document.getElementById('garden-event-layer')?.replaceChildren();
   if (finished.xp>0 && finished.type!=='butterflies') gainXP('harvest',document.getElementById('garden-event-banner'),finished.xp,`+${finished.xp} XP · ${def.name}`);
   const summary = finished.actions ? `Você participou ${finished.actions} vez${finished.actions===1?'':'es'} e ganhou ${finished.xp} XP${finished.bonus?` + ${finished.bonus} bônus`:''}.` : 'Você participou um pouquinho — o próximo evento pode trazer novas surpresas!';

@@ -35,6 +35,12 @@ test('planta perdida fora da estação não concede XP de colheita', () => {
   assert.doesNotMatch(harvestSource.slice(seasonCheck, harvestSource.indexOf('} else {', seasonCheck)), /gainXP\(/);
 });
 
+test('planta mutada fica identificada no card e no tooltip', () => {
+  assert.match(html, /plot-mutation-label/);
+  assert.match(html, /mutation-tooltip-badge/);
+  assert.match(html, /plot\.mutated \? ' event-mutated'/);
+});
+
 test('persiste o próximo evento para impedir repetição por F5', () => {
   assert.match(html, /eventNextAt:\s+Number\(G\.eventNextAt \|\| 0\)/);
   assert.match(html, /G\.eventNextAt\s+= Number\(save\.eventNextAt \|\| 0\)/);

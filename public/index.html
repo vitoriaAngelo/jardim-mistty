@@ -254,6 +254,8 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .plot.event-golden { box-shadow:0 0 0 3px #f0c95b,0 0 22px #ffd96f99 !important; animation:event-golden-pulse 1.1s ease-in-out infinite alternate; }
 .plot.event-mutated { box-shadow:0 0 0 3px #a779da,0 0 24px #b47af688 !important; }
 .plot.event-mutated::after { content:'🧬 Cristalina'; position:absolute; top:7px; left:50%; transform:translateX(-50%); z-index:5; padding:3px 7px; border-radius:9px; background:#6e4b8d; color:white; font:900 9px 'Nunito',sans-serif; white-space:nowrap; }
+.plot-mutation-label { display:inline-block; margin:2px 0; padding:2px 6px; border-radius:8px; background:#70508c; color:#fff; font-size:9px; font-weight:900; letter-spacing:.1px; }
+.mutation-tooltip-badge { display:inline-block; padding:3px 6px; border-radius:7px; background:#765292; color:#fff; font-weight:900; font-size:10px; }
 body.event-rain::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:linear-gradient(#7193aa22,#a8d7ec16); }
 body.event-moon::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:radial-gradient(circle at 78% 12%,#fffbd0 0 3%,#9d83dc33 4% 17%,#33294b44 60%); mix-blend-mode:multiply; }
 @keyframes event-pop { from{opacity:0;transform:translateY(-10px) scale(.98)} to{opacity:1;transform:none} }
@@ -6803,6 +6805,7 @@ function buildPlotEl(plot, idx) {
     tooltip.className = `plot-tooltip${outOfSeason ? ' out-of-season-warning' : ''}`;
     tooltip.innerHTML = `
       <strong>${p.emoji} ${p.name}</strong><br>
+      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 PLANTA CRISTALINA</span><br><strong>Mutação ativa: +2 itens e +25 XP ao colher.</strong><br>' : ''}
       ${outOfSeason
         ? '⚠️ FORA DE ESTAÇÃO!<br><strong>Se colher, você perderá esta planta.</strong>'
         : isReady
@@ -6875,13 +6878,14 @@ function buildPlotEl(plot, idx) {
     const harvestTotal = harvestCyclesFor(plot.type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestTotal);
     const harvestInfo = harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
+    const mutationInfo = plot.mutated ? '<div class="plot-mutation-label">🧬 mutação cristalina ativa</div>' : '';
     const specialDays = G.specialPlotExpiresAt ? Math.max(1, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS)) : 1;
     const specialLabel = `${specialDays.toLocaleString('pt-BR')} dia${specialDays > 1 ? 's' : ''}`;
     const specialInfo = isSpecialPlotActive(idx) ? `<div class="plot-harvest-count">${specialPlotIcon()} especial - ${specialLabel} restante${specialDays > 1 ? 's' : ''}</div>` : '';
     if (growReady) {
-      lbl.innerHTML = `✅ pronto!${harvestInfo}${specialInfo}`;
+      lbl.innerHTML = `✅ pronto!${mutationInfo}${harvestInfo}${specialInfo}`;
     } else {
-      lbl.innerHTML = `<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}${specialInfo}`;
+      lbl.innerHTML = `${mutationInfo}<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}${specialInfo}`;
       const growLbl = document.createElement('div');
       growLbl.className = 'plot-grow-label';
       growLbl.style.cssText = 'font-size:10px;font-weight:800;color:rgba(160,220,120,.95);margin-top:1px;';

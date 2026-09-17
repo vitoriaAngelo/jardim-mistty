@@ -146,6 +146,12 @@ test('perfil permite escolher e salvar oito planos de fundo', () => {
   assert.match(html, /data-profile-background="night"/);
 });
 
+test('fundos do perfil têm contraste próprio no modo escuro', () => {
+  assert.match(html, /body\.dark-mode #profile-overlay \.profile-modal\[data-profile-background="night"\]/);
+  assert.match(html, /body\.dark-mode #profile-overlay \.profile-modal \.profile-label/);
+  assert.match(html, /body\.dark-mode #profile-overlay \.profile-modal \.profile-input/);
+});
+
 test('perfil oferece dois títulos difíceis de desbloquear', () => {
   assert.match(html, /name:'Imperador da Colheita', target:3000/);
   assert.match(html, /name:'Eterno do Jardim', target:7500/);

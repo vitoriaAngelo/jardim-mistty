@@ -8632,7 +8632,8 @@ async function saveGardenToSENow(retryStale = true) {
           throw new Error('Sessão do jardim encerrada por outra tela.');
         }
       }
-      throw new Error(`Save failed: ${response.status}`);
+      const serverError = JSON.parse(errBody || '{}').error;
+      throw new Error(serverError || `Save failed: ${response.status}`);
     }
     const saved = await response.json();
     gardenRevision = saved.revision || gardenRevision;
@@ -9143,7 +9144,7 @@ async function completeLogout() {
     toast('👋 Sessão encerrada!', 2500);
   } catch (error) {
     console.warn('Logout cancelado: progresso não confirmado.', error);
-    if (overlay) overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true"><button class="popup-close-x" onclick="document.getElementById('logout-confirm-overlay')?.remove()" aria-label="Fechar">×</button><h2>Não foi possível salvar</h2><p>Você continua logada e nenhum progresso foi descartado. Tente novamente.</p><div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('logout-confirm-overlay')?.remove()">Continuar jogando</button><button class="btn-ok" id="logout-save-btn" onclick="completeLogout()">Tentar novamente</button></div></div>`;
+    if (overlay) overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true"><button class="popup-close-x" onclick="document.getElementById('logout-confirm-overlay')?.remove()" aria-label="Fechar">×</button><h2>Não foi possível salvar</h2><p>Você continua logada e nenhum progresso foi descartado.<br><small>${String(error?.message || 'Tente novamente.').replace(/[<>]/g, '')}</small></p><div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('logout-confirm-overlay')?.remove()">Continuar jogando</button><button class="btn-ok" id="logout-save-btn" onclick="completeLogout()">Tentar novamente</button></div></div>`;
     toast('❌ O logout foi cancelado para não perder seu progresso.', 4500);
   }
 }

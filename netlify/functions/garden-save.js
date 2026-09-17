@@ -68,6 +68,11 @@ function validateOrdersTransition(oldData, nextData) {
   }
 }
 
+function orderStateChanged(oldData, nextData) {
+  const fields = ['orders','ordersGlobalResetVersion','ordersSeasonKey','orderSearches','orderDeliveries','orderPaidReset'];
+  return fields.some((field) => JSON.stringify(oldData?.[field] ?? null) !== JSON.stringify(nextData?.[field] ?? null));
+}
+
 function isPlaceholderFarmName(name, username) {
   const value = String(name || '').trim().toLowerCase();
   const safeUsername = String(username || '').replace(/^@+/, '').trim().toLowerCase();
@@ -172,7 +177,10 @@ exports.handler = async (event) => {
       if (!expectedRevision || expectedRevision !== currentRevision) {
         return { statusCode: 409, headers, body: JSON.stringify({ error: 'O jardim foi atualizado em outra tela', code: 'STALE_STATE', revision: currentRevision }) };
       }
-      if (existingRows.length && (safeData.orders || existingData.orders)) validateOrdersTransition(existingData, safeData);
+      // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
+      // só precisam ser revalidados quando o estado dos pedidos realmente muda;
+      // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
+      if (existingRows.length && orderStateChanged(existingData, safeData)) validateOrdersTransition(existingData, safeData);
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {
         safeData.farmName = existingName;

@@ -7047,15 +7047,16 @@ function seasonPriceLabel(type, qty = 1) {
 // ─── SEED BAG SVG ────────────────────────────────────────
 function seedBagSVG(type, locked = false) {
   const p = getPlantable(type);
-  const emoji = p ? p.emoji : '🌱';
   const seasons = p && typeof SEASONS !== 'undefined'
     ? SEASONS.filter(s => s.vegetables.includes(type) || s.flowers.includes(type))
     : [];
   const lunar = type === 'moon_lily';
-  const bagColor = locked ? '#b0a090' : lunar ? '#d9c8f0' : '#f5e8c8';
-  const bagStroke = locked ? '#8a7868' : lunar ? '#765292' : '#c8a060';
-  const bagDark = locked ? '#9a8878' : lunar ? '#a98bd0' : '#d4b870';
-  const labelColor = locked ? '#e0d8c8' : lunar ? '#f7f0ff' : '#fdfaf0';
+  const seedColor = p?.color || '#a0b37c';
+  const leafColor = p?.leafColor || '#64835a';
+  const bagColor = locked ? '#b0a090' : lunar ? '#d9c8f0' : `${seedColor}55`;
+  const bagStroke = locked ? '#8a7868' : lunar ? '#765292' : leafColor;
+  const bagDark = locked ? '#9a8878' : lunar ? '#a98bd0' : `${leafColor}cc`;
+  const labelColor = locked ? '#e0d8c8' : lunar ? '#f7f0ff' : '#fffaf0';
 
   return `<div style="position:relative;width:60px;height:68px;flex-shrink:0">
     <svg width="60" height="68" viewBox="0 0 60 68" fill="none">
@@ -7065,8 +7066,10 @@ function seedBagSVG(type, locked = false) {
       <path d="M22 14 L24 24 M38 14 L36 24" stroke="${bagStroke}" stroke-width="1" opacity=".5"/>
       <rect x="10" y="28" width="40" height="30" rx="4" fill="${labelColor}" stroke="${bagStroke}" stroke-width="1" opacity=".9"/>
       <line x1="14" y1="60" x2="46" y2="60" stroke="${bagStroke}" stroke-width="0.8" opacity=".4"/>
+      <ellipse cx="25" cy="42" rx="4" ry="6" transform="rotate(-28 25 42)" fill="${seedColor}" opacity=".9"/>
+      <ellipse cx="35" cy="43" rx="4" ry="6" transform="rotate(24 35 43)" fill="${leafColor}" opacity=".78"/>
+      <path d="M30 52q0-7 5-11" stroke="${leafColor}" stroke-width="1.8" stroke-linecap="round" opacity=".75"/>
     </svg>
-    <span style="position:absolute;top:31px;left:50%;transform:translateX(-50%);font-size:20px;line-height:1;pointer-events:none">${emoji}</span>
     ${seasons.length ? `<span class="seed-season-symbol ${seasons.length > 1 ? 'multiple' : ''}" title="${seasons.map(s => s.name).join(' e ')}">${seasons.map(s => s.icon).join('')}</span>` : ''}
   </div>`;
 }

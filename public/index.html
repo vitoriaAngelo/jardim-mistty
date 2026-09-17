@@ -5338,7 +5338,7 @@ function validBadgeIds(values) {
 function renderRankingPage() {
   const users = [...rankingUsers].sort((a, b) => rankingMode === 'level'
     ? (Number(b.level ?? b.lv ?? 1) - Number(a.level ?? a.lv ?? 1)) || (Number(b.points || 0) - Number(a.points || 0))
-    : Number(b.points || 0) - Number(a.points || 0)).slice(0, 10);
+    : Number(b.points || 0) - Number(a.points || 0));
   const pageSize = 5;
   const totalPages = Math.max(1, Math.ceil(users.length / pageSize));
   rankingPage = Math.min(rankingPage, totalPages - 1);
@@ -5414,7 +5414,7 @@ async function openRanking() {
 
       // O leaderboard do StreamElements fornece o saldo de pontos, mas os
       // dados do jogo (XP/nível, estatísticas, badges etc.) ficam no JSON do
-      // jogador. Enriquecemos os 10 usuários exibidos com esse estado salvo.
+      // jogador. Enriquecemos todos os usuários carregados com esse estado salvo.
       users = await Promise.all(users.map(async (user) => {
         const username = user.username || user._id;
         if (!username) return user;
@@ -5454,6 +5454,13 @@ async function openRanking() {
           return user;
         }
       }));
+    }
+
+    // Garante que a própria pessoa apareça mesmo que esteja fora dos 100
+    // maiores saldos de pontos retornados pela API.
+    const myUsername = seUser?.username;
+    if (myUsername && !users.some(user => String(user.username || user._id || '').toLowerCase() === myUsername.toLowerCase())) {
+      users.push({ username: myUsername, points: Number(G.pts || seUser.points || 0), level: currentLevel(), farmName: document.getElementById('garden-name')?.textContent?.trim() || defaultFarmName(myUsername), xp: G.xp });
     }
 
     if (loadId !== rankingLoadId) return;

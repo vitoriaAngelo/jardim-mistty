@@ -26,7 +26,7 @@ exports.handler = async (event) => {
       }
     }
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data&order=updated_at.desc&limit=1`,
+      `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,
       {
         headers: {
           'apikey': SUPABASE_KEY,
@@ -43,7 +43,7 @@ exports.handler = async (event) => {
     const rows = await res.json();
     if (!rows.length) return { statusCode: 404, headers, body: JSON.stringify({ data: null }) };
 
-    return { statusCode: 200, headers, body: JSON.stringify({ data: rows[0].data }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ data: rows[0].data, revision: rows[0].updated_at }) };
   } catch (e) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
   }

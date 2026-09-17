@@ -3620,6 +3620,8 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="mail-modal-title">ⓘ Últimas atualizações</div>
     <p class="premium-copy">Confira os últimos deploys e o que mudou no jardim.</p>
     <div class="deploy-history-list">
+      <div class="deploy-history-item"><strong>Proteção contra múltiplas telas</strong><small>Somente a sessão mais recente pode alterar o jardim. Telas antigas são pausadas automaticamente para impedir ganhos duplicados.</small></div>
+      <div class="deploy-history-item"><strong>Pontos e salvamento protegidos</strong><small>Movimentações agora exigem a conta Twitch autenticada, a sessão ativa e a versão mais recente do jardim.</small></div>
       <div class="deploy-history-item"><strong>Loja responsiva no celular</strong><small>As abas Vegetais, Flores, Adubos e Canteiros agora ficam visíveis e fáceis de tocar em telas pequenas.</small></div>
       <div class="deploy-history-item"><strong>Segurança dos pedidos</strong><small>Limites, estação, estoque, recompensas e entregas agora são validados no servidor.</small></div>
       <div class="deploy-history-item"><strong>Notificações de entregas</strong><small>O feed público também informa quem entregou cada pedido, usando o nome da fazenda.</small></div>
@@ -4777,9 +4779,12 @@ function changeSellQty(type, delta) {
   renderHarvested();
 }
 
-function sellSelected() {
+let saleInFlight = false;
+async function sellSelected() {
+  if (saleInFlight) return;
   const total = sellTotal();
   if (total === 0) return;
+  saleInFlight = true;
 
   const sold = [];
   let soldQty = 0;
@@ -4805,9 +4810,19 @@ function sellSelected() {
   G.achievStats.totalSellPts = (G.achievStats.totalSellPts||0) + total;
   if (flowersSold > 0) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0) + flowersSold;
   checkAchievements();
-  giveSEPoints(total);
   renderHarvested();
-  saveGardenToSE();
+  try {
+    // Primeiro confirma o consumo do estoque no estado versionado. Só depois
+    // credita o saldo externo, impedindo repetir a venda com F5 ou outra tela.
+    await saveGardenToSE();
+    await giveSEPoints(total);
+  } catch (error) {
+    console.warn('Venda não confirmada:', error);
+    toast('❌ Não foi possível confirmar a venda. Atualize o jardim antes de tentar novamente.', 4500);
+    return;
+  } finally {
+    saleInFlight = false;
+  }
 
   // coin burst from the card
   const card = document.getElementById('harvest-card');
@@ -7593,7 +7608,6 @@ function switchHelpTab(tab) {
 }
 
 // ─── STREAMELEMENTS INTEGRATION ──────────────────────────
-const SE_JWT      = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjaXRhZGVsIiwiZXhwIjoxNzkxNjg4NTYzLCJqdGkiOiIxNmEwZmE2My0zNDZkLTQ3MjMtOWFmMy0yODE2MTQzNWZmY2EiLCJjaGFubmVsIjoiNWI5YTdlZmUxNWNkMjgwZjA0ZjU4OTFiIiwicm9sZSI6Im93bmVyIiwiYXV0aFRva2VuIjoiUzRnb1A1ekhXRFdPNmFhQ1lJWlEiLCJ1c2VyIjoiNWI5YTdlZmUxNWNkMjgzMDY5ZjU4OTFhIiwidXNlcl9pZCI6IjFjOGFkMWQzLTQ0NDUtNGZjZS04ODZmLTRjNDcwYWU3OTRlOSIsInVzZXJfcm9sZSI6ImNyZWF0b3IiLCJwcm92aWRlciI6InR3aXRjaCIsInByb3ZpZGVyX2lkIjoiNjE1MDIyMTMiLCJjaGFubmVsX2lkIjoiYjk1MDk3ZmYtMWQ3ZS00ZTgyLTg0YTYtMzdhYzY1MGQ1M2VlIiwiY3JlYXRvcl9pZCI6IjljN2UyZTU0LWFiNzktNGM5YS05ODdjLWRjZTZlZjllMDVjMCJ9.qdEeG4tKYt8VBhP6j6Ep-EZTo0vaEZkJdXQfCOuZLNg';
 const SE_CHANNEL  = '5b9a7efe15cd280f04f5891b';
 const SE_API      = '/se-proxy?path=';
 const TWITCH_CLIENT_ID = '5vs8ms3nlbs1blwlot6j0fx1diabhp';
@@ -7604,6 +7618,36 @@ let seUser    = null;
 let saveTimer = null;
 let syncTimer = null;
 let gardenHydrated = false;
+let twitchAuthToken = sessionStorage.getItem('twitch_access_token') || '';
+let gardenRevision = null;
+// Sempre único por carregamento: abas duplicadas não podem herdar a mesma sessão.
+// Um F5 assume uma nova sessão e invalida com segurança a página anterior.
+const gardenSessionId = crypto.randomUUID();
+
+function authenticatedHeaders(extra = {}) {
+  return { ...extra, Authorization: `Bearer ${twitchAuthToken}`, 'X-Garden-Session': gardenSessionId };
+}
+
+function handleGardenSessionConflict(message = 'Seu jardim foi aberto em outra tela.') {
+  gardenHydrated = false;
+  if (saveTimer) clearInterval(saveTimer);
+  if (syncTimer) clearInterval(syncTimer);
+  document.getElementById('login-overlay')?.classList.remove('hidden');
+  const status = document.getElementById('login-status');
+  if (status) status.textContent = `🌿 ${message} Entre novamente para continuar nesta tela.`;
+  toast('🌿 Jardim ativo em outro dispositivo. As ações desta tela foram pausadas.', 5000);
+}
+
+async function claimGardenSession(username) {
+  const response = await fetch('/garden-session', {
+    method: 'POST',
+    headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ username, sessionId: gardenSessionId }),
+  });
+  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Não foi possível iniciar uma sessão segura.');
+  const result = await response.json();
+  gardenRevision = result.revision || null;
+}
 
 function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
   const overlay = document.getElementById('login-overlay');
@@ -7653,6 +7697,8 @@ async function handleTwitchCallback() {
   const params      = new URLSearchParams(hash.replace('#', ''));
   const twitchToken = params.get('access_token');
   if (!twitchToken) return false;
+  twitchAuthToken = twitchToken;
+  sessionStorage.setItem('twitch_access_token', twitchToken);
 
   // Clean URL
   history.replaceState(null, '', window.location.pathname);
@@ -7715,7 +7761,10 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
   gardenHydrated = false;
 
   try {
-    const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}`, {});
+    twitchAuthToken = twitchAccessToken || twitchAuthToken;
+    if (!twitchAuthToken) throw new Error('Sua sessão expirou. Entre novamente com a Twitch.');
+    await claimGardenSession(username);
+    const res  = await fetch(`${SE_API}/points/${SE_CHANNEL}/${username}`, { headers: authenticatedHeaders() });
 
     if (res.status === 404) {
       // New viewer — start with 0 pts, garden will be created fresh
@@ -7736,6 +7785,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
 
     sessionStorage.setItem('se_username', username);
     sessionStorage.setItem('se_display',  displayName);
+    sessionStorage.setItem('twitch_access_token', twitchAuthToken);
 
     const hadSave = await loadGardenFromSE(username);
     if (hadSave === null) throw new Error('Não foi possível carregar seu jardim salvo. Tente novamente sem perder seu progresso.');
@@ -7922,8 +7972,8 @@ async function saveGardenToSENow() {
   try {
     const response = await fetch('/garden-save', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: seUser.username, data: saveData }),
+      headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ username: seUser.username, data: saveData, sessionId: gardenSessionId, expectedRevision: gardenRevision }),
     });
     if (!response.ok) {
       const errBody = await response.text().catch(() => '');
@@ -7932,8 +7982,14 @@ async function saveGardenToSENow() {
         // Não lança erro: save é ignorado silenciosamente para não afetar o jogador legítimo
         return;
       }
+      if (response.status === 409) {
+        const conflict = JSON.parse(errBody || '{}');
+        handleGardenSessionConflict(conflict.error);
+      }
       throw new Error(`Save failed: ${response.status}`);
     }
+    const saved = await response.json();
+    gardenRevision = saved.revision || gardenRevision;
     writeGardenCache(seUser.username, saveData);
     console.log('💾 Jardim salvo no Supabase!');
   } catch(e) {
@@ -7955,7 +8011,7 @@ async function syncPtsToSEOnce() {
     // Wait for purchases/sales already updating the remote balance.
     await sePointsMutationQueue;
     // Fetch current SE points
-    const res     = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, {});
+    const res     = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}`, { headers: authenticatedHeaders() });
     if (res.status !== 404 && !res.ok) return false;
     const data    = res.status === 404 ? { points: 0 } : await res.json();
     const current = Number(data.points) || 0;
@@ -7975,7 +8031,7 @@ async function syncPtsToSEOnce() {
     // O endpoint de pontos do StreamElements usa PUT; valores positivos
     // adicionam e valores negativos descontam o saldo.
     syncRes = await fetch(`${SE_API}/points/${SE_CHANNEL}/${seUser.username}/${diff}`, {
-      method: 'PUT'
+      method: 'PUT', headers: authenticatedHeaders()
     });
     if (!syncRes.ok) return false;
     const merged = current + diff;
@@ -8001,73 +8057,8 @@ async function syncPtsToSE() {
   }
 }
 
-// ── Save + sync on page close / tab hide ──────────────────
-window.addEventListener('beforeunload', () => {
-  if (!seUser || !gardenHydrated) return;
-  // Use sendBeacon for reliable delivery on page close
-  const saveData = {
-    xp: G.xp,
-    farmerXP: G.farmerXP || 0,
-    farmName: document.getElementById('garden-name')?.textContent || '',
-    inventory: G.inventory,
-    fertilizerInventory: G.fertilizerInventory,
-    plotFertilizers: G.plotFertilizers, plots: G.plots,
-    unlockedPlots: G.unlockedPlots, harvested: G.harvested, goldenHarvested: G.goldenHarvested || {},
-    upgrades: [...G.upgrades], upgradeLevels: G.upgradeLevels || {}, seasonIdx: G.seasonIdx,
-    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0, orderPaidReset: G.orderPaidReset === true, ordersGlobalResetVersion: G.ordersGlobalResetVersion || 0, lastOrder: G.lastOrder || null,
-    waterCapacity: G.waterCapacity ?? 5, waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
-    seasonDay: G.seasonDay, missions: G.missions,
-    achievements: [...(G.achievements || [])],
-    achievStats: G.achievStats || {},
-    achievSeen: G.achievSeen || 0,
-    presenceStreak: G.presenceStreak || 0,
-    presenceLastDay: G.presenceLastDay || '',
-    presenceBonusDate: G.presenceBonusDate || '',
-    presenceDays: G.presenceDays || [],
-    specialPlot: G.specialPlot,
-    specialPlots: G.specialPlots || [],
-    specialPlotExpiresAt: G.specialPlotExpiresAt || 0,
-    specialistPlotDurationFixed: G.specialistPlotDurationFixed === true,
-    bonusRefillDiscount: G.bonusRefillDiscount === true,
-    bonusWateringCapacity: Number(G.bonusWateringCapacity || 0),
-    bonusWaterRecoveryMinutes: Number(G.bonusWaterRecoveryMinutes || 0),
-    bonusKitLevel: Number(G.bonusKitLevel || 0),
-    bonusVipUntil: Number(G.bonusVipUntil || 0),
-    specialPlotPending: G.specialPlotPending || false,
-    premiumWateringCan: G.premiumWateringCan === true,
-    premiumShovel: G.premiumShovel === true,
-    premiumPlantsUnlocked: G.premiumPlantsUnlocked === true,
-    premiumFertilizersClaimed: G.premiumFertilizersClaimed === true,
-    premiumSpecialPlotClaimed: G.premiumSpecialPlotClaimed === true,
-    isPremium: G.isPremium === true,
-    selectedMascot: G.selectedMascot || null,
-    ownedMascots: G.ownedMascots || {},
-    profileFrame: G.profileFrame || 'red',
-    supporterFrameUnlocked: G.supporterFrameUnlocked === true,
-    dailyPhrase: G.dailyPhrase || '',
-    isSubscriber: hasSubscriberBadge(),
-    welcomeBonusClaimed: G.welcomeBonusClaimed === true,
-    skillPoints: G.skillPoints || 0,
-    skillNodes:  G.skillNodes  || {},
-    skillPointsClaimed: G.skillPointsClaimed || 0,
-    upgrades_refunded: G.upgrades_refunded || false,
-    stats: {
-      xp: G.xp,
-      harvested: G.achievStats?.totalHarvest || 0,
-      purchased: G.achievStats?.totalBuy || 0,
-      watered: G.achievStats?.totalWater || 0,
-      soldPoints: G.achievStats?.totalSellPts || 0,
-      presence: G.presenceStreak || 0,
-    },
-    shopCart: SHOP_CART,
-    mail: G_MAIL,
-    savedAt: Date.now(),
-  };
-  const blob = new Blob([JSON.stringify({ username: seUser.username, data: saveData })], { type: 'application/json' });
-  writeGardenCache(seUser.username, saveData);
-  writePremiumClaimsCache(seUser.username);
-  navigator.sendBeacon('/garden-save', blob);
-});
+// O evento de visibilidade abaixo salva pela fila normal. Evitamos um segundo
+// envio paralelo ao fechar a aba, pois ele poderia disputar a mesma versão.
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && seUser && gardenHydrated) {
@@ -8090,8 +8081,8 @@ async function loadGardenFromSE(username) {
     let json = null;
     let loadFailed = false;
     try {
-      const res = await fetch(`/garden-load?username=${encodeURIComponent(username)}`, { cache: 'no-store' });
-      if (res.ok) json = await res.json();
+      const res = await fetch(`/garden-load?username=${encodeURIComponent(username)}`, { cache: 'no-store', headers: authenticatedHeaders() });
+      if (res.ok) { json = await res.json(); gardenRevision = json.revision || gardenRevision; }
       else { json = { data: readGardenCache(username) }; loadFailed = res.status !== 404; }
     } catch (networkError) {
       json = { data: readGardenCache(username) };
@@ -8104,10 +8095,10 @@ async function loadGardenFromSE(username) {
     const serverData = json?.data;
     const serverHasPaidKit = Array.isArray(serverData?.paidKitOrders) && serverData.paidKitOrders.length > 0;
     const serverHasNewerKit = serverHasPaidKit && Number(serverData.bonusKitLevel || 0) > Number(cachedData?.bonusKitLevel || 0);
-    if (cachedData && (!serverData || (!serverHasPaidKit && !serverHasNewerKit && Number(cachedData.savedAt || 0) > Number(serverData.savedAt || 0)))) {
+    if (cachedData && !serverData) {
       json = { data: cachedData };
     }
-    if (!json?.data) return loadFailed ? null : false;
+    if (!json?.data || json.data._isSessionShell === true) return loadFailed ? null : false;
     hadSave = true;
 
     const save = json.data;
@@ -8327,11 +8318,11 @@ function queueSEPointsMutation(amount, method) {
   const seAmount = Math.abs(Number(amount) || 0);
   const operation = sePointsMutationQueue.then(async () => {
     const basePath = `${SE_API}/points/${SE_CHANNEL}/${seUser.username}`;
-    let res = await fetch(`${basePath}/${seAmount}`, { method });
+    let res = await fetch(`${basePath}/${seAmount}`, { method, headers: authenticatedHeaders() });
     // StreamElements installations differ: some accept DELETE, while older
     // point endpoints expect a negative PUT for deductions.
     if (!res.ok && method === 'DELETE') {
-      res = await fetch(`${basePath}/-${seAmount}`, { method: 'PUT' });
+      res = await fetch(`${basePath}/-${seAmount}`, { method: 'PUT', headers: authenticatedHeaders() });
     }
     if (!res.ok) throw new Error(`Points update failed: ${res.status}`);
     if (lastKnownSEPoints !== null) {
@@ -8467,6 +8458,7 @@ function completeLogout() {
     gardenHydrated = false;
     sessionStorage.removeItem('se_username');
     sessionStorage.removeItem('se_display');
+    sessionStorage.removeItem('twitch_access_token');
     if (saveTimer) clearInterval(saveTimer);
     if (syncTimer) clearInterval(syncTimer);
     if (seSocket)  seSocket.disconnect();

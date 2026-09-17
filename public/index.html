@@ -1906,10 +1906,14 @@ body:has(.login-overlay:not(.hidden)) { overflow: hidden; }
 .login-content h1 { font: 400 45px/1.08 Georgia, 'Times New Roman', serif; letter-spacing: -1.5px; color: #414f38; }
 .login-content h1 em { font-weight: 400; color: #778359; }
 .login-description { margin: 20px auto 27px; max-width: 265px; font-size: 14px; line-height: 1.8; color: #707565; }
-.login-supporters { margin: 0 auto 18px; max-width: 320px; padding: 11px 13px 12px; border: 1px solid #e2d5b8; border-radius: 16px; background: linear-gradient(135deg,#fff9e9,#f7eee0); color: #6b7059; box-shadow: 0 3px 0 #e7dcc6; }
-.login-supporters-title { margin-bottom: 7px; color: #826d45; font-size: 10px; font-weight: 900; letter-spacing: .4px; text-transform: uppercase; }
-.login-supporters-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 7px; }
-.login-supporter { display: inline-flex; align-items: center; gap: 4px; padding: 4px 7px; border-radius: 999px; background: #fffdf7; color: #58634d; font-size: 10px; font-weight: 800; }
+.login-supporters { position: relative; overflow: hidden; margin: 0 auto 18px; max-width: 320px; padding: 13px 14px 14px; border: 1px solid #e6cfd0; border-radius: 20px; background: radial-gradient(circle at 9% 12%,#fff 0 4%,transparent 5%), radial-gradient(circle at 92% 88%,#f7dfe7 0 9%,transparent 10%), linear-gradient(135deg,#fff9ec,#fff0ee 58%,#f3edf7); color: #6b7059; box-shadow: 0 4px 0 #ead9cf, 0 8px 18px #b18d7d1c; }
+.login-supporters::before { content: '✦  ♡  ✦'; position: absolute; right: 10px; top: 7px; color: #d79a9c; font-size: 11px; letter-spacing: 4px; }
+.login-supporters-title { margin-bottom: 3px; color: #725b67; font: 900 11px/1.35 Georgia,serif; }
+.login-supporters-note { margin-bottom: 9px; color: #8c7b76; font-size: 9px; }
+.login-supporters-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.login-supporter { display: inline-flex; align-items: center; gap: 4px; padding: 5px 8px; border: 1px solid #fff; border-radius: 999px; background: #fffdf9; color: #58634d; font-size: 10px; font-weight: 900; box-shadow: 0 2px 5px #a9827b20; }
+.login-supporter::first-letter { font-size: 12px; }
+.login-supporter:nth-child(1) { background:#eaf3df; } .login-supporter:nth-child(2) { background:#fff0c9; } .login-supporter:nth-child(3) { background:#ffe2e5; } .login-supporter:nth-child(4) { background:#f0e5f5; } .login-supporter:nth-child(5) { background:#e0f0ed; }
 .login-twitch-btn { justify-content: center; width: 100%; padding: 15px 14px; margin: 0; border-radius: 12px; background: #80629c; box-shadow: 0 3px 0 #64497e; font-size: 14px; }
 .login-twitch-btn.login-disabled,
 .login-twitch-btn.login-disabled:hover,
@@ -1955,9 +1959,11 @@ body.dark-mode .login-box { border-color:#52684f; background:linear-gradient(160
 body.dark-mode .login-welcome { background:#354a35; border-color:#61795c; color:#e0edcf; }
 body.dark-mode .login-content h1 { color:#f2f5df; }
 body.dark-mode .login-description, body.dark-mode .login-note { color:#cbd8c2; }
-body.dark-mode .login-supporters { border-color:#68745d; background:linear-gradient(135deg,#354432,#30392d); color:#dce8d4; box-shadow:0 3px 0 #1a241b; }
-body.dark-mode .login-supporters-title { color:#f1d995; }
-body.dark-mode .login-supporter { background:#202a21; color:#edf2e6; }
+body.dark-mode .login-supporters { border-color:#6f625f; background:radial-gradient(circle at 9% 12%,#ffffff18 0 4%,transparent 5%),linear-gradient(135deg,#3b4232,#3d333b 58%,#30383b); color:#dce8d4; box-shadow:0 4px 0 #1a241b,0 8px 18px #0004; }
+body.dark-mode .login-supporters::before { color:#f0c7a9; }
+body.dark-mode .login-supporters-title { color:#ffe5b8; }
+body.dark-mode .login-supporters-note { color:#c5cdbb; }
+body.dark-mode .login-supporter { border-color:#ffffff22; color:#283326; }
 body.dark-mode .login-footer { border-color:#40523d; color:#aebfa5; }
 @media (max-width:650px) {
   .login-overlay { padding:16px 10px; }
@@ -3793,7 +3799,8 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <h1>Jardim<br><em>dos Encantos</em></h1>
     <p class="login-description">A comunidade da live tem um jardim especial para você.<br>Entre, cuide do seu cantinho e junte pontos para trocar por dinheiro e vários outros prêmios.</p>
     <div class="login-supporters" aria-label="Apoiadores dos testes">
-      <div class="login-supporters-title">💚 Quem ajudou este jardim a florescer</div>
+      <div class="login-supporters-title">🌷 Um jardim feito a muitas mãos</div>
+      <div class="login-supporters-note">Com carinho, para quem ajudou a testar e cuidar do joguinho cozy 💚</div>
       <div class="login-supporters-list">
         <span class="login-supporter">🌿 Hagi</span><span class="login-supporter">🌱 Goulartt</span><span class="login-supporter">🌼 Babbi</span><span class="login-supporter">🌷 Juju</span><span class="login-supporter">🍀 Dujda</span>
       </div>

@@ -264,6 +264,20 @@ body.event-moon::after { content:''; position:fixed; inset:0; z-index:110; point
 @keyframes event-fly { 0%{transform:translate(-30px,30px) rotate(-8deg);opacity:0} 12%{opacity:1} 55%{transform:translate(45px,-45px) rotate(8deg)} 100%{transform:translate(120px,-90px);opacity:0} }
 @keyframes event-golden-pulse { to{filter:brightness(1.13) saturate(1.2)} }
 body.dark-mode .garden-event-banner { background:linear-gradient(135deg,#354432,#403b2b); border-color:#728069; color:#eef4e8; box-shadow:0 3px 0 #1f2a1e; }
+body.dark-mode .garden-event-timer { background:#202a21; border-color:#71856b; color:#f4e5b0; }
+body.dark-mode #garden-event-summary-overlay .levelup-rewards { background:#30392d; border-color:#687d5f; color:#e1ecd9; box-shadow:0 3px 0 #202b20; }
+body.dark-mode #garden-event-summary-overlay .levelup-rewards strong { color:#f4d990; }
+#garden-event-summary-overlay .mail-modal { width:min(420px,calc(100% - 24px)); box-sizing:border-box; }
+#garden-event-summary-overlay .levelup-rewards { width:min(300px,100%); box-sizing:border-box; }
+@media (max-width:650px) {
+  .garden-event-banner.visible { align-items:flex-start; flex-wrap:wrap; gap:8px 10px; padding:10px 12px 12px; }
+  .garden-event-icon { font-size:23px; }
+  .garden-event-copy { flex:1 1 calc(100% - 45px); }
+  .garden-event-title { font-size:12px; }
+  .garden-event-subtitle { font-size:10px; }
+  .garden-event-timer { order:3; width:100%; box-sizing:border-box; padding:5px 8px; text-align:center; font-size:11px; }
+  #garden-event-summary-overlay .mail-modal { padding:18px 14px; }
+}
 @keyframes sales-slide-in { from { opacity:.2; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 body.dark-mode .latest-sales-feed { border-color:#677c62; background:linear-gradient(135deg,#354332 0%,#2d392d 100%); color:#d9e5d0; box-shadow:0 3px 0 #202b20, 0 7px 16px rgba(0,0,0,.2); }
 body.dark-mode .latest-sales-feed strong { color:#f0f5e8; }

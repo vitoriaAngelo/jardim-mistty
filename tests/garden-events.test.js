@@ -82,3 +82,10 @@ test('evento terminado mostra popup com resumo e recompensas', () => {
   assert.match(html, /showGardenEventSummary\(finished, def\)/);
   assert.match(html, /XP ganhos/);
 });
+
+test('eventos têm contraste no modo escuro e layout responsivo', () => {
+  assert.match(html, /body\.dark-mode \.garden-event-timer/);
+  assert.match(html, /body\.dark-mode #garden-event-summary-overlay \.levelup-rewards/);
+  assert.match(html, /\.garden-event-banner\.visible \{ align-items:flex-start; flex-wrap:wrap/);
+  assert.match(html, /\.garden-event-timer \{ order:3; width:100%/);
+});

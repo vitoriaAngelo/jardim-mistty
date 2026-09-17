@@ -9,7 +9,13 @@
     .garden-mascot .mascot-button,.garden-mascot .mascot-button *{cursor:var(--cozy-click-cursor,pointer)!important}
     .mascot-button>svg{overflow:visible}
     .mascot-premium-active .mascot-button>svg{filter:sepia(.72) saturate(1.75) hue-rotate(352deg) brightness(1.08) drop-shadow(0 0 7px #ffd96c) drop-shadow(0 4px 5px #a77628aa)}
-    .mascot-twitchzinho-active .mascot-button>svg{filter:hue-rotate(238deg) saturate(1.55) brightness(1.02) drop-shadow(0 0 7px #c99aff) drop-shadow(0 4px 5px #68458daa)}
+    .mascot-twitchzinho-active .mascot-button>svg{filter:drop-shadow(0 3px 5px #77639740)}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#bbcf9e"]{fill:#ad98d2;stroke:#796399}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#a5bc89"]{fill:#a18ac7;stroke:#796399}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#80976b"]{fill:#8973ad}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#e3e9c5"]{fill:#e5dbf3}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#a8bc89"]{fill:#b7a3d5}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#d6ad93"]{fill:#c3acd9}
     .mascot-premium-active .mascot-button::after{content:'✦';position:absolute;right:2px;top:10px;color:#ffd96c;font-size:18px;text-shadow:0 0 7px #fff2a8;animation:premium-sparkle 1.5s ease-in-out infinite}
     .mascot-button{position:relative}
     .mascot-button.mascot-transform{animation:mascot-transform 1.15s cubic-bezier(.2,.8,.2,1) both}

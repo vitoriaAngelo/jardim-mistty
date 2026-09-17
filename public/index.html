@@ -2817,7 +2817,10 @@ body.dark-mode .points-history-item.loss .points-history-value { color:#ffb8aa !
 .twitchzinho-pouch { position:fixed; left:76px; bottom:16px; z-index:660; display:none; flex-direction:column; align-items:center; gap:0; width:86px; padding:0; border:0; background:transparent; color:#553b70; font:900 10px 'Nunito',sans-serif; cursor:pointer; box-shadow:none; }
 .pouch-art { position:relative; display:block; width:70px; height:82px; }
 .pouch-art svg { width:100%; height:100%; overflow:visible; filter:drop-shadow(0 3px 3px #49345b30); }
-.pouch-caption { padding:3px 7px; border:1px solid #c9addc; border-radius:12px; background:#f6eefa; color:#553b70; line-height:1.3; }
+.pouch-tip { display:none !important; }
+.pouch-art svg>path:first-of-type { fill:#e2d4ed; stroke:#ac96bc; stroke-width:1.5; }
+.pouch-art svg>path:nth-of-type(2) { stroke:#fff9f2; opacity:.55; }
+.pouch-art svg>ellipse:nth-of-type(2) { fill:#9581a7; }
 .pouch-coin { position:absolute; top:0; left:25px; width:21px; height:21px; opacity:0; pointer-events:none; }
 .twitchzinho-pouch.deposit .pouch-coin { animation:pouch-coin-drop 1.1s ease-in both; }
 .twitchzinho-pouch.deposit .pouch-coin:nth-of-type(2) { animation-delay:.28s; }
@@ -2829,7 +2832,6 @@ body.dark-mode .points-history-item.loss .points-history-value { color:#ffb8aa !
 .twitchzinho-pouch.visible { display:inline-flex; animation:pouch-pop .35s ease-out; }
 .twitchzinho-pouch.ready { animation:pouch-bounce 1.4s ease-in-out infinite; }
 body.dark-mode .twitchzinho-pouch { background:transparent; color:#fff0ff; box-shadow:none; }
-body.dark-mode .pouch-caption { background:#42334f; color:#f7eaff; border-color:#b58bd0; }
 @keyframes pouch-pop { from{opacity:0;transform:translateY(8px) scale(.9)} to{opacity:1;transform:none} }
 @keyframes pouch-bounce { 50%{transform:translateY(-3px) rotate(-2deg)} }
 @media(max-width:600px){.twitchzinho-pouch{left:43px;bottom:48px;width:65px;font-size:9px;}.pouch-art{width:50px;height:60px;}.pouch-coin{left:17px;width:17px;height:17px;}}
@@ -9723,9 +9725,14 @@ function updateTwitchzinhoPouch(preview = false) {
   pouch.classList.toggle('visible', active);
   pouch.classList.toggle('ready', amount > 0);
   if (!pouch.querySelector('.pouch-art')) pouch.innerHTML = `<span class="pouch-art" aria-hidden="true"><svg viewBox="0 0 70 82"><ellipse cx="35" cy="76" rx="25" ry="4" fill="#6e507a" opacity=".16"/><path d="M24 27 Q17 20 21 15 Q35 19 49 15 Q53 20 46 27 L49 35 C62 47 64 67 51 73 Q35 79 19 73 C6 67 8 47 21 35Z" fill="#d7bce9" stroke="#9975ae" stroke-width="1.8"/><path d="M24 34 C15 48 16 62 23 66" fill="none" stroke="#f7edff" stroke-width="5" stroke-linecap="round" opacity=".7"/><ellipse cx="35" cy="18" rx="14" ry="4" fill="#725587"/><path d="M22 29 Q35 33 48 29" fill="none" stroke="#f4dfae" stroke-width="4" stroke-linecap="round"/><path d="M42 30 Q57 24 53 34 Q48 39 43 31 Q51 40 52 47" fill="none" stroke="#f4dfae" stroke-width="2.5" stroke-linecap="round"/><image href="points-sprout.svg" x="25" y="46" width="22" height="22"/></svg><img class="pouch-coin" src="points-sprout.svg" alt=""><img class="pouch-coin" src="points-sprout.svg" alt=""><img class="pouch-coin" src="points-sprout.svg" alt=""></span><span class="pouch-caption"></span>`;
-  pouch.querySelector('.pouch-caption').textContent = amount > 0 ? `Resgatar · ${amount}` : 'Juntando moedas';
+  pouch.querySelector('.pouch-caption')?.remove();
+  let tip = pouch.querySelector('.pouch-tip');
+  if (amount > 0) {
+    if (!tip) { tip = document.createElement('span'); tip.className = 'pouch-tip'; pouch.appendChild(tip); }
+    tip.innerHTML = `<strong>Tem moedinhas! 💛</strong><span>${amount} moedas esperando por você. Clique para resgatar.</span>`;
+  } else tip?.remove();
   pouch.setAttribute('aria-label', amount > 0 ? `Resgatar ${amount} moedas` : 'Sacolinha do Twitchzinho');
-  pouch.title = amount > 0 ? 'Clique para resgatar suas moedas' : 'Recebe moedas a cada 5 minutos';
+  pouch.removeAttribute('title');
   if (preview) animateTwitchzinhoDeposit();
 }
 function animateTwitchzinhoDeposit() {

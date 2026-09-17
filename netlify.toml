@@ -18,6 +18,11 @@
   status = 200
 
 [[redirects]]
+  from = "/garden-session"
+  to = "/.netlify/functions/garden-session"
+  status = 200
+
+[[redirects]]
   from = "/live-status"
   to = "/.netlify/functions/live-status"
   status = 200

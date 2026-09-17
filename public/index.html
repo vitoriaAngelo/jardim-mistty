@@ -6763,6 +6763,10 @@ function checkOutOfSeasonPlants() {
       // Visual feedback
       const el = document.querySelector(`[data-idx="${idx}"]`);
       if (el) el.style.opacity = '.6';
+    } else if (plot.outOfSeason) {
+      // A marca antiga não pode fazer uma planta ser perdida para sempre.
+      // Ao voltar a estação correta, o canteiro volta a ser colhível normalmente.
+      plot.outOfSeason = false;
     }
   });
   renderPlots();
@@ -7523,6 +7527,7 @@ async function onPlotClick(idx) {
   const plot = G.plots[idx];
   const tool = G.selectedTool;
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);
+  if (plot && plot.outOfSeason && isInSeason(plot.type)) plot.outOfSeason = false;
   const outOfSeason = plot ? (plot.outOfSeason || !isInSeason(plot.type)) : false;
 
   if (G.specialPlotPending) {

@@ -3952,7 +3952,10 @@ let gardenEventTimer = null;
 let gardenEventRainTimer = null;
 let gardenEventButterflyTimer = null;
 
-function eventFastMode() { return new URLSearchParams(location.search).get('events') === 'fast'; }
+function eventFastMode() {
+  const allowed = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.startsWith('deploy-preview-');
+  return allowed && new URLSearchParams(location.search).get('events') === 'fast';
+}
 function nextEventDelay() { return eventFastMode() ? 25000 + Math.random()*20000 : 300000 + Math.random()*180000; }
 function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
 function setNextGardenEvent() { G.eventNextAt = Date.now() + nextEventDelay(); saveGardenToSE(); }

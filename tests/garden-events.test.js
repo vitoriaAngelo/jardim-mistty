@@ -102,3 +102,8 @@ test('conflito de gravação não deixa o login carregando infinitamente', () =>
   assert.match(html, /conflict\.code === 'STALE_STATE'[\s\S]*?saveGardenToSENow\(false\)/);
   assert.match(html, /conflict\.code === 'SESSION_CONFLICT'[\s\S]*?handleGardenSessionConflict/);
 });
+
+test('perfil oferece dois títulos difíceis de desbloquear', () => {
+  assert.match(html, /name:'Imperador da Colheita', target:1000/);
+  assert.match(html, /name:'Eterno do Jardim', target:2500/);
+});

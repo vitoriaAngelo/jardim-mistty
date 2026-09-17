@@ -2910,8 +2910,10 @@ body.dark-mode #profile-overlay .profile-modal .premium-copy { color:#d7e2d0; }
 #ranking-overlay .ranking-item.ranking-bg-rainbow { background:linear-gradient(110deg,#f5d4d4,#f5e6b2,#cfe6c9,#cedcf0) !important; }
 #ranking-overlay .ranking-item.ranking-bg-forest { background:linear-gradient(135deg,#c4d4ae,#b8afc9) !important; }
 /* Cards do ranking com espaço para fundo, título e frase */
-#ranking-overlay .ranking-item { min-height:112px; padding:16px 14px; gap:12px; }
-body.dark-mode #ranking-overlay .ranking-item { min-height:112px; }
+#ranking-overlay .ranking-item { width:100%; height:112px; min-height:112px; max-height:112px; box-sizing:border-box; padding:16px 14px; gap:12px; overflow:hidden; }
+body.dark-mode #ranking-overlay .ranking-item { height:112px; min-height:112px; max-height:112px; }
+#ranking-overlay .ranking-item .ranking-name { min-width:0; overflow:hidden; }
+#ranking-overlay .ranking-item .ranking-pts { flex-shrink:0; }
 body.dark-mode #ranking-overlay .ranking-item .ranking-farm-name,
 body.dark-mode #ranking-overlay .ranking-item .ranking-twitch-name,
 body.dark-mode #ranking-overlay .ranking-item .ranking-pts,
@@ -2922,7 +2924,6 @@ body.dark-mode #ranking-overlay .ranking-item .ranking-daily-phrase { opacity:.9
 body.dark-mode #ranking-overlay .ranking-item .ranking-pos > span:not(.ranking-place) { color:#f1f5e9 !important; }
 body.dark-mode #ranking-overlay .ranking-item .ranking-badge-tip { background:#303a30; color:#edf2e6; }
 #ranking-overlay .mail-modal { width:min(560px,calc(100% - 24px)); max-width:560px; }
-#ranking-overlay .ranking-item { width:100%; }
 @media (max-width:560px) {
   #ranking-overlay .mail-modal { width:calc(100% - 16px); max-width:none; }
 }

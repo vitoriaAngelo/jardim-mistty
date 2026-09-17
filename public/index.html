@@ -3951,6 +3951,7 @@ const G = {
   orderPaidReset: false,
   ordersGlobalResetVersion: 0,
   lastOrder: null,
+  lastEvent: null,
   eventNextAt: 0,
   eventLastType: '',
   discoveredMutations: [],
@@ -4110,7 +4111,10 @@ function finishGardenEvent() {
   document.getElementById('garden-event-layer')?.replaceChildren();
   if (finished.xp>0 && finished.type!=='butterflies') gainXP('harvest',document.getElementById('garden-event-banner'),finished.xp,`+${finished.xp} XP · ${def.name}`);
   const summary = finished.actions ? `Você participou ${finished.actions} vez${finished.actions===1?'':'es'} e ganhou ${finished.xp} XP${finished.bonus?` + ${finished.bonus} bônus`:''}.` : 'Você participou um pouquinho — o próximo evento pode trazer novas surpresas!';
-  toast(`${def.icon} ${def.name} terminou!`, 2600);
+  if (finished.actions > 0) {
+    G.lastEvent = { event: def.name, actions: finished.actions, xp: finished.xp || 0, at: Date.now() };
+    toast(`${def.icon} ${def.name} terminou!`, 2600);
+  }
   showGardenEventSummary(finished, def);
   gardenEvent=null; renderGardenEvent(); renderPlots(); saveGardenToSE();
 }
@@ -8162,6 +8166,7 @@ async function saveGardenToSENow() {
     orderDeliveries:  G.orderDeliveries || 0,
     orderPaidReset:   G.orderPaidReset === true,
     lastOrder:        G.lastOrder || null,
+    lastEvent:        G.lastEvent || null,
     eventNextAt:      Number(G.eventNextAt || 0),
     eventLastType:    G.eventLastType || '',
     discoveredMutations: G.discoveredMutations || [],
@@ -8385,6 +8390,7 @@ async function loadGardenFromSE(username) {
     G.orderPaidReset   = save.orderPaidReset === true;
     G.ordersGlobalResetVersion = Number(save.ordersGlobalResetVersion || 0);
     G.lastOrder        = save.lastOrder || null;
+    G.lastEvent        = save.lastEvent || null;
     G.eventNextAt      = Number(save.eventNextAt || 0);
     G.eventLastType    = save.eventLastType || '';
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
@@ -8805,7 +8811,9 @@ function renderLatestSale() {
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
   if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma venda recente</span>'; return; }
   const who = String(sale.farmName || `Jardim de @${sale.username || ''}`).trim();
-  feed.innerHTML = sale.activityType === 'order'
+  feed.innerHTML = sale.activityType === 'event'
+    ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> participou do evento <b>${sale.event || 'do jardim'}</b></span>`
+    : sale.activityType === 'order'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> entregou <b>${sale.item || 'um pedido'}</b> e ganhou <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.reward || 0).toLocaleString('pt-BR')} pontos</span>`
     : `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> acabou de faturar <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
 }

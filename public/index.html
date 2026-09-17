@@ -7855,6 +7855,22 @@ function previewProfileBackground(id) {
   if (modal && PROFILE_BACKGROUNDS.some(([bg]) => bg === id)) modal.dataset.profileBackground = id;
 }
 function clearProfileBackgroundPreview() { applyProfileBackground(); }
+async function saveProfilePreferences(fields, retry = true) {
+  if (!seUser || !gardenHydrated) throw new Error('Jardim ainda não carregado');
+  const response = await fetch('/garden-profile-save', {
+    method:'POST',
+    headers:authenticatedHeaders({ 'Content-Type':'application/json' }),
+    body:JSON.stringify({ username:seUser.username, sessionId:gardenSessionId, ...fields }),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (response.status === 409 && result.code === 'STALE_STATE' && retry) return saveProfilePreferences(fields, false);
+    if (response.status === 409 && result.code === 'SESSION_CONFLICT') handleGardenSessionConflict(result.error);
+    throw new Error(result.error || 'Não foi possível salvar o perfil');
+  }
+  gardenRevision = result.revision || gardenRevision;
+  return result;
+}
 function renderProfileBackgrounds() {
   const grid = document.getElementById('profile-background-grid');
   if (!grid) return;
@@ -7866,7 +7882,7 @@ async function selectProfileBackground(id) {
   G.profileBackground = id;
   applyProfileBackground();
   renderProfileBackgrounds();
-  try { await saveGardenToSE(); toast('🖼️ Fundo do perfil atualizado!', 1800); }
+  try { await saveProfilePreferences({ profileBackground:id }); toast('🖼️ Fundo do perfil atualizado!', 1800); }
   catch (e) { G.profileBackground = previous; applyProfileBackground(); renderProfileBackgrounds(); toast('❌ Não foi possível salvar o fundo.', 2400); }
 }
 function checkHarvestTitles() {
@@ -7889,7 +7905,7 @@ async function selectHarvestTitle(name) {
   if (selectedTitleEl) selectedTitleEl.textContent = `${title.icon} ${title.name}`;
   renderProfileTitles();
   try {
-    await saveGardenToSE();
+    await saveProfilePreferences({ selectedHarvestTitle:title.name });
     toast(`🏅 Título escolhido: ${title.name}`, 1800);
   } catch (e) {
     G.selectedHarvestTitle = previousTitle;

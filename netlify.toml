@@ -13,6 +13,11 @@
   status = 200
 
 [[redirects]]
+  from = "/garden-profile-save"
+  to = "/.netlify/functions/garden-profile-save"
+  status = 200
+
+[[redirects]]
   from = "/garden-load"
   to = "/.netlify/functions/garden-load"
   status = 200

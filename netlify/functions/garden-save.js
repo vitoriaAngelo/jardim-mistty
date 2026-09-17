@@ -4,12 +4,12 @@ const { authenticateTwitch, requireSameUser } = require('./_auth');
 const { activeSession } = require('./_garden-store');
 
 const ORDER_SEASONS = [
-  ['potato','lettuce','carrot','tomato','corn','star_radish'],
-  ['tomato','corn','pepper','eggplant','lettuce','star_radish'],
-  ['pumpkin','beetroot','broccoli','cassava','ruby_kale'],
-  ['potato','broccoli','ruby_kale','star_radish'],
+  ['lettuce','carrot','potato','ruby_kale','star_radish','daisy','tulip','cherry','jasmine','moon_lily','royal_dahlia'],
+  ['tomato','corn','pepper','eggplant','star_radish','sunflower','hibiscus','bluebell','poppy','daisy','royal_dahlia'],
+  ['pumpkin','beetroot','broccoli','cassava','ruby_kale','rose','lavender','orchid','moon_lily','royal_dahlia'],
+  ['potato','broccoli','ruby_kale','star_radish','moon_lily'],
 ];
-const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338 };
+const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338,daisy:43,rose:85,tulip:76,sunflower:99,lavender:113,orchid:127,hibiscus:118,bluebell:95,cherry:136,poppy:81,jasmine:104,moon_lily:1000,royal_dahlia:383 };
 const ORDER_TIERS = { A:{ mult:1,min:1,max:12 }, S:{ mult:2.2,min:8,max:26 }, SS:{ mult:4.5,min:20,max:40 } };
 const ORDER_TIER_LEGACY = { normal:'A', epic:'S', legendary:'SS' };
 

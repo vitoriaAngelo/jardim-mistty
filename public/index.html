@@ -253,6 +253,7 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .event-butterfly.rare { font-size:36px; filter:drop-shadow(0 0 8px #e58cff); }
 .plot.event-golden { box-shadow:0 0 0 3px #f0c95b,0 0 22px #ffd96f99 !important; animation:event-golden-pulse 1.1s ease-in-out infinite alternate; }
 .plot.event-mutated { box-shadow:0 0 0 3px #a779da,0 0 24px #b47af688 !important; }
+.plot.event-mutated .plant-container { filter:hue-rotate(52deg) saturate(1.45) brightness(1.08); }
 .plot.event-mutated::after { content:'🧬 Cristalina'; position:absolute; top:7px; left:50%; transform:translateX(-50%); z-index:5; padding:3px 7px; border-radius:9px; background:#6e4b8d; color:white; font:900 9px 'Nunito',sans-serif; white-space:nowrap; }
 .plot-mutation-label { display:inline-block; margin:2px 0; padding:2px 6px; border-radius:8px; background:#70508c; color:#fff; font-size:9px; font-weight:900; letter-spacing:.1px; }
 .mutation-tooltip-badge { display:inline-block; padding:3px 6px; border-radius:7px; background:#765292; color:#fff; font-weight:900; font-size:10px; }
@@ -3947,7 +3948,7 @@ const GARDEN_EVENTS = {
   golden: { icon:'☀️', name:'Hora Dourada', duration:60, color:'#d9a82f', intro:'Colheitas feitas durante o evento rendem o dobro!' },
   butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
   moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
-  mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode se transformar em uma versão cristalina!' },
+  mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode mudar de cor!' },
 };
 let gardenEvent = null;
 let gardenEventTimer = null;
@@ -3989,7 +3990,7 @@ function eventLiveSubtitle() {
   if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
   if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
   if (gardenEvent.type === 'moon') return `${n} colheita${n===1?'':'s'} ao luar`;
-  return n ? 'Uma mutação cristalina foi descoberta!' : 'A energia procura uma planta…';
+  return n ? 'Uma mutação de cor foi descoberta!' : 'A energia procura uma planta…';
 }
 
 function announceGardenEvent() {
@@ -4045,7 +4046,7 @@ function triggerEventMutation() {
   if(!choices.length)return;
   const idx=choices[Math.floor(Math.random()*choices.length)]; G.plots[idx].mutated=true; gardenEvent.actions=1;
   const name=getPlantable(G.plots[idx].type)?.name||'planta'; if(!G.discoveredMutations.includes(G.plots[idx].type))G.discoveredMutations.push(G.plots[idx].type);
-  setTimeout(()=>toast(`🧬 Sua ${name} virou uma ${name} Cristalina!`,4500),700);
+  setTimeout(()=>toast(`🧬 Sua ${name} sofreu uma mutação de cor!`,4500),700);
 }
 
 function finishGardenEvent() {
@@ -6805,7 +6806,7 @@ function buildPlotEl(plot, idx) {
     tooltip.className = `plot-tooltip${outOfSeason ? ' out-of-season-warning' : ''}`;
     tooltip.innerHTML = `
       <strong>${p.emoji} ${p.name}</strong><br>
-      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 PLANTA CRISTALINA</span><br><strong>Mutação ativa: +2 itens e +25 XP ao colher.</strong><br>' : ''}
+      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 MUTAÇÃO DE COR</span><br><strong>Esta planta está com a cor alterada.</strong><br>' : ''}
       ${outOfSeason
         ? '⚠️ FORA DE ESTAÇÃO!<br><strong>Se colher, você perderá esta planta.</strong>'
         : isReady
@@ -6967,10 +6968,6 @@ async function onPlotClick(idx) {
         gardenEvent.actions++; gardenEvent.xp += 8;
         if (Math.random() < .35) { G.inventory[type] = (G.inventory[type] || 0) + 1; gardenEvent.bonus++; toast(`🌙 Semente lunar de ${getPlantable(type).name} encontrada!`,3000); }
         renderGardenEvent();
-      }
-      if (plot.mutated) {
-        finalQty += 2; gainXP('harvest',plotEl,25,'🧬 +25 XP Cristalina');
-        toast(`🧬 Colheita cristalina! +2 ${getPlantable(type).name}`,3000);
       }
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
       if (gotDouble) {

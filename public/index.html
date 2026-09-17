@@ -9860,11 +9860,20 @@ async function claimTwitchzinhoCoins() {
   }
   G.twitchzinhoPendingCoins = 0;
   G.pts += amount;
-  if (lastKnownSEPoints !== null) lastKnownSEPoints += amount;
   const mascotName = G.selectedMascot === 'premium' ? 'Brotinho Premium' : 'Twitchzinho';
   recordPointsHistory(amount, `${mascotName} · moedas resgatadas`);
+  const rewardHistoryId = G.pointsHistory?.[0]?.id;
   updatePts(); updateTwitchzinhoPouch();
-  await syncPtsToSE();
+  const synced = await syncPtsToSE();
+  if (!synced) {
+    // Não perde as moedas se o StreamElements estiver temporariamente indisponível.
+    G.twitchzinhoPendingCoins = amount;
+    G.pts -= amount;
+    if (rewardHistoryId) G.pointsHistory = (G.pointsHistory || []).filter(entry => entry.id !== rewardHistoryId);
+    updatePts(); updateTwitchzinhoPouch();
+    toast('❌ Não foi possível confirmar as moedas agora. Elas continuam na sacolinha.', 4000);
+    return;
+  }
   await saveGardenToSE();
   toast(`${G.selectedMascot === 'premium' ? '💛' : '💜'} Você resgatou +${amount} moedas do ${mascotName}!`, 3200);
 }

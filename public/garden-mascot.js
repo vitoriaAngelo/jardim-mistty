@@ -9,6 +9,7 @@
     .garden-mascot .mascot-button,.garden-mascot .mascot-button *{cursor:var(--cozy-click-cursor,pointer)!important}
     .mascot-button>svg{overflow:visible}
     .mascot-premium-active .mascot-button>svg{filter:sepia(.72) saturate(1.75) hue-rotate(352deg) brightness(1.08) drop-shadow(0 0 7px #ffd96c) drop-shadow(0 4px 5px #a77628aa)}
+    .mascot-twitchzinho-active .mascot-button>svg{filter:hue-rotate(238deg) saturate(1.55) brightness(1.02) drop-shadow(0 0 7px #c99aff) drop-shadow(0 4px 5px #68458daa)}
     .mascot-premium-active .mascot-button::after{content:'✦';position:absolute;right:2px;top:10px;color:#ffd96c;font-size:18px;text-shadow:0 0 7px #fff2a8;animation:premium-sparkle 1.5s ease-in-out infinite}
     .mascot-button{position:relative}
     .mascot-button.mascot-transform{animation:mascot-transform 1.15s cubic-bezier(.2,.8,.2,1) both}
@@ -142,14 +143,16 @@
     const orange = type === 'orange';
     const apple = type === 'apple';
     const strawberry = type === 'strawberry';
+    const twitchzinho = type === 'twitchzinho';
     const premium = type === 'premium';
     document.body.classList.toggle('mascot-orange-active', orange);
     document.body.classList.toggle('mascot-apple-active', apple);
     document.body.classList.toggle('mascot-strawberry-active', strawberry);
+    document.body.classList.toggle('mascot-twitchzinho-active', twitchzinho);
     window.setMascotPremium(premium, premium && animate);
     const mascotName = mascot.querySelector('.mascot-bubble strong');
-    if (mascotName) mascotName.textContent = orange ? 'LARANJINHA' : apple ? 'MAÇANZINHA' : strawberry ? 'MORANGUINHO' : premium ? 'BROTINHO PREMIUM' : 'BROTINHO';
-    mascot.setAttribute('aria-label', orange ? 'Laranjinha, seu companheiro de jardim' : apple ? 'Maçanzinha, seu companheiro de jardim' : strawberry ? 'Moranguinho, seu companheiro de jardim' : premium ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');
+    if (mascotName) mascotName.textContent = orange ? 'LARANJINHA' : apple ? 'MAÇANZINHA' : strawberry ? 'MORANGUINHO' : twitchzinho ? 'TWITCHZINHO' : premium ? 'BROTINHO PREMIUM' : 'BROTINHO';
+    mascot.setAttribute('aria-label', orange ? 'Laranjinha, seu companheiro de jardim' : apple ? 'Maçanzinha, seu companheiro de jardim' : strawberry ? 'Moranguinho, seu companheiro de jardim' : twitchzinho ? 'Twitchzinho, seu companheiro roxo de jardim' : premium ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');
     if ((orange || apple || strawberry) && animate) {
       petButton.classList.remove('mascot-orange-celebrate','mascot-apple-celebrate','mascot-strawberry-celebrate');
       void petButton.offsetWidth;

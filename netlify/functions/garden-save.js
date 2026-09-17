@@ -72,7 +72,9 @@ function validateOrdersTransition(oldData, nextData) {
   });
   if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');
   if (nextGlobalReset > oldGlobalReset) {
-    if (nextGlobalReset !== 1 || oldGlobalReset !== 0 || searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
+    // Reset global pode acontecer de qualquer versão anterior para a próxima.
+    // Ao resetar, os contadores devem sempre ser zerados.
+    if (searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
     return;
   }
   if (nextGlobalReset < oldGlobalReset) throw new Error('Reset global de pedidos não pode ser revertido');

@@ -54,11 +54,15 @@ function validateOrdersTransition(oldData, nextData) {
   const nextKey = String(nextData.ordersSeasonKey ?? seasonIdx);
   const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
   const rewardState = oldKey === nextKey ? oldData : nextData;
+  // Pedidos são sempre validados contra a estação em que foram gerados (ordersSeasonKey),
+  // não a estação atual do jogo. Isso permite que pedidos criados numa estação sejam
+  // entregues ou salvos depois que a estação virar, sem serem rejeitados como incompatíveis.
+  const ordersSeasonIdx = Number(nextKey) || 0;
   const hasInvalidOrder = orders.some(order => {
     // Pedidos que já estão persistidos podem atravessar a troca de estação:
     // colher uma planta fora de estação não deve invalidar o logout.
     if (orderWasAlreadyStored(order, oldData)) return false;
-    return !validOrder(order, seasonIdx, rewardState);
+    return !validOrder(order, ordersSeasonIdx, rewardState);
   });
   if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');
   if (nextKey !== String(seasonIdx)) throw new Error('Estação dos pedidos inválida');

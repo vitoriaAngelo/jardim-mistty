@@ -9177,6 +9177,13 @@ async function loadGardenFromSE(username) {
     G.waterCapacityLastRefill = Number(save.waterCapacityLastRefill || Date.now());
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
+    // Corrige estados antigos: a marca só vale enquanto a estação atual
+    // realmente não combinar com a planta.
+    G.plots = G.plots.map(plot => {
+      if (!plot) return plot;
+      plot.outOfSeason = !isInSeason(plot.type);
+      return plot;
+    });
     G.orders          = Array.isArray(save.orders) ? save.orders : [];
     G.ordersSeasonKey = save.ordersSeasonKey ?? `${G.seasonIdx}`;
     // Normaliza contadores antigos criados quando a trava de atualizações estava desativada.

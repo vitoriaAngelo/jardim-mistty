@@ -159,7 +159,8 @@ exports.handler = async (event) => {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
       const currentRevision = existingRows[0]?.updated_at;
-      if (!existingRows.length || !activeSession(existingData, sessionId)) {
+      const sameSession = Boolean(sessionId && existingData._activeSessionId === sessionId);
+      if (!existingRows.length || (!sameSession && !activeSession(existingData, sessionId))) {
         return { statusCode: 409, headers, body: JSON.stringify({ error: 'Este jardim está ativo em outra tela', code: 'SESSION_CONFLICT' }) };
       }
       if (!expectedRevision || expectedRevision !== currentRevision) {

@@ -7915,6 +7915,7 @@ function handleGardenSessionConflict(message = 'Seu jardim foi aberto em outra t
   gardenHydrated = false;
   if (saveTimer) clearInterval(saveTimer);
   if (syncTimer) clearInterval(syncTimer);
+  setLoginLoading(false);
   document.getElementById('login-overlay')?.classList.remove('hidden');
   const status = document.getElementById('login-status');
   if (status) status.textContent = `🌿 ${message} Entre novamente para continuar nesta tela.`;
@@ -8176,7 +8177,7 @@ function restorePremiumClaimsCache(username) {
 // Serializa gravações para que um POST antigo nunca termine depois de um
 // POST mais novo e restaure um estado anterior após atualizar a página.
 let gardenSaveQueue = Promise.resolve();
-async function saveGardenToSENow() {
+async function saveGardenToSENow(retryStale = true) {
   if (!seUser || !gardenHydrated) return;
   const saveData = {
     xp:               G.xp,
@@ -8272,7 +8273,14 @@ async function saveGardenToSENow() {
       }
       if (response.status === 409) {
         const conflict = JSON.parse(errBody || '{}');
-        handleGardenSessionConflict(conflict.error);
+        if (conflict.code === 'STALE_STATE' && conflict.revision && retryStale) {
+          gardenRevision = conflict.revision;
+          return saveGardenToSENow(false);
+        }
+        if (conflict.code === 'SESSION_CONFLICT') {
+          handleGardenSessionConflict(conflict.error);
+          return;
+        }
       }
       throw new Error(`Save failed: ${response.status}`);
     }

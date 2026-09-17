@@ -96,3 +96,9 @@ test('Lírio Lunar é exclusivo do evento e tem saquinho especial', () => {
   assert.match(html, /product\?\.eventOnly/);
   assert.match(html, /const lunar = type === 'moon_lily'/);
 });
+
+test('conflito de gravação não deixa o login carregando infinitamente', () => {
+  assert.match(html, /function handleGardenSessionConflict[\s\S]*?setLoginLoading\(false\)/);
+  assert.match(html, /conflict\.code === 'STALE_STATE'[\s\S]*?saveGardenToSENow\(false\)/);
+  assert.match(html, /conflict\.code === 'SESSION_CONFLICT'[\s\S]*?handleGardenSessionConflict/);
+});

@@ -2872,6 +2872,11 @@ body.dark-mode #ranking-overlay .ranking-item .ranking-twitch-name,
 body.dark-mode #ranking-overlay .ranking-item .ranking-daily-phrase { opacity:.95; }
 body.dark-mode #ranking-overlay .ranking-item .ranking-pos > span:not(.ranking-place) { color:#f1f5e9 !important; }
 body.dark-mode #ranking-overlay .ranking-item .ranking-badge-tip { background:#303a30; color:#edf2e6; }
+#ranking-overlay .mail-modal { width:min(560px,calc(100% - 24px)); max-width:560px; }
+#ranking-overlay .ranking-item { width:100%; }
+@media (max-width:560px) {
+  #ranking-overlay .mail-modal { width:calc(100% - 16px); max-width:none; }
+}
 body.dark-mode #ranking-overlay .ranking-item.ranking-bg-spring { background:linear-gradient(135deg,#252b24,#303b2d 62%,#49343f) !important; }
 body.dark-mode #ranking-overlay .ranking-item.ranking-bg-sunny { background:linear-gradient(135deg,#252b24,#4b4228 62%,#59452c) !important; }
 body.dark-mode #ranking-overlay .ranking-item.ranking-bg-rain { background:linear-gradient(135deg,#252b24,#2d4141 62%,#38545a) !important; }

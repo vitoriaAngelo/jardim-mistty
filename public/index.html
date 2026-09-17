@@ -9055,7 +9055,19 @@ async function loadGardenFromSE(username) {
     // nova que ainda não apareceu na resposta do banco. Nunca regride para o
     // estado anterior nesse intervalo; a próxima gravação sincroniza o banco.
     if (cachedData && (!serverData || cachedSavedAt > serverSavedAt)) {
-      json = { data: cachedData };
+      // O cache pode ser mais novo durante um autosave, mas os contadores de
+      // pedidos/reset precisam continuar obedecendo ao banco. Isso evita que
+      // um reset administrativo volte para 3/3 após o F5.
+      const mergedData = serverData ? {
+        ...cachedData,
+        orders: serverData.orders,
+        ordersSeasonKey: serverData.ordersSeasonKey,
+        orderSearches: serverData.orderSearches,
+        orderDeliveries: serverData.orderDeliveries,
+        orderPaidReset: serverData.orderPaidReset,
+        ordersGlobalResetVersion: serverData.ordersGlobalResetVersion,
+      } : cachedData;
+      json = { data: mergedData };
       if (cachedSavedAt > serverSavedAt) setTimeout(() => saveGardenToSE(), 250);
     }
     if (!json?.data || json.data._isSessionShell === true) return loadFailed ? null : false;

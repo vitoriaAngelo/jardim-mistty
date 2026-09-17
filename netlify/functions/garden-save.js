@@ -49,6 +49,15 @@ function validateOrdersTransition(oldData, nextData) {
   const deliveries = Number(nextData.orderDeliveries || 0);
   if (!Number.isInteger(searches) || searches < 0 || searches > 3) throw new Error('Limite de atualizações de pedidos inválido');
   if (!Number.isInteger(deliveries) || deliveries < 0 || deliveries > 4) throw new Error('Limite de entregas de pedidos inválido');
+  
+  // Reset global: pula todas as validações de pedidos, só verifica versão
+  if (nextGlobalReset > oldGlobalReset) {
+    // Ao resetar, os contadores devem sempre ser zerados.
+    if (searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
+    return;
+  }
+  if (nextGlobalReset < oldGlobalReset) throw new Error('Reset global de pedidos não pode ser revertido');
+  
   const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
   // Pedidos existentes nunca são revalidados por estação: eles podem ter sido
   // gerados numa estação e entregues/salvos em outra. A validação de estação
@@ -71,13 +80,7 @@ function validateOrdersTransition(oldData, nextData) {
       || typeof order.id !== 'string' || order.id.length > 80;
   });
   if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');
-  if (nextGlobalReset > oldGlobalReset) {
-    // Reset global pode acontecer de qualquer versão anterior para a próxima.
-    // Ao resetar, os contadores devem sempre ser zerados.
-    if (searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
-    return;
-  }
-  if (nextGlobalReset < oldGlobalReset) throw new Error('Reset global de pedidos não pode ser revertido');
+  
   const oldKey = String(oldData.ordersSeasonKey ?? oldData.seasonIdx ?? '0');
   const nextKey = String(nextData.ordersSeasonKey ?? nextData.seasonIdx ?? '0');
   if (oldKey !== nextKey) return; // troca de estação — contadores já foram zerados pelo cliente

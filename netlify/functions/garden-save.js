@@ -1,5 +1,7 @@
 const SUPABASE_URL = 'https://luvjridqxqpxnljucnur.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1dmpyaWRxeHFweG5sanVjbnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDM3ODQsImV4cCI6MjEwNDgxOTc4NH0.shmGCDtE-XDPROUCezVjR27WFYD3VYfvQaE1-OVewGc';
+const { authenticateTwitch, requireSameUser } = require('./_auth');
+const { activeSession } = require('./_garden-store');
 
 const ORDER_SEASONS = [
   ['potato','lettuce','carrot','tomato','corn','star_radish'],
@@ -81,7 +83,7 @@ exports._test = { validOrder, validateOrdersTransition };
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Garden-Session',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Content-Type': 'application/json',
   };
@@ -90,8 +92,10 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
 
   try {
-    const { username, data } = JSON.parse(event.body);
+    const { username, data, sessionId, expectedRevision } = JSON.parse(event.body);
     if (!username) return { statusCode: 400, headers, body: JSON.stringify({ error: 'username required' }) };
+    const auth = await authenticateTwitch(event);
+    requireSameUser(auth, username);
 
     const safeData = { ...(data || {}) };
     const premiumFields = [
@@ -143,7 +147,7 @@ exports.handler = async (event) => {
     }
     
     const existingRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data&order=updated_at.desc&limit=1`,
+      `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,
       {
         headers: {
           'apikey': SUPABASE_KEY,
@@ -154,6 +158,13 @@ exports.handler = async (event) => {
     if (existingRes.ok) {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
+      const currentRevision = existingRows[0]?.updated_at;
+      if (!existingRows.length || !activeSession(existingData, sessionId)) {
+        return { statusCode: 409, headers, body: JSON.stringify({ error: 'Este jardim está ativo em outra tela', code: 'SESSION_CONFLICT' }) };
+      }
+      if (!expectedRevision || expectedRevision !== currentRevision) {
+        return { statusCode: 409, headers, body: JSON.stringify({ error: 'O jardim foi atualizado em outra tela', code: 'STALE_STATE', revision: currentRevision }) };
+      }
       if (existingRows.length && (safeData.orders || existingData.orders)) validateOrdersTransition(existingData, safeData);
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {
@@ -175,10 +186,13 @@ exports.handler = async (event) => {
       if (!Object.prototype.hasOwnProperty.call(safeData, 'selectedMascot') && existingData.selectedMascot) {
         safeData.selectedMascot = existingData.selectedMascot;
       }
+      safeData._activeSessionId = sessionId;
+      safeData._sessionLeaseUntil = Date.now() + (2 * 60 * 1000);
+      delete safeData._isSessionShell;
     }
 
     const payload = { username, data: safeData, updated_at: new Date().toISOString() };
-    let res = await fetch(`${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}`, {
+    let res = await fetch(`${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&updated_at=eq.${encodeURIComponent(expectedRevision)}`, {
       method: 'PATCH',
       headers: {
         'apikey': SUPABASE_KEY,
@@ -189,28 +203,17 @@ exports.handler = async (event) => {
       body: JSON.stringify({ data: safeData, updated_at: payload.updated_at }),
     });
 
-    if (res.ok) {
-      const updated = await res.json();
-      if (!Array.isArray(updated) || updated.length === 0) {
-        res = await fetch(`${SUPABASE_URL}/rest/v1/gardens`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
-      }
-    }
-
     if (!res.ok) {
       const err = await res.text();
       return { statusCode: 500, headers, body: JSON.stringify({ error: err }) };
     }
 
-    return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    const updated = await res.json();
+    if (!Array.isArray(updated) || updated.length !== 1) {
+      return { statusCode: 409, headers, body: JSON.stringify({ error: 'O jardim foi atualizado em outra tela', code: 'STALE_STATE' }) };
+    }
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, revision: updated[0].updated_at }) };
   } catch (e) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
+    return { statusCode: e.statusCode || 500, headers, body: JSON.stringify({ error: e.message }) };
   }
 };

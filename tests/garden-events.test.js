@@ -25,6 +25,11 @@ test('acelera automaticamente o primeiro evento apenas no Deploy Preview', () =>
   assert.match(html, /gardenEventDuration\(type\) \{ return eventFastMode\(\) \? 12/);
 });
 
+test('mutação é sorteada como evento raro', () => {
+  assert.match(html, /const mutationChance = keys\.includes\('mutation'\) \? 0\.08/);
+  assert.match(html, /Math\.random\(\) < mutationChance/);
+});
+
 test('planta perdida fora da estação não concede XP de colheita', () => {
   const harvestStart = html.indexOf('// AUTO-COLHEITA:');
   const harvestEnd = html.indexOf('// APLICAR ADUBO:', harvestStart);

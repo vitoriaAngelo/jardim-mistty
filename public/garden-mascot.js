@@ -49,7 +49,7 @@
     @keyframes mascot-sway{50%{transform:rotate(7deg)}}
     @keyframes mascot-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}}
     @keyframes mascot-hello{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-    @media(max-width:600px){.mascot-button{width:66px;height:75px}.garden-mascot{left:8px;bottom:10px}.mascot-bubble{width:195px}}
+    @media(max-width:600px){.mascot-button{width:44px;height:50px}.garden-mascot{left:6px;bottom:8px}.mascot-bubble{width:195px;margin-left:6px;padding:12px 24px 12px 13px;font-size:12px}.mascot-bubble p{font-size:12px;line-height:1.45}}
     @media(prefers-reduced-motion:reduce){.garden-mascot *{animation:none!important;transition:none!important}}
   `;
   document.head.append(style);

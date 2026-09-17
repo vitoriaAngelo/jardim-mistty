@@ -5743,7 +5743,7 @@ async function refreshOrders() {
   try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
 }
 async function refreshSingleOrder(id) {
-  if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); return; }
+  if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(false); }
   if ((G.orderSearches || 0) >= 3 || (G.orderDeliveries || 0) >= 4) { renderOrders(); toast('🌿 Você não tem mais atualizações disponíveis nesta estação.', 2800); return; }
   const index = gardenOrders.findIndex(order => order.id === id);
   if (index < 0) return;
@@ -5759,9 +5759,14 @@ function renderOrders() {
   if (!list) return;
   const allOrdersDelivered = (G.orderDeliveries || 0) >= 4;
   updateOrdersReadyBadge();
+  // Aviso não-bloqueante quando há pedidos de estação anterior ainda para entregar
+  const fromPastSeason = !allOrdersDelivered && gardenOrders.length > 0 && G.ordersSeasonKey !== orderSeasonKey();
+  const pastSeasonBanner = fromPastSeason
+    ? `<div class="market-empty" style="margin-bottom:8px;background:#fff8e6;border:1px solid #e6c96a;border-radius:10px;padding:8px 12px;font-size:11px;color:#7a5c1e">🕰️ Pedidos da estação anterior — você ainda pode entregá-los! Clique em 🔄 para receber pedidos da estação atual.</div>`
+    : '';
   list.innerHTML = allOrdersDelivered
     ? '<div class="market-empty">✅ Você entregou todos os pedidos desta estação.<br><small>Espere a estação terminar para receber novos pedidos.</small></div>'
-    : gardenOrders.map(order => {
+    : pastSeasonBanner + gardenOrders.map(order => {
     const item = getPlantable(order.type);
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
     const stock = G.harvested[order.type] || 0;
@@ -5818,7 +5823,8 @@ async function deliverOrder(id) {
 }
 async function openOrders(event) {
   event?.stopPropagation();
-  if (G.ordersSeasonKey !== orderSeasonKey()) resetOrdersForSeason(true);
+  // Pedidos de estações anteriores permanecem válidos até serem entregues.
+  // O reset só ocorre quando a jogadora clica em "Atualizar Pedidos".
   if (gardenOrders.length < 3 && (G.orderDeliveries || 0) < 4) {
     while (gardenOrders.length < 3) gardenOrders.push(createOrder(gardenOrders.length));
     G.orders = gardenOrders;
@@ -6546,7 +6552,8 @@ function advanceSeasonDay() {
   if (G.seasonDay > SEASON_DAYS_LEN) {
     G.seasonDay = 1;
     G.seasonIdx = (G.seasonIdx + 1) % 4;
-    resetOrdersForSeason(true);
+    // Não apaga pedidos ao virar a estação: a jogadora pode entregar pedidos
+    // de estações anteriores. O reset só ocorre ao clicar em "Atualizar Pedidos".
     const s = currentSeason();
     toast(`${s.icon} Nova estação: ${s.name}! ${s.msg}`, 5000);
     // Re-render shop to lock/unlock plants by season

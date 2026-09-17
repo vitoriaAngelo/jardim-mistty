@@ -45,33 +45,40 @@ function orderWasAlreadyStored(order, oldData) {
 function validateOrdersTransition(oldData, nextData) {
   const oldGlobalReset = Number(oldData.ordersGlobalResetVersion || 0);
   const nextGlobalReset = Number(nextData.ordersGlobalResetVersion || 0);
-  const seasonIdx = Number(nextData.seasonIdx || 0);
   const searches = Number(nextData.orderSearches || 0);
   const deliveries = Number(nextData.orderDeliveries || 0);
   if (!Number.isInteger(searches) || searches < 0 || searches > 3) throw new Error('Limite de atualizações de pedidos inválido');
   if (!Number.isInteger(deliveries) || deliveries < 0 || deliveries > 4) throw new Error('Limite de entregas de pedidos inválido');
-  const oldKey = String(oldData.ordersSeasonKey ?? oldData.seasonIdx ?? '0');
-  const nextKey = String(nextData.ordersSeasonKey ?? seasonIdx);
   const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
-  const rewardState = oldKey === nextKey ? oldData : nextData;
-  // Pedidos são sempre validados contra a estação em que foram gerados (ordersSeasonKey),
-  // não a estação atual do jogo. Isso permite que pedidos criados numa estação sejam
-  // entregues ou salvos depois que a estação virar, sem serem rejeitados como incompatíveis.
-  const ordersSeasonIdx = Number(nextKey) || 0;
+  // Pedidos existentes nunca são revalidados por estação: eles podem ter sido
+  // gerados numa estação e entregues/salvos em outra. A validação de estação
+  // acontece apenas no frontend (createOrder filtra por isInSeason). Aqui só
+  // verificamos integridade (qty, reward, id) dos pedidos NOVOS — os que ainda
+  // não estavam persistidos no banco.
   const hasInvalidOrder = orders.some(order => {
-    // Pedidos que já estão persistidos podem atravessar a troca de estação:
-    // colher uma planta fora de estação não deve invalidar o logout.
     if (orderWasAlreadyStored(order, oldData)) return false;
-    return !validOrder(order, ordersSeasonIdx, rewardState);
+    // Novo pedido: valida apenas estrutura e recompensa, aceitando qualquer estação
+    const tier = ORDER_TIERS[ORDER_TIER_LEGACY[order?.rarity] || order?.rarity];
+    const qty = Number(order?.qty);
+    if (!tier || !Number.isInteger(qty) || qty < tier.min || qty > tier.max) return true;
+    const mascotBonus = ['apple','premium'].includes(nextData?.selectedMascot) ? 1.15 : 1;
+    const skillBonus = 1 + Number(nextData?.skillNodes?.etiqueta_dourada || 0) * .03;
+    const unitValue = Math.round(Math.round((ORDER_VALUES[order.type] || 0) * mascotBonus) * skillBonus);
+    if (!unitValue) return true; // tipo desconhecido
+    const expectedReward = Math.max(30, Math.max(12, Math.round(unitValue * tier.mult)) * qty + Math.round(25 * tier.mult));
+    const expectedXp = Math.round((60 + qty * 10) * tier.mult);
+    return Number(order.reward) !== expectedReward || Number(order.xp) !== expectedXp
+      || typeof order.id !== 'string' || order.id.length > 80;
   });
   if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');
-  if (nextKey !== String(seasonIdx)) throw new Error('Estação dos pedidos inválida');
   if (nextGlobalReset > oldGlobalReset) {
     if (nextGlobalReset !== 1 || oldGlobalReset !== 0 || searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
     return;
   }
   if (nextGlobalReset < oldGlobalReset) throw new Error('Reset global de pedidos não pode ser revertido');
-  if (oldKey !== nextKey) return;
+  const oldKey = String(oldData.ordersSeasonKey ?? oldData.seasonIdx ?? '0');
+  const nextKey = String(nextData.ordersSeasonKey ?? nextData.seasonIdx ?? '0');
+  if (oldKey !== nextKey) return; // troca de estação — contadores já foram zerados pelo cliente
   const oldSearches = Number(oldData.orderSearches || 0);
   const oldDeliveries = Number(oldData.orderDeliveries || 0);
   const oldPaid = oldData.orderPaidReset === true;

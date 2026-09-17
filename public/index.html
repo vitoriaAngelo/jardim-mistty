@@ -2499,6 +2499,10 @@ body.dark-mode .sell-confirm-items .shop-cart-row { color:#e1ecd9; }
 .xp-text { color: #707565; font-size: 10px; }
 .theme-toggle { font-size: 15px; }
 #twitch-btn-wrap > #mail-badge { position: absolute; top: -6px; right: -6px; z-index: 301; }
+.online-notify-badge { position:absolute; top:-9px; right:-10px; z-index:302; min-width:19px; height:19px; padding:0 5px; display:flex; align-items:center; justify-content:center; border:2px solid var(--cozy-paper,#fffdf7); border-radius:999px; background:#d87578; color:#fffdf7; box-shadow:0 2px 0 #9d555b, 0 3px 10px #28332455; font:900 10px/1 'Nunito',sans-serif; pointer-events:none; animation:onlineNotifyPulse 1.8s ease-in-out infinite; }
+.online-notify-badge.hidden { display:none; }
+@keyframes onlineNotifyPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }
+body.dark-mode .online-notify-badge { border-color:#273027; background:#f08b91; color:#2c352b; box-shadow:0 2px 0 #a95c62, 0 3px 12px #10170f99; }
 .help-modal, .mail-modal, .profile-modal, .modal, .levelup-card { position: relative; }
 .popup-close-x { position: absolute; top: 10px; right: 12px; width: 30px; height: 30px; padding: 0; border: 1px solid #d7dccb; border-radius: 50%; background: #f1f1e7; color: #59694b; font: 700 20px/1 'Nunito', sans-serif; cursor: pointer; box-shadow: 0 2px 0 #d7dccb; }
 .popup-close-x:hover { background: #e8eee0; transform: translateY(-1px); }
@@ -3253,6 +3257,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
         Conectar
       </button>
+        <span class="online-notify-badge hidden" id="online-notify-badge" aria-live="polite"></span>
         <button class="mail-badge hidden" id="mail-badge" type="button" aria-label="Abrir notificações do Correio" title="Nova mensagem no Correio" onclick="event.stopPropagation(); openMailbox(); document.getElementById('user-menu').classList.add('hidden');">0</button>
       <div class="user-menu hidden" id="user-menu">
         <button class="user-menu-item" onclick="openProfile(); document.getElementById('user-menu').classList.add('hidden');">👤 Abrir perfil</button>
@@ -6341,6 +6346,19 @@ function updateAchievBadge() {
     el.textContent = unseen;
     el.classList.toggle('hidden', unseen === 0);
   });
+  updateOnlineNotificationBadge();
+}
+
+function updateOnlineNotificationBadge() {
+  const badge = document.getElementById('online-notify-badge');
+  if (!badge) return;
+  const mailCount = G_MAIL.filter(m => !m.opened).length;
+  const achievementCount = Number(document.getElementById('achiev-menu-badge')?.textContent || 0);
+  const total = mailCount + achievementCount;
+  badge.textContent = total > 9 ? '9+' : String(total);
+  badge.classList.toggle('hidden', total === 0);
+  badge.setAttribute('aria-label', total ? `${total} notificações não lidas` : 'Sem notificações novas');
+  badge.title = total ? `${total} notificaç${total === 1 ? 'ão' : 'ões'} nova${total === 1 ? '' : 's'}` : '';
 }
 
 function achievementProgress(id) {
@@ -8500,6 +8518,7 @@ function updateMailBadge() {
     el.textContent = unopened;
     el.classList.toggle('hidden', unopened === 0);
   });
+  updateOnlineNotificationBadge();
 }
 
 function openMailbox() {

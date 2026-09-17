@@ -4032,6 +4032,12 @@ function applyMagicRain() {
       plot.waterCount = Math.min(max, plot.waterCount + 1);
       if (!gardenEvent.touched.has(idx)) { gardenEvent.touched.add(idx); gardenEvent.actions++; gardenEvent.xp += 5; }
       spawnSkillEffect(idx, '💧', '+ água mágica', '#67a9c9');
+    } else {
+      const maxGrow = effectiveMaxGrow(plot.type);
+      if (Number(plot.growCount || 0) < maxGrow) {
+        plot.growCount = Math.min(maxGrow, Number(plot.growCount || 0) + 1);
+        spawnSkillEffect(idx, '🌱', '+1 crescimento', '#7fa66c');
+      }
     }
   });
   renderPlots(); renderGardenEvent();

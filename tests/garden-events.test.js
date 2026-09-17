@@ -69,3 +69,9 @@ test('eventos recompensam por ações sem creditar pontos diretamente', () => {
   assert.match(html, /activeGardenEvent\('golden'\)/);
   assert.match(html, /activeGardenEvent\('moon'\)/);
 });
+
+test('chuva mágica dá um tick de crescimento quando a planta já está totalmente regada', () => {
+  assert.match(html, /if \(plot\.waterCount < max\)/);
+  assert.match(html, /const maxGrow = effectiveMaxGrow\(plot\.type\)/);
+  assert.match(html, /plot\.growCount = Math\.min\(maxGrow, Number\(plot\.growCount \|\| 0\) \+ 1\)/);
+});

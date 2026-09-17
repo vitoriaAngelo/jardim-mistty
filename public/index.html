@@ -2722,7 +2722,7 @@ body.dark-mode .profile-stat-lbl { color:#59694b !important; opacity:1; }
 }
 .profile-modal, .modal { overflow-y: auto; }
 .mail-modal, .profile-modal { padding: 26px; }
-.profile-modal { max-width:410px; max-height:96dvh; padding:20px 22px 16px; gap:12px; }
+.profile-modal { max-width:410px; width:calc(100% - 32px); height:min(840px,calc(100dvh - 24px)); min-height:min(840px,calc(100dvh - 24px)); max-height:calc(100dvh - 24px); box-sizing:border-box; padding:20px 22px 16px; gap:12px; }
 .profile-daily-phrase { display:none; margin-top:5px; color:var(--grass2); font-size:12px; font-style:italic; font-weight:800; }
 .profile-daily-phrase.visible { display:block; }
 .mail-modal-title, .help-title, .modal h2, .levelup-title { font: 400 27px/1.2 Georgia, 'Times New Roman', serif; color: var(--cozy-ink); letter-spacing: -.5px; }

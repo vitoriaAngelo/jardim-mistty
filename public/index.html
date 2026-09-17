@@ -3900,6 +3900,7 @@ const G = {
   orderSearches: 0,
   orderDeliveries: 0,
   orderPaidReset: false,
+  ordersGlobalResetVersion: 0,
   lastOrder: null,
 };
 
@@ -5169,6 +5170,16 @@ function createOrder(index = 0) {
   const rewardPerItem = Math.max(12, Math.round(effectiveSellValue(type) * rarity.mult));
   return { id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2,8)}`, name: ORDER_NAMES[Math.floor(Math.random() * ORDER_NAMES.length)], type, qty, rarity: rarity.id, rarityLabel: rarity.label, reward: Math.max(30, rewardPerItem * qty + Math.round(25 * rarity.mult)), xp: Math.round((60 + qty * 10) * rarity.mult) };
 }
+function orderSignature(order) { return `${order?.name}|${order?.type}|${order?.qty}|${order?.rarity}`; }
+function createDifferentOrder(previous, index = 0) {
+  let replacement = createOrder(index);
+  let attempts = 0;
+  while (orderSignature(replacement) === orderSignature(previous) && attempts < 12) {
+    replacement = createOrder(index);
+    attempts += 1;
+  }
+  return replacement;
+}
 async function refreshOrders() {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); }
   if (G.orderSearches >= 3) { renderOrders(); toast('🌿 Você já atualizou os pedidos 3 vezes nesta estação.', 2800); return; }
@@ -5185,7 +5196,7 @@ async function refreshSingleOrder(id) {
   const index = gardenOrders.findIndex(order => order.id === id);
   if (index < 0) return;
   G.orderSearches = Math.min(3, (G.orderSearches || 0) + 1);
-  gardenOrders[index] = createOrder(index);
+  gardenOrders[index] = createDifferentOrder(gardenOrders[index], index);
   G.orders = gardenOrders;
   renderOrders();
   updateOrdersButton();
@@ -7851,6 +7862,7 @@ async function saveGardenToSENow() {
     seasonIdx:        G.seasonIdx,
     seasonDay:        G.seasonDay,
     orders:           G.orders || [],
+    ordersGlobalResetVersion: G.ordersGlobalResetVersion || 0,
     ordersSeasonKey:  G.ordersSeasonKey || `${G.seasonIdx}`,
     orderSearches:    G.orderSearches || 0,
     orderDeliveries:  G.orderDeliveries || 0,
@@ -8002,7 +8014,7 @@ window.addEventListener('beforeunload', () => {
     plotFertilizers: G.plotFertilizers, plots: G.plots,
     unlockedPlots: G.unlockedPlots, harvested: G.harvested, goldenHarvested: G.goldenHarvested || {},
     upgrades: [...G.upgrades], upgradeLevels: G.upgradeLevels || {}, seasonIdx: G.seasonIdx,
-    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0, orderPaidReset: G.orderPaidReset === true, lastOrder: G.lastOrder || null,
+    orders: G.orders || [], ordersSeasonKey: G.ordersSeasonKey || `${G.seasonIdx}`, orderSearches: G.orderSearches || 0, orderDeliveries: G.orderDeliveries || 0, orderPaidReset: G.orderPaidReset === true, ordersGlobalResetVersion: G.ordersGlobalResetVersion || 0, lastOrder: G.lastOrder || null,
     waterCapacity: G.waterCapacity ?? 5, waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
     seasonDay: G.seasonDay, missions: G.missions,
     achievements: [...(G.achievements || [])],
@@ -8133,8 +8145,15 @@ async function loadGardenFromSE(username) {
     G.orderSearches   = Math.min(3, Number(save.orderSearches || 0));
     G.orderDeliveries  = Number(save.orderDeliveries || 0);
     G.orderPaidReset   = save.orderPaidReset === true;
+    G.ordersGlobalResetVersion = Number(save.ordersGlobalResetVersion || 0);
     G.lastOrder        = save.lastOrder || null;
     gardenOrders      = G.orders;
+    if (G.ordersGlobalResetVersion < 1) {
+      G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
+      gardenOrders = Array.from({ length: 3 }, (_, i) => createOrder(i));
+      G.orders = gardenOrders; G.ordersGlobalResetVersion = 1;
+      setTimeout(() => saveGardenToSE(), 250);
+    }
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };

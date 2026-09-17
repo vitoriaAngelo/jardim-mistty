@@ -2048,6 +2048,8 @@ body.dark-mode .profile-selected-title { color:#e6c978; }
 .profile-background-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
 .profile-background-option { min-height:52px; padding:8px 7px; border:1px solid var(--cozy-line); border-radius:12px; color:var(--text); font:800 11px/1.15 'Nunito',sans-serif; cursor:pointer; }
 .profile-background-option.selected { outline:2px solid var(--grass2); outline-offset:1px; }
+.profile-background-option.locked { filter:grayscale(.35); opacity:.68; cursor:default; }
+.profile-background-option .profile-background-tip { display:none; }
 .profile-background-option.spring { background:linear-gradient(135deg,#eef4dd,#f7dfe7); }
 .profile-background-option.sunny { background:linear-gradient(135deg,#f9edb7,#e9c66d); }
 .profile-background-option.rain { background:linear-gradient(135deg,#d8e8e7,#8caeb0); }
@@ -4108,6 +4110,8 @@ const G = {
   dailyPhrase: '',
   selectedHarvestTitle: '',
   profileBackground: 'spring',
+  eventParticipations: 0,
+  totalOrderDeliveries: 0,
   isSubscriber: false,
   welcomeBonusClaimed: false,
   previewUnlocks: false,
@@ -4255,6 +4259,7 @@ function showGardenEventSummary(finished, def) {
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-labelledby', 'garden-event-summary-title');
   const actions = finished.actions || 0;
+  if (actions > 0) { G.eventParticipations = Number(G.eventParticipations || 0) + 1; checkProfileBackgroundUnlocks(); saveGardenToSE(); }
   const xp = finished.xp || 0;
   const bonus = finished.bonus || 0;
   const reward = bonus ? `<div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Recompensas extras</strong>${finished.type === 'moon' ? `🌙 ${bonus} Semente${bonus === 1 ? '' : 's'} Lunar${bonus === 1 ? '' : 'es'}` : `✨ ${bonus} bônus do evento`}</div>` : '';
@@ -5679,6 +5684,8 @@ async function deliverOrder(id) {
   gainXP('harvest', document.querySelector(`[onclick="deliverOrder('${order.id}')"]`), order.xp || Math.round(order.qty * 10), `+${order.xp || Math.round(order.qty * 10)} XP 📬 Pedido!`);
   gardenOrders = gardenOrders.filter(item => item.id !== id);
   G.orderDeliveries = (G.orderDeliveries || 0) + 1;
+  G.totalOrderDeliveries = Number(G.totalOrderDeliveries || 0) + 1;
+  checkProfileBackgroundUnlocks();
   if (G.orderDeliveries < 4) gardenOrders.push(createOrder(gardenOrders.length));
   G.orders = gardenOrders;
   updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE();
@@ -7806,6 +7813,28 @@ const PROFILE_BACKGROUNDS = [
   ['spring','🌱 Jardim de primavera'], ['sunny','🌻 Campo ensolarado'], ['rain','🌧️ Dia chuvoso'], ['night','🌙 Noite estrelada'],
   ['autumn','🍂 Outono dourado'], ['winter','❄️ Inverno mágico'], ['rainbow','🌈 Arco-íris'], ['forest','🔮 Floresta encantada'],
 ];
+const PROFILE_BACKGROUND_RULES = {
+  spring:'Já vem desbloqueado.', sunny:'Já vem desbloqueado.', rain:'Já vem desbloqueado.', night:'Participe 5 vezes de qualquer evento.',
+  autumn:'Tenha 5 dias consecutivos de presença.', winter:'Entregue 35 pedidos no total.', rainbow:'Alcance 3.000.000 de pontos.', forest:'Apoie a desenvolvedora com qualquer valor.',
+};
+function profileBackgroundUnlocked(id) {
+  if (['spring','sunny','rain'].includes(id)) return true;
+  if (id === 'night') return Number(G.eventParticipations || 0) >= 5;
+  if (id === 'autumn') return Number(G.presenceStreak || 0) >= 5;
+  if (id === 'winter') return Number(G.totalOrderDeliveries || 0) >= 35;
+  if (id === 'rainbow') return Number(G.pts || 0) >= 3000000;
+  if (id === 'forest') return Number(G.bonusKitLevel || 0) > 0 || G.supporterFrameUnlocked === true;
+  return false;
+}
+function checkProfileBackgroundUnlocks() {
+  PROFILE_BACKGROUNDS.forEach(([id, label]) => {
+    if (!profileBackgroundUnlocked(id) || ['spring','sunny','rain'].includes(id)) return;
+    const mailId = `background_${id}`;
+    if (G_MAIL.some(mail => mail.id === mailId)) return;
+    G_MAIL.unshift({ id:mailId, emoji:label.slice(0,2).trim(), title:`Novo plano de fundo desbloqueado`, msg:`Você desbloqueou “${label.slice(2).trim()}”. Escolha-o na seção Plano de fundo do perfil.`, reward:0, opened:false });
+  });
+  updateMailBadge();
+}
 function applyProfileBackground() {
   const modal = document.querySelector('#profile-overlay .profile-modal');
   if (modal) modal.dataset.profileBackground = PROFILE_BACKGROUNDS.some(([id]) => id === G.profileBackground) ? G.profileBackground : 'spring';
@@ -7813,10 +7842,10 @@ function applyProfileBackground() {
 function renderProfileBackgrounds() {
   const grid = document.getElementById('profile-background-grid');
   if (!grid) return;
-  grid.innerHTML = PROFILE_BACKGROUNDS.map(([id, label]) => `<button type="button" class="profile-background-option ${id} ${G.profileBackground === id ? 'selected' : ''}" onclick="selectProfileBackground('${id}')" aria-pressed="${G.profileBackground === id}">${label}</button>`).join('');
+  grid.innerHTML = PROFILE_BACKGROUNDS.map(([id, label]) => { const unlocked = profileBackgroundUnlocked(id); return `<button type="button" class="profile-background-option ${id} ${unlocked ? '' : 'locked'} ${G.profileBackground === id ? 'selected' : ''}" ${unlocked ? `onclick="selectProfileBackground('${id}')"` : 'disabled'} title="${PROFILE_BACKGROUND_RULES[id]}" aria-label="${label}. ${PROFILE_BACKGROUND_RULES[id]}" aria-pressed="${G.profileBackground === id}">${label}<small style="display:block;margin-top:4px;font-size:9px;font-weight:700;opacity:.8">${unlocked ? (G.profileBackground === id ? '✓ Em uso' : 'Clique para usar') : `🔒 ${PROFILE_BACKGROUND_RULES[id]}`}</small></button>`; }).join('');
 }
 async function selectProfileBackground(id) {
-  if (!PROFILE_BACKGROUNDS.some(([bg]) => bg === id)) return;
+  if (!PROFILE_BACKGROUNDS.some(([bg]) => bg === id) || !profileBackgroundUnlocked(id)) return;
   const previous = G.profileBackground;
   G.profileBackground = id;
   applyProfileBackground();
@@ -7908,6 +7937,7 @@ function openProfile() {
   const selectedTitle = titleForName(G.selectedHarvestTitle);
   document.getElementById('profile-selected-title').textContent = selectedTitle ? `${selectedTitle.icon} ${selectedTitle.name}` : '';
   checkHarvestTitles();
+  checkProfileBackgroundUnlocks();
 
   document.getElementById('profile-farm-name').value =
     document.getElementById('garden-name').textContent;
@@ -8468,6 +8498,8 @@ async function saveGardenToSENow(retryStale = true) {
     achievStats:      G.achievStats || {},
     selectedHarvestTitle: G.selectedHarvestTitle || '',
     profileBackground: G.profileBackground || 'spring',
+    eventParticipations: Number(G.eventParticipations || 0),
+    totalOrderDeliveries: Number(G.totalOrderDeliveries || 0),
     achievSeen:       G.achievSeen  || 0,
     presenceStreak:   G.presenceStreak || 0,
     presenceLastDay:  G.presenceLastDay || '',
@@ -8708,6 +8740,8 @@ async function loadGardenFromSE(username) {
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
     G.selectedHarvestTitle = save.selectedHarvestTitle || '';
     G.profileBackground = save.profileBackground || 'spring';
+    G.eventParticipations = Number(save.eventParticipations || 0);
+    G.totalOrderDeliveries = Number(save.totalOrderDeliveries || 0);
     G.achievSeen      = save.achievSeen       || 0;
     G.presenceStreak  = save.presenceStreak  || 0;
     G.presenceLastDay = save.presenceLastDay || '';

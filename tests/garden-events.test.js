@@ -128,6 +128,10 @@ test('o jogo possui favicon com o ícone de pontos', () => {
   assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="points-sprout\.svg">/);
 });
 
+test('cartas do correio com IDs de texto podem ser abertas', () => {
+  assert.match(html, /onclick='openLetter\(\$\{JSON\.stringify\(m\.id\)\}\)'/);
+});
+
 test('perfil oferece dois títulos difíceis de desbloquear', () => {
   assert.match(html, /name:'Imperador da Colheita', target:3000/);
   assert.match(html, /name:'Eterno do Jardim', target:7500/);

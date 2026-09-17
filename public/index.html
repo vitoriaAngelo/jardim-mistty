@@ -8001,7 +8001,7 @@ function renderMailList() {
   }
 
   list.innerHTML = unopened.map(m => `
-    <div class="mail-item" tabindex="0" role="button" title="Clique para ler e pegar sua recompensa" onclick="openLetter(${m.id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLetter(${m.id})}">
+    <div class="mail-item" tabindex="0" role="button" title="Clique para ler e pegar sua recompensa" onclick='openLetter(${JSON.stringify(m.id)})' onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLetter(${JSON.stringify(m.id)})}">
       <div class="mail-item-header">
         <div class="mail-envelope">✉️</div>
         <div class="mail-item-info">

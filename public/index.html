@@ -2814,6 +2814,13 @@ body.dark-mode .points-history-copy strong { color:#edf4e6 !important; }
 body.dark-mode .points-history-copy small { color:#c3d0bb !important; opacity:1 !important; }
 body.dark-mode .points-history-item.gain .points-history-value { color:#b9e59f !important; }
 body.dark-mode .points-history-item.loss .points-history-value { color:#ffb8aa !important; }
+.twitchzinho-pouch { position:fixed; left:76px; bottom:20px; z-index:660; display:none; align-items:center; gap:5px; padding:7px 9px; border:1px solid #c49bdc; border-radius:14px 14px 14px 5px; background:linear-gradient(145deg,#f1ddff,#d1b1e9); color:#553b70; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 4px 0 #a77bc0,0 5px 14px #6d4a832b; }
+.twitchzinho-pouch.visible { display:inline-flex; animation:pouch-pop .35s ease-out; }
+.twitchzinho-pouch.ready { animation:pouch-bounce 1.4s ease-in-out infinite; }
+body.dark-mode .twitchzinho-pouch { background:linear-gradient(145deg,#694d7f,#4b385b); border-color:#b58bd0; color:#fff0ff; box-shadow:0 4px 0 #30223b; }
+@keyframes pouch-pop { from{opacity:0;transform:translateY(8px) scale(.9)} to{opacity:1;transform:none} }
+@keyframes pouch-bounce { 50%{transform:translateY(-3px) rotate(-2deg)} }
+@media(max-width:600px){.twitchzinho-pouch{left:43px;bottom:48px;font-size:10px;padding:6px 8px;}}
 @keyframes st-badge-pop { from { transform:scale(0); } to { transform:scale(1); } }
 
 body.dark-mode .fertilizer-buy-btn { background:#e7eddb !important; color:#34422f !important; box-shadow:0 3px 0 #b7c6a8 !important; }
@@ -4263,6 +4270,7 @@ const G = {
   selectedMascot: null,
   ownedMascots: {},
   twitchzinhoNextRewardAt: 0,
+  twitchzinhoPendingCoins: 0,
   orders: [],
   ordersSeasonKey: '0',
   orderSearches: 0,
@@ -5724,6 +5732,7 @@ function applySelectedMascotAppearance(animate=false) {
   document.body.classList.toggle('mascot-twitchzinho-active', G.selectedMascot === 'twitchzinho');
   if (typeof window.setGardenMascot === 'function') window.setGardenMascot(G.selectedMascot, animate);
   else if (typeof window.setMascotPremium === 'function') window.setMascotPremium(premium, animate);
+  updateTwitchzinhoPouch();
 }
 async function buyMascot(id, cost) {
   if (!G.ownedMascots) G.ownedMascots = {};
@@ -8849,6 +8858,7 @@ async function saveGardenToSENow(retryStale = true) {
     selectedMascot: G.selectedMascot || null,
     ownedMascots: G.ownedMascots || {},
     twitchzinhoNextRewardAt: Number(G.twitchzinhoNextRewardAt || 0),
+    twitchzinhoPendingCoins: Number(G.twitchzinhoPendingCoins || 0),
     profileFrame:      G.profileFrame || 'red',
     supporterFrameUnlocked: G.supporterFrameUnlocked === true,
     dailyPhrase:       G.dailyPhrase || '',
@@ -9114,6 +9124,7 @@ async function loadGardenFromSE(username) {
     G.selectedMascot = save.selectedMascot || null;
     G.ownedMascots = save.ownedMascots || (G.selectedMascot ? {[G.selectedMascot]: true} : {});
     G.twitchzinhoNextRewardAt = Number(save.twitchzinhoNextRewardAt || 0);
+    G.twitchzinhoPendingCoins = Number(save.twitchzinhoPendingCoins || 0);
     applySelectedMascotAppearance();
     // O benefício Premium precisa estar restaurado antes de calcular o tempo
     // de reposição; caso contrário o carregamento usa os 5 minutos do regador comum.
@@ -9650,22 +9661,50 @@ setInterval(() => {
 }, 600000);
 
 // Twitchzinho: recompensa passiva aleatória a cada 5 minutos.
+function twitchzinhoBenefitActive() { return ['twitchzinho','premium'].includes(G.selectedMascot); }
+function updateTwitchzinhoPouch() {
+  if (!seUser) return;
+  let pouch = document.getElementById('twitchzinho-pouch');
+  if (!pouch) {
+    pouch = document.createElement('button');
+    pouch.id = 'twitchzinho-pouch';
+    pouch.className = 'twitchzinho-pouch';
+    pouch.type = 'button';
+    pouch.onclick = claimTwitchzinhoCoins;
+    document.body.appendChild(pouch);
+  }
+  const active = twitchzinhoBenefitActive();
+  const amount = Number(G.twitchzinhoPendingCoins || 0);
+  pouch.classList.toggle('visible', active);
+  pouch.classList.toggle('ready', amount > 0);
+  pouch.innerHTML = amount > 0 ? `👜 Resgatar ${amount} moedas` : '👜 Twitchzinho · juntando moedas';
+  pouch.setAttribute('aria-label', amount > 0 ? `Resgatar ${amount} moedas` : 'Sacolinha do Twitchzinho');
+}
+async function claimTwitchzinhoCoins() {
+  const amount = Number(G.twitchzinhoPendingCoins || 0);
+  if (!amount || !seUser || !gardenHydrated) return;
+  G.twitchzinhoPendingCoins = 0;
+  G.pts += amount;
+  if (lastKnownSEPoints !== null) lastKnownSEPoints += amount;
+  recordPointsHistory(amount, 'Twitchzinho · moedas resgatadas');
+  updatePts(); updateTwitchzinhoPouch();
+  await syncPtsToSE();
+  await saveGardenToSE();
+  toast(`💜 Você resgatou +${amount} moedas do Twitchzinho!`, 3200);
+}
 async function checkTwitchzinhoReward() {
-  if (!seUser || !gardenHydrated || G.selectedMascot !== 'twitchzinho') return;
+  if (!seUser || !gardenHydrated || !twitchzinhoBenefitActive()) { updateTwitchzinhoPouch(); return; }
   const now = Date.now();
   if (!G.twitchzinhoNextRewardAt) G.twitchzinhoNextRewardAt = now + 300000;
-  if (now < G.twitchzinhoNextRewardAt) return;
+  if (now < G.twitchzinhoNextRewardAt) { updateTwitchzinhoPouch(); return; }
   const cycles = Math.min(12, Math.max(1, Math.floor((now - G.twitchzinhoNextRewardAt) / 300000) + 1));
   let total = 0;
   for (let i = 0; i < cycles; i += 1) total += 25 + Math.floor(Math.random() * 76);
   G.twitchzinhoNextRewardAt += cycles * 300000;
-  G.pts += total;
-  if (lastKnownSEPoints !== null) lastKnownSEPoints += total;
-  recordPointsHistory(total, 'Twitchzinho · moedas aleatórias');
-  updatePts();
-  await syncPtsToSE();
+  G.twitchzinhoPendingCoins = Number(G.twitchzinhoPendingCoins || 0) + total;
+  updateTwitchzinhoPouch();
   await saveGardenToSE();
-  toast(`💜 Twitchzinho trouxe +${total} moedas!`, 3200);
+  toast(`💜 A sacolinha do Twitchzinho está cheia: +${total} moedas para resgatar!`, 3200);
 }
 setInterval(() => { checkTwitchzinhoReward().catch(() => {}); }, 30000);
 

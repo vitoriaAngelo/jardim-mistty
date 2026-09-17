@@ -89,3 +89,78 @@ test('eventos têm contraste no modo escuro e layout responsivo', () => {
   assert.match(html, /\.garden-event-banner\.visible \{ align-items:flex-start; flex-wrap:wrap/);
   assert.match(html, /\.garden-event-timer \{ order:3; width:100%/);
 });
+
+test('Lírio Lunar é exclusivo do evento e tem saquinho especial', () => {
+  assert.match(html, /moon_lily:.*eventOnly:true/);
+  assert.match(html, /Object\.entries\(FLOWERS\)\.filter\(\(\[, p\]\) => !p\.eventOnly\)/);
+  assert.match(html, /product\?\.eventOnly/);
+  assert.match(html, /const lunar = type === 'moon_lily'/);
+});
+
+test('conflito de gravação não deixa o login carregando infinitamente', () => {
+  assert.match(html, /function handleGardenSessionConflict[\s\S]*?setLoginLoading\(false\)/);
+  assert.match(html, /conflict\.code === 'STALE_STATE'[\s\S]*?saveGardenToSENow\(false\)/);
+  assert.match(html, /conflict\.code === 'SESSION_CONFLICT'[\s\S]*?handleGardenSessionConflict/);
+  assert.match(html, /handleGardenSessionConflict\(conflict\.error\);\s*throw new Error\('Sessão do jardim encerrada por outra tela\.'/);
+});
+
+test('frase do dia só confirma após salvar e restaura o valor em caso de falha', () => {
+  assert.match(html, /const previousPhrase = G\.dailyPhrase \|\| ''/);
+  assert.match(html, /if \(!seUser \|\| !gardenHydrated\)/);
+  assert.match(html, /G\.dailyPhrase = previousPhrase;[\s\S]*?Não foi possível salvar a frase/);
+});
+
+test('nome da fazenda só confirma após salvar e não exibe sucesso e erro juntos', () => {
+  assert.match(html, /const previousName = G\.farmName/);
+  assert.match(html, /await saveGardenToSE\(\);[\s\S]*?Nome da fazenda alterado!/);
+  assert.match(html, /G\.farmName = previousName;[\s\S]*?Não foi possível salvar o perfil/);
+});
+
+test('títulos desbloqueados podem ser escolhidos e avisam pelo correio', () => {
+  assert.match(html, /selectedHarvestTitle: ''/);
+  assert.match(html, /function selectHarvestTitle\(name\)/);
+  assert.match(html, /Novo título desbloqueado:/);
+  assert.match(html, /G_MAIL\.some\(mail => mail\.id === id\)/);
+  assert.match(html, /selectedHarvestTitle: G\.selectedHarvestTitle \|\| ''/);
+});
+
+test('o jogo possui favicon com o ícone de pontos', () => {
+  assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="points-sprout\.svg">/);
+});
+
+test('cartas do correio com IDs de texto podem ser abertas', () => {
+  assert.match(html, /onclick='openLetter\(\$\{JSON\.stringify\(m\.id\)\}\)'/);
+});
+
+test('falha ao salvar título restaura a seleção anterior', () => {
+  assert.match(html, /const previousTitle = G\.selectedHarvestTitle \|\| ''/);
+  assert.match(html, /G\.selectedHarvestTitle = previousTitle;[\s\S]*?Não foi possível salvar o título/);
+  assert.match(html, /checkHarvestTitles\(\);[\s\S]*?Refresh all UI/);
+});
+
+test('perfil permite escolher e salvar oito planos de fundo', () => {
+  assert.match(html, /Plano de fundo do perfil/);
+  assert.match(html, /PROFILE_BACKGROUNDS = \[/);
+  assert.match(html, /function selectProfileBackground\(id\)/);
+  assert.match(html, /profileBackground: G\.profileBackground \|\| 'spring'/);
+  assert.match(html, /data-profile-background="night"/);
+});
+
+test('fundos do perfil têm contraste próprio no modo escuro', () => {
+  assert.match(html, /body\.dark-mode #profile-overlay \.profile-modal\[data-profile-background="night"\]/);
+  assert.match(html, /body\.dark-mode #profile-overlay \.profile-modal \.profile-label/);
+  assert.match(html, /body\.dark-mode #profile-overlay \.profile-modal \.profile-input/);
+});
+
+test('perfil não exibe o título Agora na seção de informações', () => {
+  assert.doesNotMatch(html, /<div class="profile-label">Agora<\/div>/);
+});
+
+test('cabeçalho do perfil exibe o nome da fazenda', () => {
+  assert.match(html, /profile-level-name'\)\.textContent = document\.getElementById\('garden-name'\)/);
+});
+
+test('perfil oferece dois títulos difíceis de desbloquear', () => {
+  assert.match(html, /name:'Imperador da Colheita', target:3000/);
+  assert.match(html, /name:'Eterno do Jardim', target:7500/);
+});

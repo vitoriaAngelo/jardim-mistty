@@ -4,12 +4,12 @@ const { authenticateTwitch, requireSameUser } = require('./_auth');
 const { activeSession } = require('./_garden-store');
 
 const ORDER_SEASONS = [
-  ['potato','lettuce','carrot','tomato','corn','star_radish'],
-  ['tomato','corn','pepper','eggplant','lettuce','star_radish'],
-  ['pumpkin','beetroot','broccoli','cassava','ruby_kale'],
-  ['potato','broccoli','ruby_kale','star_radish'],
+  ['lettuce','carrot','potato','ruby_kale','star_radish','daisy','tulip','cherry','jasmine','moon_lily','royal_dahlia'],
+  ['tomato','corn','pepper','eggplant','star_radish','sunflower','hibiscus','bluebell','poppy','daisy','royal_dahlia'],
+  ['pumpkin','beetroot','broccoli','cassava','ruby_kale','rose','lavender','orchid','moon_lily','royal_dahlia'],
+  ['potato','broccoli','ruby_kale','star_radish','moon_lily'],
 ];
-const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338 };
+const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338,daisy:43,rose:85,tulip:76,sunflower:99,lavender:113,orchid:127,hibiscus:118,bluebell:95,cherry:136,poppy:81,jasmine:104,moon_lily:1000,royal_dahlia:383 };
 const ORDER_TIERS = { A:{ mult:1,min:1,max:12 }, S:{ mult:2.2,min:8,max:26 }, SS:{ mult:4.5,min:20,max:40 } };
 const ORDER_TIER_LEGACY = { normal:'A', epic:'S', legendary:'SS' };
 
@@ -25,6 +25,21 @@ function validOrder(order, seasonIdx, data) {
   return Number(order.reward) === reward && Number(order.xp) === xp && typeof order.id === 'string' && order.id.length <= 80;
 }
 
+function sameStoredOrder(a, b) {
+  return Boolean(a && b)
+    && String(a.id) === String(b.id)
+    && String(a.type) === String(b.type)
+    && Number(a.qty) === Number(b.qty)
+    && String(ORDER_TIER_LEGACY[a.rarity] || a.rarity) === String(ORDER_TIER_LEGACY[b.rarity] || b.rarity)
+    && Number(a.reward) === Number(b.reward)
+    && Number(a.xp) === Number(b.xp);
+}
+
+function orderWasAlreadyStored(order, oldData) {
+  const storedOrders = Array.isArray(oldData?.orders) ? oldData.orders : [];
+  return storedOrders.some(stored => sameStoredOrder(stored, order));
+}
+
 function validateOrdersTransition(oldData, nextData) {
   const oldGlobalReset = Number(oldData.ordersGlobalResetVersion || 0);
   const nextGlobalReset = Number(nextData.ordersGlobalResetVersion || 0);
@@ -37,7 +52,13 @@ function validateOrdersTransition(oldData, nextData) {
   const nextKey = String(nextData.ordersSeasonKey ?? seasonIdx);
   const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
   const rewardState = oldKey === nextKey ? oldData : nextData;
-  if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || orders.some(order => !validOrder(order, seasonIdx, rewardState))) throw new Error('Pedido adulterado ou incompatível com a estação');
+  const hasInvalidOrder = orders.some(order => {
+    // Pedidos que já estão persistidos podem atravessar a troca de estação:
+    // colher uma planta fora de estação não deve invalidar o logout.
+    if (orderWasAlreadyStored(order, oldData)) return false;
+    return !validOrder(order, seasonIdx, rewardState);
+  });
+  if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');
   if (nextKey !== String(seasonIdx)) throw new Error('Estação dos pedidos inválida');
   if (nextGlobalReset > oldGlobalReset) {
     if (nextGlobalReset !== 1 || oldGlobalReset !== 0 || searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
@@ -59,13 +80,22 @@ function validateOrdersTransition(oldData, nextData) {
     const oldOrders = Array.isArray(oldData.orders) ? oldData.orders : [];
     const remainingIds = new Set(orders.map(order => order.id));
     const removed = oldOrders.filter(order => !remainingIds.has(order.id));
-    if (removed.length !== 1 || !validOrder(removed[0], seasonIdx, oldData)) throw new Error('Entrega não corresponde a um pedido válido');
+    if (removed.length !== 1 || !orderWasAlreadyStored(removed[0], oldData)) throw new Error('Entrega não corresponde a um pedido válido');
     const delivered = removed[0];
     const oldStock = Number(oldData.harvested?.[delivered.type] || 0);
     const newStock = Number(nextData.harvested?.[delivered.type] || 0);
     if (oldStock < delivered.qty || newStock > oldStock - delivered.qty) throw new Error('Estoque insuficiente para a entrega');
     if (Number(nextData.xp || 0) < Number(oldData.xp || 0) + delivered.xp) throw new Error('XP da entrega adulterado');
   }
+}
+
+function orderActionChanged(oldData, nextData) {
+  // A colheita/plantio pode reenviar uma cópia local dos pedidos. Isso não é
+  // uma ação de pedido e não deve disparar a validação de recompensas.
+  return Number(oldData?.ordersGlobalResetVersion || 0) !== Number(nextData?.ordersGlobalResetVersion || 0)
+    || Number(oldData?.orderSearches || 0) !== Number(nextData?.orderSearches || 0)
+    || Number(oldData?.orderDeliveries || 0) !== Number(nextData?.orderDeliveries || 0)
+    || Boolean(oldData?.orderPaidReset) !== Boolean(nextData?.orderPaidReset);
 }
 
 function isPlaceholderFarmName(name, username) {
@@ -130,7 +160,9 @@ exports.handler = async (event) => {
           
           safeData.plots.forEach((p, i) => {
             const old = oldData.plots[i];
-            if (!old) return;
+            // Uma colheita final remove a planta e transforma o canteiro em
+            // null. Nesse caso não existe crescimento novo para validar.
+            if (!p || !old) return;
             const growDiff = (p.growCount || 0) - (old.growCount || 0);
             if (growDiff > maxPossibleGrowth + 3) {
               fraudDetected = true;
@@ -138,7 +170,13 @@ exports.handler = async (event) => {
             }
           });
           
-          if (fraudDetected) {
+          // Alterações exclusivamente de perfil (nome, frase, título, fundo ou
+          // correio) reenviam os canteiros completos, mas não representam uma
+          // tentativa de acelerar o crescimento. Não bloquear esse caso evita
+          // que personalizações sejam rejeitadas pelo anti-fraude.
+          const gameplayKeys = ['plots','inventory','fertilizerInventory','plotFertilizers','harvested','waterCapacity','seasonIdx','seasonDay','orders','missions','xp','pts'];
+          const gameplayUnchanged = gameplayKeys.every((key) => JSON.stringify(oldData[key] ?? null) === JSON.stringify(safeData[key] ?? null));
+          if (fraudDetected && !gameplayUnchanged) {
             console.error(`🚨 FRAUDE - ${username}:`, fraudLog);
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'Crescimento impossível detectado', fraudLog }) };
           }
@@ -159,13 +197,17 @@ exports.handler = async (event) => {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
       const currentRevision = existingRows[0]?.updated_at;
-      if (!existingRows.length || !activeSession(existingData, sessionId)) {
+      const sameSession = Boolean(sessionId && existingData._activeSessionId === sessionId);
+      if (!existingRows.length || (!sameSession && !activeSession(existingData, sessionId))) {
         return { statusCode: 409, headers, body: JSON.stringify({ error: 'Este jardim está ativo em outra tela', code: 'SESSION_CONFLICT' }) };
       }
       if (!expectedRevision || expectedRevision !== currentRevision) {
         return { statusCode: 409, headers, body: JSON.stringify({ error: 'O jardim foi atualizado em outra tela', code: 'STALE_STATE', revision: currentRevision }) };
       }
-      if (existingRows.length && (safeData.orders || existingData.orders)) validateOrdersTransition(existingData, safeData);
+      // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
+      // só precisam ser revalidados quando o estado dos pedidos realmente muda;
+      // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
+      if (existingRows.length && orderActionChanged(existingData, safeData)) validateOrdersTransition(existingData, safeData);
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {
         safeData.farmName = existingName;

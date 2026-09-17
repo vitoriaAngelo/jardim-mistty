@@ -84,3 +84,33 @@ test('uma gravação com versão antiga é rejeitada antes de sobrescrever o jar
     assert.equal(patchCalled, false);
   } finally { global.fetch = originalFetch; }
 });
+
+test('a mesma tela renova a sessão depois de ficar suspensa', async () => {
+  const originalFetch = global.fetch;
+  const revision = '2026-09-17T10:00:00.000Z';
+  const current = {
+    data: { _activeSessionId: 'tela-1', _sessionLeaseUntil: Date.now() - 60000, plots: [], orders: [] },
+    updated_at: revision,
+  };
+  global.fetch = async (url, options = {}) => {
+    if (url.includes('api.twitch.tv')) return { ok: true, json: async () => ({ data: [{ login: 'misttylol' }] }) };
+    if (options.method === 'PATCH') {
+      const body = JSON.parse(options.body);
+      return { ok: true, json: async () => [{ data: body.data, updated_at: body.updated_at }] };
+    }
+    return { ok: true, json: async () => [current] };
+  };
+
+  try {
+    delete require.cache[require.resolve('../netlify/functions/garden-save')];
+    const handler = require('../netlify/functions/garden-save').handler;
+    const response = await handler({
+      httpMethod: 'POST', headers: authHeaders('tela-1'),
+      body: JSON.stringify({
+        username: 'misttylol', sessionId: 'tela-1', expectedRevision: revision,
+        data: { plots: [], orders: [], savedAt: Date.now() },
+      }),
+    });
+    assert.equal(response.statusCode, 200);
+  } finally { global.fetch = originalFetch; }
+});

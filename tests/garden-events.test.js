@@ -75,3 +75,10 @@ test('chuva mágica dá um tick de crescimento quando a planta já está totalme
   assert.match(html, /const maxGrow = effectiveMaxGrow\(plot\.type\)/);
   assert.match(html, /plot\.growCount = Math\.min\(maxGrow, Number\(plot\.growCount \|\| 0\) \+ 1\)/);
 });
+
+test('evento terminado mostra popup com resumo e recompensas', () => {
+  assert.match(html, /function showGardenEventSummary\(finished, def\)/);
+  assert.match(html, /garden-event-summary-overlay/);
+  assert.match(html, /showGardenEventSummary\(finished, def\)/);
+  assert.match(html, /XP ganhos/);
+});

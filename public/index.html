@@ -4053,6 +4053,30 @@ function spawnEventButterfly() {
   b.onclick=()=>{ if(!activeGardenEvent('butterflies'))return; const xp=rare?30:10; gardenEvent.actions++; gardenEvent.xp+=xp; gainXP('harvest',b,xp,`${rare?'🌈':'🦋'} +${xp} XP`); toast(rare?'🦋 Borboleta arco-íris! +30 XP':'🦋 Borboleta encontrada! +10 XP',2200); b.remove(); renderGardenEvent(); };
   layer.appendChild(b); setTimeout(()=>b.remove(),5000);
 }
+function showGardenEventSummary(finished, def) {
+  document.getElementById('garden-event-summary-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'garden-event-summary-overlay';
+  overlay.className = 'mail-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'garden-event-summary-title');
+  const actions = finished.actions || 0;
+  const xp = finished.xp || 0;
+  const bonus = finished.bonus || 0;
+  const reward = bonus ? `<div class="levelup-rewards"><strong>Recompensas extras</strong>${finished.type === 'moon' ? `🌙 ${bonus} Semente${bonus === 1 ? '' : 's'} Lunar${bonus === 1 ? '' : 'es'}` : `✨ ${bonus} bônus do evento`}</div>` : '';
+  overlay.innerHTML = `<div class="mail-modal" style="max-width:420px;text-align:center" onclick="event.stopPropagation()">
+    <button class="popup-close-x" aria-label="Fechar resumo do evento" onclick="this.closest('#garden-event-summary-overlay').remove()">×</button>
+    <div style="font-size:44px;line-height:1;margin:4px 0 10px">${def.icon}</div>
+    <div class="mail-modal-title" id="garden-event-summary-title" style="justify-content:center">${def.name} terminou!</div>
+    <p class="premium-copy">${actions ? `Você participou ${actions} vez${actions === 1 ? '' : 'es'} e aproveitou o evento.` : 'Você participou um pouquinho — fique de olho no próximo evento!'}</p>
+    <div class="levelup-rewards"><strong>Resumo da participação</strong>🌱 ${actions} ação${actions === 1 ? '' : 'ões'} registrada${actions === 1 ? '' : 's'}<br>✨ +${xp} XP ganhos</div>
+    ${reward}
+    <button class="levelup-dismiss" style="margin:16px auto 0" onclick="this.closest('#garden-event-summary-overlay').remove()">Continuar no jardim 🌱</button>
+  </div>`;
+  overlay.onclick = event => { if (event.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
 function triggerEventMutation() {
   const choices=G.plots.map((p,i)=>p&&!p.mutated?i:-1).filter(i=>i>=0);
   if(!choices.length)return;
@@ -4072,7 +4096,8 @@ function finishGardenEvent() {
   document.getElementById('garden-event-layer')?.replaceChildren();
   if (finished.xp>0 && finished.type!=='butterflies') gainXP('harvest',document.getElementById('garden-event-banner'),finished.xp,`+${finished.xp} XP · ${def.name}`);
   const summary = finished.actions ? `Você participou ${finished.actions} vez${finished.actions===1?'':'es'} e ganhou ${finished.xp} XP${finished.bonus?` + ${finished.bonus} bônus`:''}.` : 'Você participou um pouquinho — o próximo evento pode trazer novas surpresas!';
-  toast(`${def.icon} ${def.name} terminou! ${summary}`,6000);
+  toast(`${def.icon} ${def.name} terminou!`, 2600);
+  showGardenEventSummary(finished, def);
   gardenEvent=null; renderGardenEvent(); renderPlots(); saveGardenToSE();
 }
 

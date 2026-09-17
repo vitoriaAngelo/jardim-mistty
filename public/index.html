@@ -739,6 +739,9 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 .bloom-anim { animation: bloom-pop .5s cubic-bezier(.34,1.5,.64,1) forwards; }
+.mature-crop-body { transform-origin:40px 100px; animation:mature-leaf-sway 5s ease-in-out infinite; }
+@keyframes mature-leaf-sway { 0%,100%{transform:rotate(-1deg)} 50%{transform:rotate(1deg) translateY(-.6px)} }
+@media(prefers-reduced-motion:reduce){.mature-crop-body{animation:none!important;}}
 
 @keyframes plant-in {
   0%   { transform: translateY(-30px) scale(.5); opacity: 0; }
@@ -3147,6 +3150,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 </style>
 <link rel="stylesheet" href="cozy-garden.css">
 <link rel="stylesheet" href="cozy-cursors.css">
+<script src="mature-plants.js"></script>
 <script defer src="cozy-tooltips.js"></script>
 </head>
 <body>
@@ -7800,6 +7804,8 @@ function plantSVG(type, progress) {
 }
 
 function bloomSVG(type, lc, pc) {
+  const matureArt = maturePlantArt(type, getPlantable(type)?.name || type);
+  if (matureArt) return matureArt;
   const soilSVG = `<ellipse cx="40" cy="100" rx="28" ry="8" fill="#a07848" opacity=".5"/>`;
   const stem = (h='18') => `
     <line x1="40" y1="100" x2="40" y2="${h}" stroke="#2a5c10" stroke-width="7" stroke-linecap="round"/>

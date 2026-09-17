@@ -3623,6 +3623,8 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 </div>
 <div class="mail-overlay hidden" id="update-news-overlay">
   <div class="mail-modal"><button class="popup-close-x" aria-label="Fechar novidades" onclick="closeUpdateNews()">×</button><div class="mail-modal-title">🌿 Novidades no jardim</div><p class="premium-copy">Uma grande atualização floresceu por aqui!</p><div class="update-news-list">
+    <div class="update-news-item"><span>🎉</span><div><strong>Eventos do jardim</strong><br>Eventos agora têm resumo ao terminar, notificam a participação da fazenda e funcionam com layout responsivo no modo claro e dark.</div></div>
+    <div class="update-news-item"><span>🌧️</span><div><strong>Chuva Mágica aprimorada</strong><br>Quando a planta já está totalmente regada, cada passagem da chuva concede +1 tick de crescimento.</div></div>
     <div class="update-news-item"><span>🌿</span><div><strong>Árvore de Habilidades</strong><br>Ganhe 1 ponto de habilidade por nível e invista em 3 ramos: Cultivo, Colheita e Mercado. Quanto mais avança, mais poderosa sua fazenda fica!</div></div>
     <div class="update-news-item"><span>🌱</span><div><strong>Pontos retroativos</strong><br>Já tem nível? Seus pontos de habilidade já estão disponíveis! Acesse o botão 🌿 no topo para distribuí-los.</div></div>
     <div class="update-news-item"><span>🧺</span><div><strong>Colheita gratuita</strong><br>Colher plantas prontas agora é de graça! Somente a pá (retirar muda antes de crescer) tem custo.</div></div>
@@ -3971,9 +3973,8 @@ let gardenEventRainTimer = null;
 let gardenEventButterflyTimer = null;
 
 function eventFastMode() {
-  const isPreviewHost = location.hostname.startsWith('deploy-preview-');
   const isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-  return isPreviewHost || (isLocalHost && new URLSearchParams(location.search).get('events') === 'fast');
+  return isLocalHost && new URLSearchParams(location.search).get('events') === 'fast';
 }
 function nextEventDelay() { return eventFastMode() ? 8000 + Math.random()*5000 : 300000 + Math.random()*180000; }
 function gardenEventDuration(type) { return eventFastMode() ? 12 : GARDEN_EVENTS[type].duration; }
@@ -4127,7 +4128,6 @@ function tickGardenEvents() {
   else renderGardenEvent();
 }
 function initGardenEvents(){
-  if (eventFastMode() && (!G.eventNextAt || G.eventNextAt > Date.now()+13000)) G.eventNextAt = Date.now()+5000;
   if(gardenEventTimer)clearInterval(gardenEventTimer);
   gardenEventTimer=setInterval(tickGardenEvents,500);
   tickGardenEvents();

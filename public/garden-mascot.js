@@ -76,6 +76,8 @@
     body.dark-mode.event-mutation{--pet-event-bg:#2c443b;--pet-event-ink:#d4f4e4}
     .mascot-event-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;filter:none!important}
     .mascot-event-art>g{display:none;transform-origin:60px 65px}
+    .mascot-event-crown{display:none}
+    .event-golden .mascot-event-crown{display:block}
     .event-rain .pet-rain,.event-golden .pet-golden,.event-butterflies .pet-butterflies,.event-moon .pet-moon,.event-mutation .pet-mutation{display:block}
     .event-rain .pet-rain{animation:pet-umbrella 3s ease-in-out infinite}
     .event-golden .mascot-body{animation:mascot-dance 2s ease-in-out infinite}
@@ -171,6 +173,17 @@
     <g class="pet-moon"><path d="M99 4A17 17 0 1 0 113 29A17 17 0 0 1 99 4" fill="#f5dfab"/><path d="M17 37v12m-6-6h12M88 58v8m-4-4h8M40 9v8m-4-4h8" stroke="#c6b8ee" stroke-width="2" stroke-linecap="round"/></g>
     <g class="pet-mutation"><ellipse cx="60" cy="103" rx="49" ry="13" stroke="#9bcfb8" stroke-width="2" stroke-dasharray="6 8"/><path d="M13 52L6 38L14 22L22 38ZM104 69L95 51L105 32L114 51Z" fill="#b7e5d9" stroke="#79b5a6" stroke-width="1.5"/><path d="M14 22v30M105 32v37" stroke="#effff7" stroke-width="1.5"/><circle cx="30" cy="17" r="3" fill="#bca4df"/><circle cx="91" cy="88" r="3" fill="#bca4df"/></g>
   </svg>`);
+  // A coroa pertence ao corpo: herda a dança, o cumprimento e os pulinhos
+  // sem precisar sincronizar uma segunda animação por cima do mascote.
+  const goldenArt = petButton.querySelector('.pet-golden');
+  const crownParts = [...goldenArt.children].slice(0, 2);
+  petButton.querySelectorAll('.mascot-body').forEach(body => {
+    const crown = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    crown.classList.add('mascot-event-crown');
+    crownParts.forEach(part => crown.appendChild(part.cloneNode(true)));
+    body.appendChild(crown);
+  });
+  crownParts.forEach(part => part.remove());
   window.setMascotPremium = (active, animate = false) => {
     document.body.classList.toggle('mascot-premium-active', Boolean(active));
     mascot.setAttribute('aria-label', active ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');

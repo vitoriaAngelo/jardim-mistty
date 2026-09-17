@@ -4262,6 +4262,7 @@ const G = {
   isPremium: false,
   selectedMascot: null,
   ownedMascots: {},
+  twitchzinhoNextRewardAt: 0,
   orders: [],
   ordersSeasonKey: '0',
   orderSearches: 0,
@@ -8847,6 +8848,7 @@ async function saveGardenToSENow(retryStale = true) {
     isPremium: G.isPremium === true,
     selectedMascot: G.selectedMascot || null,
     ownedMascots: G.ownedMascots || {},
+    twitchzinhoNextRewardAt: Number(G.twitchzinhoNextRewardAt || 0),
     profileFrame:      G.profileFrame || 'red',
     supporterFrameUnlocked: G.supporterFrameUnlocked === true,
     dailyPhrase:       G.dailyPhrase || '',
@@ -9111,6 +9113,7 @@ async function loadGardenFromSE(username) {
     restorePremiumClaimsCache(username);
     G.selectedMascot = save.selectedMascot || null;
     G.ownedMascots = save.ownedMascots || (G.selectedMascot ? {[G.selectedMascot]: true} : {});
+    G.twitchzinhoNextRewardAt = Number(save.twitchzinhoNextRewardAt || 0);
     applySelectedMascotAppearance();
     // O benefício Premium precisa estar restaurado antes de calcular o tempo
     // de reposição; caso contrário o carregamento usa os 5 minutos do regador comum.
@@ -9645,6 +9648,26 @@ setInterval(() => {
   recordPointsHistory(bonus, 'Bônus por tempo no jardim');
   updatePts();
 }, 600000);
+
+// Twitchzinho: recompensa passiva aleatória a cada 5 minutos.
+async function checkTwitchzinhoReward() {
+  if (!seUser || !gardenHydrated || G.selectedMascot !== 'twitchzinho') return;
+  const now = Date.now();
+  if (!G.twitchzinhoNextRewardAt) G.twitchzinhoNextRewardAt = now + 300000;
+  if (now < G.twitchzinhoNextRewardAt) return;
+  const cycles = Math.min(12, Math.max(1, Math.floor((now - G.twitchzinhoNextRewardAt) / 300000) + 1));
+  let total = 0;
+  for (let i = 0; i < cycles; i += 1) total += 25 + Math.floor(Math.random() * 76);
+  G.twitchzinhoNextRewardAt += cycles * 300000;
+  G.pts += total;
+  if (lastKnownSEPoints !== null) lastKnownSEPoints += total;
+  recordPointsHistory(total, 'Twitchzinho · moedas aleatórias');
+  updatePts();
+  await syncPtsToSE();
+  await saveGardenToSE();
+  toast(`💜 Twitchzinho trouxe +${total} moedas!`, 3200);
+}
+setInterval(() => { checkTwitchzinhoReward().catch(() => {}); }, 30000);
 
 // Atualiza o reservatório com frequência suficiente para refletir a reposição
 // assim que o intervalo terminar (inclusive os 2 minutos do regador premium).

@@ -92,8 +92,10 @@ function validateOrdersTransition(oldData, nextData) {
 function orderActionChanged(oldData, nextData) {
   // A colheita/plantio pode reenviar uma cópia local dos pedidos. Isso não é
   // uma ação de pedido e não deve disparar a validação de recompensas.
-  const fields = ['ordersGlobalResetVersion','ordersSeasonKey','orderSearches','orderDeliveries','orderPaidReset'];
-  return fields.some((field) => JSON.stringify(oldData?.[field] ?? null) !== JSON.stringify(nextData?.[field] ?? null));
+  return Number(oldData?.ordersGlobalResetVersion || 0) !== Number(nextData?.ordersGlobalResetVersion || 0)
+    || Number(oldData?.orderSearches || 0) !== Number(nextData?.orderSearches || 0)
+    || Number(oldData?.orderDeliveries || 0) !== Number(nextData?.orderDeliveries || 0)
+    || Boolean(oldData?.orderPaidReset) !== Boolean(nextData?.orderPaidReset);
 }
 
 function isPlaceholderFarmName(name, username) {

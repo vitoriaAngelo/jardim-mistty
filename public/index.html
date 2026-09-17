@@ -1858,6 +1858,10 @@ body:has(.login-overlay:not(.hidden)) { overflow: hidden; }
 .login-content { padding:44px 44px 32px; }
 .login-content::before { content:'🌱'; display:block; margin-bottom:12px; font-size:30px; filter:drop-shadow(0 3px 2px #687c5433); }
 .login-welcome { margin-bottom:18px; background:#f0f5e8; border-color:#d3dfc9; color:#5f754f; }
+.login-farm-choice { margin:0 auto 18px; max-width:300px; text-align:left; }
+.login-farm-choice label { display:block; margin:0 0 6px 3px; color:#53664d; font-size:12px; font-weight:900; }
+.login-farm-choice input { width:100%; box-sizing:border-box; padding:12px 14px; border:1px solid #cbd8c3; border-radius:13px; outline:none; background:#fffdf7; color:#3f513b; font:700 14px 'Nunito',sans-serif; box-shadow:inset 0 1px 2px #53664d12; }
+.login-farm-choice input:focus { border-color:#7e9d6c; box-shadow:0 0 0 3px #a7c98555; }
 .login-event-note, .login-build-note, .login-rituals { display:none; }
 .login-content h1 { font-size:48px; color:#334b31; }
 .login-description { margin:16px auto 24px; max-width:300px; color:#5d6d58; line-height:1.65; }
@@ -1867,6 +1871,8 @@ body:has(.login-overlay:not(.hidden)) { overflow: hidden; }
 body.dark-mode .login-overlay { background:radial-gradient(circle at 50% 15%,#354532 0,#1d2a20 55%,#111a14 100%); }
 body.dark-mode .login-box { border-color:#52684f; background:linear-gradient(160deg,#29362a 0%,#202a21 100%); box-shadow:0 12px 0 #111a14,0 24px 55px #0008; }
 body.dark-mode .login-welcome { background:#354a35; border-color:#61795c; color:#e0edcf; }
+body.dark-mode .login-farm-choice label { color:#d3e3c9; }
+body.dark-mode .login-farm-choice input { border-color:#61795c; background:#202a21; color:#edf4df; }
 body.dark-mode .login-content h1 { color:#f2f5df; }
 body.dark-mode .login-description, body.dark-mode .login-note { color:#cbd8c2; }
 body.dark-mode .login-footer { border-color:#40523d; color:#aebfa5; }
@@ -3530,6 +3536,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     </div>
     <div class="login-content">
     <div class="login-welcome">🌿 Que bom ter você por aqui</div>
+    <div class="login-farm-choice"><label for="login-farm-name">Escolha o nome da sua fazenda</label><input id="login-farm-name" type="text" maxlength="20" placeholder="Minha Fazenda" autocomplete="off"></div>
     <div class="login-event-note">✨ A competição de verdade começa em 18/09, mas você pode brincar um pouco para aprender.</div>
     <div class="login-build-note">💚 O site ainda pode passar por instabilidades. Tudo está sendo feito com muito amor e, logo logo, estará prontinho.</div>
     <h1>Jardim<br><em>dos Encantos</em></h1>
@@ -7931,6 +7938,14 @@ function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
 
 // ── Twitch OAuth ───────────────────────────────────────────
 function loginWithTwitch() {
+  const farmInput = document.getElementById('login-farm-name');
+  const farmName = farmInput?.value.trim();
+  if (!farmName) {
+    farmInput?.focus();
+    document.getElementById('login-status').textContent = '🌿 Escolha um nome para sua fazenda antes de entrar.';
+    return;
+  }
+  sessionStorage.setItem('pending_farm_name', farmName);
   setLoginLoading(true, 'Abrindo a Twitch para você entrar…');
   // A Twitch aceita o callback de produção já cadastrado. Guardamos a URL do
   // Preview para devolver a pessoa ao mesmo ambiente após o login.
@@ -8088,7 +8103,11 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     // Only set default name if no saved farm name was loaded
     const savedName = document.getElementById('garden-name').textContent.trim();
     const isDefault = !savedName || savedName === 'Jardim da Mistty' || savedName === 'Jardim de Mistty';
-    if (isDefault) {
+    const requestedFarmName = sessionStorage.getItem('pending_farm_name') || '';
+    if (isDefault && requestedFarmName) {
+      document.getElementById('garden-name').textContent = requestedFarmName;
+      sessionStorage.removeItem('pending_farm_name');
+    } else if (isDefault) {
       document.getElementById('garden-name').textContent = `Jardim de ${displayName}`;
     }
     gardenHydrated = true;

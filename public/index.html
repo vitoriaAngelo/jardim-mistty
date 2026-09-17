@@ -6690,6 +6690,7 @@ async function onPlotClick(idx) {
   const plot = G.plots[idx];
   const tool = G.selectedTool;
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);
+  const outOfSeason = plot ? (plot.outOfSeason || !isInSeason(plot.type)) : false;
 
   if (G.specialPlotPending) {
     if (plot) { toast('Escolha um canteiro vazio para o upgrade.'); return; }

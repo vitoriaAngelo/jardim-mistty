@@ -6806,7 +6806,7 @@ function buildPlotEl(plot, idx) {
     tooltip.className = `plot-tooltip${outOfSeason ? ' out-of-season-warning' : ''}`;
     tooltip.innerHTML = `
       <strong>${p.emoji} ${p.name}</strong><br>
-      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 MUTAÇÃO DE COR</span><br><strong>Esta planta está com a cor alterada.</strong><br>' : ''}
+      ${plot.mutated ? '<span class="mutation-tooltip-badge">🧬 MUTAÇÃO ATIVA</span><br><strong>Cor alterada · +1 item e +25 XP ao colher.</strong><br>' : ''}
       ${outOfSeason
         ? '⚠️ FORA DE ESTAÇÃO!<br><strong>Se colher, você perderá esta planta.</strong>'
         : isReady
@@ -6968,6 +6968,11 @@ async function onPlotClick(idx) {
         gardenEvent.actions++; gardenEvent.xp += 8;
         if (Math.random() < .35) { G.inventory[type] = (G.inventory[type] || 0) + 1; gardenEvent.bonus++; toast(`🌙 Semente lunar de ${getPlantable(type).name} encontrada!`,3000); }
         renderGardenEvent();
+      }
+      if (plot.mutated) {
+        finalQty += 1;
+        gainXP('harvest', plotEl, 25, '🧬 +25 XP Mutação');
+        toast(`🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
       }
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
       if (gotDouble) {

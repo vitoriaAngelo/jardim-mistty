@@ -40,7 +40,9 @@ test('planta mutada fica identificada no card e no tooltip', () => {
   assert.match(html, /mutation-tooltip-badge/);
   assert.match(html, /plot\?\.mutated \? ' event-mutated'/);
   assert.match(html, /hue-rotate\(52deg\)/);
-  assert.doesNotMatch(html, /Mutação ativa: \+2 itens e \+25 XP/);
+  assert.match(html, /Cor alterada · \+1 item e \+25 XP ao colher/);
+  assert.match(html, /finalQty \+= 1/);
+  assert.match(html, /\+25 XP Mutação/);
 });
 
 test('persiste o próximo evento para impedir repetição por F5', () => {

@@ -4248,7 +4248,7 @@ function applyMagicRain() {
       }
     }
   });
-  renderPlots(); renderGardenEvent();
+  renderPlots(); renderGardenEvent(); saveGardenToSE();
 }
 function spawnEventRain() {
   const layer = document.getElementById('garden-event-layer'); if (!layer) return;
@@ -8568,14 +8568,14 @@ async function saveGardenToSENow(retryStale = true) {
     const response = await fetch('/garden-save', {
       method: 'POST',
       headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
+      keepalive: true,
       body: JSON.stringify({ username: seUser.username, data: saveData, sessionId: gardenSessionId, expectedRevision: gardenRevision }),
     });
     if (!response.ok) {
       const errBody = await response.text().catch(() => '');
       if (response.status === 400 && errBody.includes('Crescimento impossível')) {
-        console.warn('⚠️ Save bloqueado pelo anti-fraude — ignorando:', errBody);
-        // Não lança erro: save é ignorado silenciosamente para não afetar o jogador legítimo
-        return;
+        console.warn('⚠️ Save bloqueado pelo anti-fraude:', errBody);
+        throw new Error('O servidor recusou o crescimento informado.');
       }
       if (response.status === 409) {
         const conflict = JSON.parse(errBody || '{}');

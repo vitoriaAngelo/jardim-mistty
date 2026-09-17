@@ -1316,6 +1316,10 @@ body.dark-mode .plot-tooltip.out-of-season-warning { border-color:#d87575; backg
 .season-info-tooltip { position:relative; }
 .season-info-tooltip::after { content:attr(data-tooltip); display:none; position:absolute; z-index:320; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); width:220px; padding:10px 13px; border:1px solid #53624d; border-radius:13px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
 .season-info-tooltip:hover::after, .season-info-tooltip:focus-visible::after { display:block; }
+.shop-modal .season-info-tooltip::after { top:calc(100% + 8px); bottom:auto; }
+@media (max-width:650px) {
+  .shop-modal .season-info-tooltip::after { left:auto; right:0; transform:none; width:min(220px,calc(100vw - 44px)); }
+}
 .inventory-season-badge::after { top:calc(100% + 8px); bottom:auto; }
 .order-card { display:grid; grid-template-columns:46px 1fr auto; align-items:center; gap:10px; padding:11px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:15px; background:linear-gradient(135deg,#fffaf0,#f1f4e5); box-shadow:0 3px 0 #dfd2b5; }
 .order-card.ready-to-deliver { border-color:#e2b94f; box-shadow:0 3px 0 #b98e3c,0 0 0 2px #e8c96d55,0 0 18px #e8c96d44; }

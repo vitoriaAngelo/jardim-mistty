@@ -98,6 +98,14 @@ function orderActionChanged(oldData, nextData) {
     || Boolean(oldData?.orderPaidReset) !== Boolean(nextData?.orderPaidReset);
 }
 
+function ordersMeaningfullyChanged(oldData, nextData) {
+  const project = (value) => (Array.isArray(value) ? value : []).map(order => ({
+    id: String(order?.id || ''), type: String(order?.type || ''), qty: Number(order?.qty || 0),
+    rarity: String(order?.rarity || ''), reward: Number(order?.reward || 0), xp: Number(order?.xp || 0),
+  }));
+  return JSON.stringify(project(oldData?.orders)) !== JSON.stringify(project(nextData?.orders));
+}
+
 function isPlaceholderFarmName(name, username) {
   const value = String(name || '').trim().toLowerCase();
   const safeUsername = String(username || '').replace(/^@+/, '').trim().toLowerCase();
@@ -207,7 +215,7 @@ exports.handler = async (event) => {
       // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
       // só precisam ser revalidados quando o estado dos pedidos realmente muda;
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
-      if (existingRows.length && orderActionChanged(existingData, safeData)) validateOrdersTransition(existingData, safeData);
+      if (existingRows.length && orderActionChanged(existingData, safeData) && ordersMeaningfullyChanged(existingData, safeData)) validateOrdersTransition(existingData, safeData);
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {
         safeData.farmName = existingName;

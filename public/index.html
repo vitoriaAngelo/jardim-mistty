@@ -1299,6 +1299,22 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
   display: flex; align-items: center; gap: 6px;
   padding: 4px 0;
 }
+#plots-card[data-profile-background="spring"] { background:linear-gradient(135deg,#fffdf7,#edf5e7 62%,#fae8eb); }
+#plots-card[data-profile-background="sunny"] { background:linear-gradient(135deg,#fffdf7,#f8efcf 62%,#f2d98a); }
+#plots-card[data-profile-background="rain"] { background:linear-gradient(135deg,#f5faf8,#d8e8e7 62%,#b5ced0); }
+#plots-card[data-profile-background="night"] { background:linear-gradient(135deg,#eef0e7,#c9d0e3 45%,#9ca4c7); }
+#plots-card[data-profile-background="autumn"] { background:linear-gradient(135deg,#fff7e9,#f4e5d2 62%,#dda87a); }
+#plots-card[data-profile-background="winter"] { background:linear-gradient(135deg,#fffdf7,#e8f0ed 62%,#c1dce8); }
+#plots-card[data-profile-background="rainbow"] { background:linear-gradient(135deg,#fff1dc,#f6dce9 40%,#dcebd5 72%,#d7e3f5); }
+#plots-card[data-profile-background="forest"] { background:linear-gradient(135deg,#e8efdf,#c5d4b0 52%,#b5a9c7); }
+body.dark-mode #plots-card[data-profile-background="spring"] { background:linear-gradient(135deg,#252b24,#303b2d 62%,#49343f); }
+body.dark-mode #plots-card[data-profile-background="sunny"] { background:linear-gradient(135deg,#252b24,#4b4228 62%,#59452c); }
+body.dark-mode #plots-card[data-profile-background="rain"] { background:linear-gradient(135deg,#252b24,#2d4141 62%,#38545a); }
+body.dark-mode #plots-card[data-profile-background="night"] { background:linear-gradient(135deg,#1d2534,#27344c 52%,#3b4262); }
+body.dark-mode #plots-card[data-profile-background="autumn"] { background:linear-gradient(135deg,#252b24,#4b3529 62%,#633e32); }
+body.dark-mode #plots-card[data-profile-background="winter"] { background:linear-gradient(135deg,#252b24,#2f454a 62%,#3d5065); }
+body.dark-mode #plots-card[data-profile-background="rainbow"] { background:linear-gradient(135deg,#44352f,#4b3a45 40%,#304435 72%,#34445d); }
+body.dark-mode #plots-card[data-profile-background="forest"] { background:linear-gradient(135deg,#29352a,#35462f 52%,#443b52); }
 .plot-tooltip.out-of-season-warning { border-color:#c94f4f; background:#fff0e8; color:#7d2929; box-shadow:0 4px 14px #9a393955; }
 body.dark-mode .plot-tooltip.out-of-season-warning { border-color:#d87575; background:#4a2929; color:#ffe1d8; }
 .market-orders-btn { border:1px solid #d3a84f; border-radius:999px; background:linear-gradient(135deg,#fff0b9,#f2c85f); color:#674b24; padding:7px 12px; font:900 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 #b58a35; transition:transform .15s ease,filter .15s ease; width:100%; }
@@ -3238,7 +3254,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <span class="garden-event-progress" id="garden-event-progress"></span>
     </div>
     <div class="garden-event-layer" id="garden-event-layer" aria-hidden="true"></div>
-    <div class="card">
+    <div class="card" id="plots-card" data-profile-background="spring">
       <div class="card-title">
         <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="9" width="14" height="6" rx="2" fill="#7a4f2e"/><rect x="2" y="10" width="12" height="4" rx="1.5" fill="#9b6840"/></svg>
         Canteiros
@@ -7850,7 +7866,10 @@ function checkProfileBackgroundUnlocks() {
 }
 function applyProfileBackground() {
   const modal = document.querySelector('#profile-overlay .profile-modal');
-  if (modal) modal.dataset.profileBackground = PROFILE_BACKGROUNDS.some(([id]) => id === G.profileBackground) ? G.profileBackground : 'spring';
+  const background = PROFILE_BACKGROUNDS.some(([id]) => id === G.profileBackground) ? G.profileBackground : 'spring';
+  if (modal) modal.dataset.profileBackground = background;
+  const plotsCard = document.getElementById('plots-card');
+  if (plotsCard) plotsCard.dataset.profileBackground = background;
 }
 function previewProfileBackground(id) {
   const modal = document.querySelector('#profile-overlay .profile-modal');
@@ -8774,6 +8793,7 @@ async function loadGardenFromSE(username) {
     G.achievStats     = save.achievStats      || { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
     G.selectedHarvestTitle = save.selectedHarvestTitle || '';
     G.profileBackground = save.profileBackground || 'spring';
+    applyProfileBackground();
     G.eventParticipations = Number(save.eventParticipations || 0);
     G.totalOrderDeliveries = Number(save.totalOrderDeliveries || 0);
     G.achievSeen      = save.achievSeen       || 0;

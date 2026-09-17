@@ -7045,6 +7045,23 @@ function seasonPriceLabel(type, qty = 1) {
 }
 
 // ─── SEED BAG SVG ────────────────────────────────────────
+function seedProductIcon(type, primary, secondary) {
+  const leaf = secondary || '#64835a';
+  if (type === 'cherry_blossom') return `<g fill="${primary}"><circle cx="10" cy="5" r="3"/><circle cx="15" cy="9" r="3"/><circle cx="12" cy="15" r="3"/><circle cx="5" cy="12" r="3"/><circle cx="8" cy="9" r="2"/></g><circle cx="10" cy="10" r="2" fill="#e7b85f"/>`;
+  if (type === 'orange_blossom') return `<g stroke="${leaf}" stroke-width="1.5" stroke-linecap="round"><path d="M10 16V8M10 11L5 7M10 11l5-4"/></g><g fill="${primary}"><circle cx="10" cy="6" r="3"/><circle cx="6" cy="9" r="3"/><circle cx="14" cy="9" r="3"/></g><circle cx="10" cy="8" r="2" fill="#f2c967"/>`;
+  if (type === 'moon_flower') return `<path d="M14 3a7 7 0 1 0 3 12A8 8 0 1 1 14 3Z" fill="${primary}"/><circle cx="5" cy="5" r="1" fill="#fff1b8"/><circle cx="4" cy="14" r="1" fill="#fff1b8"/>`;
+  if (type === 'sun_flower') return `<g fill="${primary}">${[0,45,90,135,180,225,270,315].map(a=>`<ellipse cx="10" cy="10" rx="3" ry="7" transform="rotate(${a} 10 10)"/>`).join('')}</g><circle cx="10" cy="10" r="4" fill="#a86b36"/>`;
+  if (type === 'guarana_flower') return `<path d="M10 17V8M10 11L5 8M10 11l5-3" stroke="${leaf}" stroke-width="1.5"/><g fill="${primary}"><circle cx="6" cy="7" r="3"/><circle cx="14" cy="7" r="3"/><circle cx="10" cy="4" r="3"/></g>`;
+  if (type === 'purple_cabbage') return `<path d="M3 13Q4 5 10 7Q16 5 17 13Q14 18 10 16Q6 18 3 13Z" fill="${primary}"/><path d="M10 8v8M5 11q5 1 10 0M6 14q4 1 8 0" stroke="#dfb9ed" stroke-width="1" fill="none"/>`;
+  if (type === 'crystal_kale') return `<path d="M10 17 4 11 7 4 10 7 13 3 16 11Z" fill="${primary}" stroke="${leaf}" stroke-width="1.3"/><path d="m10 7v9M7 11l3 5 3-5" stroke="#effff8" stroke-width="1" fill="none"/>`;
+  if (type === 'yellow_eggplant') return `<path d="M6 7Q10 4 14 7L13 15Q10 18 7 15Z" fill="${primary}"/><path d="M7 7Q10 4 13 7" stroke="${leaf}" stroke-width="2" fill="none"/>`;
+  if (type === 'pink_cucumber') return `<path d="M6 4Q10 2 14 4L13 16Q10 18 7 16Z" fill="${primary}"/><path d="M8 7v7m4-7v7" stroke="#ffd5df" stroke-width="1"/><path d="M10 4V2" stroke="${leaf}" stroke-width="2"/>`;
+  if (type === 'green_mushroom') return `<path d="M3 10Q4 3 10 3T17 10Z" fill="${primary}"/><path d="M8 10h4v7H8Z" fill="#d7c69d"/><circle cx="7" cy="7" r="1" fill="#dff0b9"/><circle cx="13" cy="6" r="1" fill="#dff0b9"/>`;
+  if (type === 'ruby_kale') return `<path d="M3 13Q4 5 10 8Q16 5 17 13Q14 18 10 15Q6 18 3 13Z" fill="${primary}"/><path d="M10 8v8M5 11q5 2 10 0" stroke="#f3b2c7" stroke-width="1" fill="none"/>`;
+  if (type === 'lettuce') return `<path d="M3 14Q4 6 10 8Q16 6 17 14Q14 18 10 15Q6 18 3 14Z" fill="${primary}"/><path d="M10 8v8M5 12q5 2 10 0" stroke="#d9f2a7" stroke-width="1" fill="none"/>`;
+  return `<ellipse cx="7" cy="11" rx="3" ry="5" transform="rotate(-28 7 11)" fill="${primary}"/><ellipse cx="13" cy="11" rx="3" ry="5" transform="rotate(28 13 11)" fill="${leaf}"/>`;
+}
+
 function seedBagSVG(type, locked = false) {
   const p = getPlantable(type);
   const seasons = p && typeof SEASONS !== 'undefined'
@@ -7066,9 +7083,7 @@ function seedBagSVG(type, locked = false) {
       <path d="M22 14 L24 24 M38 14 L36 24" stroke="${bagStroke}" stroke-width="1" opacity=".5"/>
       <rect x="10" y="28" width="40" height="30" rx="4" fill="${labelColor}" stroke="${bagStroke}" stroke-width="1" opacity=".9"/>
       <line x1="14" y1="60" x2="46" y2="60" stroke="${bagStroke}" stroke-width="0.8" opacity=".4"/>
-      <ellipse cx="25" cy="42" rx="4" ry="6" transform="rotate(-28 25 42)" fill="${seedColor}" opacity=".9"/>
-      <ellipse cx="35" cy="43" rx="4" ry="6" transform="rotate(24 35 43)" fill="${leafColor}" opacity=".78"/>
-      <path d="M30 52q0-7 5-11" stroke="${leafColor}" stroke-width="1.8" stroke-linecap="round" opacity=".75"/>
+      <g transform="translate(20 32) scale(1.05)">${seedProductIcon(type, seedColor, leafColor)}</g>
     </svg>
     ${seasons.length ? `<span class="seed-season-symbol ${seasons.length > 1 ? 'multiple' : ''}" title="${seasons.map(s => s.name).join(' e ')}">${seasons.map(s => s.icon).join('')}</span>` : ''}
   </div>`;

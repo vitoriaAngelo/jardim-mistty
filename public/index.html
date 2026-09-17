@@ -4064,13 +4064,13 @@ function showGardenEventSummary(finished, def) {
   const actions = finished.actions || 0;
   const xp = finished.xp || 0;
   const bonus = finished.bonus || 0;
-  const reward = bonus ? `<div class="levelup-rewards"><strong>Recompensas extras</strong>${finished.type === 'moon' ? `🌙 ${bonus} Semente${bonus === 1 ? '' : 's'} Lunar${bonus === 1 ? '' : 'es'}` : `✨ ${bonus} bônus do evento`}</div>` : '';
+  const reward = bonus ? `<div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Recompensas extras</strong>${finished.type === 'moon' ? `🌙 ${bonus} Semente${bonus === 1 ? '' : 's'} Lunar${bonus === 1 ? '' : 'es'}` : `✨ ${bonus} bônus do evento`}</div>` : '';
   overlay.innerHTML = `<div class="mail-modal" style="max-width:420px;text-align:center" onclick="event.stopPropagation()">
     <button class="popup-close-x" aria-label="Fechar resumo do evento" onclick="this.closest('#garden-event-summary-overlay').remove()">×</button>
     <div style="font-size:44px;line-height:1;margin:4px 0 10px">${def.icon}</div>
     <div class="mail-modal-title" id="garden-event-summary-title" style="justify-content:center">${def.name} terminou!</div>
     <p class="premium-copy">${actions ? `Você participou ${actions} vez${actions === 1 ? '' : 'es'} e aproveitou o evento.` : 'Você participou um pouquinho — fique de olho no próximo evento!'}</p>
-    <div class="levelup-rewards"><strong>Resumo da participação</strong>🌱 ${actions} ação${actions === 1 ? '' : 'ões'} registrada${actions === 1 ? '' : 's'}<br>✨ +${xp} XP ganhos</div>
+    <div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Resumo da participação</strong>🌱 ${actions} ação${actions === 1 ? '' : 'ões'} realizada${actions === 1 ? '' : 's'}<br>✨ +${xp} XP ganhos</div>
     ${reward}
     <button class="levelup-dismiss" style="margin:16px auto 0" onclick="this.closest('#garden-event-summary-overlay').remove()">Continuar no jardim 🌱</button>
   </div>`;

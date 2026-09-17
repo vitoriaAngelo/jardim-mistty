@@ -138,7 +138,13 @@ exports.handler = async (event) => {
             }
           });
           
-          if (fraudDetected) {
+          // Alterações exclusivamente de perfil (nome, frase, título, fundo ou
+          // correio) reenviam os canteiros completos, mas não representam uma
+          // tentativa de acelerar o crescimento. Não bloquear esse caso evita
+          // que personalizações sejam rejeitadas pelo anti-fraude.
+          const gameplayKeys = ['plots','inventory','fertilizerInventory','plotFertilizers','harvested','waterCapacity','seasonIdx','seasonDay','orders','missions','xp','pts'];
+          const gameplayUnchanged = gameplayKeys.every((key) => JSON.stringify(oldData[key] ?? null) === JSON.stringify(safeData[key] ?? null));
+          if (fraudDetected && !gameplayUnchanged) {
             console.error(`🚨 FRAUDE - ${username}:`, fraudLog);
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'Crescimento impossível detectado', fraudLog }) };
           }

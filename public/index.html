@@ -1771,6 +1771,25 @@ body.dark-mode .ranking-pagination button { border-color:#52624d; background:#30
 .profile-badge-slot img { width:100%; height:100%; object-fit:contain; }
 .profile-badge-slot.unlocked:hover { transform: scale(1.15); }
 
+.profile-tabs { display:flex; gap:7px; margin:4px 0 12px; padding:4px; border-radius:14px; background:var(--cream2); }
+.profile-tab { flex:1; border:0; border-radius:10px; padding:9px 10px; background:transparent; color:var(--text2); font:800 12px 'Nunito',sans-serif; cursor:pointer; }
+.profile-tab.active { background:var(--grass2); color:#fffdf7; box-shadow:0 2px 0 #586e47; }
+.profile-tab-panel.hidden { display:none; }
+.profile-titles { display:flex; flex-direction:column; gap:9px; }
+.profile-title-card { display:grid; grid-template-columns:40px minmax(0,1fr); gap:9px; align-items:center; padding:10px 11px; border:1px solid var(--cozy-line); border-radius:14px; background:var(--cozy-paper); box-shadow:0 2px 0 #d8c9ac66; }
+.profile-title-card.locked { filter:saturate(.55); opacity:.75; }
+.profile-title-icon { display:grid; place-items:center; width:40px; height:40px; border-radius:12px; background:#e8dfc1; font-size:22px; }
+.profile-title-card.unlocked .profile-title-icon { background:#f1d47d; box-shadow:0 2px 0 #c09a45; }
+.profile-title-name { color:var(--text); font-size:13px; font-weight:900; }
+.profile-title-requirement { margin-top:2px; color:var(--text2); font-size:10px; font-weight:700; }
+.profile-title-progress { height:5px; margin-top:6px; overflow:hidden; border-radius:99px; background:#dedfd3; }
+.profile-title-progress span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#829b69,#b2ca91); }
+body.dark-mode .profile-tabs { background:#30392d; }
+body.dark-mode .profile-tab { color:#cbd9c2; }
+body.dark-mode .profile-title-card { background:#30392d; border-color:#53604f; box-shadow:0 2px 0 #202b20; }
+body.dark-mode .profile-title-icon { background:#4a4a35; }
+body.dark-mode .profile-title-card.unlocked .profile-title-icon { background:#806b3a; }
+
 /* ─── LOGIN SCREEN ───────────────────────── */
 .login-overlay {
   position: fixed; inset: 0; z-index: 9999;
@@ -3423,6 +3442,12 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       </div>
     </div>
 
+    <div class="profile-tabs" role="tablist" aria-label="Seções do perfil">
+      <button class="profile-tab active" id="profile-tab-overview" type="button" role="tab" aria-selected="true" onclick="showProfileTab('overview')">👤 Perfil</button>
+      <button class="profile-tab" id="profile-tab-titles" type="button" role="tab" aria-selected="false" onclick="showProfileTab('titles')">🏅 Títulos</button>
+    </div>
+
+    <div id="profile-overview-panel" class="profile-tab-panel">
     <div class="profile-section">
       <div class="profile-label">Nome da Fazenda</div>
       <div class="profile-field-row">
@@ -3450,6 +3475,15 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="profile-section">
       <div class="profile-label">Badges Desbloqueados</div>
       <div class="profile-badges" id="profile-badges"></div>
+    </div>
+    </div>
+
+    <div id="profile-titles-panel" class="profile-tab-panel hidden">
+      <div class="profile-section">
+        <div class="profile-label">Títulos de Colheita</div>
+        <p class="premium-copy">Colha plantas para desbloquear novos títulos para sua fazenda.</p>
+        <div class="profile-titles" id="profile-titles"></div>
+      </div>
     </div>
 
     <button class="profile-close-btn" onclick="closeProfile()">Fechar</button>
@@ -7637,6 +7671,33 @@ function openModal()  { document.getElementById('modal').classList.remove('hidde
 function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
 // ─── PROFILE ─────────────────────────────────────────────
+const HARVEST_TITLES = [
+  { icon:'🌱', name:'Primeira Colheita', target:1 },
+  { icon:'🧺', name:'Mãos na Terra', target:25 },
+  { icon:'🌿', name:'Jardineiro Dedicado', target:100 },
+  { icon:'🌾', name:'Mestre da Colheita', target:250 },
+  { icon:'👑', name:'Lenda do Jardim', target:500 },
+];
+function renderProfileTitles() {
+  const container = document.getElementById('profile-titles');
+  if (!container) return;
+  const harvested = Number(G.achievStats?.totalHarvest || 0);
+  container.innerHTML = HARVEST_TITLES.map(title => {
+    const unlocked = harvested >= title.target;
+    const progress = Math.min(100, Math.round(harvested / title.target * 100));
+    return `<div class="profile-title-card ${unlocked ? 'unlocked' : 'locked'}"><div class="profile-title-icon">${title.icon}</div><div><div class="profile-title-name">${title.name} ${unlocked ? '✓' : '🔒'}</div><div class="profile-title-requirement">${unlocked ? 'Título desbloqueado' : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`}</div><div class="profile-title-progress"><span style="width:${progress}%"></span></div></div></div>`;
+  }).join('');
+}
+function showProfileTab(tab) {
+  const overview = tab === 'overview';
+  document.getElementById('profile-overview-panel')?.classList.toggle('hidden', !overview);
+  document.getElementById('profile-titles-panel')?.classList.toggle('hidden', overview);
+  document.getElementById('profile-tab-overview')?.classList.toggle('active', overview);
+  document.getElementById('profile-tab-titles')?.classList.toggle('active', !overview);
+  document.getElementById('profile-tab-overview')?.setAttribute('aria-selected', String(overview));
+  document.getElementById('profile-tab-titles')?.setAttribute('aria-selected', String(!overview));
+  if (!overview) renderProfileTitles();
+}
 function openProfile() {
   document.getElementById('frame-picker')?.classList.remove('visible');
   document.querySelector('.frame-edit-btn')?.classList.remove('is-open');
@@ -7690,6 +7751,7 @@ function openProfile() {
     ['<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true">', stats.totalSellPts || 0, 'Pontos em vendas'],
     ['🔥', G.presenceStreak || 0, 'Dias de presença'],
   ].map(([icon, value, label]) => `<div class="profile-stat"><div class="profile-stat-val">${icon} ${Number(value).toLocaleString('pt-BR')}</div><div class="profile-stat-lbl">${label}</div></div>`).join('');
+  showProfileTab('overview');
 
   document.getElementById('profile-overlay').classList.remove('hidden');
   window.dispatchEvent(new Event('profile-modal-state-change'));

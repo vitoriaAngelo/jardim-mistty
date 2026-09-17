@@ -9007,6 +9007,7 @@ function connectSESocket() {
 }
 
 // ── Queue point mutations so rapid purchases cannot race ──
+let lastPointMutationConflict = false;
 function queueSEPointsMutation(amount, method) {
   if (!seUser || amount <= 0) return Promise.resolve(true);
   const seAmount = Math.abs(Number(amount) || 0);
@@ -9018,7 +9019,11 @@ function queueSEPointsMutation(amount, method) {
     if (!res.ok && method === 'DELETE') {
       res = await fetch(`${basePath}/-${seAmount}`, { method: 'PUT', headers: authenticatedHeaders() });
     }
-    if (!res.ok) throw new Error(`Points update failed: ${res.status}`);
+    if (!res.ok) {
+      lastPointMutationConflict = res.status === 409;
+      throw new Error(`Points update failed: ${res.status}`);
+    }
+    lastPointMutationConflict = false;
     if (lastKnownSEPoints !== null) {
       lastKnownSEPoints += method === 'DELETE' ? -seAmount : seAmount;
       seUser.points = lastKnownSEPoints;
@@ -9241,10 +9246,13 @@ async function chargeGamePoints(amount) {
 
   pointChargeInFlight = true;
   try {
+    lastPointMutationConflict = false;
     if (!previewAccess()) {
       const confirmed = await spendSEPoints(cost);
       if (!confirmed) {
-        toast('❌ O desconto dos pontos não foi confirmado. Nenhum item foi entregue.', 3500);
+        toast(lastPointMutationConflict
+          ? '📱 Compra bloqueada: há outro dispositivo conectado. Atualize a fazenda e tente novamente.'
+          : '❌ O desconto dos pontos não foi confirmado. Nenhum item foi entregue.', 4200);
         return false;
       }
     }

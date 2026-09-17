@@ -147,7 +147,9 @@ exports.handler = async (event) => {
     ];
     
     // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
-    const GROW_INTERVAL_MS = 15000; // 15 segundos por estágio
+    const GROW_INTERVAL_MS = 15000;  // 15s por estágio de crescimento normal
+    const RAIN_TICK_MS     = 3500;   // Chuva Mágica dispara applyMagicRain() a cada 3.5s
+    const RAIN_DURATION_MS = 45000;  // Duração máxima do evento de chuva (45s)
     const maxGrowthPerTick = 1;
     const validationRes = await fetch(
       `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,
@@ -162,8 +164,21 @@ exports.handler = async (event) => {
         const oldData = rows[0].data || {};
         const lastSaveTime = new Date(rows[0].updated_at).getTime();
         const elapsedMs = (data.savedAt || Date.now()) - lastSaveTime;
-        const maxPossibleGrowth = Math.floor(elapsedMs / GROW_INTERVAL_MS) * maxGrowthPerTick;
-        
+
+        // Crescimento normal pelo tempo decorrido
+        const maxNormalGrowth = Math.floor(elapsedMs / GROW_INTERVAL_MS) * maxGrowthPerTick;
+
+        // Crescimento extra que a Chuva Mágica pode ter dado no período.
+        // A chuva aplica +1 growCount por planta a cada RAIN_TICK_MS ms,
+        // mas só enquanto o evento está ativo (máx RAIN_DURATION_MS por evento).
+        // Calculamos quantos ticks de chuva cabem no tempo decorrido, limitados
+        // à duração máxima de um único evento — mantém a proteção contra fraude
+        // sem bloquear saves legítimos durante o evento.
+        const maxRainWindow = Math.min(elapsedMs, RAIN_DURATION_MS);
+        const maxRainGrowth = Math.floor(maxRainWindow / RAIN_TICK_MS);
+
+        const maxGrowthAllowed = maxNormalGrowth + maxRainGrowth + 3; // +3 de margem para latência
+
         if (oldData.plots && safeData.plots) {
           let fraudDetected = false;
           const fraudLog = [];
@@ -174,9 +189,9 @@ exports.handler = async (event) => {
             // null. Nesse caso não existe crescimento novo para validar.
             if (!p || !old) return;
             const growDiff = (p.growCount || 0) - (old.growCount || 0);
-            if (growDiff > maxPossibleGrowth + 3) {
+            if (growDiff > maxGrowthAllowed) {
               fraudDetected = true;
-              fraudLog.push({ plot: i, type: p.type, diff: growDiff, max: maxPossibleGrowth, time: elapsedMs });
+              fraudLog.push({ plot: i, type: p.type, diff: growDiff, max: maxGrowthAllowed, time: elapsedMs });
             }
           });
           

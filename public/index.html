@@ -3714,7 +3714,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           class="profile-input"/>
         <button class="profile-save-btn" onclick="saveProfileName()">Salvar</button>
       </div>
-      <div class="profile-label" style="margin-top:14px">Frase do dia</div>
+      <div class="profile-label" style="margin-top:14px">STATUS</div>
       <div class="profile-field-row"><input id="profile-daily-phrase" type="text" maxlength="25" placeholder="Ex.: Bora plantar!" class="profile-input"/><button class="profile-save-btn" onclick="saveDailyPhrase()">Salvar</button></div>
     </div>
     <div class="profile-section">
@@ -8201,13 +8201,13 @@ function closeModal() { document.getElementById('modal').classList.add('hidden')
 
 // ─── PROFILE ─────────────────────────────────────────────
 const HARVEST_TITLES = [
-  { icon:'🌱', name:'Primeira Colheita', target:1 },
-  { icon:'🧺', name:'Mãos na Terra', target:50 },
-  { icon:'🌿', name:'Jardineiro Dedicado', target:250 },
-  { icon:'🌾', name:'Mestre da Colheita', target:750 },
-  { icon:'👑', name:'Lenda do Jardim', target:1500 },
-  { icon:'🏆', name:'Imperador da Colheita', target:3000 },
-  { icon:'💎', name:'Eterno do Jardim', target:7500 },
+  { icon:'🌱', name:'Peão do Primeiro Plantio', target:1 },
+  { icon:'🧺', name:'Cuidador da Roça', target:50 },
+  { icon:'🌿', name:'Agricultor Dedicado', target:250 },
+  { icon:'🌾', name:'Mestre da Fazenda', target:750 },
+  { icon:'🚜', name:'Rei do Cafezal', target:1500 },
+  { icon:'🏆', name:'Barão da Colheita', target:3000 },
+  { icon:'💎', name:'Lenda do Campo', target:7500 },
 ];
 function titleForName(name) { return HARVEST_TITLES.find(t => t.name === name) || null; }
 const PROFILE_BACKGROUNDS = [
@@ -8497,7 +8497,7 @@ async function saveDailyPhrase() {
   G.dailyPhrase = nextPhrase;
   try {
     await saveProfilePreferences({ dailyPhrase:nextPhrase });
-    toast('✅ Frase do dia salva!', 1800);
+    toast('✅ Status salvo!', 1800);
   } catch (e) {
     G.dailyPhrase = previousPhrase;
     if (input) input.value = previousPhrase;

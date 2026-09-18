@@ -41,8 +41,9 @@
 .animal-feed-choice small { position:absolute; right:-4px; top:-6px; min-width:15px; height:15px; border-radius:999px; background:#778b64; color:#fff; font:800 10px/15px Nunito,sans-serif; }
 .animal-feed-choice.empty { opacity:.4; cursor:not-allowed; }
 .animal-feed-tooltip { position:relative; }
-.animal-feed-tooltip::after { content:attr(data-tooltip); display:none; position:absolute; z-index:40; left:50%; bottom:calc(100% + 7px); transform:translateX(-50%); width:150px; padding:7px 9px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:10px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 6px 16px #4b573326; font:700 10px/1.35 Nunito,sans-serif; text-align:center; pointer-events:none; }
+.animal-feed-tooltip::after { content:attr(data-tooltip); display:none; position:absolute; z-index:40; left:50%; bottom:calc(100% + 7px); transform:translateX(-50%); width:150px; padding:7px 9px; border:1px solid #d8c9ac; border-radius:10px; background:#fffdf7; color:#414f38; box-shadow:0 6px 16px #4b573326; font:700 10px/1.35 Nunito,sans-serif; text-align:center; pointer-events:none; opacity:1; }
 .animal-feed-tooltip:hover::after,.animal-feed-tooltip:focus-visible::after { display:block; }
+body.dark-mode .animal-feed-tooltip::after { border-color:#65725b; background:#303a30; color:#edf2e6; box-shadow:0 6px 16px #111811aa; }
 .animal-action { width:100%; border:0; border-radius:12px; background:#778b64; color:#fffdf5; font:800 12px Nunito,sans-serif; padding:10px 6px; box-shadow:0 3px 0 #576d48; }
 .animal-action:disabled { opacity:.55; cursor:default; }
 .ration-quantity { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0; }

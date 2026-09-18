@@ -33,9 +33,9 @@
       if (raw?.pets?.[id]) {
         const readyAt = Number(raw.pets[id].readyAt);
         state.pets[id] = { readyAt: Number.isFinite(readyAt) && readyAt > 0 ? readyAt : 0,
-          quantity:raw.pets[id].quantity===2?2:1, booster:raw.pets[id].booster===true,
+          quantity:raw.pets[id].quantity===2?2:1, ration:['normal','premium','super'].includes(raw.pets[id].ration)?raw.pets[id].ration:'normal', booster:raw.pets[id].booster===true,
           golden:raw.pets[id].booster===true && raw.pets[id].golden===true,
-          queue:Array.isArray(raw.pets[id].queue)?raw.pets[id].queue.map(meal=>({quantity:meal?.quantity===2?2:1})):[],
+          queue:Array.isArray(raw.pets[id].queue)?raw.pets[id].queue.map(meal=>({quantity:meal?.quantity===2?2:1,ration:['normal','premium','super'].includes(meal?.ration)?meal.ration:'normal'})):[],
           stock:count(raw.pets[id].stock),goldStock:count(raw.pets[id].goldStock) };
       }
     }
@@ -51,7 +51,7 @@
       while(pet.readyAt>0 && pet.readyAt<=now) {
         pet[pet.golden?'goldStock':'stock']+=pet.quantity;
         const next=pet.queue.shift();
-        pet.quantity=next?.quantity || 1;pet.booster=false;pet.golden=false;
+        pet.quantity=next?.quantity || 1;pet.ration=next?.ration || 'normal';pet.booster=false;pet.golden=false;
         pet.readyAt=next?pet.readyAt+catalog[id].minutes*60000:0;
       }
     }
@@ -61,6 +61,7 @@
     const state = advance(raw,now), animal = catalog[id];
     if (!animal || !state.pets[id]) throw new Error('Compre este animal primeiro.');
     if (!['normal','premium','super'].includes(ration)) throw new Error('Escolha uma ração para alimentar.');
+    if (state.pets[id].readyAt && state.pets[id].queue.length >= 9) throw new Error('A fila já está cheia (máximo de 10 refeições).');
     if (ration==='normal') {
       if (state.feed < animal.feed) throw new Error('Compre mais ração na aba Rações da loja.');
       state.feed -= animal.feed;
@@ -69,8 +70,9 @@
       state.rations[ration]--;
     }
     const quantity=ration==='super' && random()<.35 ? 2 : 1;
-    if(state.pets[id].readyAt) state.pets[id].queue.push({quantity});
-    else {state.pets[id].quantity=quantity;state.pets[id].readyAt=now+animal.minutes*60000;}
+    if(state.pets[id].readyAt) {
+      state.pets[id].queue.push({quantity,ration});
+    } else {state.pets[id].quantity=quantity;state.pets[id].ration=ration;state.pets[id].readyAt=now+animal.minutes*60000;}
     return state;
   }
   function collect(raw, id, now = Date.now()) {

@@ -30,6 +30,9 @@
 .animal-pen.ready .animal-body { animation:animal-breathe 1.5s ease-in-out infinite; }
 @keyframes animal-breathe { 50% { transform:translateY(-2px) rotate(1deg); } }
 .animal-status { min-height:36px; font-size:12px; line-height:1.5; margin:6px 0; }
+.animal-ration-tag { display:inline-block; margin-left:4px; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:900; color:#5b4a2d; background:#d5bc91; }
+.animal-ration-tag.premium { background:#e6c66f; }
+.animal-ration-tag.super { background:#b9a0d7; color:#3f2e58; }
 .animal-meta { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; color:var(--text2); font-size:11px; line-height:1.3; margin:5px 0 7px; }
 .animal-meta span { background:var(--cream2); border-radius:999px; padding:4px 7px; }
 .animal-feed-picker { display:flex; justify-content:center; gap:7px; margin:8px 0; }
@@ -37,6 +40,9 @@
 .animal-feed-choice .animal-product-art { width:30px; height:30px; }
 .animal-feed-choice small { position:absolute; right:-4px; top:-6px; min-width:15px; height:15px; border-radius:999px; background:#778b64; color:#fff; font:800 10px/15px Nunito,sans-serif; }
 .animal-feed-choice.empty { opacity:.4; cursor:not-allowed; }
+.animal-feed-tooltip { position:relative; }
+.animal-feed-tooltip::after { content:attr(data-tooltip); display:none; position:absolute; z-index:40; left:50%; bottom:calc(100% + 7px); transform:translateX(-50%); width:150px; padding:7px 9px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:10px; background:var(--cozy-paper,#fffdf7); color:var(--cozy-ink,#414f38); box-shadow:0 6px 16px #4b573326; font:700 10px/1.35 Nunito,sans-serif; text-align:center; pointer-events:none; }
+.animal-feed-tooltip:hover::after,.animal-feed-tooltip:focus-visible::after { display:block; }
 .animal-action { width:100%; border:0; border-radius:12px; background:#778b64; color:#fffdf5; font:800 12px Nunito,sans-serif; padding:10px 6px; box-shadow:0 3px 0 #576d48; }
 .animal-action:disabled { opacity:.55; cursor:default; }
 .ration-quantity { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0; }

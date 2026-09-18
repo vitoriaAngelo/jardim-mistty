@@ -32,7 +32,11 @@
 .animal-status { min-height:36px; font-size:12px; line-height:1.5; margin:6px 0; }
 .animal-meta { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; color:var(--text2); font-size:11px; line-height:1.3; margin:5px 0 7px; }
 .animal-meta span { background:var(--cream2); border-radius:999px; padding:4px 7px; }
-.ration-choice { width:100%; box-sizing:border-box; border:1px solid var(--cozy-line,#c9cfb9); border-radius:10px; background:var(--cream2); color:inherit; font:700 11px Nunito,sans-serif; padding:8px 6px; }
+.animal-feed-picker { display:flex; justify-content:center; gap:7px; margin:8px 0; }
+.animal-feed-choice { position:relative; width:42px; height:38px; border:1px solid var(--cozy-line,#c9cfb9); border-radius:11px; background:var(--cream2); color:inherit; cursor:pointer; }
+.animal-feed-choice span { font-size:18px; }
+.animal-feed-choice small { position:absolute; right:-4px; top:-6px; min-width:15px; height:15px; border-radius:999px; background:#778b64; color:#fff; font:800 10px/15px Nunito,sans-serif; }
+.animal-feed-choice.empty { opacity:.4; cursor:not-allowed; }
 .animal-action { width:100%; border:0; border-radius:12px; background:#778b64; color:#fffdf5; font:800 12px Nunito,sans-serif; padding:10px 6px; box-shadow:0 3px 0 #576d48; }
 .animal-action:disabled { opacity:.55; cursor:default; }
 .ration-quantity { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0; }
@@ -50,7 +54,7 @@ body.dark-mode .animal-scene { background:linear-gradient(#364330,#44533d); }
 body.dark-mode .animal-pen,body.dark-mode .animal-shop-card { background:#2d372b; border-color:#57624c; color:#eef0df; }
 body.dark-mode .animal-note,body.dark-mode .animal-intro p,body.dark-mode .animal-home { color:#cbd4c0; }
 body.dark-mode .animal-feed-stock,body.dark-mode .animal-feed-shop { background:#3d4735; color:#eef0df; }
-body.dark-mode .animal-meta span,body.dark-mode .ration-choice { background:#3d4735; border-color:#65725b; color:#eef0df; }
+body.dark-mode .animal-meta span,body.dark-mode .animal-feed-choice { background:#3d4735; border-color:#65725b; color:#eef0df; }
 body.dark-mode .animal-product-collect b { background:#51492e; color:#fff2bf; }
 body.dark-mode .ration-quantity button { background:#657858; color:#fffbea; }
 @media(max-width:640px) { .animal-pens,.animal-shop-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.animal-intro { flex-wrap:wrap; }.animal-scene svg { height:130px; }.animal-feed-shop { flex-wrap:wrap; } }

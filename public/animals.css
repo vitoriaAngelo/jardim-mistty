@@ -30,6 +30,7 @@
 .animal-pen.ready .animal-body { animation:animal-breathe 1.5s ease-in-out infinite; }
 @keyframes animal-breathe { 50% { transform:translateY(-2px) rotate(1deg); } }
 .animal-status { min-height:36px; font-size:12px; line-height:1.5; margin:6px 0; }
+.animal-name-input { width:100%; box-sizing:border-box; margin:0 0 5px; border:1px solid var(--cozy-line,#c9cfb9); border-radius:9px; background:var(--cream2); color:inherit; text-align:center; font:800 11px Nunito,sans-serif; padding:5px; }
 .animal-ration-tag { display:inline-block; margin-left:4px; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:900; color:#5b4a2d; background:#d5bc91; }
 .animal-ration-tag.premium { background:#e6c66f; }
 .animal-ration-tag.super { background:#b9a0d7; color:#3f2e58; }

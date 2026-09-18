@@ -32,7 +32,7 @@
     for (const id of Object.keys(catalog)) {
       if (raw?.pets?.[id]) {
         const readyAt = Number(raw.pets[id].readyAt);
-        state.pets[id] = { readyAt: Number.isFinite(readyAt) && readyAt > 0 ? readyAt : 0,
+        state.pets[id] = { name: typeof raw.pets[id].name === 'string' ? raw.pets[id].name.slice(0,15) : '', readyAt: Number.isFinite(readyAt) && readyAt > 0 ? readyAt : 0,
           quantity:raw.pets[id].quantity===2?2:1, ration:['normal','premium','super'].includes(raw.pets[id].ration)?raw.pets[id].ration:'normal', booster:raw.pets[id].booster===true,
           golden:raw.pets[id].booster===true && raw.pets[id].golden===true,
           queue:Array.isArray(raw.pets[id].queue)?raw.pets[id].queue.map(meal=>({quantity:meal?.quantity===2?2:1,ration:['normal','premium','super'].includes(meal?.ration)?meal.ration:'normal'})):[],
@@ -93,7 +93,13 @@
     state.rations.booster--;pet.booster=true;pet.golden=random()<.2;
     return state;
   }
-  const api = { catalog, products, rations, normalize, advance, status, feed, boost, collect, feedCost:20 };
+  function rename(raw,id,name) {
+    const state=advance(raw), pet=state.pets[id];
+    if (!pet) throw new Error('Compre este animal primeiro.');
+    pet.name=String(name||'').trim().slice(0,15);
+    return state;
+  }
+  const api = { catalog, products, rations, normalize, advance, status, feed, boost, collect, rename, feedCost:20 };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.FarmAnimals = api;
 })(globalThis);

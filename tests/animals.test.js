@@ -70,12 +70,17 @@ test('Premium alimenta a vaca com uma unidade e preserva ração normal antiga',
   assert.equal(state.feed,7);assert.equal(state.rations.premium,0);
   assert.equal(state.pets.cow.quantity,1);
 });
-test('Super Premium sorteia 35% e mantém resultado após recarregar',()=>{
+test('Super Premium sorteia 34% com saúde suficiente e mantém resultado após recarregar',()=>{
   for(const [roll,expected] of [[.339,2],[.34,1],[.99,1]]) {
     const state=model.feed({rations:{super:1},pets:{pig:{readyAt:0}}},'pig',100,'super',()=>roll);
     const loaded=model.normalize(JSON.parse(JSON.stringify(state)));
     assert.equal(model.collect(loaded,'pig',9999999).quantity,expected);
   }
+});
+test('Super Premium sem saúde acima de 80% produz apenas o item normal',()=>{
+  const state=model.feed({rations:{super:1},pets:{chicken:{readyAt:0,health:80}}},'chicken',100,'super',()=>0);
+  assert.equal(state.pets.chicken.quantity,1);
+  assert.equal(state.pets.chicken.health,100);
 });
 test('Booster combina com Super Premium, não repete e produto dourado vale o dobro',()=>{
   let state=model.feed({rations:{super:1,booster:2},pets:{cow:{readyAt:0}}},'cow',100,'super',()=>0);

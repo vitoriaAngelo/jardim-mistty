@@ -46,7 +46,7 @@ function switchFarmTab(tab) {
 }
 function openAnimalShop() { openShop(); switchShopTab('animais'); }
 function animalState() {
-  G.livestock = FarmAnimals.advance(G.livestock);
+  G.livestock = FarmAnimals.advance(G.livestock, Date.now(), G.skillNodes || {});
   for (const [id, pet] of Object.entries(G.livestock.pets || {})) {
     const animal = FarmAnimals.catalog[id];
     const produced = (pet.stock || 0) + (pet.goldStock || 0);
@@ -65,7 +65,7 @@ function renderAnimalYard() {
   const state = animalState(), now = Date.now();
   root.innerHTML = `<div class="animal-intro"><div><h3>Um cantinho de carinho</h3><p>Alimente, espere e recolha. Cada bichinho tem seu próprio lar.</p></div></div><div class="animal-pens">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const pet = state.pets[id], status = FarmAnimals.status(pet, now), product = FarmAnimals.products[a.product];
-    const superTag=pet?.readyAt && pet.ration==='super'?'<span class="animal-super-symbol" title="Super Premium: 34% de chance de produzir 1 item extra">✦</span>':'';
+    const superTag=pet?.readyAt && pet.ration==='super'?'<span class="animal-super-symbol" title="Super Premium: com saúde acima de 80%, 34% de chance de produzir 1 item extra">✦</span>':'';
     const boosterTag=pet?.booster?'<span class="animal-booster-tag">✦ Booster ativo</span>':'';
     const petName=pet?.name || a.name;
     const health = pet ? Math.max(0, Math.min(100, Number(pet.health ?? 100))) : 0;

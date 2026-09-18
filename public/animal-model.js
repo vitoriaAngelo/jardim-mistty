@@ -18,7 +18,7 @@
   const rations = {
     normal:{name:'Normal',cost:20,color:'#d5bc91',description:'Recupera 20% da saúde do animal.'},
     premium:{name:'Premium',cost:90,color:'#e6c66f',description:'Recupera 50% da saúde do animal.'},
-    super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Recupera 80% da saúde e tem 34% de chance de produzir 1 item extra.'},
+    super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Recupera 80% da saúde. Com saúde acima de 80%, tem 34% de chance de produzir 1 item extra.'},
     booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Dura 30 minutos e dá chance de produto dourado, que vale o dobro.'},
   };
   const HEALTH_MAX = 100;
@@ -88,7 +88,8 @@
       state.rations[ration]--;
     }
     const healthRecovery = ration === 'super' ? 80 : ration === 'premium' ? 50 + Number(skills.cuidado_especial || 0) * 10 : 20 + Number(skills.trato_amigo || 0) * 5;
-    const quantity=ration==='super' && random()<(.34 + Number(skills.criador_dourado || 0) * .03) ? 2 : 1;
+    const eligibleForExtra = ration === 'super' && state.pets[id].health > 80;
+    const quantity=eligibleForExtra && random()<(.34 + Number(skills.criador_dourado || 0) * .03) ? 2 : 1;
     const productionMinutes = catalog[id].minutes * (1 - Number(skills.rotina_rural || 0) * .04);
     state.pets[id].health = Math.min(HEALTH_MAX, state.pets[id].health + healthRecovery);
     state.pets[id].healthUpdatedAt = now;

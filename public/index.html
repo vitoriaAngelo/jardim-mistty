@@ -3327,7 +3327,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <span class="achiev-tool-badge inventory-tool-badge hidden" id="inventory-tool-badge">0</span>
       </button>
       <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Inventário<br><span>Escolha uma muda para plantar</span></div>
-      <a href="album.html" style="display:block;text-align:center;margin-top:10px;padding:10px 6px;border-radius:14px;background:#eee7d4;color:#526342;font:800 12px Nunito,sans-serif;text-decoration:none">✦ Álbum de figurinhas</a>
+      <a href="#album-overlay" onclick="openFarmAlbum(event,'album.html')" style="display:block;text-align:center;margin-top:10px;padding:10px 6px;border-radius:14px;background:#eee7d4;color:#526342;font:800 12px Nunito,sans-serif;text-decoration:none">✦ Álbum de figurinhas</a>
     </div>
     <div class="header-icon-wrap" style="width:100%">
       <button class="achiev-tool-btn cozy-bonus" onclick="openBonusShop()" aria-label="Bônus da fazenda">
@@ -10608,5 +10608,5 @@ document.addEventListener('keydown', event => {
     window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
   }
 </script>
-</body>
+<div id="album-overlay" class="hidden" style="position:fixed;inset:0;z-index:10000;background:#1a243dcc;backdrop-filter:blur(8px);padding:2vh 2vw"><button onclick="closeFarmAlbum()" style="position:absolute;right:24px;top:18px;z-index:2;border:0;border-radius:50%;width:42px;height:42px;background:#f5eedc;color:#4b5f49;font-size:24px;cursor:pointer">×</button><iframe id="farm-album-frame" title="Álbum de figurinhas" style="width:100%;height:100%;border:0;border-radius:24px;background:#f5eedc"></iframe></div><script>function openFarmAlbum(e,url){e.preventDefault();const o=document.getElementById('album-overlay'),f=document.getElementById('farm-album-frame');f.src=url;o.classList.remove('hidden');document.body.style.overflow='hidden'}function closeFarmAlbum(){const o=document.getElementById('album-overlay');o.classList.add('hidden');document.getElementById('farm-album-frame').src='';document.body.style.overflow=''}</script></body>
 </html>

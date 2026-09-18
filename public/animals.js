@@ -66,12 +66,20 @@ function animalState() {
   return G.livestock;
 }
 function animalTime(ms) { const seconds = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(seconds/60)}min ${String(seconds%60).padStart(2,'0')}s`; }
+function animalSuperMarker(pet) {
+  if (!pet?.superActive) return '';
+  const active = pet.health > 80;
+  const label = active
+    ? 'Super Premium aplicada · 34% de chance de item extra'
+    : 'Super Premium aplicada · bônus pausado: recupere a saúde para acima de 80%';
+  return `<span class="animal-super-symbol${active ? '' : ' bonus-paused'}" tabindex="0" role="img" aria-label="${label}" title="${label}">✦</span>`;
+}
 function renderAnimalYard() {
   const root = document.getElementById('animal-yard'); if (!root) return;
   const state = animalState(), now = Date.now();
   root.innerHTML = `<div class="animal-intro"><div><h3>Um cantinho de carinho</h3><p>Alimente, espere e recolha. Cada bichinho tem seu próprio lar.</p></div></div><div class="animal-pens">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const pet = state.pets[id], status = FarmAnimals.status(pet, now), product = FarmAnimals.products[a.product];
-    const superTag=pet?.superActive && pet.health > 80?'<span class="animal-super-symbol" title="Super Premium: com saúde acima de 80%, 34% de chance de produzir 1 item extra">✦</span>':'';
+    const superTag=animalSuperMarker(pet);
     const boosterRemaining=pet?.booster?Math.max(0,pet.boosterUntil-now):0;
     const petName=pet?.name || a.name;
     const health = pet ? Math.floor(Math.max(0, Math.min(100, Number(pet.health ?? 100)))) : 0;
@@ -142,6 +150,13 @@ setInterval(() => {
   let changed = false;
   for (const el of root.querySelectorAll('[data-animal-status]')) {
     const id = el.dataset.animalStatus, pet = state.pets[id];
+    const scene=el.closest('.animal-pen').querySelector('.animal-scene');
+    const marker=scene.querySelector('.animal-super-symbol');
+    const expectedMarker=animalSuperMarker(pet);
+    if (marker?.outerHTML !== expectedMarker && (marker || expectedMarker)) {
+      marker?.remove();
+      if (expectedMarker) scene.insertAdjacentHTML('beforeend', expectedMarker);
+    }
     if(!pet && el.dataset.cycle)changed=true;
     if(pet && el.dataset.cycle!==`${pet.readyAt}:${Math.floor(Math.max(0,Math.min(100,Number(pet.health ?? 100))))}:${pet.booster?'booster':''}:${pet.boosterUntil||0}`)changed=true;
     const boosterTime=el.closest('.animal-pen')?.querySelector('.animal-booster-time');

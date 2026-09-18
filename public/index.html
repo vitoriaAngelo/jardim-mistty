@@ -2685,9 +2685,10 @@ body.dark-mode .st-reset-btn { background: #30392d; border-color: #485644; color
 body.dark-mode .st-reset-btn:hover { border-color: #c06878; color: #e8a0ac; box-shadow: 0 2px 0 #5a2030; }
 .st-branches {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
 }
+@media (max-width: 900px) { .st-branches { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .st-branches { grid-template-columns: 1fr; } }
 .st-branch {
   background: var(--cream2);
@@ -2708,18 +2709,22 @@ body.dark-mode .st-branch-desc { color: #5a6a55; }
 .st-branch-cultivo  { border-top: 3px solid #778b64; }
 .st-branch-colheita { border-top: 3px solid #80629c; }
 .st-branch-mercado  { border-top: 3px solid #c8943a; }
+.st-branch-animais  { border-top: 3px solid #b77b68; }
 .st-branch-cultivo  .st-branch-name { color: #586e47; }
 .st-branch-colheita .st-branch-name { color: #80629c; }
 .st-branch-mercado  .st-branch-name { color: #a87828; }
+.st-branch-animais  .st-branch-name { color: #a26050; }
 body.dark-mode .st-branch-cultivo  .st-branch-name { color: #8fa87a; }
 body.dark-mode .st-branch-colheita .st-branch-name { color: #a080c0; }
 body.dark-mode .st-branch-mercado  .st-branch-name { color: #e0aa50; }
+body.dark-mode .st-branch-animais  .st-branch-name { color: #e0a08e; }
 /* connector */
 .st-connector { display:flex; flex-direction:column; align-items:center; }
 .st-connector-line { width:2px; height:14px; background: var(--cozy-line); border-radius:2px; }
 .st-connector-line.lit-cultivo  { background: #778b64; }
 .st-connector-line.lit-colheita { background: #80629c; }
 .st-connector-line.lit-mercado  { background: #c8943a; }
+.st-connector-line.lit-animais  { background: #b77b68; }
 /* skill node */
 .st-node {
   background: var(--cream);
@@ -2736,15 +2741,19 @@ body.dark-mode .st-branch-mercado  .st-branch-name { color: #e0aa50; }
 .st-node.st-owned-cultivo  { border-color: #778b64; background: #f0f4eb; }
 .st-node.st-owned-colheita { border-color: #80629c; background: #f3eff8; }
 .st-node.st-owned-mercado  { border-color: #c8943a; background: #faf3e5; }
+.st-node.st-owned-animais   { border-color: #b77b68; background: #f9eeea; }
 .st-node.st-maxed-cultivo  { border-color: #778b64; background: #e5eddc; box-shadow: 0 0 0 3px #778b6428; }
 .st-node.st-maxed-colheita { border-color: #80629c; background: #ece5f5; box-shadow: 0 0 0 3px #80629c28; }
 .st-node.st-maxed-mercado  { border-color: #c8943a; background: #f5e8d0; box-shadow: 0 0 0 3px #c8943a28; }
+.st-node.st-maxed-animais   { border-color: #b77b68; background: #f6e2dc; box-shadow: 0 0 0 3px #b77b6828; }
 body.dark-mode .st-node.st-owned-cultivo  { background: #22301f; }
 body.dark-mode .st-node.st-owned-colheita { background: #241a30; }
 body.dark-mode .st-node.st-owned-mercado  { background: #302010; }
+body.dark-mode .st-node.st-owned-animais  { background: #321f1d; }
 body.dark-mode .st-node.st-maxed-cultivo  { background: #1e2c1b; }
 body.dark-mode .st-node.st-maxed-colheita { background: #201528; }
 body.dark-mode .st-node.st-maxed-mercado  { background: #2a1c0e; }
+body.dark-mode .st-node.st-maxed-animais  { background: #3a211e; }
 .st-node-top { display:flex; align-items:flex-start; gap:11px; }
 .st-node-emoji { font-size:20px; flex-shrink:0; margin-top:1px; }
 .st-node-name { font-size:12px; font-weight:800; color: var(--cozy-ink); line-height:1.25; }
@@ -2755,6 +2764,8 @@ body.dark-mode .st-node.st-maxed-mercado  { background: #2a1c0e; }
 .st-node.st-maxed-colheita .st-node-name { color: #64497e; }
 .st-node.st-owned-mercado  .st-node-name,
 .st-node.st-maxed-mercado  .st-node-name { color: #a87828; }
+.st-node.st-owned-animais .st-node-name,
+.st-node.st-maxed-animais .st-node-name { color: #a26050; }
 /* Dark mode: nodes não aprendidos ficam com a mesma cor do light mode */
 body.dark-mode .st-node .st-node-name { color: #414f38; }
 /* Dark mode: owned/maxed ficam na cor do ramo mais clara */
@@ -2764,6 +2775,8 @@ body.dark-mode .st-node.st-owned-colheita .st-node-name,
 body.dark-mode .st-node.st-maxed-colheita .st-node-name { color: #a080c0; }
 body.dark-mode .st-node.st-owned-mercado  .st-node-name,
 body.dark-mode .st-node.st-maxed-mercado  .st-node-name { color: #e0aa50; }
+body.dark-mode .st-node.st-owned-animais .st-node-name,
+body.dark-mode .st-node.st-maxed-animais .st-node-name { color: #e0a08e; }
 .st-node-effect { font-size:10px; color: var(--cozy-muted); font-weight:600; margin-top:3px; line-height:1.35; }
 body.dark-mode .st-node-effect { color: #7a8a75; }
 .st-node-maxlabel { font-size:9px; color: var(--cozy-muted); font-weight:700; opacity:.8; margin-top:2px; }
@@ -2773,6 +2786,7 @@ body.dark-mode .st-node-maxlabel { color: #6a7a63; }
 .st-pip.st-pip-cultivo  { background:#778b64; border-color:#586e47; }
 .st-pip.st-pip-colheita { background:#80629c; border-color:#64497e; }
 .st-pip.st-pip-mercado  { background:#c8943a; border-color:#a87828; }
+.st-pip.st-pip-animais  { background:#b77b68; border-color:#a26050; }
 .st-node-footer { display:flex; align-items:center; justify-content:space-between; margin-top:7px; gap:4px; flex-wrap:wrap; }
 .st-cost-badge {
   background: var(--cozy-leaf, #e5ebd9);
@@ -10143,6 +10157,16 @@ const SKILL_BRANCHES = [
       { id:'venda_epica',      emoji:'💎', name:'Venda Épica',       effect:'+2% chance de um item valer o dobro ao vender',        max:4, maxLabel:'máx. +7%',  req:'negociador',       reqMin:5 },
     ],
   },
+  {
+    id: 'animais', name: 'Animais', icon: '🐄',
+    desc: 'Cuide melhor dos seus companheiros',
+    nodes: [
+      { id:'trato_amigo', emoji:'🌾', name:'Trato Amigo', effect:'-1 porção de ração comum por refeição', max:3, maxLabel:'máx. -3 porções', req:null, reqMin:0 },
+      { id:'rotina_rural', emoji:'⏱️', name:'Rotina Rural', effect:'-4% no tempo de produção dos animais por nível', max:5, maxLabel:'máx. -20%', req:'trato_amigo', reqMin:3 },
+      { id:'cuidado_especial', emoji:'💛', name:'Cuidado Especial', effect:'+3% de chance de produção extra com Super Premium', max:5, maxLabel:'máx. +15%', req:'rotina_rural', reqMin:3 },
+      { id:'criador_dourado', emoji:'✨', name:'Criador Dourado', effect:'+4% de chance de produto dourado com Booster', max:5, maxLabel:'máx. +20%', req:'cuidado_especial', reqMin:3 },
+    ],
+  },
 ];
 
 // Custo em pts por nível (sobe progressivamente)
@@ -10171,6 +10195,10 @@ function skillCurrentLabel(node, level) {
     feira_local: `Atual: +${value * 5}% por conjunto acima de 15 itens`,
     negociador: `Atual: -${value * 3}% no preço de compra`,
     venda_epica: `Atual: +${value * 2}% de chance de venda em dobro`,
+    trato_amigo: `Atual: -${value} porção de ração comum por refeição`,
+    rotina_rural: `Atual: -${value * 4}% no tempo de produção`,
+    cuidado_especial: `Atual: +${value * 3}% de chance de produção extra`,
+    criador_dourado: `Atual: +${value * 4}% de chance de produto dourado`,
   };
   return labels[node.id] || node.effect;
 }

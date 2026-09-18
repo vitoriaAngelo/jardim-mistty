@@ -35,7 +35,7 @@
         state.pets[id] = { name: typeof raw.pets[id].name === 'string' ? raw.pets[id].name.slice(0,15) : '', readyAt: Number.isFinite(readyAt) && readyAt > 0 ? readyAt : 0,
           quantity:raw.pets[id].quantity===2?2:1, ration:['normal','premium','super'].includes(raw.pets[id].ration)?raw.pets[id].ration:'normal', booster:raw.pets[id].booster===true,
           golden:raw.pets[id].booster===true && raw.pets[id].golden===true,
-          queue:Array.isArray(raw.pets[id].queue)?raw.pets[id].queue.map(meal=>({quantity:meal?.quantity===2?2:1,ration:['normal','premium','super'].includes(meal?.ration)?meal.ration:'normal'})):[],
+          queue:Array.isArray(raw.pets[id].queue)?raw.pets[id].queue.map(meal=>({quantity:meal?.quantity===2?2:1,ration:['normal','premium','super'].includes(meal?.ration)?meal.ration:'normal',duration:Number.isFinite(Number(meal?.duration))?Number(meal.duration):null})):[],
           stock:count(raw.pets[id].stock),goldStock:count(raw.pets[id].goldStock) };
       }
     }
@@ -52,27 +52,29 @@
         pet[pet.golden?'goldStock':'stock']+=pet.quantity;
         const next=pet.queue.shift();
         pet.quantity=next?.quantity || 1;pet.ration=next?.ration || 'normal';pet.booster=false;pet.golden=false;
-        pet.readyAt=next?pet.readyAt+catalog[id].minutes*60000:0;
+        pet.readyAt=next?pet.readyAt+(next.duration || catalog[id].minutes)*60000:0;
       }
     }
     return state;
   }
-  function feed(raw, id, now = Date.now(), ration = 'normal', random = Math.random) {
+  function feed(raw, id, now = Date.now(), ration = 'normal', random = Math.random, skills = {}) {
     const state = advance(raw,now), animal = catalog[id];
     if (!animal || !state.pets[id]) throw new Error('Compre este animal primeiro.');
     if (!['normal','premium','super'].includes(ration)) throw new Error('Escolha uma ração para alimentar.');
     if (state.pets[id].readyAt && state.pets[id].queue.length >= 9) throw new Error('A fila já está cheia (máximo de 10 refeições).');
+    const normalCost = Math.max(1, animal.feed - Number(skills.trato_amigo || 0));
     if (ration==='normal') {
-      if (state.feed < animal.feed) throw new Error('Compre mais ração na aba Rações da loja.');
-      state.feed -= animal.feed;
+      if (state.feed < normalCost) throw new Error('Compre mais ração na aba Rações da loja.');
+      state.feed -= normalCost;
     } else {
       if (state.rations[ration]<1) throw new Error('Esta ração acabou. Visite a aba Rações da loja.');
       state.rations[ration]--;
     }
-    const quantity=ration==='super' && random()<.35 ? 2 : 1;
+    const quantity=ration==='super' && random()<(.35 + Number(skills.cuidado_especial || 0) * .03) ? 2 : 1;
+    const productionMinutes = catalog[id].minutes * (1 - Number(skills.rotina_rural || 0) * .04);
     if(state.pets[id].readyAt) {
-      state.pets[id].queue.push({quantity,ration});
-    } else {state.pets[id].quantity=quantity;state.pets[id].ration=ration;state.pets[id].readyAt=now+animal.minutes*60000;}
+      state.pets[id].queue.push({quantity,ration,duration:productionMinutes});
+    } else {state.pets[id].quantity=quantity;state.pets[id].ration=ration;state.pets[id].readyAt=now+productionMinutes*60000;}
     return state;
   }
   function collect(raw, id, now = Date.now()) {
@@ -85,12 +87,12 @@
     pet.stock=0;pet.goldStock=0;
     return {state,items,product,quantity};
   }
-  function boost(raw,id,now=Date.now(),random=Math.random) {
+  function boost(raw,id,now=Date.now(),random=Math.random, skills = {}) {
     const state=advance(raw,now),pet=state.pets[id];
     if (!pet || !pet.readyAt && (pet.stock||pet.goldStock)) throw new Error('Inicie uma nova refeição antes de adicionar o Booster.');
     if (pet.booster) throw new Error('Este animal já recebeu Booster neste ciclo.');
     if (state.rations.booster<1) throw new Error('Compre Booster na aba Rações da loja.');
-    state.rations.booster--;pet.booster=true;pet.golden=random()<.2;
+    state.rations.booster--;pet.booster=true;pet.golden=random()<(.2 + Number(skills.criador_dourado || 0) * .04);
     return state;
   }
   function rename(raw,id,name) {

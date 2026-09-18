@@ -91,9 +91,9 @@ async function animalAction(action, id, ration = 'normal', quantity = 1) {
       if (!await chargeGamePoints(r.cost*qty, `Ração ${r.name} · ${qty} unidade${qty===1?'':'s'}`)) return;
       state = animalState(); if(!id||id==='normal')state.feed+=qty;else state.rations[id]+=qty;G.livestock = state;
     } else if (action === 'feed') {
-      G.livestock = FarmAnimals.feed(state, id, Date.now(), ration);
+      G.livestock = FarmAnimals.feed(state, id, Date.now(), ration, Math.random, G.skillNodes || {});
     } else if (action === 'booster') {
-      G.livestock = FarmAnimals.boost(state,id);
+      G.livestock = FarmAnimals.boost(state,id,Date.now(),Math.random,G.skillNodes || {});
     } else if (action === 'collect') {
       const result = FarmAnimals.collect(state, id);
       G.livestock = result.state;

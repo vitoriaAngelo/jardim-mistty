@@ -106,7 +106,7 @@ test('Lírio Lunar é exclusivo do evento e tem saquinho especial', () => {
 
 test('conflito de gravação não deixa o login carregando infinitamente', () => {
   assert.match(html, /function handleGardenSessionConflict[\s\S]*?setLoginLoading\(false\)/);
-  assert.match(html, /conflict\.code === 'STALE_STATE'[\s\S]*?saveGardenToSENow\(false\)/);
+  assert.match(html, /conflict\.code === 'STALE_STATE'[\s\S]*?saveGardenToSENow\(false, orderAction\)/);
   assert.match(html, /conflict\.code === 'SESSION_CONFLICT'[\s\S]*?handleGardenSessionConflict/);
   assert.match(html, /handleGardenSessionConflict\(conflict\.error\);\s*throw new Error\('Sessão do jardim encerrada por outra tela\.'/);
 });

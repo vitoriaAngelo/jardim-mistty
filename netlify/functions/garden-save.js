@@ -140,7 +140,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
 
   try {
-    const { username, data, sessionId, expectedRevision } = JSON.parse(event.body);
+    const { username, data, sessionId, expectedRevision, orderAction } = JSON.parse(event.body);
     if (!username) return { statusCode: 400, headers, body: JSON.stringify({ error: 'username required' }) };
     const auth = await authenticateTwitch(event);
     requireSameUser(auth, username);
@@ -227,8 +227,11 @@ exports.handler = async (event) => {
       // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
       // só precisam ser revalidados quando o estado dos pedidos realmente muda;
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
-      const hasOrderAction = orderActionChanged(existingData, safeData);
-      if (existingRows.length && hasOrderAction && ordersMeaningfullyChanged(existingData, safeData)) {
+      // Somente a ação explícita de pedidos pode alterar seus contadores.
+      // Uma venda/autosave pode reenviar contadores locais atrasados; eles
+      // nunca devem ser interpretados como uma atualização de pedidos.
+      const hasOrderAction = orderAction === true;
+      if (existingRows.length && hasOrderAction) {
         validateOrdersTransition(existingData, safeData);
       } else if (existingRows.length && !hasOrderAction) {
         // Salvamentos de plantas/XP/logout não carregam intenção de alterar

@@ -5994,7 +5994,7 @@ async function refreshOrders() {
   G.orders = gardenOrders;
   renderOrders();
   updateOrdersButton();
-  try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
+  try { await saveGardenToSE(true); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
 }
 async function refreshSingleOrder(id) {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); return; }
@@ -6006,7 +6006,7 @@ async function refreshSingleOrder(id) {
   G.orders = gardenOrders;
   renderOrders();
   updateOrdersButton();
-  try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível confirmar a atualização do pedido.', 3200); }
+  try { await saveGardenToSE(true); } catch (error) { toast('❌ Não foi possível confirmar a atualização do pedido.', 3200); }
 }
 function renderOrders() {
   const list = document.getElementById('orders-list');
@@ -6046,7 +6046,7 @@ async function buyOrderRefreshes() {
   if (G.orderSearches < 3 || G.orderPaidReset) return;
   closeOrderResetConfirm();
   if (!(await chargeGamePoints(5000))) return;
-  G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = true; renderOrders(); await saveGardenToSE(); toast('✨ Atualizações e entregas resetadas nesta estação!', 2800);
+  G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = true; renderOrders(); await saveGardenToSE(true); toast('✨ Atualizações e entregas resetadas nesta estação!', 2800);
 }
 function confirmOrderReset() {
   if (G.orderSearches >= 3 && !G.orderPaidReset) document.getElementById('orders-reset-confirm-overlay')?.classList.remove('hidden');
@@ -6067,7 +6067,7 @@ async function deliverOrder(id) {
   checkProfileBackgroundUnlocks();
   if (G.orderDeliveries < 4) gardenOrders.push(createOrder(gardenOrders.length));
   G.orders = gardenOrders;
-  updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE();
+  updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE(true);
   toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
 }
 async function openOrders(event) {
@@ -6080,7 +6080,7 @@ async function openOrders(event) {
   if (gardenOrders.length < 3 && (G.orderDeliveries || 0) < 4) {
     while (gardenOrders.length < 3) gardenOrders.push(createOrder(gardenOrders.length));
     G.orders = gardenOrders;
-    try { await saveGardenToSE(); } catch (error) { toast('❌ Não foi possível carregar os pedidos.', 3200); }
+    try { await saveGardenToSE(true); } catch (error) { toast('❌ Não foi possível carregar os pedidos.', 3200); }
   }
   renderOrders();
   document.getElementById('orders-overlay')?.classList.remove('hidden');
@@ -9029,7 +9029,7 @@ function restorePremiumClaimsCache(username) {
 // Serializa gravações para que um POST antigo nunca termine depois de um
 // POST mais novo e restaure um estado anterior após atualizar a página.
 let gardenSaveQueue = Promise.resolve();
-async function saveGardenToSENow(retryStale = true) {
+async function saveGardenToSENow(retryStale = true, orderAction = false) {
   if (!seUser || !gardenHydrated) return;
   const saveData = {
     xp:               G.xp,
@@ -9124,7 +9124,7 @@ async function saveGardenToSENow(retryStale = true) {
       method: 'POST',
       headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
       keepalive: true,
-      body: JSON.stringify({ username: seUser.username, data: saveData, sessionId: gardenSessionId, expectedRevision: gardenRevision }),
+      body: JSON.stringify({ username: seUser.username, data: saveData, sessionId: gardenSessionId, expectedRevision: gardenRevision, orderAction }),
     });
     if (!response.ok) {
       const errBody = await response.text().catch(() => '');
@@ -9136,7 +9136,7 @@ async function saveGardenToSENow(retryStale = true) {
         const conflict = JSON.parse(errBody || '{}');
         if (conflict.code === 'STALE_STATE' && conflict.revision && retryStale) {
           gardenRevision = conflict.revision;
-          return saveGardenToSENow(false);
+          return saveGardenToSENow(false, orderAction);
         }
         if (conflict.code === 'SESSION_CONFLICT') {
           handleGardenSessionConflict(conflict.error);
@@ -9156,8 +9156,8 @@ async function saveGardenToSENow(retryStale = true) {
   }
 }
 
-function saveGardenToSE() {
-  const operation = gardenSaveQueue.then(() => saveGardenToSENow());
+function saveGardenToSE(orderAction = false) {
+  const operation = gardenSaveQueue.then(() => saveGardenToSENow(true, orderAction));
   gardenSaveQueue = operation.catch(() => {});
   return operation;
 }

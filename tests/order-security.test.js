@@ -37,6 +37,57 @@ test('abrir o popup não consome uma atualização de pedidos', () => {
   assert.match(body, /renderOrders\s*\(/);
 });
 
+test('venda ignora pedidos locais atrasados sem apagar a venda', async () => {
+  const originalFetch = global.fetch;
+  const revision = '2026-09-18T10:00:00.000Z';
+  const stored = {
+    ...base, orderSearches: 0, orders: [normalOrder], harvested: { potato: 7 },
+    _activeSessionId: 'tela-venda', _sessionLeaseUntil: Date.now() + 60000,
+  };
+  let saved;
+  global.fetch = async (url, options = {}) => {
+    if (url.includes('api.twitch.tv')) return { ok: true, json: async () => ({ data: [{ login: 'misttylol' }] }) };
+    if (options.method === 'PATCH') {
+      saved = JSON.parse(options.body).data;
+      return { ok: true, json: async () => [{ data: saved, updated_at: revision }] };
+    }
+    return { ok: true, json: async () => [{ data: stored, updated_at: revision }] };
+  };
+  try {
+    const handler = require('../netlify/functions/garden-save').handler;
+    const response = await handler({
+      httpMethod: 'POST', headers: { authorization: 'Bearer token' },
+      body: JSON.stringify({ username: 'misttylol', sessionId: 'tela-venda', expectedRevision: revision,
+        data: { ...stored, orderSearches: 1, orders: [{ ...normalOrder, reward: 999999 }], harvested: { potato: 0 }, lastSale: { total: 399 } } }),
+    });
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(saved.harvested, { potato: 0 });
+    assert.equal(saved.orderSearches, 0);
+    assert.deepEqual(saved.orders, [normalOrder]);
+  } finally { global.fetch = originalFetch; }
+});
+
+test('ação explícita de pedidos continua bloqueando recompensa adulterada', async () => {
+  const originalFetch = global.fetch;
+  const revision = '2026-09-18T10:00:00.000Z';
+  const stored = { ...base, orderSearches: 0, _activeSessionId: 'tela-venda', _sessionLeaseUntil: Date.now() + 60000 };
+  global.fetch = async (url, options = {}) => {
+    if (url.includes('api.twitch.tv')) return { ok: true, json: async () => ({ data: [{ login: 'misttylol' }] }) };
+    if (options.method === 'PATCH') throw new Error('Não deveria gravar');
+    return { ok: true, json: async () => [{ data: stored, updated_at: revision }] };
+  };
+  try {
+    const handler = require('../netlify/functions/garden-save').handler;
+    const response = await handler({
+      httpMethod: 'POST', headers: { authorization: 'Bearer token' },
+      body: JSON.stringify({ username: 'misttylol', sessionId: 'tela-venda', expectedRevision: revision, orderAction: true,
+        data: { ...stored, orderSearches: 1, orders: [{ ...normalOrder, reward: 999999 }] } }),
+    });
+    assert.equal(response.statusCode, 500);
+    assert.match(JSON.parse(response.body).error, /Pedido adulterado/);
+  } finally { global.fetch = originalFetch; }
+});
+
 test('badge de habilidades desaparece ao gastar o último ponto', () => {
   assert.match(pageSource, /\.st-sp-badge\.hidden\s*\{\s*display\s*:\s*none\s*!important/);
   const start = pageSource.indexOf('function renderSkillTreeBadge');

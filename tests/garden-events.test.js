@@ -40,6 +40,12 @@ test('planta perdida fora da estação não concede XP de colheita', () => {
   assert.doesNotMatch(harvestSource.slice(seasonCheck, harvestSource.indexOf('} else {', seasonCheck)), /gainXP\(/);
 });
 
+test('borboletas concedem mais XP, com bônus maior para a rara', () => {
+  assert.match(html, /const xp=rare\?75:25/);
+  assert.match(html, /gardenEvent\.xp\+=xp; gainXP\('harvest',b,xp/);
+  assert.match(html, /Borboleta encontrada/);
+});
+
 test('mutação cristalina protege a planta fora da estação até a última colheita', () => {
   assert.match(html, /const mutationProtectsSeason = outOfSeason && plot\.mutated === true/);
   assert.match(html, /const lostToSeason = outOfSeason && !mutationProtectsSeason/);

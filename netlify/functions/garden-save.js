@@ -155,10 +155,8 @@ exports.handler = async (event) => {
     ];
     
     // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
-    // O cliente avança o crescimento a cada 10 segundos. Use o relógio do
-    // servidor para não rejeitar progresso legítimo acumulado entre saves.
-    const GROW_INTERVAL_MS = 10000;
-    const maxGrowthPerTick = 1;
+    // O cliente avança a cada 15 segundos; Adubo Rápido avança 2 estágios.
+    const GROW_INTERVAL_MS = 15000;
     const validationRes = await fetch(
       `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,
       {
@@ -172,7 +170,7 @@ exports.handler = async (event) => {
         const oldData = rows[0].data || {};
         const lastSaveTime = new Date(rows[0].updated_at).getTime();
         const elapsedMs = Math.max(0, Date.now() - lastSaveTime);
-        const maxPossibleGrowth = Math.ceil(elapsedMs / GROW_INTERVAL_MS) * maxGrowthPerTick;
+        const maxPossibleTicks = Math.ceil(elapsedMs / GROW_INTERVAL_MS);
         
         if (oldData.plots && safeData.plots) {
           let fraudDetected = false;
@@ -182,9 +180,11 @@ exports.handler = async (event) => {
             const old = oldData.plots[i];
             // Uma colheita final remove a planta e transforma o canteiro em
             // null. Nesse caso não existe crescimento novo para validar.
-            if (!p || !old) return;
-            const growDiff = (p.growCount || 0) - (old.growCount || 0);
-            if (growDiff > maxPossibleGrowth + 5) {
+            if (!p) return;
+            const previousGrowth = old?.type === p.type ? Number(old.growCount || 0) : 0;
+            const growDiff = Number(p.growCount || 0) - previousGrowth;
+            const maxPossibleGrowth = maxPossibleTicks * (p.quickGrow === true ? 2 : 1);
+            if (growDiff > maxPossibleGrowth + 3) {
               fraudDetected = true;
               fraudLog.push({ plot: i, type: p.type, diff: growDiff, max: maxPossibleGrowth, time: elapsedMs });
             }

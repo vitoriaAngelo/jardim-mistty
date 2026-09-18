@@ -34,7 +34,7 @@
 .animal-meta span { background:var(--cream2); border-radius:999px; padding:4px 7px; }
 .animal-feed-picker { display:flex; justify-content:center; gap:7px; margin:8px 0; }
 .animal-feed-choice { position:relative; width:42px; height:38px; border:1px solid var(--cozy-line,#c9cfb9); border-radius:11px; background:var(--cream2); color:inherit; cursor:pointer; }
-.animal-feed-choice span { font-size:18px; }
+.animal-feed-choice .animal-product-art { width:30px; height:30px; }
 .animal-feed-choice small { position:absolute; right:-4px; top:-6px; min-width:15px; height:15px; border-radius:999px; background:#778b64; color:#fff; font:800 10px/15px Nunito,sans-serif; }
 .animal-feed-choice.empty { opacity:.4; cursor:not-allowed; }
 .animal-action { width:100%; border:0; border-radius:12px; background:#778b64; color:#fffdf5; font:800 12px Nunito,sans-serif; padding:10px 6px; box-shadow:0 3px 0 #576d48; }

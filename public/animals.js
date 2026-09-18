@@ -55,7 +55,7 @@ function renderAnimalYard() {
     const message = status === 'empty' ? 'Um lar esperando companhia' : pet.readyAt ? `${product.name} em ${animalTime(pet.readyAt-now)}` : 'Sem refeições · produção pausada';
     const action = status === 'empty' ? 'openAnimalShop()' : '';
     const progress = status === 'ready' ? 100 : status === 'producing' ? 100*(1-(pet.readyAt-now)/(a.minutes*60000)) : 0;
-    const rationButton=(r,label,qty)=>`<button type="button" class="animal-feed-choice ${qty?'':'empty'}" title="Adicionar ${label} · ${qty} disponível" aria-label="Adicionar ${label}" onclick="feedAnimalChoice('${id}','${r}')" ${qty||animalActionInFlight?'':'disabled'}><span>${FarmAnimals.rations[r].emoji||'🌾'}</span><small>${qty}</small></button>`;
+    const rationButton=(r,label,qty)=>`<button type="button" class="animal-feed-choice ${qty?'':'empty'}" title="Adicionar ${label} · ${qty} disponível" aria-label="Adicionar ${label}" onclick="feedAnimalChoice('${id}','${r}')" ${qty||animalActionInFlight?'':'disabled'}>${rationArt(r)}<small>${qty}</small></button>`;
     const choice=pet?`<div class="animal-feed-picker" aria-label="Escolha uma ração">${rationButton('normal','Ração Normal',state.feed)}${rationButton('premium','Ração Premium',state.rations.premium)}${rationButton('super','Ração Super Premium',state.rations.super)}</div>`:'';
     const booster=pet && status!=='ready'?`<button class="animal-action animal-booster" onclick="animalAction('booster','${id}')" ${pet.booster||animalActionInFlight?'disabled':''}>${pet.booster?'✦ Booster aplicado':'Adicionar Booster · 1 un.'}</button>`:'';
     const stocked=pet?pet.stock+pet.goldStock:0;

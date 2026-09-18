@@ -216,6 +216,10 @@ exports.handler = async (event) => {
     if (existingRes.ok) {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
+      // Clientes anteriores à atualização de animais não apagam os cercadinhos.
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'livestock') && existingData.livestock) {
+        safeData.livestock = existingData.livestock;
+      }
       const currentRevision = existingRows[0]?.updated_at;
       const sameSession = Boolean(sessionId && existingData._activeSessionId === sessionId);
       if (!existingRows.length || (!sameSession && !activeSession(existingData, sessionId))) {

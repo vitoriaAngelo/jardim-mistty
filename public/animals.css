@@ -1,0 +1,36 @@
+#plots-grid[hidden],#animal-yard[hidden] { display:none!important; }
+.farm-tabs { display:flex; gap:8px; margin-bottom:16px; }
+.farm-tabs button { border:1px solid var(--cozy-line,#b9c3aa); background:var(--cream); color:var(--text); padding:9px 17px; border-radius:14px; font:800 14px Nunito,sans-serif; }
+.farm-tabs button[aria-selected=true] { background:#778b64; color:#fffdf5; box-shadow:0 3px 0 #596f49; }
+.animal-intro { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.animal-intro h3 { font:24px Georgia,serif; margin:0 0 5px; }
+.animal-intro p,.animal-note { font-size:12px; line-height:1.6; color:var(--text2); }
+.animal-feed-stock { white-space:nowrap; border-radius:14px; padding:9px 12px; background:var(--cream2); font-weight:800; }
+.animal-pens,.animal-shop-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.animal-pen,.animal-shop-card { border:1px solid var(--cozy-line,#c9cfb9); border-radius:22px; background:var(--cream); padding:13px; text-align:center; box-shadow:0 4px 0 #71815c22; min-width:0; }
+.animal-pen.ready { border-color:#b39a55; box-shadow:0 4px 0 #b39a5522,0 0 15px #e2ca7440; }
+.animal-pen h4,.animal-shop-card h4 { font-size:15px; margin:6px 0; }
+.animal-home { font:12px Georgia,serif; color:var(--text2); }
+.animal-scene { position:relative; background:linear-gradient(180deg,#f4efe2,#e7eed7); border-radius:17px; margin:10px 0; overflow:hidden; }
+.animal-scene svg { width:100%; height:150px; display:block; }
+.animal-scene.empty svg { opacity:.3; }
+.animal-body { transform-origin:80px 115px; animation:animal-breathe 3.5s ease-in-out infinite; }
+.animal-pen.ready .animal-body { animation:animal-breathe 1.5s ease-in-out infinite; }
+@keyframes animal-breathe { 50% { transform:translateY(-2px) rotate(1deg); } }
+.animal-status { min-height:36px; font-size:12px; line-height:1.5; margin:6px 0; }
+.animal-action { width:100%; border:0; border-radius:12px; background:#778b64; color:#fffdf5; font:800 12px Nunito,sans-serif; padding:10px 6px; box-shadow:0 3px 0 #576d48; }
+.animal-action:disabled { opacity:.55; cursor:default; }
+.animal-progress { height:5px; border-radius:8px; background:#9cac8733; overflow:hidden; margin:9px 0; }
+.animal-progress span { display:block; height:100%; background:#9aa989; }
+.animal-product-art { display:inline-flex; width:60px; height:60px; align-items:center; justify-content:center; }
+.animal-product-art svg { width:100%; height:100%; }
+.animal-shop-details { font-size:12px; line-height:1.65; min-height:76px; margin-bottom:10px; }
+.animal-feed-shop { display:flex; align-items:center; gap:14px; background:var(--cream2); padding:16px; border-radius:18px; margin:0 0 16px; }
+.animal-feed-shop>div { flex:1; }.animal-feed-shop button { width:auto; padding:10px 16px; }
+.animal-shop-card .animal-scene svg { height:120px; }
+body.dark-mode .animal-scene { background:linear-gradient(#364330,#44533d); }
+body.dark-mode .animal-pen,body.dark-mode .animal-shop-card { background:#2d372b; border-color:#57624c; color:#eef0df; }
+body.dark-mode .animal-note,body.dark-mode .animal-intro p,body.dark-mode .animal-home { color:#cbd4c0; }
+body.dark-mode .animal-feed-stock,body.dark-mode .animal-feed-shop { background:#3d4735; color:#eef0df; }
+@media(max-width:640px) { .animal-pens,.animal-shop-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.animal-intro { flex-wrap:wrap; }.animal-scene svg { height:130px; }.animal-feed-shop { flex-wrap:wrap; } }
+@media(prefers-reduced-motion:reduce) { .animal-body { animation:none!important; } }

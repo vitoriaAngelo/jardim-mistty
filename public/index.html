@@ -10,6 +10,9 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/icon-192.svg">
 <title>FarMistty 🌱</title>
+<script src="animal-model.js"></script>
+<script src="animals.js"></script>
+<link rel="stylesheet" href="animals.css">
 <link rel="icon" type="image/svg+xml" href="points-sprout.svg">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -3374,11 +3377,12 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     </div>
     <div class="garden-event-layer" id="garden-event-layer" aria-hidden="true"></div>
     <div class="card" id="plots-card" data-profile-background="spring">
-      <div class="card-title">
-        <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="9" width="14" height="6" rx="2" fill="#7a4f2e"/><rect x="2" y="10" width="12" height="4" rx="1.5" fill="#9b6840"/></svg>
-        Canteiros
+      <div class="farm-tabs" role="tablist" aria-label="Espaços da fazenda">
+        <button id="farm-tab-plants" role="tab" aria-controls="plots-grid" aria-selected="true" onclick="switchFarmTab('plants')">Canteiros</button>
+        <button id="farm-tab-animals" role="tab" aria-controls="animal-yard" aria-selected="false" onclick="switchFarmTab('animals')">Animais</button>
       </div>
       <div class="plots-grid" id="plots-grid"></div>
+      <div id="animal-yard" hidden></div>
     </div>
 
     <div class="card" id="harvest-card" style="padding:14px 18px">
@@ -3575,6 +3579,9 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <div class="help-tip"><div class="help-tip-icon">✨</div><div><strong>Terra Dourada</strong> — canteiro vazio antes de plantar. A próxima colheita rende +1 unidade!</div></div>
         </div>
         <div class="help-section">
+          <div class="help-section-title">🐾 Animais</div>
+          <div class="help-tip"><div class="help-tip-icon">🌾</div><div>Na aba <strong>Animais</strong>, ao lado de Canteiros, cada bichinho tem seu cercadinho. Compre o animal e ração em <strong>Loja → Animais</strong>. Cada refeição produz 1 item, mesmo enquanto você está fora. Recolha e venda no Mercado; depois alimente novamente.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🧺</div><div>Galinha: ovo · Vaca: leite · Porco: bacon mágico · Ovelha: lã · Pato: ovo de pato. A loja mostra os níveis, preços, tempos e a ração necessária.</div></div>
           <div class="help-section-title">🪵 Canteiros</div>
           <div class="help-tip"><div class="help-tip-icon">🪵</div><div>Começa com <strong>2 canteiros</strong>. Compre os canteiros 3, 4 e 5 na loja conforme seus requisitos. O canteiro 6 é exclusivo para subscribers e vem como canteiro especial ao resgatar o Premium.</div></div>
           <div class="help-tip"><div class="help-tip-icon">🪣</div><div>O <strong>regador</strong> tem capacidade limitada: recupera 1 água a cada 5 minutos e pode chegar a 10 de capacidade. O botão <strong>Encher o reservatório</strong> custa 500 pts e recupera 5 águas imediatamente.</div></div>
@@ -3917,11 +3924,13 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <button class="shop-tab flowers-tab" id="tab-flores" onclick="switchShopTab('flores')">🌸 Flores</button>
       <button class="shop-tab fertilizer-tab" id="tab-adubos" onclick="switchShopTab('adubos')">🧪 Adubos</button>
       <button class="shop-tab plots-tab" id="tab-canteiros" onclick="switchShopTab('canteiros')">🪵 Canteiros</button>
+      <button class="shop-tab" id="tab-animais" onclick="switchShopTab('animais')">🐾 Animais</button>
     </div>
     <div class="shop-panel visible" id="panel-vegetais"><div class="shop-items" id="shop-items"></div></div>
     <div class="shop-panel" id="panel-flores"><div class="shop-items" id="flower-items"></div></div>
     <div class="shop-panel" id="panel-adubos"><div id="fertilizer-items"></div></div>
     <div class="shop-panel" id="panel-canteiros"><div class="plot-shop-grid" id="plot-shop-grid"></div></div>
+    <div class="shop-panel" id="panel-animais"><div id="animal-shop"></div></div>
   </div>
 </div>
 <div class="shop-cart empty shop-cart-closed" id="shop-cart"></div>
@@ -4738,10 +4747,11 @@ async function refreshPoints() {
 
 // ─── SHOP TABS ───────────────────────────────────────────
 function switchShopTab(tab) {
-  ['vegetais','flores','adubos','canteiros'].forEach(t => {
+  ['vegetais','flores','adubos','canteiros','animais'].forEach(t => {
     document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
     document.getElementById(`panel-${t}`)?.classList.toggle('visible', t === tab);
   });
+  if (tab === 'animais') renderAnimalShop();
 }
 
 // ─── PLOT SHOP DATA ───────────────────────────────────────
@@ -4892,7 +4902,7 @@ function effectiveMaxGrow(type) {
   return getPlantable(type).maxGrow * 2;
 }
 function effectiveSellValue(type, epicOverride) {
-  const base = SELL_VALUE[type];
+  const base = FarmAnimals.products[type]?.sell ?? SELL_VALUE[type];
   const mascotBonus = ['apple','premium'].includes(G.selectedMascot) ? 1.15 : 1;
   let val = Math.round(base * mascotBonus);
   // Skill: Etiqueta Dourada (+3% por nível)
@@ -5612,6 +5622,7 @@ function spawnCoinBurst(el, pts) {
 }
 
 function harvestedProduceArt(type) {
+  if (FarmAnimals.products[type]) return animalProductArt(type);
   const item = getPlantable(type);
   const isFlower = Boolean(FLOWERS[type]);
   return `<div class="harvested-produce-art ${isFlower ? 'flower' : 'vegetable'} crop-${type}" aria-hidden="true">
@@ -6096,7 +6107,7 @@ function closeOrders() { document.getElementById('orders-overlay')?.classList.ad
 function renderHarvested() {
   updateOrdersReadyBadge();
   const bag = document.getElementById('harvest-bag');
-  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
+  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
 
   if (!hasAny) {
@@ -7069,7 +7080,7 @@ function sellAll() {
     }
   }
   window._epicSaleType = epicType;
-  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
+  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
   if (!hasAny) return;
   allTypes.forEach(type => { SELL[type] = G.harvested[type] || 0; });
@@ -7109,7 +7120,7 @@ function applyOfflineProgress(savedAt) {
 }
 
 function renderSellAllConfirm() {
-  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
+  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const available = allTypes.filter(type => (G.harvested[type] || 0) > 0);
   const total = available.reduce((sum, type) => {
     const isEpic = window._epicSaleType === type;
@@ -7182,7 +7193,7 @@ function setShopSeasonFilter(v) {
 
 // Returns plant data from either PLANTS or FLOWERS
 function getPlantable(type) {
-  return PLANTS[type] || FLOWERS[type] || null;
+  return PLANTS[type] || FLOWERS[type] || FarmAnimals.products[type] || null;
 }
 
 function harvestCyclesFor(type) {
@@ -9038,6 +9049,7 @@ let gardenSaveQueue = Promise.resolve();
 async function saveGardenToSENow(retryStale = true, orderAction = false) {
   if (!seUser || !gardenHydrated) return;
   const saveData = {
+    livestock:        FarmAnimals.normalize(G.livestock),
     xp:               G.xp,
     farmerXP:         G.farmerXP || 0,
     farmName:         document.getElementById('garden-name')?.textContent || '',
@@ -9312,6 +9324,7 @@ async function loadGardenFromSE(username) {
     G.plots           = (save.plots || Array(6).fill(null)).map(p => p || null);
     G.unlockedPlots   = save.unlockedPlots    || 2;
     G.harvested       = save.harvested        || {};
+    G.livestock       = FarmAnimals.normalize(save.livestock);
     G.crystalHarvested = save.crystalHarvested || {};
   G.upgrades        = new Set(save.upgrades || []);
   G.goldenHarvested = save.goldenHarvested || {};

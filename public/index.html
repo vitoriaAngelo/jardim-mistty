@@ -1244,6 +1244,10 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .market-slot-name {
   font-size: 10px; font-weight: 800; color: var(--text2); text-align: center;
 }
+.inventory-group { margin-top: 14px; }
+.inventory-group:first-child { margin-top: 0; }
+.inventory-group-title { margin: 0 0 8px; padding-bottom: 5px; border-bottom: 1px solid var(--cozy-line,#d8c9ac); color: var(--cozy-ink,#414f38); font: 900 13px/1.2 Nunito,sans-serif; }
+body.dark-mode .inventory-group-title { color:#edf2e6; border-color:#53604f; }
 .market-crystal-tag { display:inline-flex; align-items:center; gap:3px; margin-top:1px; padding:2px 6px; border:1px solid #a779da; border-radius:999px; background:#eadcff; color:#68458d; font-size:9px; font-weight:900; }
 body.dark-mode .market-crystal-tag { border-color:#b995e5; background:#49365d; color:#f0ddff; }
 .market-slot-stock {
@@ -5286,8 +5290,7 @@ function renderInventory() {
   // clear selected seed if we ran out of it
   if (G.selectedSeed && !G.inventory[G.selectedSeed]) G.selectedSeed = null;
 
-  bar.innerHTML = `<div class="inv-slots">${
-    entries.map(([type, count]) => {
+  const renderInventoryGroup = (title, groupEntries) => groupEntries.length ? `<section class="inventory-group"><h3 class="inventory-group-title">${title}</h3><div class="inv-slots">${groupEntries.map(([type, count]) => {
       const p = getPlantable(type);
       const sel = G.selectedSeed === type;
       return `
@@ -5300,9 +5303,11 @@ function renderInventory() {
             💧 ${p.maxWater} regas · 🌱 ${effectiveMaxGrow(type)} crescimentos<br>
             <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> Venda: ${SELL_VALUE[type]} pts
           </div>
-        </div>`;
-    }).join('')
-  }</div>`;
+          </div>`;
+    }).join('')}</div></section>` : '';
+  const vegetables = entries.filter(([type]) => !FLOWERS[type]);
+  const flowers = entries.filter(([type]) => Boolean(FLOWERS[type]));
+  bar.innerHTML = `${renderInventoryGroup('🥕 Vegetais', vegetables)}${renderInventoryGroup('🌸 Flores', flowers)}`;
 }
 // sell amounts: how many of each type to sell
 const SELL = { potato: 0, carrot: 0, tomato: 0, beetroot: 0, lettuce: 0, cassava: 0,
@@ -6971,7 +6976,7 @@ function renderFertilizerInventory() {
 
   if (!validEntries.length) { bar.innerHTML = ''; return; }
 
-  bar.innerHTML = `<div class="fert-inv-slots">${validEntries.map(([id, f]) => {
+  bar.innerHTML = `<section class="inventory-group fertilizer-group"><h3 class="inventory-group-title">🧪 Adubos</h3><div class="fert-inv-slots">${validEntries.map(([id, f]) => {
     const count = G.fertilizerInventory[id] || 0;
     const currentEffect = id === 'golden_soil'
       ? '+1 unidade extra'
@@ -6988,7 +6993,7 @@ function renderFertilizerInventory() {
         ${currentEffect}
       </div>
     </div>`;
-  }).join('')}</div>`;
+  }).join('')}</div></section>`;
 }
 
 function selectFertilizer(id) {

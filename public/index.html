@@ -10161,10 +10161,10 @@ const SKILL_BRANCHES = [
     id: 'animais', name: 'Animais', icon: '🐄',
     desc: 'Cuide melhor dos seus companheiros',
     nodes: [
-      { id:'trato_amigo', emoji:'🌾', name:'Trato Amigo', effect:'-1 porção de ração comum por refeição', max:3, maxLabel:'máx. -3 porções', req:null, reqMin:0 },
+      { id:'trato_amigo', emoji:'🌾', name:'Trato Amigo', effect:'+5% de saúde recuperada com Ração Normal por nível', max:3, maxLabel:'máx. +15% de recuperação', req:null, reqMin:0 },
       { id:'rotina_rural', emoji:'⏱️', name:'Rotina Rural', effect:'-4% no tempo de produção dos animais por nível', max:5, maxLabel:'máx. -20%', req:'trato_amigo', reqMin:3 },
-      { id:'cuidado_especial', emoji:'💛', name:'Cuidado Especial', effect:'+3% de chance de produção extra com Super Premium', max:5, maxLabel:'máx. +15%', req:'rotina_rural', reqMin:3 },
-      { id:'criador_dourado', emoji:'✨', name:'Criador Dourado', effect:'+4% de chance de produto dourado com Booster', max:5, maxLabel:'máx. +20%', req:'cuidado_especial', reqMin:3 },
+      { id:'cuidado_especial', emoji:'💛', name:'Cuidado Especial', effect:'+10% de saúde recuperada com Ração Premium por nível', max:5, maxLabel:'máx. +50% de recuperação', req:'rotina_rural', reqMin:3 },
+      { id:'criador_dourado', emoji:'✨', name:'Criador Dourado', effect:'+3% de chance extra na Super Premium e +4% no Booster', max:5, maxLabel:'máx. +15% / +20%', req:'cuidado_especial', reqMin:3 },
     ],
   },
 ];
@@ -10195,10 +10195,10 @@ function skillCurrentLabel(node, level) {
     feira_local: `Atual: +${value * 5}% por conjunto acima de 15 itens`,
     negociador: `Atual: -${value * 3}% no preço de compra`,
     venda_epica: `Atual: +${value * 2}% de chance de venda em dobro`,
-    trato_amigo: `Atual: -${value} porção de ração comum por refeição`,
+    trato_amigo: `Atual: +${value * 5}% de saúde com Ração Normal`,
     rotina_rural: `Atual: -${value * 4}% no tempo de produção`,
-    cuidado_especial: `Atual: +${value * 3}% de chance de produção extra`,
-    criador_dourado: `Atual: +${value * 4}% de chance de produto dourado`,
+    cuidado_especial: `Atual: +${value * 10}% de saúde com Ração Premium`,
+    criador_dourado: `Atual: +${value * 3}% Super Premium · +${value * 4}% Booster`,
   };
   return labels[node.id] || node.effect;
 }

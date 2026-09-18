@@ -78,7 +78,7 @@
     if (!animal || !state.pets[id]) throw new Error('Compre este animal primeiro.');
     if (!['normal','premium','super'].includes(ration)) throw new Error('Escolha uma ração para alimentar.');
     if (state.pets[id].readyAt && state.pets[id].queue.length >= 9) throw new Error('A fila já está cheia (máximo de 10 refeições).');
-    const normalCost = Math.max(1, animal.feed - Number(skills.trato_amigo || 0));
+    const normalCost = animal.feed;
     if (ration==='normal') {
       if (state.feed < normalCost) throw new Error('Compre mais ração na aba Rações da loja.');
       state.feed -= normalCost;
@@ -86,8 +86,8 @@
       if (state.rations[ration]<1) throw new Error('Esta ração acabou. Visite a aba Rações da loja.');
       state.rations[ration]--;
     }
-    const healthRecovery = ration === 'super' ? 80 : ration === 'premium' ? 50 : 20;
-    const quantity=ration==='super' && random()<(.34 + Number(skills.cuidado_especial || 0) * .03) ? 2 : 1;
+    const healthRecovery = ration === 'super' ? 80 : ration === 'premium' ? 50 + Number(skills.cuidado_especial || 0) * 10 : 20 + Number(skills.trato_amigo || 0) * 5;
+    const quantity=ration==='super' && random()<(.34 + Number(skills.criador_dourado || 0) * .03) ? 2 : 1;
     const productionMinutes = catalog[id].minutes * (1 - Number(skills.rotina_rural || 0) * .04);
     state.pets[id].health = Math.min(HEALTH_MAX, state.pets[id].health + healthRecovery);
     state.pets[id].healthUpdatedAt = now;

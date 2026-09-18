@@ -9189,15 +9189,15 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     mail:             G_MAIL,
     savedAt:          Date.now(),
   };
-  writeGardenCache(seUser.username, saveData);
+  const saveSnapshot = JSON.parse(JSON.stringify(saveData));
   writePremiumClaimsCache(seUser.username);
-  if (isLocalPreview) return;
+  if (isLocalPreview) return { data: saveSnapshot };
   try {
     const response = await fetch('/.netlify/functions/garden-save', {
       method: 'POST',
       headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
       keepalive: true,
-      body: JSON.stringify({ username: seUser.username, data: saveData, sessionId: gardenSessionId, expectedRevision: gardenRevision, orderAction }),
+      body: JSON.stringify({ username: seUser.username, data: saveSnapshot, sessionId: gardenSessionId, expectedRevision: gardenRevision, orderAction }),
     });
     if (!response.ok) {
       const errBody = await response.text().catch(() => '');
@@ -9222,8 +9222,9 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     }
     const saved = await response.json();
     gardenRevision = saved.revision || gardenRevision;
-    writeGardenCache(seUser.username, saveData);
+    writeGardenCache(seUser.username, saveSnapshot);
     console.log('💾 Jardim salvo no Supabase!');
+    return { data: saveSnapshot, revision: gardenRevision };
   } catch(e) {
     console.warn('Save failed:', e);
     throw e;
@@ -9234,6 +9235,28 @@ function saveGardenToSE(orderAction = false) {
   const operation = gardenSaveQueue.then(() => saveGardenToSENow(true, orderAction));
   gardenSaveQueue = operation.catch(() => {});
   return operation;
+}
+
+function sameGardenValue(left, right) {
+  const normalize = value => {
+    if (Array.isArray(value)) return value.map(normalize);
+    if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map(key => [key, normalize(value[key])]));
+    return value;
+  };
+  return JSON.stringify(normalize(left)) === JSON.stringify(normalize(right));
+}
+
+async function confirmGardenSaved(saved) {
+  if (isLocalPreview) return;
+  const response = await fetch(`/.netlify/functions/garden-load?username=${encodeURIComponent(seUser.username)}`, {
+    cache: 'no-store', headers: authenticatedHeaders(),
+  });
+  if (!response.ok) throw new Error('Não foi possível confirmar o jardim no banco. Tente novamente.');
+  const confirmed = await response.json();
+  const fields = ['xp', 'farmerXP', 'inventory', 'fertilizerInventory', 'plots', 'harvested', 'livestock', 'skillNodes', 'achievements', 'missions', 'mail'];
+  if (!confirmed.data || fields.some(key => !sameGardenValue(saved.data[key], confirmed.data[key]))) {
+    throw new Error('O banco ainda não confirmou todo o progresso. Tente novamente.');
+  }
 }
 
 // ── Sync G.pts back to SE points balance ──────────────────
@@ -9326,46 +9349,15 @@ async function loadGardenFromSE(username) {
     try {
       const res = await fetch(`/.netlify/functions/garden-load?username=${encodeURIComponent(username)}`, { cache: 'no-store', headers: authenticatedHeaders() });
       if (res.ok) { json = await res.json(); gardenRevision = json.revision || gardenRevision; }
-      else { json = { data: readGardenCache(username) }; loadFailed = res.status !== 404; }
+      else if (res.status === 404) json = { data: null };
+      else loadFailed = true;
     } catch (networkError) {
-      json = { data: readGardenCache(username) };
       loadFailed = true;
     }
-    // O F5 pode acontecer antes de o POST terminar no servidor. Se o cache
-    // local contém uma gravação mais nova, ele é a fonte correta para esta
-    // sessão (especialmente após uma colheita, que deixa o canteiro vazio).
-    const cachedData = readGardenCache(username);
-    const serverData = json?.data;
-    const serverSavedAt = Number(serverData?.savedAt || (json?.revision ? Date.parse(json.revision) : 0));
-    const cachedSavedAt = Number(cachedData?.savedAt || 0);
-    const serverHasPaidKit = Array.isArray(serverData?.paidKitOrders) && serverData.paidKitOrders.length > 0;
-    const serverHasNewerKit = serverHasPaidKit && Number(serverData.bonusKitLevel || 0) > Number(cachedData?.bonusKitLevel || 0);
-    // Se o F5 ocorreu durante um autosave, o cache pode conter a versão mais
-    // nova que ainda não apareceu na resposta do banco. Nunca regride para o
-    // estado anterior nesse intervalo; a próxima gravação sincroniza o banco.
-    const serverLooksLikeEmptyFallback = serverData && !serverData._isSessionShell
-      && Number(serverData.xp || 0) === 0
-      && !Object.keys(serverData.inventory || {}).length
-      && !(serverData.plots || []).some(Boolean)
-      && (Number(cachedData?.xp || 0) > 0 || Object.keys(cachedData?.inventory || {}).length || (cachedData?.plots || []).some(Boolean));
-    const cacheDoesNotRegressXp = !serverData || Number(cachedData?.xp || 0) >= Number(serverData?.xp || 0);
-    if (cachedData && cacheDoesNotRegressXp && (!serverData || cachedSavedAt > serverSavedAt || serverLooksLikeEmptyFallback)) {
-      // O cache pode ser mais novo durante um autosave, mas os contadores de
-      // pedidos/reset precisam continuar obedecendo ao banco. Isso evita que
-      // um reset administrativo volte para 3/3 após o F5.
-      const mergedData = serverData ? {
-        ...cachedData,
-        orders: serverData.orders,
-        ordersSeasonKey: serverData.ordersSeasonKey,
-        orderSearches: serverData.orderSearches,
-        orderDeliveries: serverData.orderDeliveries,
-        orderPaidReset: serverData.orderPaidReset,
-        ordersGlobalResetVersion: serverData.ordersGlobalResetVersion,
-      } : cachedData;
-      json = { data: mergedData };
-      if (cachedSavedAt > serverSavedAt) setTimeout(() => saveGardenToSE(), 250);
-    }
-    if (!json?.data || json.data._isSessionShell === true) return loadFailed ? null : false;
+    // A leitura do banco precisa ser confiável antes de abrir a fazenda.
+    // O cache local não deve regravar um estado desatualizado no login.
+    if (loadFailed) return null;
+    if (!json?.data || json.data._isSessionShell === true) return false;
     hadSave = true;
 
     const save = json.data;
@@ -9419,33 +9411,6 @@ async function loadGardenFromSE(username) {
     G.eventLastType    = save.eventLastType || '';
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
     gardenOrders      = G.orders;
-    if (G.ordersGlobalResetVersion < 3) {
-      // Reset completo (versão 3): nova temporada começando do zero.
-      G.plots = Array(6).fill(null);
-      G.harvested = {};
-      G.inventory = {};
-      G.fertilizerInventory = {};
-      G.pts = 0;
-      G.xp = 0;
-      G.level = 1;
-      G.waterCount = 0;
-      G.waterCapacity = 5;
-      G.seasonIdx = 0;
-      G.seasonDay = 1;
-      G.orderSearches = 0;
-      G.orderDeliveries = 0;
-      G.orderPaidReset = false;
-      G.skillNodes = {};
-      G.skillPoints = 0;
-      G.achievements = [];
-      G.achievStats = { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
-      gardenOrders = Array.from({ length: 3 }, (_, i) => createOrder(i));
-      G.orders = gardenOrders;
-      G.ordersSeasonKey = orderSeasonKey();
-      G.ordersGlobalResetVersion = 3;
-      toast('🌱 Nova temporada! Seu jardim foi resetado. Vamos começar do zero!', 5000);
-      setTimeout(() => { saveGardenToSE(); renderAll(); }, 250);
-    }
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);
     G.achievStats     = save.achievStats      || { totalPlant:0, totalHarvest:0, totalBuy:0, totalWater:0, totalFertilizer:0, totalSellPts:0, totalFlowerSell:0 };
@@ -9790,8 +9755,9 @@ async function completeLogout() {
   if (message) message.textContent = 'Salvando plantas, inventário e XP no banco…';
   if (overlay) overlay.innerHTML = `<div class="modal logout-saving-card" role="status" aria-live="polite"><div class="logout-saving-sprout">🌱</div><h2>Salvando sua fazenda…</h2><p>Guardando suas plantas, inventário e XP com carinho.</p><div class="logout-saving-bar" aria-hidden="true"></div></div>`;
   try {
-    await saveGardenToSE();
+    const saved = await saveGardenToSE();
     await gardenSaveQueue;
+    await confirmGardenSaved(saved);
     overlay?.remove();
     seUser = null;
     gardenHydrated = false;

@@ -243,6 +243,11 @@ exports.handler = async (event) => {
     if (existingRes.ok) {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
+      const storedXP = Number(existingData.xp || 0);
+      const incomingXP = Number(safeData.xp || 0);
+      if (Number.isFinite(storedXP) && storedXP > 0 && (!Number.isFinite(incomingXP) || incomingXP < storedXP)) {
+        return { statusCode: 409, headers, body: JSON.stringify({ error: 'O banco possui mais XP que esta tela. Atualize o jardim antes de salvar.', code: 'PROGRESS_REGRESSION' }) };
+      }
       // Clientes anteriores à atualização de animais não apagam os cercadinhos.
       if (!Object.prototype.hasOwnProperty.call(safeData, 'livestock') && existingData.livestock) {
         safeData.livestock = existingData.livestock;

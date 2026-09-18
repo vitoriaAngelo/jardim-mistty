@@ -37,6 +37,7 @@
 .animal-ration-tag { display:inline-block; margin-left:4px; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:900; color:#5b4a2d; background:#d5bc91; }
 .animal-ration-tag.premium { background:#e6c66f; }
 .animal-ration-tag.super { background:#b9a0d7; color:#3f2e58; }
+.animal-super-symbol { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; margin-left:4px; border-radius:50%; background:#b9a0d7; color:#3f2e58; font-weight:900; cursor:help; }
 .animal-booster-tag { display:inline-block; margin-left:4px; padding:3px 7px; border-radius:999px; background:#9cc8bc; color:#29483e; font-size:10px; font-weight:900; }
 .animal-meta { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; color:var(--text2); font-size:11px; line-height:1.3; margin:5px 0 7px; }
 .animal-meta span { background:var(--cream2); border-radius:999px; padding:4px 7px; }

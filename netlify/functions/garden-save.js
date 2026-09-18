@@ -9,14 +9,17 @@ const ORDER_SEASONS = [
   ['pumpkin','beetroot','broccoli','cassava','ruby_kale','rose','lavender','orchid','moon_lily','royal_dahlia'],
   ['potato','broccoli','ruby_kale','star_radish','moon_lily'],
 ];
-const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338,daisy:43,rose:85,tulip:76,sunflower:99,lavender:113,orchid:127,hibiscus:118,bluebell:95,cherry:136,poppy:81,jasmine:104,moon_lily:1000,royal_dahlia:383 };
+const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338,purple_cabbage:155,crystal_kale:245,yellow_eggplant:178,pink_cucumber:205,green_mushroom:225,daisy:43,rose:85,tulip:76,sunflower:99,lavender:113,orchid:127,hibiscus:118,bluebell:95,cherry:136,poppy:81,jasmine:104,cherry_blossom:170,orange_blossom:178,moon_flower:260,sun_flower:235,guarana_flower:198,moon_lily:1000,royal_dahlia:383 };
+const ORDER_TYPES = new Set(Object.keys(ORDER_VALUES));
 const ORDER_TIERS = { A:{ mult:1,min:1,max:12 }, S:{ mult:2.2,min:8,max:26 }, SS:{ mult:4.5,min:20,max:40 } };
 const ORDER_TIER_LEGACY = { normal:'A', epic:'S', legendary:'SS' };
 
 function validOrder(order, seasonIdx, data) {
   const tier = ORDER_TIERS[ORDER_TIER_LEGACY[order?.rarity] || order?.rarity];
   const qty = Number(order?.qty);
-  if (!tier || !ORDER_SEASONS[seasonIdx]?.includes(order?.type) || !Number.isInteger(qty) || qty < tier.min || qty > tier.max) return false;
+  // A estação dá prioridade aos pedidos, mas não restringe o catálogo:
+  // pedidos já gerados continuam válidos mesmo quando a estação muda.
+  if (!tier || !ORDER_TYPES.has(order?.type) || !Number.isInteger(qty) || qty < tier.min || qty > tier.max) return false;
   const mascotBonus = ['apple','premium'].includes(data?.selectedMascot) ? 1.15 : 1;
   const skillBonus = 1 + Number(data?.skillNodes?.etiqueta_dourada || 0) * .03;
   // O cliente arredonda primeiro o bônus do mascote e só depois aplica a
@@ -110,10 +113,15 @@ function validateOrdersTransition(oldData, nextData) {
 function orderActionChanged(oldData, nextData) {
   // A colheita/plantio pode reenviar uma cópia local dos pedidos. Isso não é
   // uma ação de pedido e não deve disparar a validação de recompensas.
-  return Number(oldData?.ordersGlobalResetVersion || 0) !== Number(nextData?.ordersGlobalResetVersion || 0)
-    || Number(oldData?.orderSearches || 0) !== Number(nextData?.orderSearches || 0)
-    || Number(oldData?.orderDeliveries || 0) !== Number(nextData?.orderDeliveries || 0)
-    || Boolean(oldData?.orderPaidReset) !== Boolean(nextData?.orderPaidReset);
+  const oldSearches = Number(oldData?.orderSearches || 0);
+  const nextSearches = Number(nextData?.orderSearches || 0);
+  const oldDeliveries = Number(oldData?.orderDeliveries || 0);
+  const nextDeliveries = Number(nextData?.orderDeliveries || 0);
+  const globalReset = Number(nextData?.ordersGlobalResetVersion || 0) > Number(oldData?.ordersGlobalResetVersion || 0);
+  const paidReset = !Boolean(oldData?.orderPaidReset) && Boolean(nextData?.orderPaidReset);
+  return globalReset || paidReset
+    || nextSearches === oldSearches + 1
+    || nextDeliveries === oldDeliveries + 1;
 }
 
 function ordersMeaningfullyChanged(oldData, nextData) {
@@ -148,7 +156,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
 
   try {
-    const { username, data, sessionId, expectedRevision } = JSON.parse(event.body);
+    const { username, data, sessionId, expectedRevision, orderAction } = JSON.parse(event.body);
     if (!username) return { statusCode: 400, headers, body: JSON.stringify({ error: 'username required' }) };
     const auth = await authenticateTwitch(event);
     requireSameUser(auth, username);
@@ -163,10 +171,10 @@ exports.handler = async (event) => {
     ];
     
     // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
-    const GROW_INTERVAL_MS = 15000;  // 15s por estágio de crescimento normal
+    // Crescimento normal, Adubo Rápido e Chuva Mágica podem somar avanços.
+    const GROW_INTERVAL_MS = 15000;
     const RAIN_TICK_MS     = 3500;   // Chuva Mágica dispara applyMagicRain() a cada 3.5s
     const RAIN_DURATION_MS = 45000;  // Duração máxima do evento de chuva (45s)
-    const maxGrowthPerTick = 1;
     const validationRes = await fetch(
       `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,
       {
@@ -179,10 +187,8 @@ exports.handler = async (event) => {
       if (rows.length > 0) {
         const oldData = rows[0].data || {};
         const lastSaveTime = new Date(rows[0].updated_at).getTime();
-        const elapsedMs = (data.savedAt || Date.now()) - lastSaveTime;
-
-        // Crescimento normal pelo tempo decorrido
-        const maxNormalGrowth = Math.floor(elapsedMs / GROW_INTERVAL_MS) * maxGrowthPerTick;
+        const elapsedMs = Math.max(0, Date.now() - lastSaveTime);
+        const maxPossibleTicks = Math.ceil(elapsedMs / GROW_INTERVAL_MS);
 
         // Crescimento extra que a Chuva Mágica pode ter dado no período.
         // A chuva aplica +1 growCount por planta a cada RAIN_TICK_MS ms,
@@ -193,8 +199,6 @@ exports.handler = async (event) => {
         const maxRainWindow = Math.min(elapsedMs, RAIN_DURATION_MS);
         const maxRainGrowth = Math.floor(maxRainWindow / RAIN_TICK_MS);
 
-        const maxGrowthAllowed = maxNormalGrowth + maxRainGrowth + 3; // +3 de margem para latência
-
         if (oldData.plots && safeData.plots) {
           let fraudDetected = false;
           const fraudLog = [];
@@ -203,8 +207,10 @@ exports.handler = async (event) => {
             const old = oldData.plots[i];
             // Uma colheita final remove a planta e transforma o canteiro em
             // null. Nesse caso não existe crescimento novo para validar.
-            if (!p || !old) return;
-            const growDiff = (p.growCount || 0) - (old.growCount || 0);
+            if (!p) return;
+            const previousGrowth = old?.type === p.type ? Number(old.growCount || 0) : 0;
+            const growDiff = Number(p.growCount || 0) - previousGrowth;
+            const maxGrowthAllowed = maxPossibleTicks * (p.quickGrow === true ? 2 : 1) + maxRainGrowth + 3;
             if (growDiff > maxGrowthAllowed) {
               fraudDetected = true;
               fraudLog.push({ plot: i, type: p.type, diff: growDiff, max: maxGrowthAllowed, time: elapsedMs });
@@ -248,8 +254,11 @@ exports.handler = async (event) => {
       // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
       // só precisam ser revalidados quando o estado dos pedidos realmente muda;
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.
-      const hasOrderAction = orderActionChanged(existingData, safeData);
-      if (existingRows.length && hasOrderAction && ordersMeaningfullyChanged(existingData, safeData)) {
+      // Somente a ação explícita de pedidos pode alterar seus contadores.
+      // Uma venda/autosave pode reenviar contadores locais atrasados; eles
+      // nunca devem ser interpretados como uma atualização de pedidos.
+      const hasOrderAction = orderAction === true;
+      if (existingRows.length && hasOrderAction) {
         validateOrdersTransition(existingData, safeData);
       } else if (existingRows.length && !hasOrderAction) {
         // Salvamentos de plantas/XP/logout não carregam intenção de alterar
@@ -259,6 +268,7 @@ exports.handler = async (event) => {
         safeData.orderSearches = existingData.orderSearches;
         safeData.orderDeliveries = existingData.orderDeliveries;
         safeData.orderPaidReset = existingData.orderPaidReset;
+        safeData.ordersGlobalResetVersion = existingData.ordersGlobalResetVersion;
       }
       const existingName = existingData.farmName;
       if (isPlaceholderFarmName(safeData.farmName, username) && !isPlaceholderFarmName(existingName, username)) {

@@ -40,6 +40,12 @@ test('planta perdida fora da estação não concede XP de colheita', () => {
   assert.doesNotMatch(harvestSource.slice(seasonCheck, harvestSource.indexOf('} else {', seasonCheck)), /gainXP\(/);
 });
 
+test('borboletas concedem mais XP, com bônus maior para a rara', () => {
+  assert.match(html, /const xp=rare\?150:50/);
+  assert.match(html, /gardenEvent\.xp\+=xp; gainXP\('harvest',b,xp/);
+  assert.match(html, /Borboleta encontrada/);
+});
+
 test('mutação cristalina protege a planta fora da estação até a última colheita', () => {
   assert.match(html, /const mutationProtectsSeason = outOfSeason && plot\.mutated === true/);
   assert.match(html, /const lostToSeason = outOfSeason && !mutationProtectsSeason/);
@@ -106,7 +112,7 @@ test('Lírio Lunar é exclusivo do evento e tem saquinho especial', () => {
 
 test('conflito de gravação não deixa o login carregando infinitamente', () => {
   assert.match(html, /function handleGardenSessionConflict[\s\S]*?setLoginLoading\(false\)/);
-  assert.match(html, /conflict\.code === 'STALE_STATE'[\s\S]*?saveGardenToSENow\(false\)/);
+  assert.match(html, /conflict\.code === 'STALE_STATE'[\s\S]*?saveGardenToSENow\(false, orderAction\)/);
   assert.match(html, /conflict\.code === 'SESSION_CONFLICT'[\s\S]*?handleGardenSessionConflict/);
   assert.match(html, /handleGardenSessionConflict\(conflict\.error\);\s*throw new Error\('Sessão do jardim encerrada por outra tela\.'/);
 });
@@ -167,7 +173,7 @@ test('cabeçalho do perfil exibe o nome da fazenda', () => {
   assert.match(html, /profile-level-name'\)\.textContent = document\.getElementById\('garden-name'\)/);
 });
 
-test('perfil oferece dois títulos difíceis de desbloquear', () => {
-  assert.match(html, /name:'Imperador da Colheita', target:3000/);
-  assert.match(html, /name:'Eterno do Jardim', target:7500/);
+test('perfil oferece os títulos avançados atuais', () => {
+  assert.match(html, /name:'CEO da Agropecuária', target:3000/);
+  assert.match(html, /name:'Lenda Agronômica', target:7500/);
 });

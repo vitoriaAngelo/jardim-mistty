@@ -9,6 +9,13 @@
     .garden-mascot .mascot-button,.garden-mascot .mascot-button *{cursor:var(--cozy-click-cursor,pointer)!important}
     .mascot-button>svg{overflow:visible}
     .mascot-premium-active .mascot-button>svg{filter:sepia(.72) saturate(1.75) hue-rotate(352deg) brightness(1.08) drop-shadow(0 0 7px #ffd96c) drop-shadow(0 4px 5px #a77628aa)}
+    .mascot-twitchzinho-active .mascot-button>svg{filter:drop-shadow(0 3px 5px #77639740)}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#bbcf9e"]{fill:#ad98d2;stroke:#796399}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#a5bc89"]{fill:#a18ac7;stroke:#796399}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#80976b"]{fill:#8973ad}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#e3e9c5"]{fill:#e5dbf3}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#a8bc89"]{fill:#b7a3d5}
+    .mascot-twitchzinho-active .mascot-sprout-form [fill="#d6ad93"]{fill:#c3acd9}
     .mascot-premium-active .mascot-button::after{content:'✦';position:absolute;right:2px;top:10px;color:#ffd96c;font-size:18px;text-shadow:0 0 7px #fff2a8;animation:premium-sparkle 1.5s ease-in-out infinite}
     .mascot-button{position:relative}
     .mascot-button.mascot-transform{animation:mascot-transform 1.15s cubic-bezier(.2,.8,.2,1) both}
@@ -53,6 +60,41 @@
     @media(prefers-reduced-motion:reduce){.garden-mascot *{animation:none!important;transition:none!important}}
   `;
   document.head.append(style);
+  const eventStyle = document.createElement('style');
+  eventStyle.textContent = `
+    body.event-rain{--pet-event-bg:#e2f1f5;--pet-event-ink:#315c6b;--pet-event-edge:#8bbbc9}
+    body.event-golden{--pet-event-bg:#fff0ce;--pet-event-ink:#725425;--pet-event-edge:#d7b774}
+    body.event-butterflies{--pet-event-bg:#f3e8f1;--pet-event-ink:#70506b;--pet-event-edge:#c5a0bf}
+    body.event-moon{--pet-event-bg:#e7e5f7;--pet-event-ink:#514777;--pet-event-edge:#aaa0cd}
+    body.event-mutation{--pet-event-bg:#e2f3e9;--pet-event-ink:#386951;--pet-event-edge:#94c2ad}
+    body:is(.event-rain,.event-golden,.event-butterflies,.event-moon,.event-mutation) .mascot-bubble{background:var(--pet-event-bg);color:var(--pet-event-ink);border:2px solid var(--pet-event-edge);box-shadow:0 5px 22px color-mix(in srgb,var(--pet-event-edge) 35%,transparent)}
+    body:is(.event-rain,.event-golden,.event-butterflies,.event-moon,.event-mutation) .mascot-bubble :is(strong,p,button){color:var(--pet-event-ink)}
+    body.dark-mode.event-rain{--pet-event-bg:#273e4a;--pet-event-ink:#d5f0fa}
+    body.dark-mode.event-golden{--pet-event-bg:#493e29;--pet-event-ink:#ffedbf}
+    body.dark-mode.event-butterflies{--pet-event-bg:#48384b;--pet-event-ink:#f5def0}
+    body.dark-mode.event-moon{--pet-event-bg:#34304b;--pet-event-ink:#e7e0ff}
+    body.dark-mode.event-mutation{--pet-event-bg:#2c443b;--pet-event-ink:#d4f4e4}
+    .mascot-event-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;filter:none!important}
+    .mascot-event-art>g{display:none;transform-origin:60px 65px}
+    .mascot-event-crown{display:none}
+    .event-golden .mascot-event-crown{display:block}
+    .event-rain .pet-rain,.event-golden .pet-golden,.event-butterflies .pet-butterflies,.event-moon .pet-moon,.event-mutation .pet-mutation{display:block}
+    .event-rain .pet-rain{animation:pet-umbrella 3s ease-in-out infinite}
+    .event-golden .mascot-body{animation:mascot-dance 2s ease-in-out infinite}
+    .event-butterflies .pet-butterflies{animation:pet-orbit 4s ease-in-out infinite}
+    .event-moon .mascot-body{animation:pet-float 4s ease-in-out infinite}
+    .event-moon .pet-moon{animation:premium-sparkle 3s ease-in-out infinite}
+    .event-mutation .pet-mutation{animation:pet-glow 2.8s ease-in-out infinite}
+    .event-mutation .mascot-body{animation:mascot-dance 3s ease-in-out infinite}
+    .garden-mascot.mascot-event-returning .mascot-button{animation:mascot-event-return 1.1s cubic-bezier(.22,1,.36,1) both}
+    @keyframes pet-umbrella{50%{transform:rotate(5deg)}}
+    @keyframes pet-orbit{50%{transform:translateY(-9px) rotate(9deg)}}
+    @keyframes pet-float{50%{transform:translateY(-8px)}}
+    @keyframes pet-glow{50%{opacity:.45;transform:scale(1.08)}}
+    @keyframes mascot-event-return{0%{opacity:.35;transform:translateY(-7px) scale(.92) rotate(-3deg)}55%{opacity:1;transform:translateY(2px) scale(1.04) rotate(2deg)}100%{opacity:1;transform:none}}
+    @media(prefers-reduced-motion:reduce){.garden-mascot *{animation:none!important}}
+  `;
+  document.head.append(eventStyle);
   const mascot = document.createElement('aside');
   mascot.className = 'garden-mascot';
   mascot.hidden = true;
@@ -108,7 +150,7 @@
     hideTimer = setTimeout(close, 9000);
   }
   function blocked() {
-    return document.hidden || !!document.querySelector('.modal-overlay:not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
+    return document.hidden || !!document.querySelector('.modal-overlay:not(#skilltree-overlay):not(.hidden), .help-overlay:not(.hidden), .mail-overlay:not(#shop-overlay):not(#inventory-overlay):not(#premium-overlay):not(#mascot-overlay):not(#garden-event-summary-overlay):not(#bonus-overlay):not(#mail-overlay):not(#achiev-overlay):not(#points-history-overlay):not(.hidden), .levelup-overlay:not(.hidden)');
   }
   window.mascotNotify = (text, duration = 2400) => {
     syncVisibility();
@@ -126,6 +168,24 @@
   };
   let petReactionIndex = 0;
   const petButton = mascot.querySelector('.mascot-button');
+  petButton.insertAdjacentHTML('beforeend', `<svg class="mascot-event-art" viewBox="0 0 120 130" fill="none" aria-hidden="true">
+    <g class="pet-rain"><path d="M76 28V73Q76 83 69 79" stroke="#738e9c" stroke-width="3" stroke-linecap="round"/><path d="M43 29Q48-4 77-4Q106-4 112 29Q102 21 94 29Q85 21 76 29Q68 21 59 29Q50 21 43 29Z" fill="#a8d4df" stroke="#678f9f" stroke-width="2"/><path d="M12 35l-3 8M25 13l-3 8M108 49l-3 8" stroke="#94c8dc" stroke-width="3" stroke-linecap="round"/></g>
+    <g class="pet-golden"><path d="M39 40L35 22L49 30L60 17L71 30L85 22L81 40Z" fill="#efcf7c" stroke="#b99a53" stroke-width="2"/><circle cx="60" cy="32" r="3" fill="#fff4cc"/><path d="M14 50v10m-5-5h10M103 42v10m-5-5h10" stroke="#dfbe72" stroke-width="2" stroke-linecap="round"/></g>
+    <g class="pet-butterflies"><path d="M20 45C-4 20 3 63 20 48C38 24 40 65 20 48" fill="#d4b2dc" stroke="#ab89b7" stroke-width="1.5"/><path d="M101 26C80 6 87 43 101 29C117 7 122 45 101 29" fill="#efd2a2" stroke="#c4a176" stroke-width="1.5"/><path d="M20 42v10M101 24v10" stroke="#796280" stroke-width="2"/></g>
+    <g class="pet-moon"><path d="M99 4A17 17 0 1 0 113 29A17 17 0 0 1 99 4" fill="#f5dfab"/><path d="M17 37v12m-6-6h12M88 58v8m-4-4h8M40 9v8m-4-4h8" stroke="#c6b8ee" stroke-width="2" stroke-linecap="round"/></g>
+    <g class="pet-mutation"><ellipse cx="60" cy="103" rx="49" ry="13" stroke="#9bcfb8" stroke-width="2" stroke-dasharray="6 8"/><path d="M13 52L6 38L14 22L22 38ZM104 69L95 51L105 32L114 51Z" fill="#b7e5d9" stroke="#79b5a6" stroke-width="1.5"/><path d="M14 22v30M105 32v37" stroke="#effff7" stroke-width="1.5"/><circle cx="30" cy="17" r="3" fill="#bca4df"/><circle cx="91" cy="88" r="3" fill="#bca4df"/></g>
+  </svg>`);
+  // A coroa pertence ao corpo: herda a dança, o cumprimento e os pulinhos
+  // sem precisar sincronizar uma segunda animação por cima do mascote.
+  const goldenArt = petButton.querySelector('.pet-golden');
+  const crownParts = [...goldenArt.children].slice(0, 2);
+  petButton.querySelectorAll('.mascot-body').forEach(body => {
+    const crown = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    crown.classList.add('mascot-event-crown');
+    crownParts.forEach(part => crown.appendChild(part.cloneNode(true)));
+    body.appendChild(crown);
+  });
+  crownParts.forEach(part => part.remove());
   window.setMascotPremium = (active, animate = false) => {
     document.body.classList.toggle('mascot-premium-active', Boolean(active));
     mascot.setAttribute('aria-label', active ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');
@@ -142,14 +202,16 @@
     const orange = type === 'orange';
     const apple = type === 'apple';
     const strawberry = type === 'strawberry';
+    const twitchzinho = type === 'twitchzinho';
     const premium = type === 'premium';
     document.body.classList.toggle('mascot-orange-active', orange);
     document.body.classList.toggle('mascot-apple-active', apple);
     document.body.classList.toggle('mascot-strawberry-active', strawberry);
+    document.body.classList.toggle('mascot-twitchzinho-active', twitchzinho);
     window.setMascotPremium(premium, premium && animate);
     const mascotName = mascot.querySelector('.mascot-bubble strong');
-    if (mascotName) mascotName.textContent = orange ? 'LARANJINHA' : apple ? 'MAÇANZINHA' : strawberry ? 'MORANGUINHO' : premium ? 'BROTINHO PREMIUM' : 'BROTINHO';
-    mascot.setAttribute('aria-label', orange ? 'Laranjinha, seu companheiro de jardim' : apple ? 'Maçanzinha, seu companheiro de jardim' : strawberry ? 'Moranguinho, seu companheiro de jardim' : premium ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');
+    if (mascotName) mascotName.textContent = orange ? 'LARANJINHA' : apple ? 'MAÇANZINHA' : strawberry ? 'MORANGUINHO' : twitchzinho ? 'TWITCHZINHO' : premium ? 'BROTINHO PREMIUM' : 'BROTINHO';
+    mascot.setAttribute('aria-label', orange ? 'Laranjinha, seu companheiro de jardim' : apple ? 'Maçanzinha, seu companheiro de jardim' : strawberry ? 'Moranguinho, seu companheiro de jardim' : twitchzinho ? 'Twitchzinho, seu companheiro roxo de jardim' : premium ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');
     if ((orange || apple || strawberry) && animate) {
       petButton.classList.remove('mascot-orange-celebrate','mascot-apple-celebrate','mascot-strawberry-celebrate');
       void petButton.offsetWidth;
@@ -175,9 +237,17 @@
     if (!loggedIn) { close(); return; }
     if (blocked()) { close(); return; }
   }
+  window.mascotEventReturn = () => {
+    mascot.classList.remove('mascot-event-returning');
+    void mascot.offsetWidth;
+    mascot.classList.add('mascot-event-returning');
+    setTimeout(() => mascot.classList.remove('mascot-event-returning'), 1200);
+    syncVisibility();
+  };
   document.addEventListener('visibilitychange', syncVisibility);
   window.addEventListener('focus', syncVisibility);
   window.addEventListener('garden-login-state-change', syncVisibility);
   window.addEventListener('profile-modal-state-change', syncVisibility);
+  window.addEventListener('garden-bonus-state-change', syncVisibility);
   syncVisibility();
 })();

@@ -1,7 +1,7 @@
 /* A single viewport-aware tooltip for static and dynamically rendered controls. */
 (() => {
-  const sources = '.header-btn-tip, .plot-tooltip, .inv-tip, .fert-tip';
-  const hosts = '.header-icon-wrap, .plot, .inv-slot, .fert-inv-slot';
+  const sources = '.header-btn-tip, .plot-tooltip, .inv-tip, .fert-tip, .pouch-tip';
+  const hosts = '.header-icon-wrap, .plot, .inv-slot, .fert-inv-slot, .twitchzinho-pouch';
   const bubble = document.createElement('div');
   bubble.className = 'cozy-tooltip';
   bubble.id = 'cozy-tooltip';
@@ -11,6 +11,7 @@
   document.body.classList.add('cozy-tooltips-ready');
   let activeHost, activeSource, describedControl;
   const sourceObserver = new MutationObserver(() => {
+    if (activeSource && !activeSource.isConnected) return hide();
     if (activeSource) { bubble.innerHTML = activeSource.innerHTML; position(); }
   });
   function hide() {

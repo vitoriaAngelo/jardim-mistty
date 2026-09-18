@@ -4462,7 +4462,7 @@ function spawnEventButterfly() {
   if (!activeGardenEvent('butterflies')) return;
   const layer=document.getElementById('garden-event-layer'); if(!layer)return;
   const rare=Math.random()<.14, b=document.createElement('button'); b.className=`event-butterfly${rare?' rare':''}`; b.textContent=rare?'🌈':'🦋'; b.style.left=`${5+Math.random()*78}%`; b.style.top=`${18+Math.random()*62}%`;
-  b.onclick=()=>{ if(!activeGardenEvent('butterflies'))return; const xp=rare?75:25; gardenEvent.actions++; gardenEvent.xp+=xp; gainXP('harvest',b,xp,`${rare?'🌈':'🦋'} +${xp} XP`); toast(`🦋 ${rare?'Borboleta arco-íris':'Borboleta encontrada'}! +${xp} XP`,2200); b.remove(); renderGardenEvent(); };
+  b.onclick=()=>{ if(!activeGardenEvent('butterflies'))return; const xp=rare?150:50; gardenEvent.actions++; gardenEvent.xp+=xp; gainXP('harvest',b,xp,`${rare?'🌈':'🦋'} +${xp} XP`); toast(`🦋 ${rare?'Borboleta arco-íris':'Borboleta encontrada'}! +${xp} XP`,2200); b.remove(); renderGardenEvent(); };
   layer.appendChild(b); setTimeout(()=>b.remove(),5000);
 }
 function showGardenEventSummary(finished, def) {

@@ -41,7 +41,7 @@ test('planta perdida fora da estação não concede XP de colheita', () => {
 });
 
 test('borboletas concedem mais XP, com bônus maior para a rara', () => {
-  assert.match(html, /const xp=rare\?75:25/);
+  assert.match(html, /const xp=rare\?150:50/);
   assert.match(html, /gardenEvent\.xp\+=xp; gainXP\('harvest',b,xp/);
   assert.match(html, /Borboleta encontrada/);
 });

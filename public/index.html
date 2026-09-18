@@ -9340,7 +9340,12 @@ async function loadGardenFromSE(username) {
     // Se o F5 ocorreu durante um autosave, o cache pode conter a versão mais
     // nova que ainda não apareceu na resposta do banco. Nunca regride para o
     // estado anterior nesse intervalo; a próxima gravação sincroniza o banco.
-    if (cachedData && (!serverData || cachedSavedAt > serverSavedAt)) {
+    const serverLooksLikeEmptyFallback = serverData && !serverData._isSessionShell
+      && Number(serverData.xp || 0) === 0
+      && !Object.keys(serverData.inventory || {}).length
+      && !(serverData.plots || []).some(Boolean)
+      && (Number(cachedData?.xp || 0) > 0 || Object.keys(cachedData?.inventory || {}).length || (cachedData?.plots || []).some(Boolean));
+    if (cachedData && (!serverData || cachedSavedAt > serverSavedAt || serverLooksLikeEmptyFallback)) {
       // O cache pode ser mais novo durante um autosave, mas os contadores de
       // pedidos/reset precisam continuar obedecendo ao banco. Isso evita que
       // um reset administrativo volte para 3/3 após o F5.

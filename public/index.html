@@ -9348,7 +9348,8 @@ async function loadGardenFromSE(username) {
       && !Object.keys(serverData.inventory || {}).length
       && !(serverData.plots || []).some(Boolean)
       && (Number(cachedData?.xp || 0) > 0 || Object.keys(cachedData?.inventory || {}).length || (cachedData?.plots || []).some(Boolean));
-    if (cachedData && (!serverData || cachedSavedAt > serverSavedAt || serverLooksLikeEmptyFallback)) {
+    const cacheDoesNotRegressXp = !serverData || Number(cachedData?.xp || 0) >= Number(serverData?.xp || 0);
+    if (cachedData && cacheDoesNotRegressXp && (!serverData || cachedSavedAt > serverSavedAt || serverLooksLikeEmptyFallback)) {
       // O cache pode ser mais novo durante um autosave, mas os contadores de
       // pedidos/reset precisam continuar obedecendo ao banco. Isso evita que
       // um reset administrativo volte para 3/3 após o F5.

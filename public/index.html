@@ -5493,6 +5493,18 @@ async function sellSelected() {
   if (total === 0) return;
   saleInFlight = true;
 
+  const saleSnapshot = {
+    harvested: JSON.parse(JSON.stringify(G.harvested || {})),
+    crystalHarvested: JSON.parse(JSON.stringify(G.crystalHarvested || {})),
+    pts: G.pts,
+    pointsHistory: JSON.parse(JSON.stringify(G.pointsHistory || [])),
+    lastSale: G.lastSale,
+    farmerXP: G.farmerXP,
+    achievStats: JSON.parse(JSON.stringify(G.achievStats || {})),
+    missions: JSON.parse(JSON.stringify(G.missions || null)),
+    achievements: new Set(G.achievements || []),
+  };
+
   const sold = [];
   let soldQty = 0;
   let flowersSold = 0;
@@ -5520,13 +5532,26 @@ async function sellSelected() {
   if (flowersSold > 0) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0) + flowersSold;
   checkAchievements();
   renderHarvested();
+  let pointsCredited = false;
   try {
-    // Primeiro confirma o consumo do estoque no estado versionado. Só depois
-    // credita o saldo externo, impedindo repetir a venda com F5 ou outra tela.
+    // Credita primeiro no StreamElements e só remove os itens no estado
+    // persistido depois da confirmação. Assim uma falha nunca perde estoque.
+    if (!(await giveSEPoints(total))) throw new Error('Pontos da venda não confirmados.');
+    pointsCredited = true;
     await saveGardenToSE();
-    await giveSEPoints(total);
   } catch (error) {
     console.warn('Venda não confirmada:', error);
+    if (pointsCredited) await spendSEPoints(total).catch(() => {});
+    G.harvested = saleSnapshot.harvested;
+    G.crystalHarvested = saleSnapshot.crystalHarvested;
+    G.pts = saleSnapshot.pts;
+    G.pointsHistory = saleSnapshot.pointsHistory;
+    G.lastSale = saleSnapshot.lastSale;
+    G.farmerXP = saleSnapshot.farmerXP;
+    G.achievStats = saleSnapshot.achievStats;
+    G.missions = saleSnapshot.missions;
+    G.achievements = saleSnapshot.achievements;
+    updatePts(); renderHarvested(); renderMissions();
     toast('❌ Não foi possível confirmar a venda. Atualize o jardim antes de tentar novamente.', 4500);
     return;
   } finally {

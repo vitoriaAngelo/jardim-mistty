@@ -668,6 +668,7 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
   position: absolute; bottom: 0; left: 0; right: 0; height: 26px;
   background: linear-gradient(180deg, #a07840 0%, #8a6030 100%);
   border-radius: 0 0 15px 15px;
+  pointer-events: none;
 }
 .plot-label {
   font-size: 11px; font-weight: 800;
@@ -3866,7 +3867,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="login-event-note">✨ A competição de verdade começa em 18/09, mas você pode brincar um pouco para aprender.</div>
     <div class="login-build-note">💚 O site ainda pode passar por instabilidades. Tudo está sendo feito com muito amor e, logo logo, estará prontinho.</div>
     <h1>Far<em>Mistty</em></h1>
-    <p class="login-description">A comunidade da live tem um jardim especial para você.<br>Entre, cuide do seu cantinho e junte pontos para trocar por dinheiro e vários outros prêmios.</p>
+    <p class="login-description">Entre na competição de vendas: plante, regue, espere e colha.<br>Ganhe pontos e troque por prêmios!</p>
     <div class="login-supporters" aria-label="Apoiadores dos testes">
       <div class="login-supporters-title">🌷 Um jardim feito a muitas mãos</div>
       <div class="login-supporters-note">Com carinho, para quem ajudou a testar e cuidar do joguinho cozy 💚</div>
@@ -3874,18 +3875,10 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <span class="login-supporter">🌿 Hagi</span><span class="login-supporter">🌱 Goulartt</span><span class="login-supporter">🌼 Babbi</span><span class="login-supporter">🌷 Juju</span><span class="login-supporter">🍀 Dujda</span>
       </div>
     </div>
-    <button id="login-twitch-button" class="login-twitch-btn login-disabled" type="button" aria-disabled="true" disabled onclick="loginWithTwitch()">
+    <button id="login-twitch-button" class="login-twitch-btn" type="button" onclick="loginWithTwitch()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
       Entrar com Twitch
     </button>
-    <script>
-      if (/^deploy-preview-\d+--/.test(window.location.hostname)) {
-        const previewLoginButton = document.getElementById('login-twitch-button');
-        previewLoginButton?.removeAttribute('disabled');
-        previewLoginButton?.removeAttribute('aria-disabled');
-        previewLoginButton?.classList.remove('login-disabled');
-      }
-    </script>
     <p class="login-note">Use sua conta Twitch para entrar no jardim.</p>
     <p class="login-launch-warning">A corrida começa dia 18/09 às 08:30 da manhã.</p>
     <div id="login-status" role="status" aria-live="polite"></div>
@@ -6066,7 +6059,7 @@ async function refreshOrders() {
   try { await saveGardenToSE(true); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
 }
 async function refreshSingleOrder(id) {
-  if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(true); return; }
+  if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(false); }
   if ((G.orderSearches || 0) >= 3 || (G.orderDeliveries || 0) >= 4) { renderOrders(); toast('🌿 Você não tem mais atualizações disponíveis nesta estação.', 2800); return; }
   const index = gardenOrders.findIndex(order => order.id === id);
   if (index < 0) return;
@@ -6082,9 +6075,14 @@ function renderOrders() {
   if (!list) return;
   const allOrdersDelivered = (G.orderDeliveries || 0) >= 4;
   updateOrdersReadyBadge();
+  // Aviso não-bloqueante quando há pedidos de estação anterior ainda para entregar
+  const fromPastSeason = !allOrdersDelivered && gardenOrders.length > 0 && G.ordersSeasonKey !== orderSeasonKey();
+  const pastSeasonBanner = fromPastSeason
+    ? `<div class="market-empty" style="margin-bottom:8px;background:#fff8e6;border:1px solid #e6c96a;border-radius:10px;padding:8px 12px;font-size:11px;color:#7a5c1e">🕰️ Pedidos da estação anterior — você ainda pode entregá-los! Clique em 🔄 para receber pedidos da estação atual.</div>`
+    : '';
   list.innerHTML = allOrdersDelivered
     ? '<div class="market-empty">✅ Você entregou todos os pedidos desta estação.<br><small>Espere a estação terminar para receber novos pedidos.</small></div>'
-    : gardenOrders.map(order => {
+    : pastSeasonBanner + gardenOrders.map(order => {
     const item = getPlantable(order.type);
     const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
     const stock = G.harvested[order.type] || 0;
@@ -6145,7 +6143,7 @@ async function openOrders(event) {
     toast('🔒 Os Pedidos do jardim serão liberados no nível 5.', 3000);
     return;
   }
-  if (G.ordersSeasonKey !== orderSeasonKey()) resetOrdersForSeason(true);
+  // Pedidos de estações anteriores permanecem válidos até serem entregues.
   if (gardenOrders.length < 3 && (G.orderDeliveries || 0) < 4) {
     while (gardenOrders.length < 3) gardenOrders.push(createOrder(gardenOrders.length));
     G.orders = gardenOrders;
@@ -6899,7 +6897,8 @@ function advanceSeasonDay() {
   if (G.seasonDay > SEASON_DAYS_LEN) {
     G.seasonDay = 1;
     G.seasonIdx = (G.seasonIdx + 1) % 4;
-    resetOrdersForSeason(true);
+    // Não apaga pedidos ao virar a estação: a jogadora pode entregar pedidos
+    // de estações anteriores. O reset só ocorre ao clicar em "Atualizar Pedidos".
     const s = currentSeason();
     toast(`${s.icon} Nova estação: ${s.name}! ${s.msg}`, 5000);
     // Re-render shop to lock/unlock plants by season
@@ -7553,7 +7552,7 @@ function buildPlotEl(plot, idx) {
     }
     if (isSpecialPlotActive(idx)) {
       const specialBadge = document.createElement('div');
-      specialBadge.style.cssText = 'position:absolute;top:5px;left:5px;z-index:4;';
+      specialBadge.style.cssText = 'position:absolute;top:5px;left:5px;z-index:4;pointer-events:none;';
       specialBadge.innerHTML = specialPlotIcon();
       div.appendChild(specialBadge);
       const tooltip = document.createElement('div');
@@ -7604,7 +7603,7 @@ function buildPlotEl(plot, idx) {
     }
     if (plot.goldenPlot || isSpecialPlotActive(idx)) {
       const specialBadge = document.createElement('div');
-      specialBadge.style.cssText = 'position:absolute;top:5px;left:5px;z-index:4;';
+      specialBadge.style.cssText = 'position:absolute;top:5px;left:5px;z-index:4;pointer-events:none;';
       specialBadge.innerHTML = specialPlotIcon();
       div.appendChild(specialBadge);
     }
@@ -7675,7 +7674,10 @@ function buildPlotEl(plot, idx) {
   }
   div.appendChild(lbl);
 
-  div.addEventListener('click', () => onPlotClick(idx));
+  div.addEventListener('click', () => onPlotClick(idx).catch(err => {
+    console.error('Erro ao clicar no canteiro:', err);
+    toast('❌ Não foi possível salvar a colheita. Tente novamente.', 3000);
+  }));
   return div;
 }
 
@@ -7800,7 +7802,6 @@ async function onPlotClick(idx) {
       // O Mercado deve refletir a colheita imediatamente, mesmo que o
       // salvamento remoto demore ou precise ser tentado novamente.
       renderHarvested();
-      try { await saveGardenToSE(); } catch (error) { console.warn('Colheita não salva imediatamente:', error); }
       // Atualizar inventário e regador após aplicar bônus de skills
       renderInventory();
       renderFertilizerInventory();
@@ -7808,6 +7809,9 @@ async function onPlotClick(idx) {
         `🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!${plot.goldenPlot ? ' ✨ Canteiro Especial: planta dourada vale 3x!' : hasGolden ? ' ✨ Terra Dourada: +1 unidade extra!' : ''}`;
       toast(regrows ? `${toastMsg} 🌱 Ela continuará plantada — regue novamente! (${plot.harvestsRemaining} colheita${plot.harvestsRemaining > 1 ? 's' : ''} restante${plot.harvestsRemaining > 1 ? 's' : ''})` : toastMsg);
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
+
+      // Save em background — não bloqueia a interface
+      saveGardenToSE();
     }
     return;
   }
@@ -8859,7 +8863,6 @@ function setLoginLoading(loading, message = 'Conectando com a Twitch…') {
 
 // ── Twitch OAuth ───────────────────────────────────────────
 function loginWithTwitch() {
-  if (!/^deploy-preview-\d+--/.test(window.location.hostname)) return;
   setLoginLoading(true, 'Abrindo a Twitch para você entrar…');
   // A Twitch aceita o callback de produção já cadastrado. Guardamos a URL do
   // Preview para devolver a pessoa ao mesmo ambiente após o login.
@@ -9415,11 +9418,32 @@ async function loadGardenFromSE(username) {
     G.eventLastType    = save.eventLastType || '';
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
     gardenOrders      = G.orders;
-    if (G.ordersGlobalResetVersion < 1) {
-      G.orderSearches = 0; G.orderDeliveries = 0; G.orderPaidReset = false;
+    if (G.ordersGlobalResetVersion < 3) {
+      // Reset completo (versão 3): nova temporada começando do zero.
+      G.plots = Array(6).fill(null);
+      G.harvested = {};
+      G.inventory = {};
+      G.fertilizerInventory = {};
+      G.pts = 0;
+      G.xp = 0;
+      G.level = 1;
+      G.waterCount = 0;
+      G.waterCapacity = 5;
+      G.seasonIdx = 0;
+      G.seasonDay = 1;
+      G.orderSearches = 0;
+      G.orderDeliveries = 0;
+      G.orderPaidReset = false;
+      G.skillNodes = {};
+      G.skillPoints = 0;
+      G.achievements = [];
+      G.achievStats = { totalHarvest:0, totalBuy:0, totalWater:0, totalSellPts:0, totalFlowerSell:0 };
       gardenOrders = Array.from({ length: 3 }, (_, i) => createOrder(i));
-      G.orders = gardenOrders; G.ordersGlobalResetVersion = 1;
-      setTimeout(() => saveGardenToSE(), 250);
+      G.orders = gardenOrders;
+      G.ordersSeasonKey = orderSeasonKey();
+      G.ordersGlobalResetVersion = 3;
+      toast('🌱 Nova temporada! Seu jardim foi resetado. Vamos começar do zero!', 5000);
+      setTimeout(() => { saveGardenToSE(); renderAll(); }, 250);
     }
     G.missions        = save.missions         || null;
     G.achievements    = new Set(save.achievements || []);

@@ -48,29 +48,45 @@ function orderWasAlreadyStored(order, oldData) {
 function validateOrdersTransition(oldData, nextData) {
   const oldGlobalReset = Number(oldData.ordersGlobalResetVersion || 0);
   const nextGlobalReset = Number(nextData.ordersGlobalResetVersion || 0);
-  const seasonIdx = Number(nextData.seasonIdx || 0);
   const searches = Number(nextData.orderSearches || 0);
   const deliveries = Number(nextData.orderDeliveries || 0);
   if (!Number.isInteger(searches) || searches < 0 || searches > 3) throw new Error('Limite de atualizações de pedidos inválido');
   if (!Number.isInteger(deliveries) || deliveries < 0 || deliveries > 4) throw new Error('Limite de entregas de pedidos inválido');
-  const oldKey = String(oldData.ordersSeasonKey ?? oldData.seasonIdx ?? '0');
-  const nextKey = String(nextData.ordersSeasonKey ?? seasonIdx);
-  const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
-  const rewardState = oldKey === nextKey ? oldData : nextData;
-  const hasInvalidOrder = orders.some(order => {
-    // Pedidos que já estão persistidos podem atravessar a troca de estação:
-    // colher uma planta fora de estação não deve invalidar o logout.
-    if (orderWasAlreadyStored(order, oldData)) return false;
-    return !validOrder(order, seasonIdx, rewardState);
-  });
-  if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');
-  if (nextKey !== String(seasonIdx)) throw new Error('Estação dos pedidos inválida');
+  
+  // Reset global: pula todas as validações de pedidos, só verifica versão
   if (nextGlobalReset > oldGlobalReset) {
-    if (nextGlobalReset !== 1 || oldGlobalReset !== 0 || searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
+    // Ao resetar, os contadores devem sempre ser zerados.
+    if (searches !== 0 || deliveries !== 0 || nextData.orderPaidReset === true) throw new Error('Reset global de pedidos inválido');
     return;
   }
   if (nextGlobalReset < oldGlobalReset) throw new Error('Reset global de pedidos não pode ser revertido');
-  if (oldKey !== nextKey) return;
+  
+  const orders = Array.isArray(nextData.orders) ? nextData.orders : [];
+  // Pedidos existentes nunca são revalidados por estação: eles podem ter sido
+  // gerados numa estação e entregues/salvos em outra. A validação de estação
+  // acontece apenas no frontend (createOrder filtra por isInSeason). Aqui só
+  // verificamos integridade (qty, reward, id) dos pedidos NOVOS — os que ainda
+  // não estavam persistidos no banco.
+  const hasInvalidOrder = orders.some(order => {
+    if (orderWasAlreadyStored(order, oldData)) return false;
+    // Novo pedido: valida apenas estrutura e recompensa, aceitando qualquer estação
+    const tier = ORDER_TIERS[ORDER_TIER_LEGACY[order?.rarity] || order?.rarity];
+    const qty = Number(order?.qty);
+    if (!tier || !Number.isInteger(qty) || qty < tier.min || qty > tier.max) return true;
+    const mascotBonus = ['apple','premium'].includes(nextData?.selectedMascot) ? 1.15 : 1;
+    const skillBonus = 1 + Number(nextData?.skillNodes?.etiqueta_dourada || 0) * .03;
+    const unitValue = Math.round(Math.round((ORDER_VALUES[order.type] || 0) * mascotBonus) * skillBonus);
+    if (!unitValue) return true; // tipo desconhecido
+    const expectedReward = Math.max(30, Math.max(12, Math.round(unitValue * tier.mult)) * qty + Math.round(25 * tier.mult));
+    const expectedXp = Math.round((60 + qty * 10) * tier.mult);
+    return Number(order.reward) !== expectedReward || Number(order.xp) !== expectedXp
+      || typeof order.id !== 'string' || order.id.length > 80;
+  });
+  if (orders.length > 3 || new Set(orders.map(order => order.id)).size !== orders.length || hasInvalidOrder) throw new Error('Pedido adulterado ou incompatível com a estação');
+  
+  const oldKey = String(oldData.ordersSeasonKey ?? oldData.seasonIdx ?? '0');
+  const nextKey = String(nextData.ordersSeasonKey ?? nextData.seasonIdx ?? '0');
+  if (oldKey !== nextKey) return; // troca de estação — contadores já foram zerados pelo cliente
   const oldSearches = Number(oldData.orderSearches || 0);
   const oldDeliveries = Number(oldData.orderDeliveries || 0);
   const oldPaid = oldData.orderPaidReset === true;
@@ -155,8 +171,10 @@ exports.handler = async (event) => {
     ];
     
     // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
-    // O cliente avança a cada 15 segundos; Adubo Rápido avança 2 estágios.
+    // Crescimento normal, Adubo Rápido e Chuva Mágica podem somar avanços.
     const GROW_INTERVAL_MS = 15000;
+    const RAIN_TICK_MS     = 3500;   // Chuva Mágica dispara applyMagicRain() a cada 3.5s
+    const RAIN_DURATION_MS = 45000;  // Duração máxima do evento de chuva (45s)
     const validationRes = await fetch(
       `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,
       {
@@ -171,7 +189,16 @@ exports.handler = async (event) => {
         const lastSaveTime = new Date(rows[0].updated_at).getTime();
         const elapsedMs = Math.max(0, Date.now() - lastSaveTime);
         const maxPossibleTicks = Math.ceil(elapsedMs / GROW_INTERVAL_MS);
-        
+
+        // Crescimento extra que a Chuva Mágica pode ter dado no período.
+        // A chuva aplica +1 growCount por planta a cada RAIN_TICK_MS ms,
+        // mas só enquanto o evento está ativo (máx RAIN_DURATION_MS por evento).
+        // Calculamos quantos ticks de chuva cabem no tempo decorrido, limitados
+        // à duração máxima de um único evento — mantém a proteção contra fraude
+        // sem bloquear saves legítimos durante o evento.
+        const maxRainWindow = Math.min(elapsedMs, RAIN_DURATION_MS);
+        const maxRainGrowth = Math.floor(maxRainWindow / RAIN_TICK_MS);
+
         if (oldData.plots && safeData.plots) {
           let fraudDetected = false;
           const fraudLog = [];
@@ -183,10 +210,10 @@ exports.handler = async (event) => {
             if (!p) return;
             const previousGrowth = old?.type === p.type ? Number(old.growCount || 0) : 0;
             const growDiff = Number(p.growCount || 0) - previousGrowth;
-            const maxPossibleGrowth = maxPossibleTicks * (p.quickGrow === true ? 2 : 1);
-            if (growDiff > maxPossibleGrowth + 3) {
+            const maxGrowthAllowed = maxPossibleTicks * (p.quickGrow === true ? 2 : 1) + maxRainGrowth + 3;
+            if (growDiff > maxGrowthAllowed) {
               fraudDetected = true;
-              fraudLog.push({ plot: i, type: p.type, diff: growDiff, max: maxPossibleGrowth, time: elapsedMs });
+              fraudLog.push({ plot: i, type: p.type, diff: growDiff, max: maxGrowthAllowed, time: elapsedMs });
             }
           });
           

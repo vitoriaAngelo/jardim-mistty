@@ -5490,12 +5490,16 @@ let saleInFlight = false;
 async function sellSelected() {
   if (saleInFlight) return;
   const total = sellTotal();
-  if (total === 0) return;
+  if (total === 0) {
+    toast('🧺 Escolha pelo menos um item para vender.', 2400);
+    return;
+  }
   saleInFlight = true;
 
   const saleSnapshot = {
     harvested: JSON.parse(JSON.stringify(G.harvested || {})),
     crystalHarvested: JSON.parse(JSON.stringify(G.crystalHarvested || {})),
+    sellSelection: { ...SELL },
     pts: G.pts,
     pointsHistory: JSON.parse(JSON.stringify(G.pointsHistory || [])),
     lastSale: G.lastSale,
@@ -5544,6 +5548,7 @@ async function sellSelected() {
     if (pointsCredited) await spendSEPoints(total).catch(() => {});
     G.harvested = saleSnapshot.harvested;
     G.crystalHarvested = saleSnapshot.crystalHarvested;
+    Object.keys(SELL).forEach(type => { SELL[type] = saleSnapshot.sellSelection[type] || 0; });
     G.pts = saleSnapshot.pts;
     G.pointsHistory = saleSnapshot.pointsHistory;
     G.lastSale = saleSnapshot.lastSale;
@@ -8260,13 +8265,13 @@ function closeModal() { document.getElementById('modal').classList.add('hidden')
 
 // ─── PROFILE ─────────────────────────────────────────────
 const HARVEST_TITLES = [
-  { icon:'🌱', name:'Peão do Primeiro Plantio', target:1 },
-  { icon:'🧺', name:'Cuidador da Roça', target:50 },
-  { icon:'🌿', name:'Agricultor Dedicado', target:250 },
-  { icon:'🌾', name:'Mestre da Fazenda', target:750 },
-  { icon:'🚜', name:'Rei do Cafezal', target:1500 },
-  { icon:'🏆', name:'Barão da Colheita', target:3000 },
-  { icon:'💎', name:'Lenda do Campo', target:7500 },
+  { icon:'🌱', name:'Broto de Agrônomo', target:1 },
+  { icon:'🧤', name:'Estagiário da Terra', target:50 },
+  { icon:'🪴', name:'Fiscal da Enxada', target:250 },
+  { icon:'🧪', name:'Doutor em Adubo', target:750 },
+  { icon:'🚜', name:'Mestre do Manejo', target:1500 },
+  { icon:'🏆', name:'CEO do Cafezal', target:3000 },
+  { icon:'💎', name:'Lenda Agronômica', target:7500 },
 ];
 function titleForName(name) { return HARVEST_TITLES.find(t => t.name === name) || null; }
 const PROFILE_BACKGROUNDS = [

@@ -1226,6 +1226,8 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 .market-slot-name {
   font-size: 10px; font-weight: 800; color: var(--text2); text-align: center;
 }
+.market-crystal-tag { display:inline-flex; align-items:center; gap:3px; margin-top:1px; padding:2px 6px; border:1px solid #a779da; border-radius:999px; background:#eadcff; color:#68458d; font-size:9px; font-weight:900; }
+body.dark-mode .market-crystal-tag { border-color:#b995e5; background:#49365d; color:#f0ddff; }
 .market-slot-stock {
   position: absolute;
   top: -6px; right: -6px;
@@ -4258,6 +4260,7 @@ const G = {
   plots: Array(6).fill(null),
   unlockedPlots: 2,
   harvested: {},
+  crystalHarvested: {},
   goldenHarvested: {},
   upgrades: new Set(),
   upgradeLevels: {},
@@ -5496,6 +5499,7 @@ async function sellSelected() {
   Object.entries(SELL).forEach(([type, qty]) => {
     if (qty > 0) {
       G.harvested[type] = (G.harvested[type] || 0) - qty;
+      if (G.crystalHarvested?.[type]) G.crystalHarvested[type] = Math.max(0, G.crystalHarvested[type] - Math.min(qty, G.crystalHarvested[type]));
       soldQty += qty;
       sold.push(`${qty}× ${getPlantable(type).emoji}`);
       // Contabilizar flores ANTES de zerar SELL
@@ -6065,6 +6069,7 @@ function renderHarvested() {
 
   const slots = harvestedTypes.map(type => {
     const count  = G.harvested[type] || 0;
+    const crystalCount = G.crystalHarvested?.[type] || 0;
     const qty    = SELL[type] || 0;
     const unitVal = effectiveSellValue(type);
     const selected = qty > 0;
@@ -6080,6 +6085,7 @@ function renderHarvested() {
       <div class="market-slot ${selected ? 'selected' : ''}" onclick="toggleSellSlot('${type}')">
         <div class="market-slot-svg">${harvestedProduceArt(type)}</div>
         <div class="market-slot-name">${getPlantable(type).name}</div>
+        ${crystalCount > 0 ? `<div class="market-crystal-tag">💎 Cristalina${crystalCount > 1 ? ` · ${crystalCount}x` : ''}</div>` : ''}
         <div class="market-slot-stock">×${count}</div>
         ${sellQty}
       </div>`;
@@ -7635,6 +7641,7 @@ async function onPlotClick(idx) {
           : `🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
       }
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
+      if (plot.mutated) G.crystalHarvested[type] = (G.crystalHarvested[type] || 0) + finalQty;
       if (gotDouble) {
         spawnSkillEffect(idx, '🧺🧺', '×2 Colheita Dupla!', '#778b64');
       }
@@ -8991,6 +8998,7 @@ async function saveGardenToSENow(retryStale = true) {
     plots:            G.plots,
     unlockedPlots:    G.unlockedPlots,
     harvested:        G.harvested,
+    crystalHarvested: G.crystalHarvested || {},
     goldenHarvested:   G.goldenHarvested || {},
     upgrades:         [...G.upgrades],
     upgradeLevels:    G.upgradeLevels || {},
@@ -9255,6 +9263,7 @@ async function loadGardenFromSE(username) {
     G.plots           = (save.plots || Array(6).fill(null)).map(p => p || null);
     G.unlockedPlots   = save.unlockedPlots    || 2;
     G.harvested       = save.harvested        || {};
+    G.crystalHarvested = save.crystalHarvested || {};
   G.upgrades        = new Set(save.upgrades || []);
   G.goldenHarvested = save.goldenHarvested || {};
     G.upgradeLevels   = save.upgradeLevels || {};

@@ -150,7 +150,9 @@ exports.handler = async (event) => {
     ];
     
     // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
-    const GROW_INTERVAL_MS = 15000; // 15 segundos por estágio
+    // O cliente avança o crescimento a cada 10 segundos. Use o relógio do
+    // servidor para não rejeitar progresso legítimo acumulado entre saves.
+    const GROW_INTERVAL_MS = 10000;
     const maxGrowthPerTick = 1;
     const validationRes = await fetch(
       `${SUPABASE_URL}/rest/v1/gardens?username=eq.${encodeURIComponent(username)}&select=data,updated_at&order=updated_at.desc&limit=1`,
@@ -164,8 +166,8 @@ exports.handler = async (event) => {
       if (rows.length > 0) {
         const oldData = rows[0].data || {};
         const lastSaveTime = new Date(rows[0].updated_at).getTime();
-        const elapsedMs = (data.savedAt || Date.now()) - lastSaveTime;
-        const maxPossibleGrowth = Math.floor(elapsedMs / GROW_INTERVAL_MS) * maxGrowthPerTick;
+        const elapsedMs = Math.max(0, Date.now() - lastSaveTime);
+        const maxPossibleGrowth = Math.ceil(elapsedMs / GROW_INTERVAL_MS) * maxGrowthPerTick;
         
         if (oldData.plots && safeData.plots) {
           let fraudDetected = false;
@@ -177,7 +179,7 @@ exports.handler = async (event) => {
             // null. Nesse caso não existe crescimento novo para validar.
             if (!p || !old) return;
             const growDiff = (p.growCount || 0) - (old.growCount || 0);
-            if (growDiff > maxPossibleGrowth + 3) {
+            if (growDiff > maxPossibleGrowth + 5) {
               fraudDetected = true;
               fraudLog.push({ plot: i, type: p.type, diff: growDiff, max: maxPossibleGrowth, time: elapsedMs });
             }

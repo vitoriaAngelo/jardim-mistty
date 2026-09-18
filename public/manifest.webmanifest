@@ -1,0 +1,14 @@
+{
+  "name": "FarMistty",
+  "short_name": "FarMistty",
+  "description": "Plante, cuide e colha no jardim cozy da FarMistty.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#eef2e5",
+  "theme_color": "#263528",
+  "icons": [
+    { "src": "/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

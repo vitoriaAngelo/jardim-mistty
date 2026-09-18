@@ -97,10 +97,15 @@ function validateOrdersTransition(oldData, nextData) {
 function orderActionChanged(oldData, nextData) {
   // A colheita/plantio pode reenviar uma cópia local dos pedidos. Isso não é
   // uma ação de pedido e não deve disparar a validação de recompensas.
-  return Number(oldData?.ordersGlobalResetVersion || 0) !== Number(nextData?.ordersGlobalResetVersion || 0)
-    || Number(oldData?.orderSearches || 0) !== Number(nextData?.orderSearches || 0)
-    || Number(oldData?.orderDeliveries || 0) !== Number(nextData?.orderDeliveries || 0)
-    || Boolean(oldData?.orderPaidReset) !== Boolean(nextData?.orderPaidReset);
+  const oldSearches = Number(oldData?.orderSearches || 0);
+  const nextSearches = Number(nextData?.orderSearches || 0);
+  const oldDeliveries = Number(oldData?.orderDeliveries || 0);
+  const nextDeliveries = Number(nextData?.orderDeliveries || 0);
+  const globalReset = Number(nextData?.ordersGlobalResetVersion || 0) > Number(oldData?.ordersGlobalResetVersion || 0);
+  const paidReset = !Boolean(oldData?.orderPaidReset) && Boolean(nextData?.orderPaidReset);
+  return globalReset || paidReset
+    || nextSearches === oldSearches + 1
+    || nextDeliveries === oldDeliveries + 1;
 }
 
 function ordersMeaningfullyChanged(oldData, nextData) {

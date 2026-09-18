@@ -261,6 +261,12 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .event-rain-drop { position:absolute; top:-30px; color:#8ed4f5; font-size:18px; animation:event-rain 1.2s linear forwards; }
 .event-butterfly { position:fixed; z-index:121; pointer-events:auto; cursor:pointer; border:0; background:transparent; font-size:30px; filter:drop-shadow(0 3px 3px rgba(50,45,80,.25)); animation:event-fly 5s ease-in-out forwards; }
 .event-butterfly.rare { font-size:36px; filter:drop-shadow(0 0 8px #e58cff); }
+.event-pest { position:fixed; z-index:121; pointer-events:auto; cursor:pointer; border:2px solid #718c5d; border-radius:999px; background:#fff9df; padding:7px; font-size:25px; line-height:1; box-shadow:0 3px 0 #c9b98f,0 0 0 3px #ffffffaa; animation:pest-wiggle 1.1s ease-in-out infinite; }
+.event-pest.large { font-size:33px; border-color:#b7794c; }
+.event-pest.golden { font-size:34px; border-color:#d7a62e; box-shadow:0 0 14px #f5d56a,0 3px 0 #b98122; }
+.event-pest.hit { animation:pest-hit .2s ease both; }
+.pest-danger { display:inline-block; margin-left:8px; color:#a85a43; font-weight:900; }
+body.event-pests { animation:farm-pest-shake .35s ease-in-out 3; }
 .plot.event-golden { box-shadow:0 0 0 3px #f0c95b,0 0 22px #ffd96f99 !important; animation:event-golden-pulse 1.1s ease-in-out infinite alternate; }
 .plot.event-mutated { box-shadow:0 0 0 3px #a779da,0 0 24px #b47af688 !important; }
 .plot.event-mutated .plant-container { filter:hue-rotate(52deg) saturate(1.45) brightness(1.08); }
@@ -271,6 +277,9 @@ body.event-rain::after { content:''; position:fixed; inset:0; z-index:110; point
 body.event-moon::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:radial-gradient(circle at 78% 12%,#fffbd0 0 3%,#9d83dc33 4% 17%,#33294b44 60%); mix-blend-mode:multiply; }
 @keyframes event-pop { from{opacity:0;transform:translateY(-10px) scale(.98)} to{opacity:1;transform:none} }
 @keyframes event-rain { to{transform:translate(-35px,110vh);opacity:.15} }
+@keyframes pest-wiggle { 0%,100%{transform:rotate(-5deg) translateY(0)} 50%{transform:rotate(5deg) translateY(-4px)} }
+@keyframes pest-hit { 50%{transform:scale(1.25) rotate(12deg);filter:brightness(1.6)} 100%{transform:scale(.8);opacity:.35} }
+@keyframes farm-pest-shake { 20%,60%{transform:translateX(-2px)} 40%,80%{transform:translateX(2px)} }
 @keyframes event-fly { 0%{transform:translate(-30px,30px) rotate(-8deg);opacity:0} 12%{opacity:1} 55%{transform:translate(45px,-45px) rotate(8deg)} 100%{transform:translate(120px,-90px);opacity:0} }
 @keyframes event-golden-pulse { to{filter:brightness(1.13) saturate(1.2)} }
 body.dark-mode .garden-event-banner { background:linear-gradient(135deg,#354432,#403b2b); border-color:#728069; color:#eef4e8; box-shadow:0 3px 0 #1f2a1e; }
@@ -4348,6 +4357,7 @@ const GARDEN_EVENTS = {
   butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
   moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
   mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode mudar de cor!' },
+  pests: { icon:'🐛', name:'Invasão de Pragas', duration:55, color:'#b7794c', intro:'Algo está se mexendo nas plantações…' },
 };
 let gardenEvent = null;
 let gardenEventTimer = null;
@@ -4417,6 +4427,7 @@ function eventLiveSubtitle() {
   if (gardenEvent.type === 'rain') return `${n} planta${n===1?'':'s'} recebeu${n===1?'':'ram'} água mágica`;
   if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
   if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
+  if (gardenEvent.type === 'pests') return `${n} praga${n===1?'':'s'} removida${n===1?'':'s'} · 🐛 Infestação: ${Math.min(100, gardenEvent.danger || 0)}%`;
   if (gardenEvent.type === 'moon') return `${n} colheita${n===1?'':'s'} ao luar`;
   return n ? 'Uma mutação de cor foi descoberta!' : 'A energia procura uma planta…';
 }
@@ -4431,7 +4442,7 @@ function announceGardenEvent() {
   const type = Math.random() < mutationChance
     ? 'mutation'
     : eventPool[Math.floor(Math.random() * eventPool.length)];
-  gardenEvent = { type, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set() };
+  gardenEvent = { type, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
   toast(`${GARDEN_EVENTS[type].icon} ${GARDEN_EVENTS[type].name} começa em 10 segundos!`, 5000);
   renderGardenEvent();
 }
@@ -4449,6 +4460,7 @@ function startGardenEvent() {
     gardenEventRainTimer = setInterval(() => { spawnEventRain(); applyMagicRain(); }, 3500);
   }
   if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
+  if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
   if (gardenEvent.type === 'mutation') triggerEventMutation();
   renderPlots(); renderGardenEvent(); saveGardenToSE();
 }
@@ -4523,6 +4535,17 @@ function finishGardenEvent() {
   clearInterval(gardenEventRainTimer); clearInterval(gardenEventButterflyTimer);
   gardenEventRainTimer=null; gardenEventButterflyTimer=null;
   document.body.classList.remove(`event-${finished.type}`);
+  if (finished.type === 'pests') {
+    const ignored = (finished.pests || []).filter(p => !p.removed);
+    ignored.forEach(p => { const plot=G.plots[p.plot]; if (plot) plot.pestInfestedUntil=Date.now()+30*60*1000; });
+    if (finished.actions >= 5) {
+      creditGardenPoints(120, 'Invasão de Pragas: fazenda protegida');
+      finished.bonus = 120; finished.xp += 80;
+      G.fertilizerInventory = G.fertilizerInventory || {}; G.fertilizerInventory.natural = Number(G.fertilizerInventory.natural || 0) + 1;
+      toast('🌿 Fazenda protegida! +80 XP · +120 pontos · +1 Adubo Natural', 4200);
+    }
+    if (finished.pestsSpawned > 0 && ignored.length === 0) toast('🏆 Controle perfeito! Nenhuma planta foi afetada.', 3800);
+  }
   window.mascotEventReturn?.();
   document.getElementById('garden-event-layer')?.replaceChildren();
   if (finished.xp>0 && finished.type!=='butterflies') gainXP('harvest',document.getElementById('garden-event-banner'),finished.xp,`+${finished.xp} XP · ${def.name}`);
@@ -5054,6 +5077,27 @@ function isReady(plot) {
 }
 function premiumSpecialPlotAccess() {
   return G.premiumSpecialPlotClaimed === true && hasSubscriberBadge();
+}
+function creditGardenPoints(amount, reason) {
+  const value = Number(amount) || 0;
+  if (!value) return;
+  G.pts = Number(G.pts || 0) + value;
+  recordPointsHistory(value, reason);
+  updatePts();
+  giveSEPoints?.(value);
+}
+function spawnEventPest() {
+  if (!activeGardenEvent('pests')) return;
+  const layer=document.getElementById('garden-event-layer'); if(!layer)return;
+  const plots=G.plots.map((p,i)=>p?i:-1).filter(i=>i>=0); if(!plots.length)return;
+  const golden=Math.random()<.07, large=!golden&&Math.random()<.18;
+  const types=['🐛','🦗','🐌','🪲']; const item={id:crypto.randomUUID(),plot:plots[Math.floor(Math.random()*plots.length)],hits:golden||large?3:1,golden,removed:false};
+  gardenEvent.pests.push(item); gardenEvent.pestsSpawned++;
+  const button=document.createElement('button'); button.className=`event-pest${large?' large':''}${golden?' golden':''}`; button.textContent=types[Math.floor(Math.random()*types.length)]; button.title=item.hits>1?'Praga grande — clique 3 vezes!':'Remover praga';
+  button.style.left=`${8+Math.random()*78}%`; button.style.top=`${18+Math.random()*65}%`;
+  button.onclick=()=>{ if(!activeGardenEvent('pests')||item.removed)return; item.hits--; button.classList.remove('hit'); void button.offsetWidth; button.classList.add('hit'); if(item.hits>0){setTimeout(()=>button.classList.remove('hit'),220);return;} item.removed=true; gardenEvent.actions++; gardenEvent.xp+=5; gardenEvent.danger=Math.max(0,(gardenEvent.danger||0)-10); if(item.golden)gardenEvent.goldenPests++; gainXP('harvest',button,5,'🐛 Praga removida'); toast(`${item.golden?'✨ Praga dourada':'🐛 Praga'} removida! +5 XP`,2200); button.remove(); renderGardenEvent(); };
+  layer.appendChild(button);
+  setTimeout(()=>{if(!item.removed&&activeGardenEvent('pests')){gardenEvent.danger=Math.min(100,(gardenEvent.danger||0)+10);button.remove();renderGardenEvent();}},7000);
 }
 function isSpecialPlotActive(index) {
   // O canteiro 6 resgatado no Premium é permanente enquanto o usuário

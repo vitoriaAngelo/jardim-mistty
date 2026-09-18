@@ -47,6 +47,7 @@ function switchFarmTab(tab) {
 function openAnimalShop() { openShop(); switchShopTab('animais'); }
 function animalState() {
   G.livestock = FarmAnimals.advance(G.livestock, Date.now(), G.skillNodes || {});
+  let delivered = false;
   for (const [id, pet] of Object.entries(G.livestock.pets || {})) {
     const animal = FarmAnimals.catalog[id];
     const produced = (pet.stock || 0) + (pet.goldStock || 0);
@@ -55,7 +56,12 @@ function animalState() {
     G.harvested[animal.product] = (G.harvested[animal.product] || 0) + normal;
     G.harvested[animal.product + '_golden'] = (G.harvested[animal.product + '_golden'] || 0) + golden;
     pet.stock = 0; pet.goldStock = 0;
+    delivered = true;
     toast(`🐾 ${pet.name || animal.name} produziu ${produced} ${FarmAnimals.products[animal.product].name}${golden ? ' · ✨ dourado!' : ''}`, 3500);
+  }
+  if (delivered) {
+    renderHarvested();
+    saveGardenToSE().catch(error => console.warn('Produto animal aguardando sincronização:', error));
   }
   return G.livestock;
 }
@@ -80,7 +86,7 @@ function renderAnimalYard() {
     const boosterStatus=pet?`<div class="animal-booster-status ${pet.booster?'active':''}"><div class="animal-booster-heading"><span>✦ Booster</span><b class="animal-booster-time">${pet.booster?`ativo · ${animalTime(boosterRemaining)}`:'inativo'}</b></div><div class="animal-booster-bar"><span style="width:${pet.booster?Math.max(0,Math.min(100,boosterRemaining/(30*60000)*100)):0}%"></span></div></div>`:'';
     const productionLabel=pet?(status==='producing'?`Próximo ${product.name.toLowerCase()} em ${animalTime(pet.readyAt-now)}`:`Cada item em ${a.minutes} min`):'';
     return `<article class="animal-pen ${status}${pet?.booster?' booster-active':''}">${collect}<span class="animal-home">${a.home}</span>${pet?`<input class="animal-name-input" maxlength="15" value="${petName.replace(/"/g,'&quot;')}" aria-label="Nome do animal" onchange="animalAction('rename','${id}',this.value)" />${boosterStatus}<div class="animal-production-summary"><div class="animal-production-bar"><span style="width:${Math.max(0,progress)}%"></span></div><small>${productionLabel}</small></div>`:`<h4>${a.name}</h4>`}<div class="animal-scene ${status}">${animalArt(id)}</div>${pet?`<div class="animal-health" title="Vida do animal: ${health}%"><span style="width:${health}%"></span><b>${health}%</b></div>`:''}<div class="animal-status" data-animal-status="${id}" data-cycle="${pet?`${pet.readyAt}:${health}:${pet.booster?'booster':''}:${pet.boosterUntil||0}`:''}">${message}</div>${reserve}${choice}${status==='empty'?`<button class="animal-action" onclick="${action}">Conhecer na loja</button>`:''}</article>`;
-  }).join('')}</div><p class="animal-note">A saúde mantém a produção ativa. Cada ração recupera saúde e os produtos produzidos entram automaticamente no Mercado. Super Premium: 34% de chance de +1 item. Booster: 30 minutos de efeito.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
+  }).join('')}</div><p class="animal-note">Com 15% ou mais de saúde, o animal produz normalmente. Cada ração recupera saúde e os produtos entram automaticamente no Mercado. Super Premium: 34% de chance de +1 item quando a saúde está acima de 80%. Booster: 30 minutos de efeito.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
 }
 function renderAnimalShop() {
   const root = document.getElementById('animal-shop'); if (!root) return;
@@ -124,7 +130,7 @@ async function animalAction(action, id, ration = 'normal', quantity = 1) {
     renderAnimalYard(); renderAnimalShop(); renderHarvested();
     try { await saveGardenToSE(); }
     catch (error) { toast(`⚠️ A ação foi mantida nesta tela, mas ainda não foi salva: ${error.message}`, 6000); return; }
-    toast(action === 'collect' ? '🧺 Produtos recolhidos! Confira o Mercado.' : action === 'feed' ? '🌾 Refeição adicionada! O animal produzirá enquanto houver comida.' : action === 'buy' ? `${a.name} chegou ao seu cercadinho!` : action==='booster'?'✦ Booster aplicado a este ciclo!':'🌾 Ração guardada na despensa.', 3000);
+    toast(action === 'collect' ? '🧺 Produtos recolhidos! Confira o Mercado.' : action === 'feed' ? '💚 Saúde recuperada! O animal produzirá enquanto estiver com 15% ou mais de saúde.' : action === 'buy' ? `${a.name} chegou ao seu cercadinho!` : action==='booster'?'✦ Booster aplicado por 30 minutos!':'🌾 Ração guardada na despensa.', 3000);
   } catch (error) { toast(error.message, 4000); }
   finally { animalActionInFlight = false; renderAnimalYard(); renderAnimalShop(); renderRationShop(); }
 }

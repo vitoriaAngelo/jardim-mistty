@@ -75,7 +75,7 @@ function renderAnimalYard() {
     const boosterRemaining=pet?.booster?Math.max(0,pet.boosterUntil-now):0;
     const petName=pet?.name || a.name;
     const health = pet ? Math.max(0, Math.min(100, Number(pet.health ?? 100))) : 0;
-    const message = status === 'empty' ? 'Um lar esperando companhia' : health < 15 ? 'Saúde baixa · alimente para produzir' : `Saúde: ${health}%${pet.readyAt ? ` · ${product.name} em ${animalTime(pet.readyAt-now)} ${superTag}` : ' · aguardando alimentação'}`;
+    const message = status === 'empty' ? 'Um lar esperando companhia' : superTag;
     const action = status === 'empty' ? 'openAnimalShop()' : '';
     const progress = status === 'ready' ? 100 : status === 'producing' ? 100*(1-(pet.readyAt-now)/(a.minutes*60000)) : 0;
     const rationButton=(r,label,qty)=>`<button type="button" class="animal-feed-choice ration-${r} animal-feed-tooltip ${qty?'':'empty'}" data-tooltip="Adicionar ${label} — ${FarmAnimals.rations[r].description}" aria-label="Adicionar ${label}" onclick="feedAnimalChoice('${id}','${r}')" ${qty||animalActionInFlight?'':'disabled'}>${rationArt(r)}<small>${qty}</small></button>`;
@@ -85,7 +85,7 @@ function renderAnimalYard() {
     const collect='';
     const boosterStatus=pet?`<div class="animal-booster-status ${pet.booster?'active':''}"><div class="animal-booster-heading"><span>✦ Booster</span><b class="animal-booster-time">${pet.booster?`ativo · ${animalTime(boosterRemaining)}`:'inativo'}</b></div><div class="animal-booster-bar"><span style="width:${pet.booster?Math.max(0,Math.min(100,boosterRemaining/(30*60000)*100)):0}%"></span></div></div>`:'';
     const productionLabel=pet?(status==='producing'?`Próximo ${product.name.toLowerCase()} em ${animalTime(pet.readyAt-now)}`:`Cada item em ${a.minutes} min`):'';
-    return `<article class="animal-pen ${status}${pet?.booster?' booster-active':''}">${collect}<span class="animal-home">${a.home}</span>${pet?`<input class="animal-name-input" maxlength="15" value="${petName.replace(/"/g,'&quot;')}" aria-label="Nome do animal" onchange="animalAction('rename','${id}',this.value)" />${boosterStatus}<div class="animal-production-summary"><div class="animal-production-bar"><span style="width:${Math.max(0,progress)}%"></span></div><small>${productionLabel}</small></div>`:`<h4>${a.name}</h4>`}<div class="animal-scene ${status}">${animalArt(id)}</div>${pet?`<div class="animal-health" title="Vida do animal: ${health}%"><span style="width:${health}%"></span><b>${health}%</b></div>`:''}<div class="animal-status" data-animal-status="${id}" data-cycle="${pet?`${pet.readyAt}:${health}:${pet.booster?'booster':''}:${pet.boosterUntil||0}`:''}">${message}</div>${reserve}${choice}${status==='empty'?`<button class="animal-action" onclick="${action}">Conhecer na loja</button>`:''}</article>`;
+    return `<article class="animal-pen ${status}${pet?.booster?' booster-active':''}">${collect}<span class="animal-home">${a.home}</span>${pet?`<input class="animal-name-input" maxlength="15" value="${petName.replace(/"/g,'&quot;')}" aria-label="Nome do animal" onchange="animalAction('rename','${id}',this.value)" />${boosterStatus}<div class="animal-production-summary"><div class="animal-production-bar"><span style="width:${Math.max(0,progress)}%"></span></div><small>${productionLabel}</small></div>`:`<h4>${a.name}</h4>`}<div class="animal-scene ${status}">${animalArt(id)}</div>${pet?`<div class="animal-health" title="Vida do animal: ${health}%"><span style="width:${health}%"></span><b>${health}%</b></div>`:''}${pet||message?`<div class="animal-status" data-animal-status="${id}" data-cycle="${pet?`${pet.readyAt}:${health}:${pet.booster?'booster':''}:${pet.boosterUntil||0}`:''}">${message}</div>`:''}${reserve}${choice}${status==='empty'?`<button class="animal-action" onclick="${action}">Conhecer na loja</button>`:''}</article>`;
   }).join('')}</div><p class="animal-note">Com 15% ou mais de saúde, o animal produz normalmente. Cada ração recupera saúde e os produtos entram automaticamente no Mercado. Super Premium: 34% de chance de +1 item quando a saúde está acima de 80%. Booster: 30 minutos de efeito.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
 }
 function renderAnimalShop() {
@@ -152,7 +152,7 @@ setInterval(() => {
     if (FarmAnimals.status(pet) === 'producing') {
       const a=FarmAnimals.catalog[id], remaining=pet.readyAt-Date.now();
       const superMark=pet.ration==='super'?'<span class="animal-super-symbol" title="Super Premium: com saúde acima de 80%, 34% de chance de produzir 1 item extra">✦</span>':'';
-      el.innerHTML = `Saúde: ${Math.max(0,Math.min(100,Number(pet.health||0)))}% · ${FarmAnimals.products[a.product].name} em ${animalTime(remaining)} ${superMark}`;
+      el.innerHTML = superMark;
       el.closest('.animal-pen').querySelector('.animal-production-bar span').style.width = `${Math.max(0,100*(1-remaining/(a.minutes*60000)))}%`;
     }
     else if (FarmAnimals.status(pet) === 'ready' && !el.closest('.animal-pen').classList.contains('ready')) changed = true;

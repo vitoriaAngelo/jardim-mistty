@@ -24,3 +24,4 @@ function newOffer(){openBody('<h2>Uma nova troca</h2><label>Enviar para<select i
 document.querySelector('#trade').onclick=()=>trades();render();
 const prismaticLink=document.createElement('a');prismaticLink.href='album-prismatic.html';prismaticLink.textContent='✦ Abrir Prismas da Primavera';prismaticLink.className='prismatic-link';document.querySelector('nav').append(prismaticLink);
 prismaticLink.innerHTML='✦ <strong>Próxima página</strong> · 10 cartinhas prismáticas';
+const nextAlbum=document.createElement('a');nextAlbum.href='album-prismatic.html';nextAlbum.className='next-album-button';nextAlbum.textContent='Próxima página →';const albumFooter=document.querySelector('.album footer');if(albumFooter)albumFooter.append(nextAlbum);

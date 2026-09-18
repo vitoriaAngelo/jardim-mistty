@@ -5489,12 +5489,20 @@ function changeSellQty(type, delta) {
 let saleInFlight = false;
 async function sellSelected() {
   if (saleInFlight) return;
+  // Nunca venda mais do que o estoque confirmado na tela.
+  for (const [type, qty] of Object.entries(SELL)) {
+    if (!Number.isInteger(qty) || qty < 0 || qty > (G.harvested[type] || 0)) {
+      toast('❌ A quantidade mudou. Confira os itens antes de vender.', 4000);
+      return;
+    }
+  }
   const total = sellTotal();
   if (total === 0) {
     toast('🧺 Escolha pelo menos um item para vender.', 2400);
     return;
   }
   saleInFlight = true;
+  const cacheBeforeSale = seUser ? readGardenCache(seUser.username) : null;
 
   const saleSnapshot = {
     harvested: JSON.parse(JSON.stringify(G.harvested || {})),
@@ -5545,7 +5553,8 @@ async function sellSelected() {
     await saveGardenToSE();
   } catch (error) {
     console.warn('Venda não confirmada:', error);
-    if (pointsCredited) await spendSEPoints(total).catch(() => {});
+    let pointsReversed = true;
+    if (pointsCredited) pointsReversed = await spendSEPoints(total).catch(() => false);
     G.harvested = saleSnapshot.harvested;
     G.crystalHarvested = saleSnapshot.crystalHarvested;
     Object.keys(SELL).forEach(type => { SELL[type] = saleSnapshot.sellSelection[type] || 0; });
@@ -5556,8 +5565,12 @@ async function sellSelected() {
     G.achievStats = saleSnapshot.achievStats;
     G.missions = saleSnapshot.missions;
     G.achievements = saleSnapshot.achievements;
+    if (seUser && cacheBeforeSale) writeGardenCache(seUser.username, cacheBeforeSale);
     updatePts(); renderHarvested(); renderMissions();
-    toast('❌ Não foi possível confirmar a venda. Atualize o jardim antes de tentar novamente.', 4500);
+    const reason = error?.message || 'Falha de comunicação com o servidor.';
+    toast(pointsReversed
+      ? `❌ Venda não concluída: ${reason} Os itens continuam no mercado.`
+      : `⚠️ Venda não concluída: ${reason} Os pontos podem ter sido creditados; não tente novamente e avise o suporte.`, 7000);
     return;
   } finally {
     saleInFlight = false;

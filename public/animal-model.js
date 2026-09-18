@@ -16,10 +16,10 @@
   };
   for (const [id,p] of Object.entries(products)) products[id+'_golden'] = {...p,name:p.name+' dourado',sell:p.sell*2,golden:true,base:id};
   const rations = {
-    normal:{name:'Normal',cost:20,color:'#d5bc91',description:'Uma porção por unidade. Galinha e pato: 1; vaca: 4; porco e ovelha: 3.'},
-    premium:{name:'Premium',cost:90,color:'#e6c66f',description:'Uma unidade alimenta completamente qualquer animal.'},
-    super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Alimenta completamente com 1 unidade e tem 35% de chance de produzir 1 item extra.'},
-    booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Complemento: 20% de chance de produto dourado, que vale o dobro. Uma aplicação ao ciclo atual. Não se repete nas refeições reservadas.'},
+    normal:{name:'Normal',cost:20,color:'#d5bc91',description:'Recupera 20% da saúde. Galinha e pato: 1; vaca: 4; porco e ovelha: 3.'},
+    premium:{name:'Premium',cost:90,color:'#e6c66f',description:'Recupera 50% da saúde do animal.'},
+    super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Recupera 80% da saúde e tem 34% de chance de produzir 1 item extra.'},
+    booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Dura 30 minutos e dá chance de produto dourado, que vale o dobro.'},
   };
   const HEALTH_MAX = 100;
   const HEALTH_DECAY_PER_HOUR = 10;
@@ -43,7 +43,7 @@
         state.pets[id] = { name: typeof raw.pets[id].name === 'string' ? raw.pets[id].name.slice(0,15) : '', readyAt: Number.isFinite(readyAt) && readyAt > 0 ? readyAt : 0,
           health: Number.isFinite(savedHealth) ? Math.max(0, Math.min(HEALTH_MAX, savedHealth)) : HEALTH_MAX,
           healthUpdatedAt: Number.isFinite(savedHealthAt) && savedHealthAt > 0 ? savedHealthAt : Date.now(),
-          quantity:raw.pets[id].quantity===2?2:1, ration:['normal','premium','super'].includes(raw.pets[id].ration)?raw.pets[id].ration:'normal', booster:raw.pets[id].booster===true,
+          quantity:raw.pets[id].quantity===2?2:1, ration:['normal','premium','super'].includes(raw.pets[id].ration)?raw.pets[id].ration:'normal', booster:raw.pets[id].booster===true, boosterUntil:Number(raw.pets[id].boosterUntil) || 0,
           golden:raw.pets[id].booster===true && raw.pets[id].golden===true,
           queue:Array.isArray(raw.pets[id].queue)?raw.pets[id].queue.map(meal=>({quantity:meal?.quantity===2?2:1,ration:['normal','premium','super'].includes(meal?.ration)?meal.ration:'normal',duration:Number.isFinite(Number(meal?.duration))?Number(meal.duration):null})):[],
           stock:count(raw.pets[id].stock),goldStock:count(raw.pets[id].goldStock) };
@@ -65,6 +65,7 @@
       } else {
         pet.healthUpdatedAt = now;
       }
+      if (pet.boosterUntil && pet.boosterUntil <= now) { pet.booster=false; pet.boosterUntil=0; pet.golden=false; }
       while(pet.readyAt>0 && pet.readyAt<=now) {
         pet[pet.golden?'goldStock':'stock']+=pet.quantity;
         const next=pet.queue.shift();
@@ -87,9 +88,10 @@
       if (state.rations[ration]<1) throw new Error('Esta ração acabou. Visite a aba Rações da loja.');
       state.rations[ration]--;
     }
-    const quantity=ration==='super' && random()<(.35 + Number(skills.cuidado_especial || 0) * .03) ? 2 : 1;
+    const healthRecovery = ration === 'super' ? 80 : ration === 'premium' ? 50 : 20;
+    const quantity=ration==='super' && random()<(.34 + Number(skills.cuidado_especial || 0) * .03) ? 2 : 1;
     const productionMinutes = catalog[id].minutes * (1 - Number(skills.rotina_rural || 0) * .04);
-    state.pets[id].health = Math.min(HEALTH_MAX, state.pets[id].health + 20);
+    state.pets[id].health = Math.min(HEALTH_MAX, state.pets[id].health + healthRecovery);
     state.pets[id].healthUpdatedAt = now;
     if(state.pets[id].readyAt) {
       state.pets[id].queue.push({quantity,ration,duration:productionMinutes});
@@ -111,7 +113,7 @@
     if (!pet || !pet.readyAt && (pet.stock||pet.goldStock)) throw new Error('Inicie uma nova refeição antes de adicionar o Booster.');
     if (pet.booster) throw new Error('Este animal já recebeu Booster neste ciclo.');
     if (state.rations.booster<1) throw new Error('Compre Booster na aba Rações da loja.');
-    state.rations.booster--;pet.booster=true;pet.golden=random()<(.2 + Number(skills.criador_dourado || 0) * .04);
+    state.rations.booster--;pet.booster=true;pet.boosterUntil=now+30*60000;pet.golden=random()<(.2 + Number(skills.criador_dourado || 0) * .04);
     return state;
   }
   function rename(raw,id,name) {

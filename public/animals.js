@@ -45,7 +45,20 @@ function switchFarmTab(tab) {
   if (animals) renderAnimalYard();
 }
 function openAnimalShop() { openShop(); switchShopTab('animais'); }
-function animalState() { G.livestock = FarmAnimals.advance(G.livestock); return G.livestock; }
+function animalState() {
+  G.livestock = FarmAnimals.advance(G.livestock);
+  for (const [id, pet] of Object.entries(G.livestock.pets || {})) {
+    const animal = FarmAnimals.catalog[id];
+    const produced = (pet.stock || 0) + (pet.goldStock || 0);
+    if (!produced || !animal) continue;
+    const normal = pet.stock || 0, golden = pet.goldStock || 0;
+    G.harvested[animal.product] = (G.harvested[animal.product] || 0) + normal;
+    G.harvested[animal.product + '_golden'] = (G.harvested[animal.product + '_golden'] || 0) + golden;
+    pet.stock = 0; pet.goldStock = 0;
+    toast(`🐾 ${pet.name || animal.name} produziu ${produced} ${FarmAnimals.products[animal.product].name}${golden ? ' · ✨ dourado!' : ''}`, 3500);
+  }
+  return G.livestock;
+}
 function animalTime(ms) { const seconds = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(seconds/60)}min ${String(seconds%60).padStart(2,'0')}s`; }
 function renderAnimalYard() {
   const root = document.getElementById('animal-yard'); if (!root) return;
@@ -53,20 +66,19 @@ function renderAnimalYard() {
   root.innerHTML = `<div class="animal-intro"><div><h3>Um cantinho de carinho</h3><p>Alimente, espere e recolha. Cada bichinho tem seu próprio lar.</p></div></div><div class="animal-pens">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const pet = state.pets[id], status = FarmAnimals.status(pet, now), product = FarmAnimals.products[a.product];
     const rationTag=pet?.readyAt?`<span class="animal-ration-tag ${pet.ration||'normal'}">${FarmAnimals.rations[pet.ration||'normal'].name}</span>`:'';
-    const boosterTag=pet?.booster?'<span class="animal-booster-tag">✦ Booster aplicado</span>':'';
+    const boosterTag=pet?.booster?'<span class="animal-booster-tag">✦ Booster ativo</span>':'';
     const petName=pet?.name || a.name;
     const health = pet ? Math.max(0, Math.min(100, Number(pet.health ?? 100))) : 0;
-    const message = status === 'empty' ? 'Um lar esperando companhia' : pet.readyAt ? `${product.name} em ${animalTime(pet.readyAt-now)} ${rationTag} ${boosterTag}` : 'Sem refeições · produção pausada';
+    const message = status === 'empty' ? 'Um lar esperando companhia' : `Saúde: ${health}%${pet.readyAt ? ` · ${product.name} em ${animalTime(pet.readyAt-now)} ${rationTag} ${boosterTag}` : ' · aguardando alimentação'}`;
     const action = status === 'empty' ? 'openAnimalShop()' : '';
     const progress = status === 'ready' ? 100 : status === 'producing' ? 100*(1-(pet.readyAt-now)/(a.minutes*60000)) : 0;
     const rationButton=(r,label,qty)=>`<button type="button" class="animal-feed-choice ration-${r} animal-feed-tooltip ${qty?'':'empty'}" data-tooltip="Adicionar ${label} — ${FarmAnimals.rations[r].description}" aria-label="Adicionar ${label}" onclick="feedAnimalChoice('${id}','${r}')" ${qty||animalActionInFlight?'':'disabled'}>${rationArt(r)}<small>${qty}</small></button>`;
     const boosterChoice=pet?`<button type="button" class="animal-feed-choice ration-booster animal-feed-tooltip ${state.rations.booster?'':'empty'}" data-tooltip="Adicionar Booster — ${FarmAnimals.rations.booster.description}" aria-label="Adicionar Booster" onclick="animalAction('booster','${id}')" ${state.rations.booster&&!pet.booster&&status!=='ready'&&!animalActionInFlight?'':'disabled'}>${rationArt('booster')}<small>${state.rations.booster}</small></button>`:'';
     const choice=pet?`<div class="animal-feed-picker" aria-label="Escolha uma ração">${rationButton('normal','Ração Normal',state.feed)}${rationButton('premium','Ração Premium',state.rations.premium)}${rationButton('super','Ração Super Premium',state.rations.super)}${boosterChoice}</div>`:'';
-    const stocked=pet?pet.stock+pet.goldStock:0;
-    const reserve=pet?`<div class="animal-meta"><span>🌾 ${pet.queue.length + (pet.readyAt ? 1 : 0)} na fila</span><span>📦 ${pet.stock + pet.goldStock} guardados</span></div>`:'';
-    const collect=stocked?`<button class="animal-product-collect" title="Recolher ${stocked} produtos" aria-label="Recolher ${stocked} produtos" onclick="animalAction('collect','${id}')" ${animalActionInFlight?'disabled':''}>${animalProductArt(a.product)}<b>${stocked}</b></button>`:'';
-    return `<article class="animal-pen ${status}">${collect}<span class="animal-home">${a.home}</span>${pet?`<input class="animal-name-input" maxlength="15" value="${petName.replace(/"/g,'&quot;')}" aria-label="Nome do animal" onchange="animalAction('rename','${id}',this.value)" />`:`<h4>${a.name}</h4>`}<div class="animal-scene ${status}">${animalArt(id)}</div>${pet?`<div class="animal-health" title="Vida do animal: ${health}%"><span style="width:${health}%"></span></div>`:''}<div class="animal-status" data-animal-status="${id}" data-cycle="${pet?`${pet.readyAt}:${stocked}:${health}`:''}">${message}</div>${reserve}${choice}<div class="animal-progress"><span style="width:${Math.max(0,progress)}%"></span></div>${status==='empty'?`<button class="animal-action" onclick="${action}">Conhecer na loja</button>`:''}</article>`;
-  }).join('')}</div><p class="animal-note">Adicione várias refeições: elas serão consumidas em ordem e os produtos ficarão guardados. Sem comida, a produção pausa. O tempo fora do jogo também conta. Super Premium: 35% de +1 por refeição. Booster: 20% de dourado somente no ciclo atual.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
+    const reserve=pet?`<div class="animal-meta"><span>🌾 ${pet.queue.length + (pet.readyAt ? 1 : 0)} na fila</span></div>`:'';
+    const collect='';
+    return `<article class="animal-pen ${status}">${collect}<span class="animal-home">${a.home}</span>${pet?`<input class="animal-name-input" maxlength="15" value="${petName.replace(/"/g,'&quot;')}" aria-label="Nome do animal" onchange="animalAction('rename','${id}',this.value)" />`:`<h4>${a.name}</h4>`}<div class="animal-scene ${status}">${animalArt(id)}</div>${pet?`<div class="animal-health" title="Vida do animal: ${health}%"><span style="width:${health}%"></span></div>`:''}<div class="animal-status" data-animal-status="${id}" data-cycle="${pet?`${pet.readyAt}:${health}`:''}">${message}</div>${reserve}${choice}<div class="animal-progress"><span style="width:${Math.max(0,progress)}%"></span></div>${status==='empty'?`<button class="animal-action" onclick="${action}">Conhecer na loja</button>`:''}</article>`;
+  }).join('')}</div><p class="animal-note">A saúde mantém a produção ativa. Cada ração recupera saúde e os produtos produzidos entram automaticamente no Mercado. Super Premium: 34% de chance de +1 item. Booster: 30 minutos de efeito.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
 }
 function renderAnimalShop() {
   const root = document.getElementById('animal-shop'); if (!root) return;
@@ -121,7 +133,7 @@ setInterval(() => {
   let changed = false;
   for (const el of root.querySelectorAll('[data-animal-status]')) {
     const id = el.dataset.animalStatus, pet = state.pets[id];
-    if(pet && el.dataset.cycle!==`${pet.readyAt}:${pet.stock+pet.goldStock}`)changed=true;
+    if(pet && el.dataset.cycle!==`${pet.readyAt}:${Math.max(0,Math.min(100,Number(pet.health ?? 100)))}`)changed=true;
     if (FarmAnimals.status(pet) === 'producing') {
       const a=FarmAnimals.catalog[id], remaining=pet.readyAt-Date.now();
       el.innerHTML = `${FarmAnimals.products[a.product].name} em ${animalTime(remaining)} <span class="animal-ration-tag ${pet.ration||'normal'}">${FarmAnimals.rations[pet.ration||'normal'].name}</span>`;

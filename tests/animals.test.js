@@ -9,7 +9,7 @@ for (const [id, animal] of Object.entries(model.catalog)) {
     const original = { feed:10, pets:{ [id]:{ readyAt:0 } } };
     const fed = model.feed(original, id, 1000);
     assert.equal(original.feed, 10);
-    assert.equal(fed.feed, 10-animal.feed);
+    assert.equal(fed.feed, 9);
     assert.equal(fed.pets[id].readyAt, 1000+animal.minutes*60000);
     assert.equal(model.feed(fed,id,1001).pets[id].queue.length,1);
     assert.throws(() => model.collect(fed,id,1001));

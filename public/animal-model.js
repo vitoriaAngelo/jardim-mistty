@@ -16,7 +16,7 @@
   };
   for (const [id,p] of Object.entries(products)) products[id+'_golden'] = {...p,name:p.name+' dourado',sell:p.sell*2,golden:true,base:id};
   const rations = {
-    normal:{name:'Normal',cost:20,color:'#d5bc91',description:'Recupera 20% da saúde. Galinha e pato: 1; vaca: 4; porco e ovelha: 3.'},
+    normal:{name:'Normal',cost:20,color:'#d5bc91',description:'Recupera 20% da saúde do animal.'},
     premium:{name:'Premium',cost:90,color:'#e6c66f',description:'Recupera 50% da saúde do animal.'},
     super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Recupera 80% da saúde e tem 34% de chance de produzir 1 item extra.'},
     booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Dura 30 minutos e dá chance de produto dourado, que vale o dobro.'},
@@ -78,7 +78,7 @@
     if (!animal || !state.pets[id]) throw new Error('Compre este animal primeiro.');
     if (!['normal','premium','super'].includes(ration)) throw new Error('Escolha uma ração para alimentar.');
     if (state.pets[id].readyAt && state.pets[id].queue.length >= 9) throw new Error('A fila já está cheia (máximo de 10 refeições).');
-    const normalCost = animal.feed;
+    const normalCost = 1;
     if (ration==='normal') {
       if (state.feed < normalCost) throw new Error('Compre mais ração na aba Rações da loja.');
       state.feed -= normalCost;

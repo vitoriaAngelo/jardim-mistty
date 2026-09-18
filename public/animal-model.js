@@ -22,6 +22,7 @@
     booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Dura 30 minutos e dá chance de produto dourado, que vale o dobro.'},
   };
   const HEALTH_MAX = 100;
+  const MIN_HEALTH_TO_PRODUCE = 15;
   const HEALTH_DECAY_PER_HOUR = 10;
   function healthAfterIdle(health, lastHealthAt, now) {
     const elapsedHours = Math.max(0, now - lastHealthAt) / 3600000;
@@ -52,20 +53,17 @@
     return state;
   }
   function status(pet, now = Date.now()) {
-    return !pet ? 'empty' : pet.readyAt>now ? 'producing' : pet.readyAt || pet.stock || pet.goldStock ? 'ready' : 'hungry';
+    return !pet ? 'empty' : pet.health < MIN_HEALTH_TO_PRODUCE ? 'hungry' : pet.readyAt>now ? 'producing' : pet.readyAt || pet.stock || pet.goldStock ? 'ready' : 'hungry';
   }
   function count(n) { n=Number(n);return Number.isSafeInteger(n)&&n>0?n:0; }
   function advance(raw,now=Date.now()) {
     const state=normalize(raw);
     for(const [id,pet] of Object.entries(state.pets)) {
-      if (!pet.readyAt && !pet.queue.length) {
-        pet.health = healthAfterIdle(pet.health, pet.healthUpdatedAt, now);
-        pet.healthUpdatedAt = now;
-        if (pet.health <= 0) { delete state.pets[id]; continue; }
-      } else {
-        pet.healthUpdatedAt = now;
-      }
+      pet.health = healthAfterIdle(pet.health, pet.healthUpdatedAt, now);
+      pet.healthUpdatedAt = now;
+      if (pet.health <= 0) { delete state.pets[id]; continue; }
       if (pet.boosterUntil && pet.boosterUntil <= now) { pet.booster=false; pet.boosterUntil=0; pet.golden=false; }
+      if (pet.health < MIN_HEALTH_TO_PRODUCE) continue;
       while(pet.readyAt>0 && pet.readyAt<=now) {
         pet[pet.golden?'goldStock':'stock']+=pet.quantity;
         const next=pet.queue.shift();

@@ -46,6 +46,10 @@ test('borboletas concedem mais XP, com bônus maior para a rara', () => {
   assert.match(html, /Borboleta encontrada/);
 });
 
+test('gasto de habilidade aparece no histórico de pontos', () => {
+  assert.match(html, /chargeGamePoints\(cost, `Habilidade: \$\{node\.name\} · nível \$\{lvl \+ 1\}`\)/);
+});
+
 test('mutação cristalina protege a planta fora da estação até a última colheita', () => {
   assert.match(html, /const mutationProtectsSeason = outOfSeason && plot\.mutated === true/);
   assert.match(html, /const lostToSeason = outOfSeason && !mutationProtectsSeason/);

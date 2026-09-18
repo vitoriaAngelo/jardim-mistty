@@ -10334,7 +10334,7 @@ async function upgradeSkillNode(nodeId, branchId) {
   if (G.pts < cost) { toast(`🌱 Faltam ${cost - G.pts} pts para evoluir!`); return; }
 
   // Cobrar via chargeGamePoints para sincronizar corretamente com o StreamElements
-  if (!(await chargeGamePoints(cost, 'Regador cheio'))) return;
+  if (!(await chargeGamePoints(cost, `Habilidade: ${node.name} · nível ${lvl + 1}`))) return;
   G.skillPoints--;
   G.skillNodes[nodeId] = lvl + 1;
   // Garantir que skillPointsClaimed está atualizado para evitar re-concessão retroativa

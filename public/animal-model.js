@@ -56,7 +56,7 @@
     return !pet ? 'empty' : pet.health < MIN_HEALTH_TO_PRODUCE ? 'hungry' : pet.readyAt>now ? 'producing' : pet.readyAt || pet.stock || pet.goldStock ? 'ready' : 'hungry';
   }
   function count(n) { n=Number(n);return Number.isSafeInteger(n)&&n>0?n:0; }
-  function advance(raw,now=Date.now()) {
+  function advance(raw,now=Date.now(),skills={},random=Math.random) {
     const state=normalize(raw);
     for(const [id,pet] of Object.entries(state.pets)) {
       pet.health = healthAfterIdle(pet.health, pet.healthUpdatedAt, now);
@@ -67,14 +67,15 @@
       while(pet.readyAt>0 && pet.readyAt<=now) {
         pet[pet.golden?'goldStock':'stock']+=pet.quantity;
         const next=pet.queue.shift();
-        pet.quantity=next?.quantity || 1;pet.ration=next?.ration || 'normal';pet.booster=false;pet.golden=false;
+        pet.quantity=next?.quantity || 1;pet.ration=next?.ration || 'normal';
+        pet.golden=next ? pet.booster && random()<(.2 + Number(skills.criador_dourado || 0) * .04) : false;
         pet.readyAt=next?pet.readyAt+(next.duration || catalog[id].minutes)*60000:0;
       }
     }
     return state;
   }
   function feed(raw, id, now = Date.now(), ration = 'normal', random = Math.random, skills = {}) {
-    const state = advance(raw,now), animal = catalog[id];
+    const state = advance(raw,now,skills,random), animal = catalog[id];
     if (!animal || !state.pets[id]) throw new Error('Compre este animal primeiro.');
     if (!['normal','premium','super'].includes(ration)) throw new Error('Escolha uma ração para alimentar.');
     if (state.pets[id].readyAt && state.pets[id].queue.length >= 9) throw new Error('A fila já está cheia (máximo de 10 refeições).');
@@ -107,7 +108,7 @@
     return {state,items,product,quantity};
   }
   function boost(raw,id,now=Date.now(),random=Math.random, skills = {}) {
-    const state=advance(raw,now),pet=state.pets[id];
+    const state=advance(raw,now,{},random),pet=state.pets[id];
     if (!pet || !pet.readyAt && (pet.stock||pet.goldStock)) throw new Error('Inicie uma nova refeição antes de adicionar o Booster.');
     if (pet.booster) throw new Error('Este animal já recebeu Booster neste ciclo.');
     if (state.rations.booster<1) throw new Error('Compre Booster na aba Rações da loja.');

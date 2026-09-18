@@ -85,7 +85,7 @@ test('Booster combina com Super Premium, não repete e produto dourado vale o do
   const result=model.collect(model.normalize(JSON.parse(JSON.stringify(state))),'cow',999999);
   assert.equal(result.quantity,2);assert.equal(result.product,'farm_milk_golden');
   assert.equal(model.products[result.product].sell,model.products.farm_milk.sell*2);
-  assert.equal(result.state.pets.cow.booster,false);
+  assert.equal(result.state.pets.cow.booster,true);
 });
 test('Booster antes da refeição não alimenta; após produzir não pode ser aplicado',()=>{
   const state=model.boost({rations:{booster:1},pets:{duck:{readyAt:0}}},'duck',100,()=>.2);
@@ -116,7 +116,7 @@ test('coleta de comuns e dourados preserva ciclo em andamento e Booster não se 
   const result=model.collect(state,'pig',1000+2*360000+10);
   assert.deepEqual(result.items,{farm_bacon:1,farm_bacon_golden:2});
   assert.equal(result.state.pets.pig.readyAt,1000+3*360000);
-  assert.equal(result.state.pets.pig.booster,false);
+  assert.equal(result.state.pets.pig.booster,true);
 });
 test('nova refeição após pausa inicia agora e não produz retroativamente',()=>{
   let state=model.feed({feed:2,pets:{duck:{readyAt:0}}},'duck',1000);

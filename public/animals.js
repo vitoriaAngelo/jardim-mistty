@@ -50,7 +50,7 @@ function animalTime(ms) { const seconds = Math.max(0, Math.ceil(ms / 1000)); ret
 function renderAnimalYard() {
   const root = document.getElementById('animal-yard'); if (!root) return;
   const state = animalState(), now = Date.now();
-  root.innerHTML = `<div class="animal-intro"><div><h3>Um cantinho de carinho</h3><p>Alimente, espere e recolha. Cada bichinho tem seu próprio lar.</p></div><span class="animal-feed-stock">Ração: ${state.feed} ${state.feed===1?'porção':'porções'}</span></div><div class="animal-pens">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
+  root.innerHTML = `<div class="animal-intro"><div><h3>Um cantinho de carinho</h3><p>Alimente, espere e recolha. Cada bichinho tem seu próprio lar.</p></div></div><div class="animal-pens">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const pet = state.pets[id], status = FarmAnimals.status(pet, now), product = FarmAnimals.products[a.product];
     const message = status === 'empty' ? 'Um lar esperando companhia' : pet.readyAt ? `${product.name} em ${animalTime(pet.readyAt-now)}` : 'Sem refeições · produção pausada';
     const action = status === 'empty' ? 'openAnimalShop()' : '';

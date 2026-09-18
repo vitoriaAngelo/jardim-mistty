@@ -2,6 +2,7 @@
 .farm-tabs { display:flex; gap:8px; margin-bottom:16px; }
 .ration-choice { width:100%; padding:8px 3px; margin-top:5px; border-radius:9px; background:var(--cream); color:var(--text); border:1px solid #9ba58b; font:12px Nunito,sans-serif; }
 .animal-booster { margin-top:9px; background:#658e80; }
+.animal-collect { margin-top:9px; background:#967c45; }
 .animal-golden { position:relative; filter:drop-shadow(0 0 5px #e9c24d); margin-bottom:17px; }
 .animal-golden svg { filter:sepia(.8) saturate(1.6); }
 .animal-gold-tag { position:absolute; top:100%; left:50%; transform:translateX(-50%); white-space:nowrap; background:#f5e5b6; color:#71501c; border-radius:7px; padding:2px 5px; font-size:9px; font-weight:900; }

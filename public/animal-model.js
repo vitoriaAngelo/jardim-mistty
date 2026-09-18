@@ -17,9 +17,9 @@
   for (const [id,p] of Object.entries(products)) products[id+'_golden'] = {...p,name:p.name+' dourado',sell:p.sell*2,golden:true,base:id};
   const rations = {
     normal:{name:'Normal',cost:20,color:'#d5bc91',description:'Uma porção por unidade. Galinha e pato: 1; vaca: 4; porco e ovelha: 3.'},
-    premium:{name:'Premium',cost:55,color:'#e6c66f',description:'Uma unidade alimenta completamente qualquer animal.'},
-    super:{name:'Super Premium',cost:65,color:'#b9a0d7',description:'Alimenta completamente com 1 unidade e tem 35% de chance de produzir 1 item extra.'},
-    booster:{name:'Booster',cost:15,color:'#9cc8bc',description:'Complemento: 20% de chance de produto dourado, que vale o dobro. Uma aplicação por animal a cada ciclo. Não substitui a refeição.'},
+    premium:{name:'Premium',cost:90,color:'#e6c66f',description:'Uma unidade alimenta completamente qualquer animal.'},
+    super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Alimenta completamente com 1 unidade e tem 35% de chance de produzir 1 item extra.'},
+    booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Complemento: 20% de chance de produto dourado, que vale o dobro. Uma aplicação ao ciclo atual. Não se repete nas refeições reservadas.'},
   };
   function normalize(raw) {
     const amount = Number(raw?.feed);
@@ -34,17 +34,32 @@
         const readyAt = Number(raw.pets[id].readyAt);
         state.pets[id] = { readyAt: Number.isFinite(readyAt) && readyAt > 0 ? readyAt : 0,
           quantity:raw.pets[id].quantity===2?2:1, booster:raw.pets[id].booster===true,
-          golden:raw.pets[id].booster===true && raw.pets[id].golden===true };
+          golden:raw.pets[id].booster===true && raw.pets[id].golden===true,
+          queue:Array.isArray(raw.pets[id].queue)?raw.pets[id].queue.map(meal=>({quantity:meal?.quantity===2?2:1})):[],
+          stock:count(raw.pets[id].stock),goldStock:count(raw.pets[id].goldStock) };
       }
     }
     return state;
   }
   function status(pet, now = Date.now()) {
-    return !pet ? 'empty' : !pet.readyAt ? 'hungry' : pet.readyAt <= now ? 'ready' : 'producing';
+    return !pet ? 'empty' : pet.readyAt>now ? 'producing' : pet.readyAt || pet.stock || pet.goldStock ? 'ready' : 'hungry';
+  }
+  function count(n) { n=Number(n);return Number.isSafeInteger(n)&&n>0?n:0; }
+  function advance(raw,now=Date.now()) {
+    const state=normalize(raw);
+    for(const [id,pet] of Object.entries(state.pets)) {
+      while(pet.readyAt>0 && pet.readyAt<=now) {
+        pet[pet.golden?'goldStock':'stock']+=pet.quantity;
+        const next=pet.queue.shift();
+        pet.quantity=next?.quantity || 1;pet.booster=false;pet.golden=false;
+        pet.readyAt=next?pet.readyAt+catalog[id].minutes*60000:0;
+      }
+    }
+    return state;
   }
   function feed(raw, id, now = Date.now(), ration = 'normal', random = Math.random) {
-    const state = normalize(raw), animal = catalog[id];
-    if (!animal || status(state.pets[id], now) !== 'hungry') throw new Error('Este animal não precisa de comida agora.');
+    const state = advance(raw,now), animal = catalog[id];
+    if (!animal || !state.pets[id]) throw new Error('Compre este animal primeiro.');
     if (!['normal','premium','super'].includes(ration)) throw new Error('Escolha uma ração para alimentar.');
     if (ration==='normal') {
       if (state.feed < animal.feed) throw new Error('Compre mais ração na aba Rações da loja.');
@@ -53,27 +68,30 @@
       if (state.rations[ration]<1) throw new Error('Esta ração acabou. Visite a aba Rações da loja.');
       state.rations[ration]--;
     }
-    state.pets[id].quantity = ration==='super' && random()<.35 ? 2 : 1;
-    state.pets[id].readyAt = now + animal.minutes * 60000;
+    const quantity=ration==='super' && random()<.35 ? 2 : 1;
+    if(state.pets[id].readyAt) state.pets[id].queue.push({quantity});
+    else {state.pets[id].quantity=quantity;state.pets[id].readyAt=now+animal.minutes*60000;}
     return state;
   }
   function collect(raw, id, now = Date.now()) {
-    const state = normalize(raw);
-    if (!catalog[id] || status(state.pets[id], now) !== 'ready') throw new Error('O produto ainda não está pronto.');
-    const pet=state.pets[id], quantity=pet.quantity;
-    const product=catalog[id].product+(pet.golden?'_golden':'');
-    state.pets[id] = {readyAt:0,quantity:1,booster:false,golden:false};
-    return { state, product, quantity };
+    const state = advance(raw,now),pet=state.pets[id];
+    if (!catalog[id] || !pet || !pet.stock&&!pet.goldStock) throw new Error('O produto ainda não está pronto.');
+    const items={};
+    if(pet.stock)items[catalog[id].product]=pet.stock;
+    if(pet.goldStock)items[catalog[id].product+'_golden']=pet.goldStock;
+    const quantity=pet.stock+pet.goldStock,product=Object.keys(items)[0];
+    pet.stock=0;pet.goldStock=0;
+    return {state,items,product,quantity};
   }
   function boost(raw,id,now=Date.now(),random=Math.random) {
-    const state=normalize(raw),pet=state.pets[id];
-    if (!pet || status(pet,now)==='ready') throw new Error('Adicione o Booster antes de o produto ficar pronto.');
+    const state=advance(raw,now),pet=state.pets[id];
+    if (!pet || !pet.readyAt && (pet.stock||pet.goldStock)) throw new Error('Inicie uma nova refeição antes de adicionar o Booster.');
     if (pet.booster) throw new Error('Este animal já recebeu Booster neste ciclo.');
     if (state.rations.booster<1) throw new Error('Compre Booster na aba Rações da loja.');
     state.rations.booster--;pet.booster=true;pet.golden=random()<.2;
     return state;
   }
-  const api = { catalog, products, rations, normalize, status, feed, boost, collect, feedCost:20 };
+  const api = { catalog, products, rations, normalize, advance, status, feed, boost, collect, feedCost:20 };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.FarmAnimals = api;
 })(globalThis);

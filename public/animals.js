@@ -53,7 +53,8 @@ function renderAnimalYard() {
   root.innerHTML = `<div class="animal-intro"><div><h3>Um cantinho de carinho</h3><p>Alimente, espere e recolha. Cada bichinho tem seu próprio lar.</p></div></div><div class="animal-pens">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const pet = state.pets[id], status = FarmAnimals.status(pet, now), product = FarmAnimals.products[a.product];
     const rationTag=pet?.readyAt?`<span class="animal-ration-tag ${pet.ration||'normal'}">${FarmAnimals.rations[pet.ration||'normal'].name}</span>`:'';
-    const message = status === 'empty' ? 'Um lar esperando companhia' : pet.readyAt ? `${product.name} em ${animalTime(pet.readyAt-now)} ${rationTag}` : 'Sem refeições · produção pausada';
+    const boosterTag=pet?.booster?'<span class="animal-booster-tag">✦ Booster aplicado</span>':'';
+    const message = status === 'empty' ? 'Um lar esperando companhia' : pet.readyAt ? `${product.name} em ${animalTime(pet.readyAt-now)} ${rationTag} ${boosterTag}` : 'Sem refeições · produção pausada';
     const action = status === 'empty' ? 'openAnimalShop()' : '';
     const progress = status === 'ready' ? 100 : status === 'producing' ? 100*(1-(pet.readyAt-now)/(a.minutes*60000)) : 0;
     const rationButton=(r,label,qty)=>`<button type="button" class="animal-feed-choice animal-feed-tooltip ${qty?'':'empty'}" data-tooltip="Adicionar ${label} — ${qty} de ração disponível" aria-label="Adicionar ${label}" onclick="feedAnimalChoice('${id}','${r}')" ${qty||animalActionInFlight?'':'disabled'}>${rationArt(r)}<small>${qty}</small></button>`;

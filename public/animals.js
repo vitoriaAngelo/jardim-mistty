@@ -11,6 +11,8 @@ function animalArt(id) {
   return `<svg viewBox="0 0 160 160" role="img" aria-label="${FarmAnimals.catalog[id].name}"><ellipse cx="80" cy="133" rx="61" ry="14" fill="#aaba8d" opacity=".4"/><path d="M18 51 39 30 62 51" fill="none" stroke="#b2a081" stroke-width="5" stroke-linecap="round"/><path d="M25 48v42h32V48" fill="#d7c8a9" opacity=".5"/><g class="animal-body">${shapes[id]}</g><g fill="#c5b48e" stroke="#a18e70" stroke-width="1.5"><rect x="15" y="130" width="130" height="6" rx="2"/><rect x="15" y="143" width="130" height="5" rx="2"/><rect x="22" y="120" width="8" height="35" rx="3"/><rect x="75" y="123" width="8" height="32" rx="3"/><rect x="130" y="120" width="8" height="35" rx="3"/></g></svg>`;
 }
 function animalProductArt(type) {
+  const golden=FarmAnimals.products[type]?.golden;
+  if (golden) type=FarmAnimals.products[type].base;
   const shapes = {
     farm_egg: '<path d="M30 8C19 8 12 29 12 38a18 18 0 0 0 36 0C48 29 41 8 30 8Z" fill="#efd9b4" stroke="#b89b72" stroke-width="2"/><ellipse cx="23" cy="28" rx="4" ry="8" fill="#fff5df"/>',
     farm_duck_egg: '<path d="M30 5C18 5 10 28 10 38a20 20 0 0 0 40 0C50 28 42 5 30 5Z" fill="#c7ddd0" stroke="#88a896" stroke-width="2"/><g fill="#a5beaa"><circle cx="24" cy="35" r="2"/><circle cx="35" cy="42" r="2"/><circle cx="37" cy="28" r="1.5"/></g><ellipse cx="23" cy="23" rx="3" ry="6" fill="#edf5e6"/>',
@@ -19,7 +21,19 @@ function animalProductArt(type) {
     farm_bacon: '<path d="M11 14q10-6 19 0t19 0v12q-10 6-19 0t-19 0Z" fill="#cb9390" stroke="#b57b79"/><path d="M11 19q10-6 19 0t19 0" fill="none" stroke="#f3d4ba" stroke-width="4"/><path d="M9 34q10-6 19 0t22 0v13q-12 6-22 0t-19 0Z" fill="#cb9390" stroke="#b57b79"/><path d="M9 40q10-6 19 0t22 0" fill="none" stroke="#f3d4ba" stroke-width="4"/>',
     feed: '<path d="M18 10h24l-3 10q13 13 10 31-19 8-38 0-3-18 10-31Z" fill="#d5bc91" stroke="#a18a62" stroke-width="2"/><path d="M19 19h22" stroke="#806e52" stroke-width="3"/><ellipse cx="30" cy="37" rx="12" ry="11" fill="#f2e5c5"/><path d="M30 45V29m0 8-6-4m6 9 7-5" stroke="#899767" stroke-width="2" fill="none"/>',
   };
-  return `<span class="animal-product-art"><svg viewBox="0 0 60 60" aria-hidden="true">${shapes[type] || ''}</svg></span>`;
+  return `<span class="animal-product-art ${golden?'animal-golden':''}"><svg viewBox="0 0 60 60" aria-hidden="true">${shapes[type] || ''}</svg>${golden?'<span class="animal-gold-tag">✦ Dourado · 2×</span>':''}</span>`;
+}
+function rationArt(type) {
+  return animalProductArt('feed').replace('#d5bc91',FarmAnimals.rations[type].color);
+}
+function openRationShop() { openShop();switchShopTab('racoes'); }
+function renderRationShop() {
+  const root=document.getElementById('ration-shop');if(!root)return;
+  const state=animalState();
+  root.innerHTML='<p class="animal-note">Três refeições para escolher e um complemento especial. Cada compra abaixo entrega 1 unidade.</p><div class="animal-shop-grid">'+Object.entries(FarmAnimals.rations).map(([id,r])=>`<article class="animal-shop-card">${rationArt(id)}<h4>Ração ${r.name}</h4><p class="animal-shop-details">${r.description}</p><p>Na despensa: ${id==='normal'?state.feed:state.rations[id]}</p><button class="animal-action" onclick="animalAction('ration','${id}')" ${animalActionInFlight?'disabled':''}>Comprar · ${r.cost} pts</button></article>`).join('')+'</div>';
+}
+function feedAnimalChoice(id) {
+  return animalAction('feed',id,document.getElementById('ration-choice-'+id)?.value || 'normal');
 }
 let animalActionInFlight = false;
 function switchFarmTab(tab) {
@@ -35,24 +49,27 @@ function animalState() { G.livestock = FarmAnimals.normalize(G.livestock); retur
 function animalTime(ms) { const seconds = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(seconds/60)}min ${String(seconds%60).padStart(2,'0')}s`; }
 function renderAnimalYard() {
   const root = document.getElementById('animal-yard'); if (!root) return;
+  const choices=Object.fromEntries([...root.querySelectorAll('.ration-choice')].map(el=>[el.id,el.value]));
   const state = animalState(), now = Date.now();
   root.innerHTML = `<div class="animal-intro"><div><h3>Um cantinho de carinho</h3><p>Alimente, espere e recolha. Cada bichinho tem seu próprio lar.</p></div><span class="animal-feed-stock">Ração: ${state.feed} ${state.feed===1?'porção':'porções'}</span></div><div class="animal-pens">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const pet = state.pets[id], status = FarmAnimals.status(pet, now), product = FarmAnimals.products[a.product];
     const message = status === 'empty' ? 'Um lar esperando companhia' : status === 'hungry' ? `Hora de comer · ${a.feed} ${a.feed===1?'porção':'porções'} de ração` : status === 'ready' ? `${product.name} pronto para recolher!` : `${product.name} em ${animalTime(pet.readyAt-now)}`;
-    const action = status === 'empty' ? 'openAnimalShop()' : `animalAction('${status === 'ready' ? 'collect' : 'feed'}','${id}')`;
+    const action = status === 'empty' ? 'openAnimalShop()' : status==='ready' ? `animalAction('collect','${id}')` : `feedAnimalChoice('${id}')`;
     const progress = status === 'ready' ? 100 : status === 'producing' ? 100*(1-(pet.readyAt-now)/(a.minutes*60000)) : 0;
-    return `<article class="animal-pen ${status}"><span class="animal-home">${a.home}</span><h4>${a.name}</h4><div class="animal-scene ${status}">${animalArt(id)}</div><div class="animal-status" data-animal-status="${id}">${message}</div><div class="animal-progress"><span style="width:${Math.max(0,progress)}%"></span></div><button class="animal-action" onclick="${action}" ${animalActionInFlight || status==='producing' ? 'disabled' : ''}>${status==='empty'?'Conhecer na loja':status==='ready'?`Recolher ${product.name}`:status==='producing'?'Produzindo com carinho':'Alimentar'}</button></article>`;
-  }).join('')}</div><p class="animal-note">Cada refeição rende 1 produto. A produção continua quando você sai, e o produto aguarda a coleta. Alimente novamente para iniciar outro ciclo. O porquinho traz bacon em uma cestinha mágica e continua morando aqui.</p><button class="animal-action" onclick="openAnimalShop()">Comprar ração e conhecer os animais</button>`;
+    const choice=status==='hungry'?`<label class="animal-note" for="ration-choice-${id}">Escolha a refeição</label><select id="ration-choice-${id}" class="ration-choice">${['normal','premium','super'].map(r=>`<option value="${r}" ${choices['ration-choice-'+id]===r?'selected':''}>${FarmAnimals.rations[r].name} · ${r==='normal'?a.feed:1} un. (${r==='normal'?state.feed:state.rations[r]} disponíveis)</option>`).join('')}</select>`:'';
+    const booster=pet && status!=='ready'?`<button class="animal-action animal-booster" onclick="animalAction('booster','${id}')" ${pet.booster||animalActionInFlight?'disabled':''}>${pet.booster?'✦ Booster aplicado':'Adicionar Booster · 1 un.'}</button>`:'';
+    return `<article class="animal-pen ${status}"><span class="animal-home">${a.home}</span><h4>${a.name}</h4><div class="animal-scene ${status}">${animalArt(id)}</div><div class="animal-status" data-animal-status="${id}">${message}</div>${choice}<div class="animal-progress"><span style="width:${Math.max(0,progress)}%"></span></div><button class="animal-action" onclick="${action}" ${animalActionInFlight || status==='producing' ? 'disabled' : ''}>${status==='empty'?'Conhecer na loja':status==='ready'?`Recolher ${product.name}`:status==='producing'?'Produzindo com carinho':'Alimentar'}</button>${booster}</article>`;
+  }).join('')}</div><p class="animal-note">Premium alimenta com 1 unidade. Super Premium tem 35% de chance de +1 produto. Booster: 20% de chance de dourado, uma aplicação por ciclo, antes de ficar pronto. A produção continua enquanto você sai.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
 }
 function renderAnimalShop() {
   const root = document.getElementById('animal-shop'); if (!root) return;
   const state = animalState();
-  root.innerHTML = `<div class="animal-feed-shop">${animalProductArt('feed')}<div><strong>Ração do campo</strong><p class="animal-note">5 porções · 100 pts<br>Na despensa: ${state.feed} porções</p></div><button class="animal-action" onclick="animalAction('ration')" ${animalActionInFlight?'disabled':''}>Comprar ração</button></div><p class="animal-note">Cada compra inclui o animal e seu cercadinho. Um de cada espécie por fazenda. Os produtos recolhidos ficam no Mercado.</p><div class="animal-shop-grid">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
+  root.innerHTML = `<p class="animal-note">Cada compra inclui o animal e seu cercadinho. Um de cada espécie por fazenda. Compre comida na aba Rações. Os produtos recolhidos ficam no Mercado.</p><div class="animal-shop-grid">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const owned = !!state.pets[id], locked = currentLevel() < a.level, p = FarmAnimals.products[a.product];
     return `<article class="animal-shop-card"><div class="animal-scene">${animalArt(id)}</div><h4>${a.name}</h4><span class="animal-home">${a.home} incluído</span><div>${animalProductArt(a.product)}</div><div class="animal-shop-details">Produz 1 ${p.name.toLowerCase()} em ${a.minutes} min<br>${a.feed} porções de ração por ciclo<br>Venda base: ${p.sell} pts · Nível ${a.level}</div><button class="animal-action" onclick="animalAction('buy','${id}')" ${owned||locked||animalActionInFlight?'disabled':''}>${owned?'Já mora na fazenda':locked?`Libera no nível ${a.level}`:`Comprar · ${a.cost} pts`}</button></article>`;
   }).join('')}</div>`;
 }
-async function animalAction(action, id) {
+async function animalAction(action, id, ration = 'normal') {
   if (animalActionInFlight || !gardenHydrated) return;
   animalActionInFlight = true;
   try {
@@ -64,10 +81,13 @@ async function animalAction(action, id) {
       state = animalState(); state.pets[id] = { readyAt:0 };
       G.livestock = state;
     } else if (action === 'ration') {
-      if (!await chargeGamePoints(5*FarmAnimals.feedCost, 'Ração dos animais · 5 porções')) return;
-      state = animalState(); state.feed += 5; G.livestock = state;
+      const r=FarmAnimals.rations[id || 'normal'];if(!r)return;
+      if (!await chargeGamePoints(r.cost, `Ração ${r.name} · 1 unidade`)) return;
+      state = animalState(); if(!id||id==='normal')state.feed++;else state.rations[id]++;G.livestock = state;
     } else if (action === 'feed') {
-      G.livestock = FarmAnimals.feed(state, id);
+      G.livestock = FarmAnimals.feed(state, id, Date.now(), ration);
+    } else if (action === 'booster') {
+      G.livestock = FarmAnimals.boost(state,id);
     } else if (action === 'collect') {
       const result = FarmAnimals.collect(state, id);
       G.livestock = result.state;
@@ -76,9 +96,9 @@ async function animalAction(action, id) {
     renderAnimalYard(); renderAnimalShop(); renderHarvested();
     try { await saveGardenToSE(); }
     catch (error) { toast(`⚠️ A ação foi mantida nesta tela, mas ainda não foi salva: ${error.message}`, 6000); return; }
-    toast(action === 'collect' ? `🧺 ${FarmAnimals.products[a.product].name} foi para o Mercado!` : action === 'feed' ? '🌾 Barriguinha cheia! A produção começou.' : action === 'buy' ? `${a.name} chegou ao seu cercadinho!` : '🌾 5 porções guardadas na despensa.', 3000);
+    toast(action === 'collect' ? '🧺 Produtos recolhidos! Confira o Mercado.' : action === 'feed' ? '🌾 Barriguinha cheia! A produção começou.' : action === 'buy' ? `${a.name} chegou ao seu cercadinho!` : action==='booster'?'✦ Booster aplicado a este ciclo!':'🌾 Ração guardada na despensa.', 3000);
   } catch (error) { toast(error.message, 4000); }
-  finally { animalActionInFlight = false; renderAnimalYard(); renderAnimalShop(); }
+  finally { animalActionInFlight = false; renderAnimalYard(); renderAnimalShop(); renderRationShop(); }
 }
 setInterval(() => {
   const root = document.getElementById('animal-yard');

@@ -3925,12 +3925,14 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <button class="shop-tab fertilizer-tab" id="tab-adubos" onclick="switchShopTab('adubos')">🧪 Adubos</button>
       <button class="shop-tab plots-tab" id="tab-canteiros" onclick="switchShopTab('canteiros')">🪵 Canteiros</button>
       <button class="shop-tab" id="tab-animais" onclick="switchShopTab('animais')">🐾 Animais</button>
+      <button class="shop-tab" id="tab-racoes" onclick="switchShopTab('racoes')">🌾 Rações</button>
     </div>
     <div class="shop-panel visible" id="panel-vegetais"><div class="shop-items" id="shop-items"></div></div>
     <div class="shop-panel" id="panel-flores"><div class="shop-items" id="flower-items"></div></div>
     <div class="shop-panel" id="panel-adubos"><div id="fertilizer-items"></div></div>
     <div class="shop-panel" id="panel-canteiros"><div class="plot-shop-grid" id="plot-shop-grid"></div></div>
     <div class="shop-panel" id="panel-animais"><div id="animal-shop"></div></div>
+    <div class="shop-panel" id="panel-racoes"><div id="ration-shop"></div></div>
   </div>
 </div>
 <div class="shop-cart empty shop-cart-closed" id="shop-cart"></div>
@@ -4747,11 +4749,12 @@ async function refreshPoints() {
 
 // ─── SHOP TABS ───────────────────────────────────────────
 function switchShopTab(tab) {
-  ['vegetais','flores','adubos','canteiros','animais'].forEach(t => {
+  ['vegetais','flores','adubos','canteiros','animais','racoes'].forEach(t => {
     document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
     document.getElementById(`panel-${t}`)?.classList.toggle('visible', t === tab);
   });
   if (tab === 'animais') renderAnimalShop();
+  if (tab === 'racoes') renderRationShop();
 }
 
 // ─── PLOT SHOP DATA ───────────────────────────────────────

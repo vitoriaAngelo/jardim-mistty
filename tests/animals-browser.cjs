@@ -26,7 +26,7 @@ const server=http.createServer((req,res)=>{
     assert.equal(await page.locator('#plots-grid').isVisible(),false);
     await page.evaluate(async()=>{
       for(const id of Object.keys(FarmAnimals.catalog)) await animalAction('buy',id);
-      await animalAction('ration'); await animalAction('ration');
+      for(let i=0;i<13;i++)await animalAction('ration','normal');
       for(const id of Object.keys(FarmAnimals.catalog)) await animalAction('feed',id);
     });
     await page.locator('#plots-card').screenshot({path:'tmp/animals-desktop.png'});
@@ -50,6 +50,20 @@ const server=http.createServer((req,res)=>{
     assert.equal(Object.keys(saved.livestock.pets).length,5);
     assert.equal(saved.livestock.feed,1);
     assert.equal(saved.harvested.farm_milk,0);
+    await page.evaluate(async()=>{
+      await animalAction('ration','super');await animalAction('ration','booster');
+      G.livestock=FarmAnimals.feed(G.livestock,'cow',Date.now(),'super',()=>0);
+      G.livestock=FarmAnimals.boost(G.livestock,'cow',Date.now(),()=>0);
+      G.livestock.pets.cow.readyAt=Date.now()-1;
+      await animalAction('collect','cow');
+      sellAll();
+    });
+    assert.equal(await page.evaluate(()=>sellTotal()),880);
+    assert.equal(await page.locator('.animal-gold-tag').count(),1);
+    assert.equal(await page.evaluate(()=>G.harvested.farm_milk_golden),2);
+    await page.evaluate(()=>{closeSellAllConfirm();dismissLevelUp();openRationShop();});
+    assert.equal(await page.locator('#ration-shop .animal-shop-card').count(),4);
+    await page.locator('#panel-racoes').screenshot({path:'tmp/rations-shop.png'});
     await page.evaluate(()=>{dismissLevelUp();openAnimalShop();});
     await page.locator('#panel-animais').screenshot({path:'tmp/animals-shop.png'});
     await page.evaluate(()=>{closeShop();document.body.classList.add('dark-mode');switchFarmTab('animals');});

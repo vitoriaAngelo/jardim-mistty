@@ -1,5 +1,10 @@
 #plots-grid[hidden],#animal-yard[hidden] { display:none!important; }
 .farm-tabs { display:flex; gap:8px; margin-bottom:16px; }
+.ration-choice { width:100%; padding:8px 3px; margin-top:5px; border-radius:9px; background:var(--cream); color:var(--text); border:1px solid #9ba58b; font:12px Nunito,sans-serif; }
+.animal-booster { margin-top:9px; background:#658e80; }
+.animal-golden { position:relative; filter:drop-shadow(0 0 5px #e9c24d); margin-bottom:17px; }
+.animal-golden svg { filter:sepia(.8) saturate(1.6); }
+.animal-gold-tag { position:absolute; top:100%; left:50%; transform:translateX(-50%); white-space:nowrap; background:#f5e5b6; color:#71501c; border-radius:7px; padding:2px 5px; font-size:9px; font-weight:900; }
 .farm-tabs button { border:1px solid var(--cozy-line,#b9c3aa); background:var(--cream); color:var(--text); padding:9px 17px; border-radius:14px; font:800 14px Nunito,sans-serif; }
 .farm-tabs button[aria-selected=true] { background:#778b64; color:#fffdf5; box-shadow:0 3px 0 #596f49; }
 .animal-intro { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }

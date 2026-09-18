@@ -23,9 +23,9 @@ for (const [id, animal] of Object.entries(model.catalog)) {
   });
 }
 test('sem ração não inicia produção e conta nova começa vazia', () => {
-  assert.deepEqual(model.normalize(null), { feed:0, pets:{} });
+  assert.deepEqual(model.normalize(null), { feed:0, pets:{},rations:{premium:0,super:0,booster:0} });
   assert.throws(() => model.feed({feed:0,pets:{cow:{readyAt:0}}},'cow'));
-  assert.deepEqual(model.normalize({feed:Infinity,pets:{unknown:{}}}), {feed:0,pets:{}});
+  assert.deepEqual(model.normalize({feed:Infinity,pets:{unknown:{}}}), {feed:0,pets:{},rations:{premium:0,super:0,booster:0}});
 });
 function harness(charge = async () => true) {
   const context = vm.createContext({ FarmAnimals:model, G:{livestock:model.normalize(),harvested:{}}, gardenHydrated:true,
@@ -49,7 +49,7 @@ test('compra repetida não duplica animal e coleta entra no estoque do mercado',
   assert.equal(charges,1);
   await ctx.animalAction('ration');
   await ctx.animalAction('feed','chicken');
-  assert.equal(ctx.G.livestock.feed,4);
+  assert.equal(ctx.G.livestock.feed,0);
   ctx.G.livestock.pets.chicken.readyAt = Date.now()-1;
   await ctx.animalAction('collect','chicken');
   await ctx.animalAction('collect','chicken');
@@ -63,4 +63,32 @@ test('cliques simultâneos não cobram duas vezes', async () => {
   resolveCharge(true); await first;
   assert.equal(charges,1);
   assert.ok(ctx.G.livestock.pets.cow);
+});
+
+test('Premium alimenta a vaca com uma unidade e preserva ração normal antiga',()=>{
+  const state=model.feed({feed:7,rations:{premium:1},pets:{cow:{readyAt:0}}},'cow',100,'premium');
+  assert.equal(state.feed,7);assert.equal(state.rations.premium,0);
+  assert.equal(state.pets.cow.quantity,1);
+});
+test('Super Premium sorteia 35% e mantém resultado após recarregar',()=>{
+  for(const [roll,expected] of [[.349,2],[.35,1],[.99,1]]) {
+    const state=model.feed({rations:{super:1},pets:{pig:{readyAt:0}}},'pig',100,'super',()=>roll);
+    const loaded=model.normalize(JSON.parse(JSON.stringify(state)));
+    assert.equal(model.collect(loaded,'pig',9999999).quantity,expected);
+  }
+});
+test('Booster combina com Super Premium, não repete e produto dourado vale o dobro',()=>{
+  let state=model.feed({rations:{super:1,booster:2},pets:{cow:{readyAt:0}}},'cow',100,'super',()=>0);
+  state=model.boost(state,'cow',200,()=>0);
+  assert.throws(()=>model.boost(state,'cow',201,()=>0));
+  assert.equal(state.rations.booster,1);
+  const result=model.collect(model.normalize(JSON.parse(JSON.stringify(state))),'cow',999999);
+  assert.equal(result.quantity,2);assert.equal(result.product,'farm_milk_golden');
+  assert.equal(model.products[result.product].sell,model.products.farm_milk.sell*2);
+  assert.equal(result.state.pets.cow.booster,false);
+});
+test('Booster antes da refeição não alimenta; após produzir não pode ser aplicado',()=>{
+  const state=model.boost({rations:{booster:1},pets:{duck:{readyAt:0}}},'duck',100,()=>.2);
+  assert.equal(model.status(state.pets.duck),'hungry');assert.equal(state.pets.duck.golden,false);
+  assert.throws(()=>model.boost({rations:{booster:1},pets:{duck:{readyAt:10}}},'duck',100));
 });

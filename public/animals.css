@@ -34,6 +34,16 @@
 @keyframes animal-breathe { 50% { transform:translateY(-2px) rotate(1deg); } }
 .animal-status { min-height:36px; font-size:12px; line-height:1.5; margin:6px 0; }
 .animal-name-input { width:100%; box-sizing:border-box; margin:0 0 5px; border:1px solid var(--cozy-line,#c9cfb9); border-radius:9px; background:var(--cream2); color:inherit; text-align:center; font:800 11px Nunito,sans-serif; padding:5px; }
+.animal-booster-status { margin:2px 0 7px; padding:5px 8px 6px; border-radius:11px; background:#eee9d5; color:#837344; opacity:.72; }
+.animal-booster-status.active { background:linear-gradient(135deg,#fff0b8,#f1d77a); color:#76552c; opacity:1; box-shadow:0 2px 0 #c49b4a55; }
+.animal-booster-heading { display:flex; justify-content:space-between; gap:5px; font:800 9px/1.2 Nunito,sans-serif; }
+.animal-booster-heading b { font-size:8px; }
+.animal-booster-bar,.animal-production-bar { height:5px; margin-top:5px; border-radius:99px; background:#c5b77d55; overflow:hidden; }
+.animal-booster-bar span { display:block; height:100%; border-radius:inherit; background:#c99b3f; transition:width .4s linear; }
+.animal-production-summary { margin:0 0 7px; }
+.animal-production-bar { height:6px; background:#9cac8733; }
+.animal-production-bar span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#91a77b,#c6a76c); transition:width .4s linear; }
+.animal-production-summary small { display:block; margin-top:4px; color:var(--text2); font:700 9px/1.2 Nunito,sans-serif; }
 .animal-ration-tag { display:inline-block; margin-left:4px; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:900; color:#5b4a2d; background:#d5bc91; }
 .animal-ration-tag.premium { background:#e6c66f; }
 .animal-ration-tag.super { background:#b9a0d7; color:#3f2e58; }

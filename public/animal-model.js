@@ -21,6 +21,12 @@
     super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Alimenta completamente com 1 unidade e tem 35% de chance de produzir 1 item extra.'},
     booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Complemento: 20% de chance de produto dourado, que vale o dobro. Uma aplicação ao ciclo atual. Não se repete nas refeições reservadas.'},
   };
+  const HEALTH_MAX = 100;
+  const HEALTH_DECAY_PER_HOUR = 10;
+  function healthAfterIdle(health, lastHealthAt, now) {
+    const elapsedHours = Math.max(0, now - lastHealthAt) / 3600000;
+    return Math.max(0, Math.round(health - elapsedHours * HEALTH_DECAY_PER_HOUR));
+  }
   function normalize(raw) {
     const amount = Number(raw?.feed);
     const state = { feed: Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0, pets:{} };
@@ -32,7 +38,11 @@
     for (const id of Object.keys(catalog)) {
       if (raw?.pets?.[id]) {
         const readyAt = Number(raw.pets[id].readyAt);
+        const savedHealth = Number(raw.pets[id].health);
+        const savedHealthAt = Number(raw.pets[id].healthUpdatedAt);
         state.pets[id] = { name: typeof raw.pets[id].name === 'string' ? raw.pets[id].name.slice(0,15) : '', readyAt: Number.isFinite(readyAt) && readyAt > 0 ? readyAt : 0,
+          health: Number.isFinite(savedHealth) ? Math.max(0, Math.min(HEALTH_MAX, savedHealth)) : HEALTH_MAX,
+          healthUpdatedAt: Number.isFinite(savedHealthAt) && savedHealthAt > 0 ? savedHealthAt : Date.now(),
           quantity:raw.pets[id].quantity===2?2:1, ration:['normal','premium','super'].includes(raw.pets[id].ration)?raw.pets[id].ration:'normal', booster:raw.pets[id].booster===true,
           golden:raw.pets[id].booster===true && raw.pets[id].golden===true,
           queue:Array.isArray(raw.pets[id].queue)?raw.pets[id].queue.map(meal=>({quantity:meal?.quantity===2?2:1,ration:['normal','premium','super'].includes(meal?.ration)?meal.ration:'normal',duration:Number.isFinite(Number(meal?.duration))?Number(meal.duration):null})):[],
@@ -48,6 +58,13 @@
   function advance(raw,now=Date.now()) {
     const state=normalize(raw);
     for(const [id,pet] of Object.entries(state.pets)) {
+      if (!pet.readyAt && !pet.queue.length) {
+        pet.health = healthAfterIdle(pet.health, pet.healthUpdatedAt, now);
+        pet.healthUpdatedAt = now;
+        if (pet.health <= 0) { delete state.pets[id]; continue; }
+      } else {
+        pet.healthUpdatedAt = now;
+      }
       while(pet.readyAt>0 && pet.readyAt<=now) {
         pet[pet.golden?'goldStock':'stock']+=pet.quantity;
         const next=pet.queue.shift();
@@ -72,6 +89,8 @@
     }
     const quantity=ration==='super' && random()<(.35 + Number(skills.cuidado_especial || 0) * .03) ? 2 : 1;
     const productionMinutes = catalog[id].minutes * (1 - Number(skills.rotina_rural || 0) * .04);
+    state.pets[id].health = Math.min(HEALTH_MAX, state.pets[id].health + 20);
+    state.pets[id].healthUpdatedAt = now;
     if(state.pets[id].readyAt) {
       state.pets[id].queue.push({quantity,ration,duration:productionMinutes});
     } else {state.pets[id].quantity=quantity;state.pets[id].ration=ration;state.pets[id].readyAt=now+productionMinutes*60000;}

@@ -55,6 +55,7 @@ function renderAnimalYard() {
     const rationTag=pet?.readyAt?`<span class="animal-ration-tag ${pet.ration||'normal'}">${FarmAnimals.rations[pet.ration||'normal'].name}</span>`:'';
     const boosterTag=pet?.booster?'<span class="animal-booster-tag">✦ Booster aplicado</span>':'';
     const petName=pet?.name || a.name;
+    const health = pet ? Math.max(0, Math.min(100, Number(pet.health ?? 100))) : 0;
     const message = status === 'empty' ? 'Um lar esperando companhia' : pet.readyAt ? `${product.name} em ${animalTime(pet.readyAt-now)} ${rationTag} ${boosterTag}` : 'Sem refeições · produção pausada';
     const action = status === 'empty' ? 'openAnimalShop()' : '';
     const progress = status === 'ready' ? 100 : status === 'producing' ? 100*(1-(pet.readyAt-now)/(a.minutes*60000)) : 0;
@@ -64,7 +65,7 @@ function renderAnimalYard() {
     const stocked=pet?pet.stock+pet.goldStock:0;
     const reserve=pet?`<div class="animal-meta"><span>🌾 ${pet.queue.length + (pet.readyAt ? 1 : 0)} na fila</span><span>📦 ${pet.stock + pet.goldStock} guardados</span></div>`:'';
     const collect=stocked?`<button class="animal-product-collect" title="Recolher ${stocked} produtos" aria-label="Recolher ${stocked} produtos" onclick="animalAction('collect','${id}')" ${animalActionInFlight?'disabled':''}>${animalProductArt(a.product)}<b>${stocked}</b></button>`:'';
-    return `<article class="animal-pen ${status}">${collect}<span class="animal-home">${a.home}</span>${pet?`<input class="animal-name-input" maxlength="15" value="${petName.replace(/"/g,'&quot;')}" aria-label="Nome do animal" onchange="animalAction('rename','${id}',this.value)" />`:`<h4>${a.name}</h4>`}<div class="animal-scene ${status}">${animalArt(id)}</div><div class="animal-status" data-animal-status="${id}" data-cycle="${pet?`${pet.readyAt}:${stocked}`:''}">${message}</div>${reserve}${choice}<div class="animal-progress"><span style="width:${Math.max(0,progress)}%"></span></div>${status==='empty'?`<button class="animal-action" onclick="${action}">Conhecer na loja</button>`:''}</article>`;
+    return `<article class="animal-pen ${status}">${collect}<span class="animal-home">${a.home}</span>${pet?`<input class="animal-name-input" maxlength="15" value="${petName.replace(/"/g,'&quot;')}" aria-label="Nome do animal" onchange="animalAction('rename','${id}',this.value)" />`:`<h4>${a.name}</h4>`}<div class="animal-scene ${status}">${animalArt(id)}</div>${pet?`<div class="animal-health" title="Vida do animal: ${health}%"><span style="width:${health}%"></span></div>`:''}<div class="animal-status" data-animal-status="${id}" data-cycle="${pet?`${pet.readyAt}:${stocked}:${health}`:''}">${message}</div>${reserve}${choice}<div class="animal-progress"><span style="width:${Math.max(0,progress)}%"></span></div>${status==='empty'?`<button class="animal-action" onclick="${action}">Conhecer na loja</button>`:''}</article>`;
   }).join('')}</div><p class="animal-note">Adicione várias refeições: elas serão consumidas em ordem e os produtos ficarão guardados. Sem comida, a produção pausa. O tempo fora do jogo também conta. Super Premium: 35% de +1 por refeição. Booster: 20% de dourado somente no ciclo atual.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
 }
 function renderAnimalShop() {

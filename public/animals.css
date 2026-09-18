@@ -59,6 +59,8 @@ body.dark-mode .animal-feed-tooltip::after { border-color:#65725b; background:#3
 .ration-quantity strong { min-width:18px; font-size:15px; }
 .animal-progress { height:5px; border-radius:8px; background:#9cac8733; overflow:hidden; margin:9px 0; }
 .animal-progress span { display:block; height:100%; background:#9aa989; }
+.animal-health { height:7px; border-radius:99px; background:#c98b8b55; overflow:hidden; margin:4px 0 7px; }
+.animal-health span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#c56f6f,#d7a45c 55%,#8ba66d); transition:width .3s ease; }
 .animal-product-art { display:inline-flex; width:60px; height:60px; align-items:center; justify-content:center; }
 .animal-product-art svg { width:100%; height:100%; }
 .animal-shop-details { font-size:12px; line-height:1.65; min-height:76px; margin-bottom:10px; }

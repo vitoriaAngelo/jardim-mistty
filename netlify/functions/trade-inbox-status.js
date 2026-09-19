@@ -1,6 +1,7 @@
 const SUPABASE_URL = 'https://luvjridqxqpxnljucnur.supabase.co';
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const { authenticateTwitch } = require('./_auth');
+const { supabaseServiceHeaders } = require('./_supabase-auth');
 
 exports.handler = async event => {
   const headers = {
@@ -16,9 +17,10 @@ exports.handler = async event => {
   try {
     const user = await authenticateTwitch(event);
     if (!KEY) throw new Error('Banco de trocas indisponível');
+    const dbHeaders = supabaseServiceHeaders(KEY, { 'Content-Type':'application/json' });
     const expiryResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/expire_trade_offers`, {
       method:'POST',
-      headers:{ apikey:KEY, Authorization:`Bearer ${KEY}`, 'Content-Type':'application/json' },
+      headers:dbHeaders,
       body:'{}',
     });
     if (!expiryResponse.ok) console.error('Falha não bloqueante na limpeza de trocas:', expiryResponse.status, await expiryResponse.text());
@@ -30,7 +32,7 @@ exports.handler = async event => {
       limit:'100',
     });
     const response = await fetch(`${SUPABASE_URL}/rest/v1/trade_offers?${params}`, {
-      headers:{ apikey:KEY, Authorization:`Bearer ${KEY}` },
+      headers:dbHeaders,
     });
     if (!response.ok) throw new Error('Não foi possível consultar as trocas');
     const offers = await response.json();

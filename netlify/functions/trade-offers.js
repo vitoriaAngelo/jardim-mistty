@@ -1,6 +1,7 @@
 const SUPABASE_URL='https://luvjridqxqpxnljucnur.supabase.co';
 const KEY=process.env.SUPABASE_SERVICE_ROLE_KEY;
 const {authenticateTwitch}=require('./_auth');
+const {supabaseServiceHeaders}=require('./_supabase-auth');
 
 exports.handler=async event=>{
   const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type, Authorization, X-Garden-Session','Access-Control-Allow-Methods':'GET, OPTIONS','Content-Type':'application/json','Cache-Control':'no-store'};
@@ -9,10 +10,11 @@ exports.handler=async event=>{
   try{
     const user=await authenticateTwitch(event);
     if(!KEY)throw new Error('Banco de trocas indisponível');
-    const rpc=await fetch(SUPABASE_URL+'/rest/v1/rpc/expire_trade_offers',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:'{}'});
+    const dbHeaders=supabaseServiceHeaders(KEY,{'Content-Type':'application/json'});
+    const rpc=await fetch(SUPABASE_URL+'/rest/v1/rpc/expire_trade_offers',{method:'POST',headers:dbHeaders,body:'{}'});
     if(!rpc.ok)console.error('Falha não bloqueante na limpeza de trocas:',rpc.status,await rpc.text());
     const query='?status=eq.active&expires_at=gt.'+encodeURIComponent(new Date().toISOString())+'&select=id,sender_username,recipient_username,offered_card_id,requested_card_id,status,created_at,expires_at&order=created_at.desc&limit=100';
-    const results=await Promise.all(['sender_username','recipient_username'].map(key=>fetch(SUPABASE_URL+'/rest/v1/trade_offers'+query+'&'+key+'=eq.'+encodeURIComponent(user.username),{headers:{apikey:KEY,Authorization:'Bearer '+KEY}})));
+    const results=await Promise.all(['sender_username','recipient_username'].map(key=>fetch(SUPABASE_URL+'/rest/v1/trade_offers'+query+'&'+key+'=eq.'+encodeURIComponent(user.username),{headers:dbHeaders})));
     if(results.some(response=>!response.ok)){
       const failures=await Promise.all(results.filter(response=>!response.ok).map(async response=>({status:response.status,detail:await response.text()})));
       console.error('Falha ao consultar trade_offers:',failures);
@@ -20,7 +22,7 @@ exports.handler=async event=>{
     }
     const rows=(await Promise.all(results.map(response=>response.json()))).flat();
     const offers=[...new Map(rows.map(row=>[row.id,row])).values()].sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
-    const gardenResponse=await fetch(SUPABASE_URL+'/rest/v1/gardens?username=eq.'+encodeURIComponent(user.username)+'&select=data,updated_at&order=updated_at.desc&limit=1',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
+    const gardenResponse=await fetch(SUPABASE_URL+'/rest/v1/gardens?username=eq.'+encodeURIComponent(user.username)+'&select=data,updated_at&order=updated_at.desc&limit=1',{headers:dbHeaders});
     if(!gardenResponse.ok)throw new Error('Não foi possível sincronizar seu álbum após a troca.');
     const gardens=await gardenResponse.json();
     return{statusCode:200,headers,body:JSON.stringify({offers,albumCards:gardens[0]?.data?.albumCards||{}})};

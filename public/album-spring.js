@@ -26,3 +26,4 @@ const prismaticLink=document.createElement('a');prismaticLink.href='album-prisma
 prismaticLink.innerHTML='✦ <strong>Próxima página</strong> · 10 cartinhas prismáticas';
 const nextAlbum=document.createElement('a');nextAlbum.href='album-prismatic.html';nextAlbum.className='next-album-button';nextAlbum.textContent='Próxima página →';const albumFooter=document.querySelector('.album footer');if(albumFooter)albumFooter.append(nextAlbum);
 const prismOdds='<div class="prism-odds"><span>Prismática 0,80%</span><span>Rara 0,35%</span><span>Épica 0,12%</span><span>Arco-Íris 0,03%</span></div>';const prismObserver=new MutationObserver(()=>{const b=document.querySelector('#modal-body');if(b&&b.textContent.includes('Oficina')&&!b.querySelector('.prism-odds'))b.insertAdjacentHTML('afterbegin',prismOdds)});prismObserver.observe(document.querySelector('#modal-body'),{childList:true,subtree:true});
+document.querySelector('nav a:first-child')?.remove();

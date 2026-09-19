@@ -1483,6 +1483,11 @@ body.dark-mode .order-card small { color:#cbd9c2; }
   font-size: 13px; font-weight: 800;
   box-shadow: 0 2px 0 #3a1a08;
 }
+.market-fair-indicator { display:inline-flex; align-items:center; gap:4px; margin-top:5px; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:800; line-height:1.3; }
+.market-fair-indicator.active { color:#31533a; background:#dcebd3; border:1px solid #9fbd8b; }
+.market-fair-indicator.pending { color:var(--text2); background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); }
+body.dark-mode .market-fair-indicator.active { color:#e5f2d9; background:#344a35; border-color:#718b62; }
+body.dark-mode .market-fair-indicator.pending { color:#d5dfcc; background:#30392d; border-color:#53604f; }
 .sell-btn {
   padding: 9px 20px;
   border-radius: 99px;
@@ -4160,26 +4165,26 @@ const LEVELS = [
   { lv: 30, name: 'O Eterno Jardim',   emoji: '🌌', color: '#000040', minXP: 87190  },
 ];
 
-// Continua a progressão até o nível 100 para comportar os marcos de packs.
-// A curva extrapola o intervalo crescente de XP usado nos níveis finais atuais.
+// A partir da passagem do nível 13 para o 14, cada nível exige mais XP.
+// O intervalo cresce ao menos 450 XP e acelera 5,5% quando esse valor é maior.
+// Os requisitos dos níveis 1 a 13 permanecem iguais.
 {
-  let previous = LEVELS[LEVELS.length - 1];
-  let interval = previous.minXP - LEVELS[LEVELS.length - 2].minXP;
+  let previous = LEVELS[12];
+  let interval = LEVELS[12].minXP - LEVELS[11].minXP;
+  for (let index = 13; index < LEVELS.length; index += 1) {
+    interval += Math.max(450, Math.ceil(interval * 0.055));
+    LEVELS[index].minXP = previous.minXP + interval;
+    previous = LEVELS[index];
+  }
   const titles = ['Guardião do Jardim', 'Mestre das Estações', 'Lenda da Colheita', 'Sábio da Primavera', 'Protetor da Fazenda'];
   const emojis = ['🌿', '🌻', '✨', '🪴', '🌈'];
   const colors = ['#477a55', '#b17b32', '#7954a8', '#35818a', '#66833f'];
   for (let lv = 31; lv <= 100; lv += 1) {
-    interval += 20;
+    interval += Math.max(450, Math.ceil(interval * 0.055));
     previous = { lv, name: titles[(lv - 31) % titles.length], emoji: emojis[(lv - 31) % emojis.length], color: colors[(lv - 31) % colors.length], minXP: previous.minXP + interval };
     LEVELS.push(previous);
   }
 }
-.market-fair-indicator { display:inline-flex; align-items:center; gap:4px; margin-top:5px; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:800; line-height:1.3; }
-.market-fair-indicator.active { color:#31533a; background:#dcebd3; border:1px solid #9fbd8b; }
-.market-fair-indicator.pending { color:var(--text2); background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); }
-body.dark-mode .market-fair-indicator.active { color:#e5f2d9; background:#344a35; border-color:#718b62; }
-body.dark-mode .market-fair-indicator.pending { color:#d5dfcc; background:#30392d; border-color:#53604f; }
-
 // XP per action
 const XP_ACTIONS = {
   plant:   { xp: 10, label: '+10 XP 🌱 Plantou!' },

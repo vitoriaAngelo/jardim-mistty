@@ -9,6 +9,17 @@
     .garden-mascot .mascot-button,.garden-mascot .mascot-button *{cursor:var(--cozy-click-cursor,pointer)!important}
     .mascot-button>svg{overflow:visible}
     .mascot-premium-active .mascot-button>svg{filter:sepia(.72) saturate(1.75) hue-rotate(352deg) brightness(1.08) drop-shadow(0 0 7px #ffd96c) drop-shadow(0 4px 5px #a77628aa)}
+    .mascot-prismatic-active .mascot-button>svg{filter:drop-shadow(0 0 6px #a4eaff) drop-shadow(0 0 12px #d7a8ff) drop-shadow(0 4px 5px #806ab088)}
+    .mascot-prismatic-active .mascot-sprout-form [fill="#bbcf9e"]{fill:url(#mascotPrismaticBody);stroke:#8c79c3}
+    .mascot-prismatic-active .mascot-sprout-form [fill="#a5bc89"]{fill:#91dfd6;stroke:#7b83b3}
+    .mascot-prismatic-active .mascot-sprout-form [fill="#80976b"]{fill:#8a78bb}
+    .mascot-prismatic-active .mascot-sprout-form [fill="#e3e9c5"]{fill:#f7eaff}
+    .mascot-prismatic-active .mascot-sprout-form [fill="#a8bc89"]{fill:#b9e8eb}
+    .mascot-prismatic-active .mascot-sprout-form [fill="#d6ad93"]{fill:#f0b9df}
+    .mascot-prismatic-active .mascot-button::after{content:'✦';position:absolute;right:1px;top:6px;color:#e9fcff;font-size:20px;text-shadow:0 0 5px #68dff4,0 0 11px #c282ff,0 0 17px #ffe89a;animation:premium-sparkle 1.2s ease-in-out infinite}
+    .mascot-gold-pouch,.mascot-prismatic-glitter{display:none}
+    .mascot-prismatic-active .mascot-gold-pouch,.mascot-prismatic-active .mascot-prismatic-glitter{display:block}
+    .mascot-prismatic-glitter{animation:premium-sparkle 1.7s ease-in-out infinite}
     .mascot-twitchzinho-active .mascot-button>svg{filter:drop-shadow(0 3px 5px #77639740)}
     .mascot-twitchzinho-active .mascot-sprout-form [fill="#bbcf9e"]{fill:#ad98d2;stroke:#796399}
     .mascot-twitchzinho-active .mascot-sprout-form [fill="#a5bc89"]{fill:#a18ac7;stroke:#796399}
@@ -102,6 +113,7 @@
   mascot.innerHTML = `<div class="mascot-bubble" hidden><strong>BROTINHO</strong><button class="mascot-dismiss" aria-label="Fechar recado">×</button><p role="status" aria-live="polite"></p></div>
     <button class="mascot-button" aria-label="Conversar com o Brotinho">
     <svg viewBox="0 0 120 130" fill="none" aria-hidden="true">
+      <defs><linearGradient id="mascotPrismaticBody" x1="22" y1="44" x2="91" y2="109" gradientUnits="userSpaceOnUse"><stop stop-color="#8fe8e5"/><stop offset=".34" stop-color="#a99bea"/><stop offset=".68" stop-color="#f49ed5"/><stop offset="1" stop-color="#ffe184"/></linearGradient></defs>
       <ellipse cx="60" cy="119" rx="33" ry="5" fill="#819567" opacity=".18"/>
       <g class="mascot-body mascot-sprout-form">
         <ellipse cx="40" cy="110" rx="14" ry="9" fill="#80976b"/><ellipse cx="80" cy="110" rx="14" ry="9" fill="#80976b"/>
@@ -114,6 +126,8 @@
         <ellipse cx="35" cy="76" rx="7" ry="4" fill="#d6ad93" opacity=".7"/><ellipse cx="85" cy="76" rx="7" ry="4" fill="#d6ad93" opacity=".7"/>
         <path d="M54 76Q60 83 66 76" stroke="#526342" stroke-width="2.5" stroke-linecap="round"/>
         <path d="M56 94Q49 88 50 95Q51 99 60 103Q69 99 70 95Q71 88 64 94L60 97Z" fill="#a8bc89"/>
+        <g class="mascot-gold-pouch" transform="translate(82 89)"><path d="M2 12Q2 5 8 5h14q6 0 6 7v12H2Z" fill="#d9ae48" stroke="#8b642c" stroke-width="2"/><path d="M7 5V3Q7-1 15-1t8 4v2" fill="none" stroke="#8b642c" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="#fff0a5"/><circle cx="19" cy="17" r="2" fill="#fff0a5"/><path d="M12 7l1.5-3 1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5Z" fill="#fff4bd"/></g>
+        <g class="mascot-prismatic-glitter" fill="#f5ffff"><path d="M22 49l2.2 5 5 2.2-5 2.2-2.2 5-2.2-5-5-2.2 5-2.2Z"/><path d="M91 45l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5Z"/><path d="M39 99l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5Z"/></g>
       </g>
       <g class="mascot-body mascot-orange-form">
         <defs><linearGradient id="orangeCozyBody" x1="35" y1="42" x2="88" y2="108" gradientUnits="userSpaceOnUse"><stop stop-color="#ffd66b"/><stop offset=".52" stop-color="#f6a33f"/><stop offset="1" stop-color="#df762e"/></linearGradient></defs>
@@ -204,14 +218,16 @@
     const strawberry = type === 'strawberry';
     const twitchzinho = type === 'twitchzinho';
     const premium = type === 'premium';
+    const prismatic = type === 'prismatic';
     document.body.classList.toggle('mascot-orange-active', orange);
     document.body.classList.toggle('mascot-apple-active', apple);
     document.body.classList.toggle('mascot-strawberry-active', strawberry);
     document.body.classList.toggle('mascot-twitchzinho-active', twitchzinho);
+    document.body.classList.toggle('mascot-prismatic-active', prismatic);
     window.setMascotPremium(premium, premium && animate);
     const mascotName = mascot.querySelector('.mascot-bubble strong');
-    if (mascotName) mascotName.textContent = orange ? 'LARANJINHA' : apple ? 'MAÇANZINHA' : strawberry ? 'MORANGUINHO' : twitchzinho ? 'TWITCHZINHO' : premium ? 'BROTINHO PREMIUM' : 'BROTINHO';
-    mascot.setAttribute('aria-label', orange ? 'Laranjinha, seu companheiro de jardim' : apple ? 'Maçanzinha, seu companheiro de jardim' : strawberry ? 'Moranguinho, seu companheiro de jardim' : twitchzinho ? 'Twitchzinho, seu companheiro roxo de jardim' : premium ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');
+    if (mascotName) mascotName.textContent = orange ? 'LARANJINHA' : apple ? 'MAÇANZINHA' : strawberry ? 'MORANGUINHO' : twitchzinho ? 'TWITCHZINHO' : prismatic ? 'BROTINHO PRISMÁTICO' : premium ? 'BROTINHO PREMIUM' : 'BROTINHO';
+    mascot.setAttribute('aria-label', orange ? 'Laranjinha, seu companheiro de jardim' : apple ? 'Maçanzinha, seu companheiro de jardim' : strawberry ? 'Moranguinho, seu companheiro de jardim' : twitchzinho ? 'Twitchzinho, seu companheiro roxo de jardim' : prismatic ? 'Brotinho Prismático, seu companheiro de jardim' : premium ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');
     if ((orange || apple || strawberry) && animate) {
       petButton.classList.remove('mascot-orange-celebrate','mascot-apple-celebrate','mascot-strawberry-celebrate');
       void petButton.offsetWidth;
@@ -219,7 +235,7 @@
       setTimeout(() => petButton.classList.remove('mascot-orange-celebrate','mascot-apple-celebrate','mascot-strawberry-celebrate'), 1350);
     }
   };
-  window.setGardenMascot(document.body.classList.contains('mascot-orange-active') ? 'orange' : document.body.classList.contains('mascot-apple-active') ? 'apple' : document.body.classList.contains('mascot-strawberry-active') ? 'strawberry' : document.body.classList.contains('mascot-premium-active') ? 'premium' : null);
+  window.setGardenMascot(document.body.classList.contains('mascot-orange-active') ? 'orange' : document.body.classList.contains('mascot-apple-active') ? 'apple' : document.body.classList.contains('mascot-strawberry-active') ? 'strawberry' : document.body.classList.contains('mascot-prismatic-active') ? 'prismatic' : document.body.classList.contains('mascot-premium-active') ? 'premium' : null);
   let reactionTimer;
   petButton.onclick = () => {
     if (blocked()) return;

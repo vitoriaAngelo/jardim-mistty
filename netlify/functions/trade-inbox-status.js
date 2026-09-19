@@ -21,7 +21,7 @@ exports.handler = async event => {
       headers:{ apikey:KEY, Authorization:`Bearer ${KEY}`, 'Content-Type':'application/json' },
       body:'{}',
     });
-    if (!expiryResponse.ok) throw new Error('Não foi possível atualizar o estado das ofertas.');
+    if (!expiryResponse.ok) console.error('Falha não bloqueante na limpeza de trocas:', expiryResponse.status, await expiryResponse.text());
     const params = new URLSearchParams({
       select:'id',
       recipient_username:`eq.${user.username}`,

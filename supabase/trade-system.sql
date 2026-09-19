@@ -247,3 +247,6 @@ revoke all on public.trade_offers, public.trade_events, public.trade_notificatio
 revoke all on function public.create_trade_offer(text,text,text,text), public.accept_trade_offer(uuid,text), public.cancel_trade_offer(uuid,text,boolean), public.expire_trade_offers(), public.trade_album_key(text), public.trade_card_quantity(jsonb,text) from public, anon, authenticated;
 grant execute on function public.create_trade_offer(text,text,text,text), public.accept_trade_offer(uuid,text), public.cancel_trade_offer(uuid,text,boolean), public.expire_trade_offers() to service_role;
 
+-- Atualiza o cache do PostgREST para que a função RPC fique disponível imediatamente.
+notify pgrst, 'reload schema';
+

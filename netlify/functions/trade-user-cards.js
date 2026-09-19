@@ -18,8 +18,12 @@ exports.handler=async event=>{
     const gardens=await gardenResponse.json();
     if(!gardens.length)return{statusCode:404,headers,body:JSON.stringify({error:'Fazenda não encontrada',cards:[]})};
     const offersResponse=await fetch(SUPABASE_URL+'/rest/v1/trade_offers?sender_username=eq.'+encodeURIComponent(username)+'&status=eq.active&expires_at=gt.'+encodeURIComponent(new Date().toISOString())+'&select=offered_card_id',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
-    if(!offersResponse.ok)throw new Error('Não foi possível verificar cartas já reservadas.');
-    const reserved={};(await offersResponse.json()).forEach(row=>reserved[row.offered_card_id]=(reserved[row.offered_card_id]||0)+1);
+    const reserved={};
+    if(offersResponse.ok){
+      (await offersResponse.json()).forEach(row=>reserved[row.offered_card_id]=(reserved[row.offered_card_id]||0)+1);
+    }else{
+      console.error('Falha não bloqueante ao consultar reservas:',offersResponse.status,await offersResponse.text());
+    }
     const album=gardens[0].data?.albumCards||{};
     const cards=[];
     for(let i=0;i<COMMON.length;i++){

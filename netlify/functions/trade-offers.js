@@ -10,7 +10,7 @@ exports.handler=async event=>{
     const user=await authenticateTwitch(event);
     if(!KEY)throw new Error('Banco de trocas indisponível');
     const rpc=await fetch(SUPABASE_URL+'/rest/v1/rpc/expire_trade_offers',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:'{}'});
-    if(!rpc.ok)throw new Error('A migração SQL do sistema de trocas precisa ser atualizada no Supabase.');
+    if(!rpc.ok)console.error('Falha não bloqueante na limpeza de trocas:',rpc.status,await rpc.text());
     const query='?status=eq.active&expires_at=gt.'+encodeURIComponent(new Date().toISOString())+'&select=id,sender_username,recipient_username,offered_card_id,requested_card_id,status,created_at,expires_at&order=created_at.desc&limit=100';
     const results=await Promise.all(['sender_username','recipient_username'].map(key=>fetch(SUPABASE_URL+'/rest/v1/trade_offers'+query+'&'+key+'=eq.'+encodeURIComponent(user.username),{headers:{apikey:KEY,Authorization:'Bearer '+KEY}})));
     if(results.some(response=>!response.ok))throw new Error('Não foi possível carregar as ofertas do banco.');

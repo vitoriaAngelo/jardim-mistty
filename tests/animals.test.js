@@ -75,34 +75,46 @@ test('zero remove animal e estoque não recolhido, permitindo nova compra',()=>{
 });
 test('rações recuperam 20, 50 e 80 e consomem uma unidade sem criar fila',()=>{
   for(const [ration,recovery]of [['normal',20],['premium',50],['super',80]]){
-    const s=model.feed(state(10),'chicken',start,ration);
-    assert.equal(s.pets.chicken.health,10+recovery);
+    const initial=ration==='super'?80:10;
+    const s=model.feed(state(initial),'chicken',start,ration);
+    assert.equal(s.pets.chicken.health,Math.min(100,initial+recovery));
     assert.equal(s.pets.chicken.queue,undefined);
     assert.equal(ration==='normal'?s.feed:s.rations[ration],ration==='normal'?19:4);
   }
 });
-test('bônus Super Premium dá 34% por produção durante os 30 minutos, sem limite de saúde',()=>{
-  for(const [health,roll,expected]of [[85,.339,2],[79,.1,2],[85,.34,1]]){
+test('bônus Super Premium só dá 34% de chance quando a saúde está em 80% ou mais',()=>{
+  for(const [health,roll,expected]of [[85,.339,2],[79,0,1],[84,.33,2],[85,.34,1]]){
     let s=state(health);s.pets.chicken.superUntil=start+30*60000;
     s=model.advance(s,start+240000,{criador_dourado:5},()=>roll);
     assert.equal(s.pets.chicken.stock,expected);
-    assert.equal(s.pets.chicken.superActive,true);
   }
-  let s=model.feed(state(20),'chicken',start,'super',()=>0);
+  assert.throws(()=>model.feed(state(79),'chicken',start,'super',()=>0),/80% de vida ou mais/);
+  let s=model.feed(state(80),'chicken',start,'super',()=>0);
   assert.equal(s.pets.chicken.health,100);
   assert.equal(s.pets.chicken.superUntil,start+30*60000);
-  s=model.feed(s,'chicken',start,'normal',()=>0);
-  s=model.feed(s,'chicken',start,'super',()=>0);
-  assert.equal(s.pets.chicken.superUntil,start+30*60000);
-  s=model.advance(s,start+240000,{criador_dourado:5},()=>.34);
-  assert.equal(s.pets.chicken.stock,1);
 });
-test('buff Super Premium expira exatamente após 30 minutos e é salvo pelo horário final',()=>{
-  let s=state(100);s.pets.chicken.superUntil=start+30*60000;s.pets.chicken.readyAt=start+30*60000;
+test('buff pausa abaixo de 80%, retoma com alimentação e o cronômetro continua correndo',()=>{
+  let s=state(81);s.pets.chicken.superUntil=start+30*60000;
+  s=model.advance(s,start+2*60000,{},()=>0);
+  assert.equal(s.pets.chicken.health,79);
+  assert.equal(s.pets.chicken.superActive,false);
+  assert.equal(s.pets.chicken.superUntil,start+30*60000);
+  s=model.advance(s,start+4*60000,{},()=>0);
+  assert.equal(s.pets.chicken.stock,1);
+  assert.equal(s.pets.chicken.superActive,false);
+  s=model.feed(s,'chicken',start+4*60000,'premium',()=>1);
+  assert.equal(s.pets.chicken.health,100);
+  assert.equal(s.pets.chicken.superActive,true);
+  assert.equal(s.pets.chicken.superUntil,start+30*60000);
+  s=model.advance(s,start+8*60000,{},()=>0);
+  assert.equal(s.pets.chicken.stock,3);
   s=model.advance(s,start+30*60000,{},()=>0);
   assert.equal(s.pets.chicken.superActive,false);
   assert.equal(s.pets.chicken.superUntil,0);
-  assert.equal(s.pets.chicken.stock,1);
+  s=model.feed(s,'chicken',start+30*60000,'premium',()=>0);
+  assert.equal(s.pets.chicken.superActive,false);
+  s=model.feed(s,'chicken',start+30*60000,'super',()=>0);
+  assert.equal(s.pets.chicken.superUntil,start+60*60000);
 });
 test('UI troca o selo da Super Premium por uma barra temporizada',()=>{
   const fs=require('node:fs');

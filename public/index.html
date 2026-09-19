@@ -7161,7 +7161,9 @@ function applyOfflineProgress(savedAt) {
   // Avança a estação pelo tempo real decorrido, mesmo com a página fechada.
   const seasonDays = Math.floor(elapsed / SEASON_DAY_MS);
   const elapsedInDay = elapsed % SEASON_DAY_MS;
-  scheduleSeasonDayTick(elapsedInDay ? SEASON_DAY_MS - elapsedInDay : SEASON_DAY_MS);
+  const persistedEnd = Number(seasonDayEndsAt);
+  const remainingToNextDay = Number.isFinite(persistedEnd) ? persistedEnd - Date.now() : (SEASON_DAY_MS - elapsedInDay);
+  scheduleSeasonDayTick(Math.max(1000, remainingToNextDay));
   G.dayChangedWhileAway = seasonDays > 0;
   for (let i = 0; i < seasonDays; i++) {
     G.seasonDay++;
@@ -9137,6 +9139,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     waterCapacityLastRefill: G.waterCapacityLastRefill || Date.now(),
     seasonIdx:        G.seasonIdx,
     seasonDay:        G.seasonDay,
+    seasonDayEndsAt:  seasonDayEndsAt,
     orders:           G.orders || [],
     ordersGlobalResetVersion: G.ordersGlobalResetVersion || 0,
     ordersSeasonKey:  G.ordersSeasonKey || `${G.seasonIdx}`,
@@ -9406,6 +9409,7 @@ async function loadGardenFromSE(username) {
     G.waterCapacityLastRefill = Number(save.waterCapacityLastRefill || Date.now());
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
+    seasonDayEndsAt   = Number(save.seasonDayEndsAt) || (Date.now() + SEASON_DAY_MS);
     // Corrige estados antigos: a marca só vale enquanto a estação atual
     // realmente não combinar com a planta.
     G.plots = G.plots.map(plot => {

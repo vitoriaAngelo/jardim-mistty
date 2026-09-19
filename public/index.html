@@ -11148,13 +11148,19 @@ document.addEventListener('keydown', event => {
     toolsPanel.appendChild(toggle);
     alwaysVisible.forEach(child => toolsPanel.appendChild(child));
     toolsPanel.appendChild(dropdown);
+    dropdown.hidden = true;
+  }
+
+  // Insere a loja fora da criação do toggle para também funcionar se o menu já existir.
+  // A função da loja é declarada no script seguinte, então a chamada precisa ser adiada.
+  const existingToolsDropdown = toolsPanel?.querySelector('.tools-dropdown-content');
+  if (existingToolsDropdown && !existingToolsDropdown.querySelector('.exclusive-store-launcher')) {
     const exclusiveStoreButton = document.createElement('button');
     exclusiveStoreButton.type = 'button';
     exclusiveStoreButton.className = 'exclusive-store-launcher';
     exclusiveStoreButton.textContent = '🎁 Loja Exclusiva';
-    exclusiveStoreButton.addEventListener('click', openExclusiveStore);
-    dropdown.appendChild(exclusiveStoreButton);
-    dropdown.hidden = true;
+    exclusiveStoreButton.addEventListener('click', () => window.openExclusiveStore?.());
+    existingToolsDropdown.appendChild(exclusiveStoreButton);
   }
 </script>
 

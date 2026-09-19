@@ -4514,6 +4514,27 @@ function playEventStartSound() {
   });
 }
 
+function playMagicalRainSound() {
+  if (eventAudioVolume <= 0) return;
+  unlockEventAudio();
+  if (!eventAudioContext || eventAudioContext.state !== 'running') return;
+  const now = eventAudioContext.currentTime;
+  // Pequena cascata de sinos em tons claros, exclusiva da Chuva Mágica.
+  [659.25, 783.99, 987.77, 1174.66, 987.77, 1318.51].forEach((frequency, index) => {
+    const startAt = now + index * 0.12;
+    const oscillator = eventAudioContext.createOscillator();
+    const gain = eventAudioContext.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, startAt);
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(0.045 * eventAudioVolume, startAt + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.62);
+    oscillator.connect(gain).connect(eventAudioContext.destination);
+    oscillator.start(startAt);
+    oscillator.stop(startAt + 0.65);
+  });
+}
+
 document.addEventListener('pointerdown', unlockEventAudio, { once: true, passive: true });
 
 function eventFastMode() {
@@ -4581,7 +4602,8 @@ function startGardenEvent() {
   G.eventLastType = gardenEvent.type;
   G.eventNextAt = gardenEvent.endsAt + nextEventDelay();
   document.body.classList.add(`event-${gardenEvent.type}`);
-  playEventStartSound();
+  if (gardenEvent.type === 'rain') playMagicalRainSound();
+  else playEventStartSound();
   toast(`${def.icon} ${def.name} começou!`, 4000);
   if (gardenEvent.type === 'rain') {
     applyMagicRain();

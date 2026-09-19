@@ -33,6 +33,23 @@ test('compra repetida não duplica animal e coleta entra no estoque do mercado',
   await ctx.animalAction('collect','chicken');
   assert.equal(ctx.G.harvested.farm_egg,1);
 });
+test('ovo dourado de animal de estimação gera atividade para o feed global', () => {
+  const ctx=harness();
+  ctx.G.livestock=model.normalize({pets:{chicken:{name:'Pipoca',goldStock:2}}});
+  ctx.animalState();
+  assert.equal(ctx.G.harvested.farm_egg_golden,2);
+  assert.equal(ctx.G.recentGoldenEggFinds.length,1);
+  assert.equal(ctx.G.recentGoldenEggFinds[0].animalName,'Pipoca');
+  assert.equal(ctx.G.recentGoldenEggFinds[0].eggType,'egg');
+  assert.equal(ctx.G.recentGoldenEggFinds[0].quantity,2);
+  assert.equal(ctx.G.livestock.pets.chicken.goldStock,0);
+});
+test('produto dourado de animais que não põem ovos não aparece como ovo no feed', () => {
+  const ctx=harness();
+  ctx.G.livestock=model.normalize({pets:{cow:{name:'Mimosa',goldStock:1}}});
+  ctx.animalState();
+  assert.equal(ctx.G.recentGoldenEggFinds,undefined);
+});
 test('cliques simultâneos não cobram duas vezes', async () => {
   let resolveCharge, charges=0;
   const ctx=harness(()=>{ charges++;return new Promise(resolve=>{resolveCharge=resolve;}); });

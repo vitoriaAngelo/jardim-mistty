@@ -55,6 +55,11 @@ function animalState() {
     const normal = pet.stock || 0, golden = pet.goldStock || 0;
     G.harvested[animal.product] = (G.harvested[animal.product] || 0) + normal;
     G.harvested[animal.product + '_golden'] = (G.harvested[animal.product + '_golden'] || 0) + golden;
+    if (golden > 0 && ['farm_egg','farm_duck_egg'].includes(animal.product)) {
+      const eggType = animal.product === 'farm_duck_egg' ? 'duck_egg' : 'egg';
+      const find = { animalName:String(pet.name || animal.name).trim().slice(0,40), eggType, quantity:Math.min(1000,golden), at:Date.now() };
+      G.recentGoldenEggFinds = [find, ...(Array.isArray(G.recentGoldenEggFinds) ? G.recentGoldenEggFinds : []).filter(item => Number(item?.at) > Date.now() - 86400000)].slice(0,20);
+    }
     pet.stock = 0; pet.goldStock = 0;
     delivered = true;
     toast(`🐾 ${pet.name || animal.name} produziu ${produced} ${FarmAnimals.products[animal.product].name}${golden ? ' · ✨ dourado!' : ''}`, 3500);

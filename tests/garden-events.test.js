@@ -5,8 +5,8 @@ const path = require('node:path');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
 
-test('inclui os cinco eventos e mantém apenas um evento ativo', () => {
-  for (const type of ['rain', 'golden', 'butterflies', 'moon', 'mutation']) {
+test('inclui os eventos e mantém apenas um evento ativo', () => {
+  for (const type of ['rain', 'goldenshower', 'golden', 'butterflies', 'moon', 'mutation']) {
     assert.match(html, new RegExp(`${type}: \\{`));
   }
   assert.match(html, /if \(!gardenHydrated \|\| gardenEvent \|\|/);
@@ -85,6 +85,12 @@ test('eventos recompensam por ações sem creditar pontos diretamente', () => {
   assert.match(eventSource, /gainXP\(/);
   assert.match(html, /activeGardenEvent\('golden'\)/);
   assert.match(html, /activeGardenEvent\('moon'\)/);
+});
+
+test('GOLDENSHOWER dura cinco segundos e concede água e duas recargas da estação', () => {
+  assert.match(html, /goldenshower:\s*\{[^}]*duration:5/);
+  assert.match(html, /function applyGoldenShowerReward\(\)[\s\S]*?G\.waterCapacity=maxWateringCapacity\(\)[\s\S]*?G\.wateringRefillsBonus[\s\S]*?\+2/);
+  assert.match(html, /Regador cheio<br>✨ \+2 recargas nesta estação/);
 });
 
 test('chuva mágica dá um tick de crescimento quando a planta já está totalmente regada', () => {

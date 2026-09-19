@@ -221,7 +221,7 @@ exports.handler = async (event) => {
           // correio) reenviam os canteiros completos, mas não representam uma
           // tentativa de acelerar o crescimento. Não bloquear esse caso evita
           // que personalizações sejam rejeitadas pelo anti-fraude.
-          const gameplayKeys = ['plots','inventory','fertilizerInventory','plotFertilizers','harvested','waterCapacity','seasonIdx','seasonDay','seasonCycle','wateringRefillsUsed','wateringRefillsSeasonCycle','orders','missions','packInventory','xp','pts'];
+          const gameplayKeys = ['plots','inventory','fertilizerInventory','plotFertilizers','harvested','waterCapacity','seasonIdx','seasonDay','seasonCycle','wateringRefillsUsed','wateringRefillsBonus','wateringRefillsSeasonCycle','orders','missions','packInventory','xp','pts'];
           const gameplayUnchanged = gameplayKeys.every((key) => JSON.stringify(oldData[key] ?? null) === JSON.stringify(safeData[key] ?? null));
           if (fraudDetected && !gameplayUnchanged) {
             console.error(`🚨 FRAUDE - ${username}:`, fraudLog);
@@ -260,6 +260,18 @@ exports.handler = async (event) => {
       if (!expectedRevision || expectedRevision !== currentRevision) {
         return { statusCode: 409, headers, body: JSON.stringify({ error: 'O jardim foi atualizado em outra tela', code: 'STALE_STATE', revision: currentRevision }) };
       }
+      // O limite base é sete. Só uma transição real para o evento dourado
+      // concede mais duas recargas; a bonificação reinicia ao mudar de estação.
+      const oldRefillCycle = Number(existingData.wateringRefillsSeasonCycle || 0);
+      const incomingRefillCycle = Number(safeData.wateringRefillsSeasonCycle || 0);
+      const oldRefillBonus = Math.max(0, Math.min(10000, Math.floor(Number(existingData.wateringRefillsBonus) || 0)));
+      const goldenShowerStarted = safeData.eventLastType === 'goldenshower'
+        && existingData.eventLastType !== 'goldenshower'
+        && Number(existingData.eventNextAt || 0) <= Date.now();
+      safeData.wateringRefillsBonus = incomingRefillCycle !== oldRefillCycle
+        ? 0
+        : Math.min(10000, oldRefillBonus + (goldenShowerStarted ? 2 : 0));
+      safeData.wateringRefillsUsed = Math.max(0, Math.min(7 + safeData.wateringRefillsBonus, Math.floor(Number(safeData.wateringRefillsUsed) || 0)));
       // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
       // só precisam ser revalidados quando o estado dos pedidos realmente muda;
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.

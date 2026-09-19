@@ -249,6 +249,7 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .latest-sales-card-name.rare { color:#8960a6; }
 .latest-sales-card-name.legendary { color:#b18422; }
 .latest-sales-card-name.prismatic { color:transparent; background:linear-gradient(100deg,#659fdb,#a675c9,#58aaa8,#d49bc1); background-clip:text; -webkit-background-clip:text; }
+.latest-sales-golden-item { color:#a87a16; font-weight:900; text-shadow:0 1px 0 #f8e9ae; }
 .watering-refill-offer { display:none; position:absolute; left:calc(100% + 9px); top:50%; transform:translateY(-50%); width:150px; padding:8px 9px; border:1px solid #e3c98f; border-radius:12px; background:#fff7df; color:#80652e; font-size:10px; font-weight:800; line-height:1.25; text-align:center; cursor:pointer; box-shadow:0 3px 0 #dec58d, 0 5px 12px rgba(117,91,52,.12); z-index:8; }
 .watering-refill-offer::before { content:''; position:absolute; right:100%; top:50%; border:6px solid transparent; border-right-color:#e3c98f; transform:translateY(-50%); }
 .watering-refill-offer.visible { display:block; }
@@ -264,6 +265,7 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .garden-event-progress { position:absolute; left:0; bottom:0; height:4px; width:100%; transform-origin:left; background:#7fa66c; }
 .garden-event-layer { position:fixed; inset:0; z-index:120; pointer-events:none; overflow:hidden; }
 .event-rain-drop { position:absolute; top:-30px; color:#8ed4f5; font-size:18px; animation:event-rain 1.2s linear forwards; }
+.event-golden-drop { position:absolute; top:-34px; color:#f3d15b; font-size:18px; text-shadow:0 0 8px #fff2a6,0 0 15px #d79e24; animation:event-golden-rain 1.35s linear forwards; }
 .event-butterfly { position:fixed; z-index:121; pointer-events:auto; cursor:pointer; border:0; background:transparent; font-size:30px; filter:drop-shadow(0 3px 3px rgba(50,45,80,.25)); animation:event-fly 5s ease-in-out forwards; }
 .event-butterfly.rare { font-size:36px; filter:drop-shadow(0 0 8px #e58cff); }
 .event-pest { position:fixed; z-index:121; pointer-events:auto; cursor:pointer; border:2px solid #718c5d; border-radius:999px; background:#fff9df; padding:7px; font-size:25px; line-height:1; box-shadow:0 3px 0 #c9b98f,0 0 0 3px #ffffffaa; animation:pest-wiggle 1.1s ease-in-out infinite; }
@@ -279,9 +281,11 @@ body.event-pests { animation:farm-pest-shake .35s ease-in-out 3; }
 .plot-mutation-label { display:inline-block; margin:2px 0; padding:2px 6px; border-radius:8px; background:#70508c; color:#fff; font-size:9px; font-weight:900; letter-spacing:.1px; }
 .mutation-tooltip-badge { display:inline-block; padding:3px 6px; border-radius:7px; background:#765292; color:#fff; font-weight:900; font-size:10px; }
 body.event-rain::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:linear-gradient(#7193aa22,#a8d7ec16); }
+body.event-goldenshower::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:linear-gradient(180deg,#ffdf6b22,#fff5b516 45%,transparent); }
 body.event-moon::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:radial-gradient(circle at 78% 12%,#fffbd0 0 3%,#9d83dc33 4% 17%,#33294b44 60%); mix-blend-mode:multiply; }
 @keyframes event-pop { from{opacity:0;transform:translateY(-10px) scale(.98)} to{opacity:1;transform:none} }
 @keyframes event-rain { to{transform:translate(-35px,110vh);opacity:.15} }
+@keyframes event-golden-rain { to{transform:translate(-18px,110vh) rotate(210deg);opacity:.08} }
 @keyframes pest-wiggle { 0%,100%{transform:rotate(-5deg) translateY(0)} 50%{transform:rotate(5deg) translateY(-4px)} }
 @keyframes pest-hit { 50%{transform:scale(1.25) rotate(12deg);filter:brightness(1.6)} 100%{transform:scale(.8);opacity:.35} }
 @keyframes farm-pest-shake { 20%,60%{transform:translateX(-2px)} 40%,80%{transform:translateX(2px)} }
@@ -305,6 +309,7 @@ body.dark-mode #garden-event-summary-overlay .levelup-rewards strong { color:#f4
 @keyframes sales-slide-in { from { opacity:.2; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 body.dark-mode .latest-sales-feed { border-color:#677c62; background:linear-gradient(135deg,#354332 0%,#2d392d 100%); color:#d9e5d0; box-shadow:0 3px 0 #202b20, 0 7px 16px rgba(0,0,0,.2); }
 body.dark-mode .latest-sales-feed strong { color:#f0f5e8; }
+body.dark-mode .latest-sales-golden-item { color:#f2d16a; text-shadow:0 1px 2px #1c1608; }
 
 .header-btn-tip {
   display: none; position: absolute;
@@ -498,6 +503,12 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
   transition: background .12s;
 }
 .user-menu-item:hover { background: var(--cream2); color: #c03030; }
+.user-audio-settings { margin:0 8px 8px; padding:10px; border:1px solid var(--cozy-line); border-radius:11px; background:var(--cream2); color:var(--text); }
+.user-audio-settings[hidden] { display:none; }
+.user-audio-settings label { display:flex; justify-content:space-between; gap:8px; margin-bottom:7px; font-size:11px; font-weight:800; }
+.user-audio-settings input { width:100%; accent-color:#80629c; cursor:pointer; }
+.user-audio-settings .audio-volume-hint { display:block; margin-top:3px; color:var(--text2); font-size:10px; text-align:right; }
+body.dark-mode .user-audio-settings { background:#30392d; border-color:#53604f; color:#e1ecd9; }
 
 /* ─── MAIN LAYOUT ────────────────────────── */
 .game-wrap {
@@ -2262,6 +2273,26 @@ body.dark-mode .profile-current-value { color:#f1f5e9; }
   display: flex; flex-direction: column; gap: 14px;
   cursor: var(--cozy-cursor, default);
 }
+.exclusive-store-modal { width:min(720px,calc(100% - 24px)); max-width:720px; }
+.exclusive-store-intro { margin:-5px 0 2px; color:var(--text2); font-size:13px; line-height:1.5; }
+.exclusive-store-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.exclusive-store-card { display:flex; flex-direction:column; gap:12px; padding:16px; border:1.5px solid var(--cozy-line); border-radius:18px; background:linear-gradient(145deg,var(--cream),var(--cream2)); box-shadow:0 4px 0 #d8d2bd; }
+.exclusive-store-card h3 { margin:0; color:var(--text); font:700 19px Georgia,serif; }
+.exclusive-store-card .exclusive-store-art { display:grid; place-items:center; min-height:100px; border:1px solid #e5d5ad; border-radius:14px; background:linear-gradient(135deg,#fff4dc,#f5d8c9); color:#a84f41; font-size:30px; font-weight:900; }
+.exclusive-store-price { color:var(--soil2); font-size:13px; font-weight:900; }
+.exclusive-store-stock { padding:8px 10px; border-radius:10px; background:var(--cream2); color:var(--text); font-size:12px; font-weight:800; }
+.exclusive-store-redeemers { display:grid; gap:5px; max-height:86px; overflow:auto; color:var(--text2); font-size:11px; }
+.exclusive-store-redeemer { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.exclusive-store-claim { min-height:42px; border:0; border-radius:12px; background:#778b64; color:#fffdf7; box-shadow:0 3px 0 #586e47; font:800 13px 'Nunito',sans-serif; cursor:pointer; }
+.exclusive-store-claim:disabled { opacity:.48; cursor:not-allowed; box-shadow:none; }
+.exclusive-store-launcher { width:100%; min-height:48px; padding:9px 10px; border:1px solid #d8c997; border-radius:14px; background:linear-gradient(135deg,#fff4cf,#f2db9c); color:#6c5428; font:800 12px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 3px 0 #c2a967; }
+.exclusive-store-launcher:hover { transform:translateY(-1px); box-shadow:0 4px 0 #c2a967; }
+body.dark-mode .exclusive-store-card { border-color:#586b52; background:linear-gradient(145deg,#30392d,#252d24); box-shadow:0 4px 0 #20271f; }
+body.dark-mode .exclusive-store-card h3, body.dark-mode .exclusive-store-stock { color:#e1ecd9; }
+body.dark-mode .exclusive-store-card .exclusive-store-art { border-color:#80684a; background:linear-gradient(135deg,#443b2b,#49332e); }
+body.dark-mode .exclusive-store-claim { background:#667d58; color:#f2f7ea; box-shadow:0 3px 0 #43563b; }
+body.dark-mode .exclusive-store-launcher { border-color:#887343; background:linear-gradient(135deg,#51462f,#3f3929); color:#f2dfa9; box-shadow:0 3px 0 #342d20; }
+.exclusive-store-launcher:focus-visible, .exclusive-store-claim:focus-visible { outline:3px solid #9bbd7a; outline-offset:2px; }
 .mail-overlay, .modal-overlay, .help-overlay, .profile-overlay, .levelup-overlay { cursor:var(--cozy-cursor, default); }
 .mail-modal-title { font-size: 18px; font-weight: 800; color: var(--text); }
 .shop-modal, .inventory-modal { width: min(760px, calc(100% - 32px)); max-width: 760px; max-height: 88vh; }
@@ -3193,6 +3224,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
   }
   .mail-modal-title, .help-title { font-size: 21px; }
   .mail-modal, .profile-modal { padding: 18px 14px; }
+  .exclusive-store-grid { grid-template-columns:1fr; }
   .modal-actions { flex-wrap: wrap; }
   .modal-actions button { flex: 1 1 120px; }
   .shop-cart.side-cart { left: 8px; right: 8px; bottom: 8px; width: auto; min-width: 0; max-width: none; }
@@ -3343,6 +3375,12 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <button class="user-menu-item user-menu-mail-item" onclick="openMailbox(); document.getElementById('user-menu').classList.add('hidden');"><span>✉️ Correio</span><span class="user-menu-mail-badge hidden" id="mail-menu-badge">0</span></button>
         <button class="user-menu-item user-menu-mail-item" onclick="openAchievements(); document.getElementById('user-menu').classList.add('hidden');"><span>🏆 Conquistas</span><span class="user-menu-mail-badge hidden" id="achiev-menu-badge">0</span></button>
         <button class="user-menu-item" onclick="openPointsHistory(); document.getElementById('user-menu').classList.add('hidden');">📒 Histórico de pontos</button>
+        <button class="user-menu-item" id="event-audio-settings-toggle" type="button" aria-expanded="false" onclick="toggleEventAudioSettings()">⚙️ Configurações</button>
+        <div class="user-audio-settings" id="event-audio-settings" hidden>
+          <label for="event-audio-volume"><span>🔔 Volume dos eventos</span><span id="event-audio-volume-value">100%</span></label>
+          <input id="event-audio-volume" type="range" min="0" max="200" step="5" value="100" aria-label="Volume do som de eventos" oninput="setEventAudioVolume(this.value)">
+          <span class="audio-volume-hint">Você pode aumentar até 200%</span>
+        </div>
         <button class="user-menu-item" onclick="logout()">🚪 Sair</button>
       </div>
     </div>
@@ -3973,6 +4011,17 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
   </div>
 </div>
 
+<!-- EXCLUSIVE REWARD STORE -->
+<div class="mail-overlay hidden" id="exclusive-store-overlay">
+  <div class="mail-modal exclusive-store-modal" role="dialog" aria-modal="true" aria-labelledby="exclusive-store-title">
+    <button class="popup-close-x" type="button" aria-label="Fechar loja exclusiva" onclick="closeExclusiveStore()">×</button>
+    <div class="mail-modal-title" id="exclusive-store-title">🎁 Loja Exclusiva</div>
+    <p class="exclusive-store-intro">Troque seus pontos por cartões iFood. Os resgates são limitados; o nome da conta aparece aqui após a confirmação para organizar a entrega.</p>
+    <div class="shop-points-badge" style="align-self:flex-start"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"><span id="exclusive-store-points">0</span> pts</div>
+    <div id="exclusive-store-content" aria-live="polite"></div>
+  </div>
+</div>
+
 <!-- SHOP MODAL -->
 <div class="mail-overlay hidden" id="shop-overlay">
   <div class="mail-modal shop-modal">
@@ -4373,6 +4422,7 @@ const G = {
   seasonDay: 1,
   seasonCycle: 0,
   wateringRefillsUsed: 0,
+  wateringRefillsBonus: 0,
   wateringRefillsSeasonCycle: 0,
   missions: null,
   achievements: null,
@@ -4432,6 +4482,7 @@ const G = {
 // ─── EVENTOS VIVOS DO JARDIM ─────────────────────────────
 const GARDEN_EVENTS = {
   rain: { icon:'🌧️', name:'Chuva Mágica', duration:45, color:'#67a9c9', intro:'A chuva vai regar suas plantas automaticamente!' },
+  goldenshower: { icon:'🌟', name:'GOLDENSHOWER', duration:5, color:'#e5bd43', intro:'Chuva dourada! Enche o regador e concede +2 recargas nesta estação.' },
   golden: { icon:'☀️', name:'Hora Dourada', duration:60, color:'#d9a82f', intro:'Colheitas feitas durante o evento rendem o dobro!' },
   butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
   moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
@@ -4443,6 +4494,36 @@ let gardenEventTimer = null;
 let gardenEventRainTimer = null;
 let gardenEventButterflyTimer = null;
 let eventAudioContext = null;
+let eventAudioVolume = (() => {
+  try {
+    const stored = Number(localStorage.getItem('mistty-event-audio-volume'));
+    return Number.isFinite(stored) ? Math.max(0, Math.min(2, stored)) : 1;
+  } catch { return 1; }
+})();
+
+function syncEventAudioVolumeControl() {
+  const slider = document.getElementById('event-audio-volume');
+  const output = document.getElementById('event-audio-volume-value');
+  if (slider) slider.value = String(Math.round(eventAudioVolume * 100));
+  if (output) output.textContent = `${Math.round(eventAudioVolume * 100)}%`;
+}
+
+function toggleEventAudioSettings() {
+  const panel = document.getElementById('event-audio-settings');
+  const button = document.getElementById('event-audio-settings-toggle');
+  if (!panel || !button) return;
+  panel.hidden = !panel.hidden;
+  button.setAttribute('aria-expanded', String(!panel.hidden));
+  syncEventAudioVolumeControl();
+}
+
+function setEventAudioVolume(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return;
+  eventAudioVolume = Math.max(0, Math.min(2, parsed / 100));
+  try { localStorage.setItem('mistty-event-audio-volume', String(eventAudioVolume)); } catch {}
+  syncEventAudioVolumeControl();
+}
 
 function unlockEventAudio() {
   if (!eventAudioContext) {
@@ -4454,6 +4535,7 @@ function unlockEventAudio() {
 }
 
 function playEventStartSound() {
+  if (eventAudioVolume <= 0) return;
   unlockEventAudio();
   if (!eventAudioContext || eventAudioContext.state !== 'running') return;
   const now = eventAudioContext.currentTime;
@@ -4463,11 +4545,32 @@ function playEventStartSound() {
     oscillator.type = 'sine';
     oscillator.frequency.value = frequency;
     gain.gain.setValueAtTime(0.0001, now + index * 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.09, now + index * 0.1 + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.09 * eventAudioVolume, now + index * 0.1 + 0.025);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.1 + 0.42);
     oscillator.connect(gain).connect(eventAudioContext.destination);
     oscillator.start(now + index * 0.1);
     oscillator.stop(now + index * 0.1 + 0.45);
+  });
+}
+
+function playMagicalRainSound() {
+  if (eventAudioVolume <= 0) return;
+  unlockEventAudio();
+  if (!eventAudioContext || eventAudioContext.state !== 'running') return;
+  const now = eventAudioContext.currentTime;
+  // Pequena cascata de sinos em tons claros, exclusiva da Chuva Mágica.
+  [659.25, 783.99, 987.77, 1174.66, 987.77, 1318.51].forEach((frequency, index) => {
+    const startAt = now + index * 0.12;
+    const oscillator = eventAudioContext.createOscillator();
+    const gain = eventAudioContext.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, startAt);
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(0.045 * eventAudioVolume, startAt + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.62);
+    oscillator.connect(gain).connect(eventAudioContext.destination);
+    oscillator.start(startAt);
+    oscillator.stop(startAt + 0.65);
   });
 }
 
@@ -4480,6 +4583,7 @@ function eventFastMode() {
 function nextEventDelay() { return eventFastMode() ? 8000 + Math.random()*5000 : 300000 + Math.random()*180000; }
 function gardenEventDuration(type) {
   const base = eventFastMode() ? 12 : GARDEN_EVENTS[type].duration;
+  if (type === 'goldenshower' && !eventFastMode()) return GARDEN_EVENTS[type].duration;
   return base + (skillBranchBonusActive('colheita') ? 15 : 0);
 }
 function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
@@ -4507,6 +4611,7 @@ function eventLiveSubtitle() {
   if (!gardenEvent) return '';
   const n = gardenEvent.actions || 0;
   if (gardenEvent.type === 'rain') return `${n} planta${n===1?'':'s'} recebeu${n===1?'':'ram'} água mágica`;
+  if (gardenEvent.type === 'goldenshower') return 'Regador cheio · +2 recargas nesta estação';
   if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
   if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
   if (gardenEvent.type === 'pests') return `${n} praga${n===1?'':'s'} removida${n===1?'':'s'} · 🐛 Infestação: ${Math.min(100, gardenEvent.danger || 0)}%`;
@@ -4538,11 +4643,17 @@ function startGardenEvent() {
   G.eventLastType = gardenEvent.type;
   G.eventNextAt = gardenEvent.endsAt + nextEventDelay();
   document.body.classList.add(`event-${gardenEvent.type}`);
-  playEventStartSound();
+  if (gardenEvent.type === 'rain') playMagicalRainSound();
+  else playEventStartSound();
   toast(`${def.icon} ${def.name} começou!`, 4000);
   if (gardenEvent.type === 'rain') {
     applyMagicRain();
     gardenEventRainTimer = setInterval(() => { spawnEventRain(); applyMagicRain(); }, 3500);
+  }
+  if (gardenEvent.type === 'goldenshower') {
+    applyGoldenShowerReward();
+    spawnGoldenShower();
+    toast('🌟 GOLDENSHOWER! Regador cheio e +2 recargas disponíveis nesta estação.', 5200);
   }
   if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
   if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
@@ -4592,13 +4703,17 @@ function showGardenEventSummary(finished, def) {
   const xp = finished.xp || 0;
   const bonus = finished.bonus || 0;
   const reward = bonus ? `<div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Recompensas extras</strong>${finished.type === 'moon' ? `🌙 ${bonus} Semente${bonus === 1 ? '' : 's'} Lunar${bonus === 1 ? '' : 'es'}` : `✨ ${bonus} bônus do evento`}</div>` : '';
+  const goldenShowerReward = finished.type === 'goldenshower'
+    ? '<div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Presente da chuva dourada</strong>💧 Regador cheio<br>✨ +2 recargas nesta estação</div>'
+    : '';
   overlay.innerHTML = `<div class="mail-modal" style="max-width:420px;text-align:center" onclick="event.stopPropagation()">
     <button class="popup-close-x" aria-label="Fechar resumo do evento" onclick="this.closest('#garden-event-summary-overlay').remove()">×</button>
     <div style="font-size:44px;line-height:1;margin:4px 0 10px">${def.icon}</div>
     <div class="mail-modal-title" id="garden-event-summary-title" style="justify-content:center">${def.name} terminou!</div>
-    <p class="premium-copy">${actions ? `Você participou ${actions} vez${actions === 1 ? '' : 'es'} e aproveitou o evento.` : 'Você participou um pouquinho — fique de olho no próximo evento!'}</p>
+    <p class="premium-copy">${finished.type === 'goldenshower' ? 'A chuva dourada deixou presentes para sua fazenda!' : actions ? `Você participou ${actions} vez${actions === 1 ? '' : 'es'} e aproveitou o evento.` : 'Você participou um pouquinho — fique de olho no próximo evento!'}</p>
     <div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Resumo da participação</strong>🌱 ${actions} ${actions === 1 ? 'ação realizada' : 'ações realizadas'}<br>✨ +${xp} XP ganhos</div>
     ${reward}
+    ${goldenShowerReward}
     <button class="levelup-dismiss" style="margin:16px auto 0" onclick="this.closest('#garden-event-summary-overlay').remove()">Continuar no jardim 🌱</button>
   </div>`;
   overlay.onclick = event => { if (event.target === overlay) overlay.remove(); };
@@ -4938,14 +5053,19 @@ function wateringRefillCost() {
   return G.bonusRefillDiscount ? Math.ceil(base / 2) : base;
 }
 const MAX_WATERING_REFILLS_PER_SEASON = 7;
+function wateringRefillLimit() {
+  return MAX_WATERING_REFILLS_PER_SEASON + Math.min(10000, Math.max(0, Math.floor(Number(G.wateringRefillsBonus) || 0)));
+}
 function syncWateringRefillSeason() {
   const cycle = Math.max(0, Number(G.seasonCycle) || 0);
   const savedCycle = Number(G.wateringRefillsSeasonCycle);
   if (!Number.isFinite(savedCycle) || savedCycle !== cycle) {
     G.wateringRefillsUsed = 0;
+    G.wateringRefillsBonus = 0;
     G.wateringRefillsSeasonCycle = cycle;
   }
-  G.wateringRefillsUsed = Math.max(0, Math.min(MAX_WATERING_REFILLS_PER_SEASON, Math.floor(Number(G.wateringRefillsUsed) || 0)));
+  G.wateringRefillsBonus = Math.min(10000, Math.max(0, Math.floor(Number(G.wateringRefillsBonus) || 0)));
+  G.wateringRefillsUsed = Math.max(0, Math.min(wateringRefillLimit(), Math.floor(Number(G.wateringRefillsUsed) || 0)));
 }
 function effectiveWaterRecoveryMinutes() {
   const base = G.premiumWateringCan ? 2 : 5;
@@ -4992,15 +5112,16 @@ function renderWateringCapacity() {
   const caption = document.getElementById('water-caption');
   const offer = document.getElementById('watering-refill-offer');
   const refillCounter = document.getElementById('watering-season-refills');
-  const refillsLeft = Math.max(0, MAX_WATERING_REFILLS_PER_SEASON - G.wateringRefillsUsed);
-  if (refillCounter) refillCounter.textContent = `Recargas da estação: ${G.wateringRefillsUsed}/${MAX_WATERING_REFILLS_PER_SEASON}`;
+  const refillLimit = wateringRefillLimit();
+  const refillsLeft = Math.max(0, refillLimit - G.wateringRefillsUsed);
+  if (refillCounter) refillCounter.textContent = `Recargas da estação: ${G.wateringRefillsUsed}/${refillLimit}`;
   if (offer) {
     offer.classList.toggle('visible', amount <= 1 && amount < max);
     offer.setAttribute('aria-disabled', refillsLeft <= 0 || waterRefillPurchaseInFlight ? 'true' : 'false');
     offer.tabIndex = refillsLeft <= 0 || waterRefillPurchaseInFlight ? -1 : 0;
     offer.innerHTML = refillsLeft > 0
-      ? `Regador quase vazio<br>Clique para gastar <img src="points-sprout.svg" alt="" aria-hidden="true"> ${wateringRefillCost()} pontos e encher · ${refillsLeft}/7 restantes`
-      : 'Limite de 7 recargas desta estação atingido';
+      ? `Regador quase vazio<br>Clique para gastar <img src="points-sprout.svg" alt="" aria-hidden="true"> ${wateringRefillCost()} pontos e encher · ${refillsLeft} recargas restantes`
+      : `Limite de ${refillLimit} recargas desta estação atingido`;
   }
   if (caption) {
     if (amount >= max) {
@@ -5148,9 +5269,9 @@ var waterRefillPurchaseInFlight = false;
 async function buyWaterRefillFromNotice() {
   syncWateringRefillSeason();
   if (waterRefillPurchaseInFlight) return;
-  if (G.wateringRefillsUsed >= MAX_WATERING_REFILLS_PER_SEASON) {
+  if (G.wateringRefillsUsed >= wateringRefillLimit()) {
     renderWateringCapacity();
-    toast('Você já usou as 7 recargas desta estação. O limite renova na próxima estação.', 3500);
+    toast(`Você já usou as ${wateringRefillLimit()} recargas desta estação. O limite renova na próxima estação.`, 3500);
     return;
   }
   const cost = wateringRefillCost();
@@ -5174,12 +5295,12 @@ async function buyWaterRefillFromNotice() {
     if (!(await chargeGamePoints(cost, 'Recarga do regador'))) return;
     syncWateringRefillSeason();
     G.waterCapacity = maxWateringCapacity();
-    G.wateringRefillsUsed = Math.min(MAX_WATERING_REFILLS_PER_SEASON, G.wateringRefillsUsed + 1);
+    G.wateringRefillsUsed = Math.min(wateringRefillLimit(), G.wateringRefillsUsed + 1);
     G.wateringRefillsSeasonCycle = Number(G.seasonCycle) || 0;
     renderWateringCapacity();
     updatePts();
     await saveGardenToSE();
-    toast(`Regador cheio! (${G.waterCapacity}/${maxWateringCapacity()}) · ${MAX_WATERING_REFILLS_PER_SEASON - G.wateringRefillsUsed} recargas restantes nesta estação`, 3200);
+    toast(`Regador cheio! (${G.waterCapacity}/${maxWateringCapacity()}) · ${wateringRefillLimit() - G.wateringRefillsUsed} recargas restantes nesta estação`, 3200);
   } finally {
     waterRefillPurchaseInFlight = false;
     renderWateringCapacity();
@@ -6083,6 +6204,27 @@ const PRISMATIC_ALBUM_NAMES = ['Prisma de Orvalho','Prisma de Pétala','Prisma d
 function hasCompleteSpringAlbum(cards=G.albumCards||{}) { return SPRING_ALBUM_NAMES.every(name=>Number(cards[name]||0)>0); }
 function hasCompletePrismaticAlbum(cards=G.albumCards||{}) {
   return PRISMATIC_ALBUM_NAMES.every((name,index)=>Number(cards[`prismatic_${index}`]??cards[name]??0)>0);
+}
+
+function spawnGoldenShower() {
+  const layer=document.getElementById('garden-event-layer');
+  if(!layer)return;
+  layer.replaceChildren();
+  for(let i=0;i<28;i++){
+    const drop=document.createElement('span');
+    drop.className='event-golden-drop';drop.textContent=i%3?'✦':'✧';
+    drop.style.left=`${Math.random()*100}%`;drop.style.animationDelay=`${Math.random()*.75}s`;
+    layer.appendChild(drop);setTimeout(()=>drop.remove(),2200);
+  }
+}
+
+function applyGoldenShowerReward() {
+  syncWateringRefillSeason();
+  G.waterCapacity=maxWateringCapacity();
+  G.waterCapacityLastRefill=Date.now();
+  G.wateringRefillsBonus=Math.min(10000,Math.max(0,Math.floor(Number(G.wateringRefillsBonus)||0))+2);
+  gardenEvent.wateringRefillsBonus=2;
+  renderWateringCapacity();
 }
 function ensureAlbumCompletionRewards() {
   if (!seUser || !gardenHydrated) return false;
@@ -9481,6 +9623,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     seasonDay:        G.seasonDay,
     seasonCycle:      Number(G.seasonCycle) || 0,
     wateringRefillsUsed: Number(G.wateringRefillsUsed) || 0,
+    wateringRefillsBonus: Number(G.wateringRefillsBonus) || 0,
     wateringRefillsSeasonCycle: Number(G.wateringRefillsSeasonCycle) || 0,
     albumPacks:       Number(G.albumPacks || 0),
     packInventory:   G.packInventory || { normal:0, prismatic:0 },
@@ -9497,6 +9640,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     lastOrder:        G.lastOrder || null,
     lastEvent:        G.lastEvent || null,
     recentCardFinds:  Array.isArray(G.recentCardFinds) ? G.recentCardFinds.slice(0, 20) : [],
+    recentGoldenEggFinds: Array.isArray(G.recentGoldenEggFinds) ? G.recentGoldenEggFinds.slice(0, 20) : [],
     eventNextAt:      Number(G.eventNextAt || 0),
     eventLastType:    G.eventLastType || '',
     discoveredMutations: G.discoveredMutations || [],
@@ -9766,7 +9910,8 @@ async function loadGardenFromSE(username) {
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
     G.seasonCycle     = Math.max(0, Number(save.seasonCycle) || 0);
-    G.wateringRefillsUsed = Math.max(0, Math.min(MAX_WATERING_REFILLS_PER_SEASON, Math.floor(Number(save.wateringRefillsUsed) || 0)));
+    G.wateringRefillsBonus = Math.min(10000, Math.max(0, Math.floor(Number(save.wateringRefillsBonus) || 0)));
+    G.wateringRefillsUsed = Math.max(0, Math.min(wateringRefillLimit(), Math.floor(Number(save.wateringRefillsUsed) || 0)));
     G.wateringRefillsSeasonCycle = Number.isFinite(Number(save.wateringRefillsSeasonCycle))
       ? Number(save.wateringRefillsSeasonCycle)
       : G.seasonCycle;
@@ -9794,6 +9939,7 @@ async function loadGardenFromSE(username) {
     G.lastOrder        = save.lastOrder || null;
     G.lastEvent        = save.lastEvent || null;
     G.recentCardFinds  = Array.isArray(save.recentCardFinds) ? save.recentCardFinds.slice(0, 20) : [];
+    G.recentGoldenEggFinds = Array.isArray(save.recentGoldenEggFinds) ? save.recentGoldenEggFinds.slice(0, 20) : [];
     G.eventNextAt      = Number(save.eventNextAt || 0);
     G.eventLastType    = save.eventLastType || '';
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
@@ -10309,6 +10455,8 @@ function renderLatestSale() {
     ? `<span class="latest-sales-content sales-slide-in"><strong>${escapeLatestFeedText(who)}</strong> conseguiu a carta <b class="latest-sales-card-name ${sale.card.prismatic ? 'prismatic' : String(sale.card.rarity).toLocaleLowerCase('pt-BR') === 'lendária' ? 'legendary' : 'rare'}">${escapeLatestFeedText(sale.card.name)}</b></span>`
     : sale.activityType === 'event'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> participou do evento <b>${sale.event || 'do jardim'}</b></span>`
+    : sale.activityType === 'golden-egg'
+    ? `<span class="latest-sales-content sales-slide-in"><strong>${escapeLatestFeedText(who)}</strong> · ${escapeLatestFeedText(sale.animalName || 'Um animal')} produziu <b class="latest-sales-golden-item">${escapeLatestFeedText(sale.item || 'ovo dourado')}</b>${Number(sale.quantity) > 1 ? ` ×${Number(sale.quantity)}` : ''}</span>`
     : sale.activityType === 'order'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> entregou <b>${sale.item || 'um pedido'}</b> e ganhou <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.reward || 0).toLocaleString('pt-BR')} pontos</span>`
     : `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> acabou de faturar <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;
@@ -11053,9 +11201,118 @@ document.addEventListener('keydown', event => {
     toolsPanel.appendChild(dropdown);
     dropdown.hidden = true;
   }
+
+  // Insere a loja fora da criação do toggle para também funcionar se o menu já existir.
+  // A função da loja é declarada no script seguinte, então a chamada precisa ser adiada.
+  const existingToolsDropdown = toolsPanel?.querySelector('.tools-dropdown-content');
+  if (existingToolsDropdown && !existingToolsDropdown.querySelector('.exclusive-store-launcher')) {
+    const exclusiveStoreButton = document.createElement('button');
+    exclusiveStoreButton.type = 'button';
+    exclusiveStoreButton.className = 'exclusive-store-launcher';
+    exclusiveStoreButton.textContent = '🎁 Loja Exclusiva';
+    exclusiveStoreButton.addEventListener('click', () => window.openExclusiveStore?.());
+    existingToolsDropdown.appendChild(exclusiveStoreButton);
+  }
 </script>
 
 <!-- ── ANTI-FRAUDE: Proteção via servidor (garden-save.js) ── -->
+
+<script>
+const EXCLUSIVE_STORE_PRODUCTS = {
+  ifood_20:{ name:'Cartão iFood de R$ 20', cost:5_000_000, limit:3, art:'🍔 iFood R$ 20' },
+  ifood_50:{ name:'Cartão iFood de R$ 50', cost:10_000_000, limit:1, art:'🍟 iFood R$ 50' },
+};
+let exclusiveStoreBusy = false;
+let exclusiveStoreSnapshot = {};
+
+function escapeExclusiveStoreText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+
+function closeExclusiveStore() {
+  document.getElementById('exclusive-store-overlay')?.classList.add('hidden');
+}
+
+async function openExclusiveStore() {
+  if (!seUser || !gardenHydrated) { toast('Conecte-se à fazenda para acessar a Loja Exclusiva.', 2600); return; }
+  const dropdown = document.querySelector('.tools-dropdown-content');
+  if (dropdown) dropdown.hidden = true;
+  const toggle = document.querySelector('.tools-dropdown-toggle');
+  if (toggle) toggle.setAttribute('aria-expanded','false');
+  document.getElementById('exclusive-store-overlay')?.classList.remove('hidden');
+  const points = document.getElementById('exclusive-store-points');
+  if (points) points.textContent = Number(G.pts || 0).toLocaleString('pt-BR');
+  await refreshExclusiveStore();
+}
+
+function renderExclusiveStore(products=exclusiveStoreSnapshot) {
+  const host = document.getElementById('exclusive-store-content');
+  if (!host) return;
+  const points = Number(G.pts || 0);
+  document.getElementById('exclusive-store-points').textContent = points.toLocaleString('pt-BR');
+  host.innerHTML = `<div class="exclusive-store-grid">${Object.entries(EXCLUSIVE_STORE_PRODUCTS).map(([key, product]) => {
+    const status = products?.[key] || { remaining:product.limit, redeemers:[], processing:0 };
+    const enough = points >= product.cost;
+    const remaining = Math.max(0, Number(status.remaining) || 0);
+    const redeemers = Array.isArray(status.redeemers) ? status.redeemers : [];
+    const people = redeemers.length
+      ? redeemers.map(person => `<div class="exclusive-store-redeemer">🌿 ${escapeExclusiveStoreText(person.name || person.username)} <span>@${escapeExclusiveStoreText(person.username)}</span></div>`).join('')
+      : '<div class="exclusive-store-redeemer">Ainda não resgatado</div>';
+    const availability = remaining === 1 ? '1 resgate disponível' : `${remaining} resgates disponíveis`;
+    const buttonText = exclusiveStoreBusy ? 'Processando…' : remaining === 0 ? 'Esgotado' : enough ? `Resgatar · ${product.cost.toLocaleString('pt-BR')} pts` : `Faltam ${(product.cost-points).toLocaleString('pt-BR')} pts`;
+    return `<article class="exclusive-store-card"><div class="exclusive-store-art">${product.art}</div><h3>${product.name}</h3><div class="exclusive-store-price">Custo: ${product.cost.toLocaleString('pt-BR')} pontos</div><div class="exclusive-store-stock">${availability}${status.processing ? ` · ${status.processing} em processamento` : ''}</div><div class="exclusive-store-redeemers"><strong>Quem já resgatou</strong>${people}</div><button class="exclusive-store-claim" type="button" ${exclusiveStoreBusy || remaining===0 || !enough ? 'disabled' : ''} onclick="redeemExclusiveReward('${key}')">${buttonText}</button></article>`;
+  }).join('')}</div>`;
+}
+
+async function refreshExclusiveStore() {
+  const host = document.getElementById('exclusive-store-content');
+  if (host) host.innerHTML = '<p class="exclusive-store-intro">Carregando disponibilidade dos cartões…</p>';
+  try {
+    const response = await fetch('/.netlify/functions/exclusive-store', { headers:authenticatedHeaders() });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Não foi possível carregar a loja agora.');
+    exclusiveStoreSnapshot = payload.products || {};
+    renderExclusiveStore();
+  } catch (error) {
+    if (host) host.innerHTML = `<p role="alert" class="exclusive-store-intro">${escapeExclusiveStoreText(error.message)}</p>`;
+  }
+}
+
+async function redeemExclusiveReward(rewardKey) {
+  const product = EXCLUSIVE_STORE_PRODUCTS[rewardKey];
+  if (!product || exclusiveStoreBusy) return;
+  if (Number(G.pts || 0) < product.cost) { toast(`Você precisa de ${product.cost.toLocaleString('pt-BR')} pontos para esse resgate.`, 3000); return; }
+  if (!window.confirm(`Resgatar ${product.name} por ${product.cost.toLocaleString('pt-BR')} pontos? O desconto será imediato.`)) return;
+
+  exclusiveStoreBusy = true;
+  renderExclusiveStore();
+  try {
+    const syncReady = await syncPtsToSE();
+    if (!syncReady) throw new Error('Não foi possível confirmar seu saldo com o StreamElements. Tente novamente.');
+    if (Number(G.pts || 0) < product.cost) throw new Error(`Seu saldo atualizado é menor que ${product.cost.toLocaleString('pt-BR')} pontos.`);
+    const response = await fetch('/.netlify/functions/exclusive-store', {
+      method:'POST',
+      headers:authenticatedHeaders({ 'Content-Type':'application/json' }),
+      body:JSON.stringify({ reward_key:rewardKey, request_id:crypto.randomUUID() }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Não foi possível concluir o resgate.');
+    if (payload.alreadyRedeemed) { toast('Esse resgate já foi confirmado anteriormente.', 3000); return; }
+    G.pts = Math.max(0, Number(payload.pointsRemaining ?? (G.pts-product.cost)));
+    lastKnownSEPoints = G.pts;
+    if (seUser) seUser.points = G.pts;
+    recordPointsHistory(-product.cost, `Loja Exclusiva: ${product.name}`);
+    updatePts();
+    try { await saveGardenToSE(); } catch (saveError) { console.warn('O saldo foi descontado pelo StreamElements, mas o histórico do jardim não sincronizou:', saveError); }
+    toast(`🎁 ${product.name} resgatado! Confira o contato oficial da fazenda para receber o cartão.`, 5200);
+  } catch (error) {
+    toast(error.message || 'Não foi possível concluir o resgate.', 4500);
+  } finally {
+    exclusiveStoreBusy = false;
+    await refreshExclusiveStore();
+  }
+}
+</script>
 
 <script src="garden-mascot.js?v=12"></script>
 <script>

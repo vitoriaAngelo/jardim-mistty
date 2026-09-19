@@ -16,7 +16,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: 'Method Not Allowed' };
   try {
-    const { username, sessionId, profileBackground, selectedHarvestTitle, farmName, dailyPhrase } = JSON.parse(event.body || '{}');
+    const { username, sessionId, profileBackground, selectedHarvestTitle, farmName, farmNameChosen, dailyPhrase } = JSON.parse(event.body || '{}');
     if (!username || !sessionId) return { statusCode: 400, headers, body: JSON.stringify({ error:'Dados inválidos' }) };
     const auth = await authenticateTwitch(event);
     requireSameUser(auth, username);
@@ -37,6 +37,10 @@ exports.handler = async (event) => {
       const value = String(farmName || '').trim();
       if (!value || value.length > 20) return { statusCode:400, headers, body:JSON.stringify({ error:'Nome da fazenda inválido' }) };
       next.farmName = value;
+    }
+    if (farmNameChosen !== undefined) {
+      if (farmNameChosen !== true || !String(next.farmName || '').trim()) return { statusCode:400, headers, body:JSON.stringify({ error:'Escolha um nome válido para a fazenda' }) };
+      next.farmNameChosen = true;
     }
     if (dailyPhrase !== undefined) {
       const value = String(dailyPhrase || '').trim();

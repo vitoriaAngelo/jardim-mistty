@@ -1719,6 +1719,8 @@ body.dark-mode .ranking-tab.active { background:#3b4938; border-color:#607256; c
 .ranking-frame[data-frame="red"] { border-color:#c87d79; background:linear-gradient(145deg,#f6d5d1,#e5a29d 55%,#be706e); box-shadow:0 2px 0 #914d4c; }
 .ranking-frame[data-frame="yellow"] { border-color:#d7b354; background:linear-gradient(145deg,#fff1b8,#e8c96a 55%,#b88932); box-shadow:0 2px 0 #956b25,0 0 0 1px #fff3bd; }
 .ranking-frame[data-frame="vip"] { border-color:#e5bd55; background:repeating-linear-gradient(135deg,#fff0a8 0 5px,#d6a83f 5px 9px,#ffe58a 9px 14px); box-shadow:0 2px 0 #8b6321,0 0 0 1px #fff4b9; }
+.ranking-frame[data-frame="spring_album"] { border-color:#d59bac; background:linear-gradient(135deg,#f7dbe7,#b7d39b 55%,#d7b6cf); }
+.ranking-frame[data-frame="prism_album"] { border-color:#a892d2; background:linear-gradient(120deg,#66d8d2,#9e8ce0 35%,#ed9dca 68%,#f6da79); }
 .ranking-frame[data-frame="vip"]::before { content:'VIP'; right:-9px; top:-10px; padding:2px 4px; border-radius:6px; background:#a77928; color:#fff7cf; font:900 7px 'Nunito',sans-serif; text-shadow:none; }
 body.dark-mode .ranking-frame { filter:saturate(.9); }
 body.dark-mode .ranking-item[role="button"]::after { background:#303a30; border-color:#53604f; color:#edf2e6; }
@@ -2099,8 +2101,13 @@ body.dark-mode .subscriber-label { color:#d9baf2; }
 .frame-picker-btn[data-frame="purple"] { background:#c39be2; }
 .frame-picker-btn[data-frame="yellow"] { background:#e8bd55; box-shadow:0 0 0 1px #c8943a; }
 .frame-picker-btn[data-frame="vip"] { background:repeating-linear-gradient(135deg,#fff2a6 0 5px,#d9a93f 5px 10px,#fff8c9 10px 15px); border-color:#b07d32; box-shadow:0 0 0 1px #80602c; }
+.frame-picker-btn[data-frame="spring_album"] { background:linear-gradient(135deg,#f8dce8,#a9ca8d); border-color:#fff5e4; box-shadow:0 0 0 1px #b78391; }
+.frame-picker-btn[data-frame="prism_album"] { background:linear-gradient(135deg,#75ddd4,#b999ea 48%,#f0a7d0 76%,#f6dc83); border-color:#fff8dc; box-shadow:0 0 0 1px #9079b7; }
 .frame-picker-btn.selected { box-shadow:0 0 0 2px #a779c9; }
 .frame-picker-btn.locked { opacity:.52; cursor:not-allowed; filter:grayscale(.35); }
+.album-frame-option { display:none; }
+.subscriber-frame[data-frame="spring_album"] { background:linear-gradient(135deg,#f7dbe7,#b7d39b 55%,#d7b6cf); box-shadow:0 4px 0 #785868,0 0 0 2px #fff0e7; }
+.subscriber-frame[data-frame="prism_album"] { background:linear-gradient(120deg,#66d8d2,#9e8ce0 35%,#ed9dca 68%,#f6da79); box-shadow:0 4px 0 #65517f,0 0 0 2px #fff0d7; }
 .frame-picker.has-locked-purple { position:absolute; left:0; top:48px; }
 .frame-option { position:relative; display:flex; align-items:center; justify-content:center; width:24px; height:24px; }
 .frame-option::after { content:attr(data-tooltip); position:absolute; left:calc(100% + 12px); top:50%; z-index:40; width:154px; padding:8px 10px; border:1px solid #dbc8a7; border-radius:10px; background:#fffdf4; color:#596149; font:700 11px/1.3 'Nunito',sans-serif; text-align:center; opacity:0; visibility:hidden; pointer-events:none; transform:translate(-5px,-50%) scale(.96); transition:opacity .18s ease, transform .2s ease, visibility .18s ease; box-shadow:0 5px 14px #4b315226; }
@@ -3776,6 +3783,8 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <span class="frame-option" data-tooltip="Moldura vermelha"><button class="frame-picker-btn" data-frame="red" aria-label="Moldura vermelha" onclick="selectProfileFrame('red')"></button></span>
           <span class="frame-option" data-tooltip="Moldura de apoiador amarela · permanente"><button class="frame-picker-btn" data-frame="yellow" aria-label="Moldura de apoiador amarela" onclick="selectProfileFrame('yellow')"></button></span>
           <span class="frame-option" data-tooltip="Moldura VIP · exclusiva do Kit Especialista"><button class="frame-picker-btn" data-frame="vip" aria-label="Moldura VIP" onclick="selectProfileFrame('vip')"></button></span>
+          <span class="frame-option album-frame-option" data-tooltip="Moldura floral · álbum Primavera Encantada"><button class="frame-picker-btn" data-frame="spring_album" aria-label="Moldura floral do álbum" onclick="selectProfileFrame('spring_album')">🌸</button></span>
+          <span class="frame-option album-frame-option" data-tooltip="Moldura Arco-Íris · álbum prismático"><button class="frame-picker-btn" data-frame="prism_album" aria-label="Moldura Arco-Íris do álbum" onclick="selectProfileFrame('prism_album')">🌈</button></span>
       </div>
     </div>
 
@@ -6069,9 +6078,26 @@ function applySelectedMascotAppearance(animate=false) {
   updateTwitchzinhoPouch();
 }
 const MASCOT_COSTS = { orange:2500, apple:7500, strawberry:15000, premium:75000 };
+const SPRING_ALBUM_NAMES = ['Brotinho de Esperança','Juju entre Margaridas','Alfredo do Orvalho','Ovelhinha Algodão','Cogumelo do Pomar','Abelhinha Bilhetinho','Tulipinha Nuvem','Moranguinho Estrelar','Borboleta Açucarada','Solária da Primavera'];
 const PRISMATIC_ALBUM_NAMES = ['Prisma de Orvalho','Prisma de Pétala','Prisma do Galinheiro','Prisma do Lago','Prisma de Cristal','Prisma Borboleta','Prisma Lunar','Prisma Aurora','Prisma Estelar','Arco-Íris Primaveril'];
+function hasCompleteSpringAlbum(cards=G.albumCards||{}) { return SPRING_ALBUM_NAMES.every(name=>Number(cards[name]||0)>0); }
 function hasCompletePrismaticAlbum(cards=G.albumCards||{}) {
   return PRISMATIC_ALBUM_NAMES.every((name,index)=>Number(cards[`prismatic_${index}`]??cards[name]??0)>0);
+}
+function ensureAlbumCompletionRewards() {
+  if (!seUser || !gardenHydrated) return false;
+  const checks = [
+    { id:'album-spring-complete', key:'spring', complete:hasCompleteSpringAlbum(), title:'Primavera Encantada completa!', emoji:'🌸', msg:'Parabéns! Você completou as 10 cartas da Primavera Encantada. Resgate 3 sementes de flores, 2 packs comuns, 750 XP, 2.500 pontos, o título Colecionador da Primavera e uma moldura floral permanente.', specialReward:{text:'3 sementes de flores · 2 packs comuns · +750 XP · título e moldura exclusivos',xp:750,pts:2500,seeds:{daisy:1,rose:1,tulip:1},packs:{normal:2,prismatic:0},albumCompletion:'spring'} },
+    { id:'album-prismatic-complete', key:'prismatic', complete:hasCompletePrismaticAlbum(), title:'Álbum Prismático completo!', emoji:'🌈', msg:'A coleção prismática está completa! Resgate 5 sementes especiais, 1 pack prismático, +1.000 XP, 5.000 pontos, uma carta Arco-Íris extra, o título Guardião dos Prismas e a moldura Arco-Íris. O Brotinho Prismático também foi desbloqueado.', specialReward:{text:'5 sementes especiais · 1 pack prismático · +1.000 XP · +5.000 pontos · 1 carta Arco-Íris · título e moldura exclusivos',xp:1000,pts:5000,seeds:{ruby_kale:1,star_radish:1,moon_lily:1,royal_dahlia:1,crystal_kale:1},packs:{normal:0,prismatic:1},albumCompletion:'prismatic',prismaticCard:9} },
+  ];
+  let added = false;
+  for (const reward of checks) {
+    if (!reward.complete || G.albumRewardsClaimed?.[reward.key] || G_MAIL.some(mail=>mail.id===reward.id)) continue;
+    G_MAIL.unshift({id:reward.id,emoji:reward.emoji,title:reward.title,msg:reward.msg,reward:0,specialReward:reward.specialReward,opened:false});
+    added = true;
+  }
+  if (added) { updateMailBadge(); saveGardenToSE(); }
+  return added;
 }
 function syncPrismaticMascotUnlock() {
   if (!G.ownedMascots) G.ownedMascots={};
@@ -6451,7 +6477,7 @@ function renderRankingPage() {
     const bgClass = PROFILE_BACKGROUNDS.some(([id]) => id === profileBackground) ? `ranking-bg-${profileBackground}` : 'ranking-bg-spring';
     const topClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
     const rankingFrame = isMe ? (G.profileFrame || u.profileFrame || u.frame) : (u.profileFrame || u.frame);
-    const frame = ['purple','pink','blue','red','yellow','vip'].includes(rankingFrame) ? rankingFrame : 'red';
+    const frame = ['purple','pink','blue','red','yellow','vip','spring_album','prism_album'].includes(rankingFrame) ? rankingFrame : 'red';
     const unlockedBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : [...(u.badges || u.unlockedBadges || u.achievements || [])];
     if ((isMe && hasSubscriberBadge()) || u.isSubscriber) unlockedBadges.push('subscriber');
     const badgeIds = validBadgeIds(unlockedBadges);
@@ -7065,7 +7091,7 @@ function openRankingProfile(index) {
     ['🔥', isMe ? (G.presenceStreak || 0) : (stats.presence ?? 0), 'Dias de presença']
   ];
   const statsHtml = statItems.map(([icon, value, label]) => `<div class="ranking-profile-stat">${icon} ${Number(value || 0).toLocaleString('pt-BR')}<small>${label}</small></div>`).join('');
-  const frame = ['purple','pink','blue','red','yellow','vip'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
+  const frame = ['purple','pink','blue','red','yellow','vip','spring_album','prism_album'].includes(u.profileFrame || u.frame) ? (u.profileFrame || u.frame) : 'red';
   const profileBadges = isMe ? ACHIEV_GROUPS.filter(g => G.achievements.has('badge_' + g.id)).map(g => g.id) : [...(u.badges || u.unlockedBadges || u.achievements || [])];
   if ((isMe && hasSubscriberBadge()) || u.isSubscriber) profileBadges.push('subscriber');
   const badgeIds = validBadgeIds(profileBadges).slice(0, 4);
@@ -8596,8 +8622,11 @@ const HARVEST_TITLES = [
   { icon:'🚜', name:'Mestre do Manejo', target:1500 },
   { icon:'🏆', name:'CEO da Agropecuária', target:3000 },
   { icon:'💎', name:'Lenda Agronômica', target:7500 },
+  { icon:'🌸', name:'Colecionador da Primavera', target:0, albumKey:'spring' },
+  { icon:'🌈', name:'Guardião dos Prismas', target:0, albumKey:'prismatic' },
 ];
 function titleForName(name) { return HARVEST_TITLES.find(t => t.name === name) || null; }
+function harvestTitleUnlocked(title) { return Boolean(title && (title.albumKey ? G.albumRewardsClaimed?.[title.albumKey] === true : Number(G.achievStats?.totalHarvest || 0) >= title.target)); }
 const PROFILE_BACKGROUNDS = [
   ['spring','🌱 Jardim de primavera'], ['sunny','🌻 Campo ensolarado'], ['rain','🌧️ Dia chuvoso'], ['night','🌙 Noite estrelada'],
   ['autumn','🍂 Outono dourado'], ['winter','❄️ Inverno mágico'], ['rainbow','🌈 Arco-íris'], ['forest','🔮 Floresta encantada'],
@@ -8670,6 +8699,8 @@ function checkHarvestTitles() {
   initAchievements();
   const harvested = Number(G.achievStats?.totalHarvest || 0);
   HARVEST_TITLES.forEach(title => {
+    // Títulos de álbum já são anunciados e entregues pela carta de conclusão.
+    if (title.albumKey) return;
     if (harvested < title.target) return;
     const id = `title_${title.name}`;
     if (G_MAIL.some(mail => mail.id === id)) return;
@@ -8679,7 +8710,7 @@ function checkHarvestTitles() {
 }
 async function selectHarvestTitle(name) {
   const title = titleForName(name);
-  if (!title || Number(G.achievStats?.totalHarvest || 0) < title.target) return;
+  if (!harvestTitleUnlocked(title)) return;
   const previousTitle = G.selectedHarvestTitle || '';
   G.selectedHarvestTitle = title.name;
   const selectedTitleEl = document.getElementById('profile-selected-title');
@@ -8701,9 +8732,10 @@ function renderProfileTitles() {
   if (!container) return;
   const harvested = Number(G.achievStats?.totalHarvest || 0);
   container.innerHTML = HARVEST_TITLES.map(title => {
-    const unlocked = harvested >= title.target;
-    const progress = Math.min(100, Math.round(harvested / title.target * 100));
-    return `<button type="button" class="profile-title-card ${unlocked ? 'unlocked' : 'locked'} ${G.selectedHarvestTitle === title.name ? 'selected' : ''}" ${unlocked ? `onclick="selectHarvestTitle('${title.name}')"` : 'disabled'}><div class="profile-title-icon">${title.icon}</div><div><div class="profile-title-name">${title.name} ${G.selectedHarvestTitle === title.name ? '⭐' : (unlocked ? '✓' : '🔒')}</div><div class="profile-title-requirement">${G.selectedHarvestTitle === title.name ? 'Título equipado' : (unlocked ? 'Clique para escolher' : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`)}</div><div class="profile-title-progress"><span style="width:${progress}%"></span></div></div></button>`;
+    const unlocked = harvestTitleUnlocked(title);
+    const progress = title.albumKey ? (unlocked ? 100 : 0) : Math.min(100, Math.round(harvested / title.target * 100));
+    const requirement = title.albumKey ? (unlocked ? 'Desbloqueado ao completar o álbum' : `Complete o álbum ${title.albumKey === 'spring' ? 'Primavera Encantada' : 'Prismático'}`) : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`;
+    return `<button type="button" class="profile-title-card ${unlocked ? 'unlocked' : 'locked'} ${G.selectedHarvestTitle === title.name ? 'selected' : ''}" ${unlocked ? `onclick="selectHarvestTitle('${title.name}')"` : 'disabled'}><div class="profile-title-icon">${title.icon}</div><div><div class="profile-title-name">${title.name} ${G.selectedHarvestTitle === title.name ? '⭐' : (unlocked ? '✓' : '🔒')}</div><div class="profile-title-requirement">${G.selectedHarvestTitle === title.name ? 'Título equipado' : (unlocked ? 'Clique para escolher' : requirement)}</div><div class="profile-title-progress"><span style="width:${progress}%"></span></div></div></button>`;
   }).join('');
 }
 function showProfileTab(tab) {
@@ -8727,6 +8759,11 @@ function openProfile() {
   const { current } = getLevelData(G.xp);
   const season = currentSeason();
   initAchievements();
+  document.querySelectorAll('.album-frame-option').forEach(option => {
+    const frame = option.querySelector('[data-frame]')?.dataset.frame;
+    const unlocked = frame === 'spring_album' ? G.albumFrameUnlocks?.spring === true : frame === 'prism_album' ? G.albumFrameUnlocks?.prismatic === true : false;
+    option.style.display = unlocked ? '' : 'none';
+  });
   const stats = G.achievStats;
   applyProfileBackground();
   renderProfileBackgrounds();
@@ -8783,7 +8820,7 @@ function openProfile() {
       <span class="profile-badge-slot ${unlocked ? 'unlocked' : ''}"><img src="badge-${g.id}.svg" alt="${g.name}" width="64" height="72"></span>
       <div class="header-btn-tip">${g.name}<br><span>${unlocked ? '✅ Desbloqueado' : '🔒 Complete as 5 conquistas'}</span></div>
     </div>`;
-  }).join('') + subscriberBadge;
+  }).join('') + subscriberBadge + (G.albumRewardsClaimed?.spring ? '<span class="profile-badge-slot unlocked" title="Colecionador da Primavera">🌸</span>' : '') + (G.albumRewardsClaimed?.prismatic ? '<span class="profile-badge-slot unlocked" title="Guardião dos Prismas">🌈</span>' : '');
 }
 
 function hasSubscriberBadge() {
@@ -8798,7 +8835,9 @@ function toggleFramePicker() {
 
 function selectProfileFrame(frame) {
   const subscriber = Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
-  if (!['purple', 'pink', 'blue', 'red', 'yellow', 'vip'].includes(frame)) return;
+  if (!['purple', 'pink', 'blue', 'red', 'yellow', 'vip', 'spring_album', 'prism_album'].includes(frame)) return;
+  if (frame === 'spring_album' && G.albumFrameUnlocks?.spring !== true) { toast('🔒 Complete o álbum Primavera Encantada para liberar esta moldura.', 2600); return; }
+  if (frame === 'prism_album' && G.albumFrameUnlocks?.prismatic !== true) { toast('🔒 Complete o álbum Prismático para liberar esta moldura.', 2600); return; }
   if (frame === 'yellow' && !G.supporterFrameUnlocked) {
     toast('🔒 A moldura amarela é desbloqueada ao comprar um kit de bônus.', 2600);
     return;
@@ -8971,7 +9010,7 @@ function applySpecialLevelReward(reward) {
   }
   if (reward.seeds) {
     Object.entries(reward.seeds).forEach(([id, qty]) => { G.inventory[id] = (G.inventory[id] || 0) + qty; });
-    received.push('2x Margaridas');
+    received.push(Object.entries(reward.seeds).map(([id, qty]) => `${qty}x ${FLOWERS[id]?.name || PLANTS[id]?.name || id}`).join(', '));
   }
   if (reward.randomFlowers) {
     const flowers = Object.keys(FLOWERS);
@@ -8995,6 +9034,17 @@ function applySpecialLevelReward(reward) {
     G.packInventory.prismatic = Number(G.packInventory.prismatic || 0) + Number(reward.packs.prismatic || 0);
     received.push(`${packRewardText(reward.packs)} enviados ao Inventário`);
     renderPackInventory();
+  }
+  if (reward.albumCompletion) {
+    const album = reward.albumCompletion;
+    G.albumRewardsClaimed = { ...(G.albumRewardsClaimed || {}), [album]:true };
+    G.albumFrameUnlocks = { ...(G.albumFrameUnlocks || {}), [album]:true };
+    if (reward.prismaticCard !== undefined) {
+      G.albumCards = { ...(G.albumCards || {}) };
+      const key = `prismatic_${Number(reward.prismaticCard)}`;
+      G.albumCards[key] = Number(G.albumCards[key] || 0) + 1;
+    }
+    received.push(album === 'spring' ? 'Título Colecionador da Primavera e moldura floral desbloqueados' : 'Título Guardião dos Prismas e moldura Arco-Íris desbloqueados');
   }
   renderLevelWidget(); renderInventory(); renderFertilizerInventory(); renderWateringCapacity(); updatePts();
   return received;
@@ -9041,7 +9091,7 @@ async function openLetter(id) {
   letter.opened = true;
   G.pts += letter.reward;
   recordPointsHistory(letter.reward, `Correio: ${letter.title}`);
-  const specialReceived = applySpecialLevelReward({ ...(letter.specialReward || {}), packs:letter.packReward || levelPackReward(letter.lv) });
+  const specialReceived = applySpecialLevelReward({ ...(letter.specialReward || {}), packs:letter.packReward || letter.specialReward?.packs || levelPackReward(letter.lv) });
   updatePts();
   updateMailBadge();
   renderMailList();
@@ -9051,8 +9101,10 @@ async function openLetter(id) {
     toast('⚠️ A carta foi aberta, mas ainda não foi salva. Não atualize a página.', 5000);
     return;
   }
+  if (letter.specialReward?.pts) await syncPtsToSE();
   spawnCoinBurst(document.getElementById('mail-overlay'), letter.reward);
-  toast(`🌟 +${letter.reward} pts recebidos!${specialReceived.length ? ` ${specialReceived.join(' · ')}` : ''}`, 4200);
+  const pointsMessage = letter.reward ? `🌟 +${letter.reward} pts recebidos!` : '';
+  toast(`${pointsMessage}${pointsMessage && specialReceived.length ? ' ' : ''}${specialReceived.join(' · ') || 'Recompensa resgatada!'}`, 4200);
 }
 
 function renderMailList() {
@@ -9079,7 +9131,7 @@ function renderMailList() {
         <div class="mail-letter">
           ${m.emoji} ${m.msg}
           <br><br>
-          <div class="mail-reward-badge">🌟 +${m.reward} pts${m.specialReward ? `<br>🎁 ${m.specialReward.text}` : ''}${(m.packReward || levelPackReward(m.lv)) ? `<br>🎴 ${packRewardText(m.packReward || levelPackReward(m.lv))}` : ''}</div>
+    <div class="mail-reward-badge">${m.reward ? `🌟 +${m.reward} pts` : ''}${m.specialReward ? `${m.reward ? '<br>' : ''}🎁 ${m.specialReward.text}` : ''}${(m.packReward || levelPackReward(m.lv)) ? `<br>🎴 ${packRewardText(m.packReward || levelPackReward(m.lv))}` : ''}</div>
         </div>
       </div>
     </div>`).join('');
@@ -9433,6 +9485,8 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     albumPacks:       Number(G.albumPacks || 0),
     packInventory:   G.packInventory || { normal:0, prismatic:0 },
     albumCards:       G.albumCards || {},
+    albumRewardsClaimed: G.albumRewardsClaimed || {},
+    albumFrameUnlocks: G.albumFrameUnlocks || {},
     seasonDayEndsAt:  seasonDayEndsAt,
     orders:           G.orders || [],
     ordersGlobalResetVersion: G.ordersGlobalResetVersion || 0,
@@ -9720,6 +9774,8 @@ async function loadGardenFromSE(username) {
     G.albumPacks      = Number(save.albumPacks || 0);
     G.packInventory   = { normal:Number(save.packInventory?.normal || 0), prismatic:Number(save.packInventory?.prismatic || 0) };
     G.albumCards      = save.albumCards || {};
+    G.albumRewardsClaimed = save.albumRewardsClaimed || {};
+    G.albumFrameUnlocks = save.albumFrameUnlocks || {};
     seasonDayEndsAt   = Number(save.seasonDayEndsAt) || (Date.now() + SEASON_DAY_MS);
     // Corrige estados antigos: a marca só vale enquanto a estação atual
     // realmente não combinar com a planta.
@@ -9869,6 +9925,7 @@ async function loadGardenFromSE(username) {
     }
     checkHarvestTitles();
     checkHarvestTitles();
+    ensureAlbumCompletionRewards();
 
     // Refresh all UI
     updatePts();
@@ -11021,7 +11078,7 @@ const originalPackBuy=buyCardPack;buyCardPack=function(){if(Number(G.pts||0)<1){
 </script>
 <style>.pack-card-front{gap:4px}.pack-card-artwork{display:block;width:100%;border-radius:10px;overflow:hidden;background:#e1e7cb}.pack-card-artwork svg{display:block;width:100%;height:auto}.pack-card-front b{font:normal 16px Georgia,serif;text-align:center}.pack-card-front small{font:800 9px Nunito;color:#778b64}</style>
 <script>
-window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='garden-session-revoked'){closeFarmAlbum();handleRevokedSession();return}if(event.data?.type==='card-found'){if(recordCardFind(event.data.card)){syncPrismaticMascotUnlock();saveGardenToSE()}return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;syncPrismaticMascotUnlock();saveGardenToSE()}});
+window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='garden-session-revoked'){closeFarmAlbum();handleRevokedSession();return}if(event.data?.type==='card-found'){if(recordCardFind(event.data.card)){syncPrismaticMascotUnlock();saveGardenToSE()}return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;syncPrismaticMascotUnlock();ensureAlbumCompletionRewards();saveGardenToSE()}});
 const openAlbumWithUserCards=openFarmAlbum;openFarmAlbum=function(e,url){window.__farmAlbumCards={...(G.albumCards||{})};return openAlbumWithUserCards(e,url)};
 window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow||event.data?.type!=='album-theme-ready')return;event.source.postMessage({type:'album-theme',dark:document.body.classList.contains('dark-mode')},'*')});
 new MutationObserver(()=>{const frame=document.getElementById('farm-album-frame');if(!frame?.contentWindow)return;frame.contentWindow.postMessage({type:'album-theme',dark:document.body.classList.contains('dark-mode')},'*')}).observe(document.body,{attributes:true,attributeFilter:['class']});

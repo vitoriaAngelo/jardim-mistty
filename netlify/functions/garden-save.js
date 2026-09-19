@@ -294,6 +294,16 @@ exports.handler = async (event) => {
       safeData.paidKitOrders = Array.isArray(existingData.paidKitOrders)
         ? existingData.paidKitOrders
         : [];
+      const incomingAlbumRewardsClaimed = safeData.albumRewardsClaimed || {};
+      safeData.albumRewardsClaimed = { ...(existingData.albumRewardsClaimed || {}) };
+      Object.entries(incomingAlbumRewardsClaimed).forEach(([key, value]) => {
+        safeData.albumRewardsClaimed[key] = value === true || existingData.albumRewardsClaimed?.[key] === true;
+      });
+      const incomingAlbumFrameUnlocks = safeData.albumFrameUnlocks || {};
+      safeData.albumFrameUnlocks = { ...(existingData.albumFrameUnlocks || {}) };
+      Object.entries(incomingAlbumFrameUnlocks).forEach(([key, value]) => {
+        safeData.albumFrameUnlocks[key] = value === true || existingData.albumFrameUnlocks?.[key] === true;
+      });
       safeData.isPremium = safeData.isPremium === true
         || existingData.isPremium === true
         || premiumFields.some((field) => safeData[field]);

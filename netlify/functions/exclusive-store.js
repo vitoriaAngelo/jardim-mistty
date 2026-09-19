@@ -72,8 +72,15 @@ exports.handler = async event => {
       });
       const raw = await response.text();
       if (!response.ok) {
-        const missingMigration = /exclusive_store_redemptions|schema cache/i.test(raw);
-        throw Object.assign(new Error(missingMigration ? 'A migração SQL da Loja Exclusiva ainda precisa ser aplicada no Supabase.' : 'Não foi possível carregar os resgates da Loja Exclusiva.'), { statusCode:missingMigration ? 503 : 502 });
+        let details={};try{details=JSON.parse(raw)}catch{}
+        const missingMigration = ['PGRST205','42P01'].includes(details.code) || /schema cache|does not exist/i.test(details.message||'');
+        const permissionIssue = details.code === '42501' || /permission denied/i.test(details.message||'');
+        const message = missingMigration
+          ? 'A tabela da Loja Exclusiva não foi encontrada no projeto Supabase conectado ao Preview.'
+          : permissionIssue
+            ? 'O servidor não tem permissão para consultar os resgates. Reaplique a migração da Loja Exclusiva no Supabase.'
+            : 'Não foi possível carregar os resgates da Loja Exclusiva: ' + (details.message||'erro no Supabase.');
+        throw Object.assign(new Error(message), { statusCode:missingMigration||permissionIssue ? 503 : 502 });
       }
       const rows = JSON.parse(raw || '[]');
       const pendingCutoff = Date.now() - 15 * 60 * 1000;

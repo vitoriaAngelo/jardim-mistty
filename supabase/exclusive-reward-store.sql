@@ -26,6 +26,7 @@ create unique index if not exists exclusive_store_one_claim_per_user_idx
 
 alter table public.exclusive_store_redemptions enable row level security;
 revoke all on public.exclusive_store_redemptions from public, anon, authenticated;
+grant usage on schema public to service_role;
 grant select on public.exclusive_store_redemptions to service_role;
 
 create or replace function public.reserve_exclusive_store_redemption(
@@ -163,3 +164,6 @@ grant execute on function public.reserve_exclusive_store_redemption(uuid,text,te
 grant execute on function public.finish_exclusive_store_redemption(uuid) to service_role;
 grant execute on function public.release_exclusive_store_redemption(uuid) to service_role;
 grant execute on function public.flag_exclusive_store_redemption_for_review(uuid) to service_role;
+
+-- Atualiza a lista de tabelas/funções exposta pelo PostgREST após a migração.
+notify pgrst, 'reload schema';

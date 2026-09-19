@@ -18,7 +18,7 @@
   const rations = {
     normal:{name:'Normal',cost:20,color:'#d5bc91',description:'Recupera 20% da saúde do animal.'},
     premium:{name:'Premium',cost:90,color:'#e6c66f',description:'Recupera 50% da saúde do animal.'},
-    super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Recupera 80% da saúde. Com saúde acima de 80%, tem 34% de chance de produzir 1 item extra.'},
+    super:{name:'Super Premium',cost:120,color:'#b9a0d7',description:'Recupera 80% da saúde e concede por 30 minutos 34% de chance de produzir 1 item extra.'},
     booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Dura 30 minutos e dá chance de produto dourado, que vale o dobro.'},
   };
   const MIN_HEALTH_TO_PRODUCE = 15;
@@ -43,7 +43,8 @@
         readyAt:Math.max(0,Number(source.readyAt)||0),
         cycleDuration:Math.max(1000,Number(source.cycleDuration)||duration(id)),
         ration:['normal','premium','super'].includes(source.ration)?source.ration:'normal',
-        superActive:source.superActive===true||source.ration==='super',
+        superUntil:Math.max(0,Number(source.superUntil)||0),
+        superActive:Number(source.superUntil)>now,
         boosterUntil:Math.max(0,Number(source.boosterUntil)||0),
         booster:source.booster===true,
         stock:count(source.stock),goldStock:count(source.goldStock),
@@ -73,15 +74,14 @@
       // Avalia os bônus no instante de cada produto, inclusive durante ausência.
       while (pet.readyAt>0 && pet.readyAt<=end && pet.readyAt<=productionEnd) {
         const time=pet.readyAt;
-        const extra=pet.superActive && healthAt(time)>80 && random()<.34;
+        const extra=pet.superUntil>time && random()<.34;
         const golden=pet.boosterUntil>time && random()<(.2+level(skills,'criador_dourado',5)*.04);
         pet[golden?'goldStock':'stock']+=extra?2:1;
         pet.readyAt+=ms;pet.cycleDuration=ms;
       }
       pet.health=healthAt(end);pet.healthUpdatedAt=end;
-      // Super Premium's bonus is a live state, not merely a production-time
-      // condition: once health reaches 80% or less, it stays off until reapplied.
-      if(pet.health<=80)pet.superActive=false;
+      pet.superActive=pet.superUntil>end;
+      if(!pet.superActive)pet.superUntil=0;
       pet.booster=pet.boosterUntil>end;
       if(!pet.booster)pet.boosterUntil=0;
       if(pet.health<15)pet.readyAt=0;
@@ -97,7 +97,7 @@
     else {if(state.rations[ration]<1)throw new Error('Esta ração acabou. Visite a aba Rações da loja.');state.rations[ration]--;}
     const recovery=ration==='super'?80:ration==='premium'?50+level(skills,'cuidado_especial',5)*10:20+level(skills,'trato_amigo',3)*5;
     pet.health=Math.min(100,pet.health+recovery);
-    if(ration==='super')pet.superActive=true;
+    if(ration==='super'){pet.superUntil=now+30*60000;pet.superActive=true;}
     pet.ration=ration;
     if(!pet.readyAt&&pet.health>=15){pet.cycleDuration=duration(id,skills);pet.readyAt=now+pet.cycleDuration;}
     return state;

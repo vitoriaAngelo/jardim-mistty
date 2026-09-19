@@ -14,8 +14,15 @@
     '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
   }[char]));
 
+  const heading = '<div class="ranking-heading"><span class="ranking-emblem" aria-hidden="true">✧</span><span class="ranking-eyebrow">COLECIONADORES DA FAZENDA</span><h2>Ranking de cartas</h2><p>Cada descoberta faz sua coleção florescer.</p></div>';
+  const quantity = value => Math.min(10, Math.max(0, Math.floor(Number(value) || 0)));
+  const albumCount = (label, count, theme) => '<div class="ranking-album '+theme+'"><span>'+label+' <b>'+count+'<small>/10</small></b></span><div class="ranking-meter" aria-hidden="true"><i style="width:'+count*10+'%"></i></div></div>';
+
   button.onclick = async () => {
-    body.innerHTML = '<section class="ranking-view"><h2>🏆 Ranking de cartas</h2><p>Cartas descobertas, sem contar repetidas.</p><div class="ranking-loading">Carregando fazendas…</div></section>';
+    const view = document.createElement('section');
+    view.className = 'ranking-view';
+    view.innerHTML = heading + '<div class="ranking-loading" role="status">Carregando fazendas…</div>';
+    body.replaceChildren(view);
     if (!modal.open) modal.showModal();
     const token = sessionStorage.getItem('twitch_access_token') || '';
     try {
@@ -26,11 +33,16 @@
       if (!response.ok) throw new Error(response.status === 401 ? 'Entre na sua conta para ver o ranking.' : 'Não foi possível carregar o ranking agora.');
       const data = await response.json();
       const rows = Array.isArray(data.ranking) ? data.ranking : [];
-      body.innerHTML = '<section class="ranking-view"><h2>🏆 Ranking de cartas</h2><p>Cartas descobertas, sem contar repetidas.</p>' + (rows.length
-        ? '<ol class="ranking-list">' + rows.map((player, index) => '<li><span class="ranking-position">' + (index < 3 ? ['🥇','🥈','🥉'][index] : '#' + (index + 1)) + '</span><span class="ranking-farm"><strong>' + escape(player.farmName) + '</strong><small>@' + escape(player.username) + '</small></span><span class="ranking-counts"><b>' + Number(player.total) + '/20</b><small>🌼 ' + Number(player.normalCount) + '/10 · ✨ ' + Number(player.prismaticCount) + '/10</small></span></li>').join('') + '</ol>'
-        : '<div class="ranking-loading">Ainda não há fazendas no ranking.</div>') + '</section>';
+      if (!view.isConnected) return;
+      view.innerHTML = heading + '<div class="ranking-summary"><span><b>'+rows.length+'</b> fazendas</span><span>20 cartas para descobrir</span></div>' + (rows.length
+        ? '<ol class="ranking-list" aria-label="Classificação das fazendas">' + rows.map((player, index) => {
+          const normal = quantity(player.normalCount), prism = quantity(player.prismaticCount), total = normal + prism;
+          const name = String(player.farmName || player.username || 'Fazenda');
+          return '<li class="ranking-row '+(index<3?'ranking-top ranking-top-'+(index+1):'')+'"><span class="ranking-position" aria-label="Posição '+(index+1)+'">'+String(index+1).padStart(2,'0')+'</span><span class="ranking-avatar" aria-hidden="true">'+escape(Array.from(name.trim())[0] || '❀')+'</span><div class="ranking-farm"><strong title="'+escape(name)+'">'+escape(name)+'</strong><small>@'+escape(String(player.username).replace(/^@+/,''))+'</small></div><div class="ranking-total"><b>'+total+'</b><span>/20</span><small>descobertas</small></div><div class="ranking-albums">'+albumCount('Comum',normal,'normal')+albumCount('Prismático',prism,'prismatic')+'</div></li>';
+        }).join('') + '</ol><p class="ranking-footnote">Uma carta, uma descoberta. Cópias repetidas não somam pontos.</p>'
+        : '<div class="ranking-loading">Ainda não há fazendas no ranking.</div>');
     } catch (error) {
-      body.innerHTML = '<section class="ranking-view"><h2>🏆 Ranking de cartas</h2><p class="ranking-loading" role="status">' + escape(error.message) + '</p></section>';
+      if (view.isConnected) view.innerHTML = heading + '<p class="ranking-loading" role="status">' + escape(error.message) + '</p>';
     }
   };
 })();

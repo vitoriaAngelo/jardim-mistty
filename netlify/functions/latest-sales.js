@@ -8,7 +8,8 @@ exports.handler = async () => {
     const rows = await res.json();
     const activities = rows.flatMap(row => {
       const base = { username: row.username, farmName: row.data?.farmName || `Jardim de @${String(row.username || '').replace(/^@+/, '')}` };
-      return [row.data?.lastSale ? { ...base, ...row.data.lastSale, activityType:'sale' } : null, row.data?.lastOrder ? { ...base, ...row.data.lastOrder, activityType:'order' } : null, row.data?.lastEvent ? { ...base, ...row.data.lastEvent, activityType:'event' } : null];
+      const cardFinds = (Array.isArray(row.data?.recentCardFinds) ? row.data.recentCardFinds : []).filter(card => card && typeof card.name === 'string' && card.name.length <= 80 && (card.prismatic === true || ['rara','lendária'].includes(String(card.rarity || '').toLocaleLowerCase('pt-BR')))).map(card => ({ ...base, card, at:card.at, activityType:'card' }));
+      return [row.data?.lastSale ? { ...base, ...row.data.lastSale, activityType:'sale' } : null, row.data?.lastOrder ? { ...base, ...row.data.lastOrder, activityType:'order' } : null, row.data?.lastEvent ? { ...base, ...row.data.lastEvent, activityType:'event' } : null, ...cardFinds];
     }).filter(item => item?.at && Date.now()-Number(item.at) < 24*60*60*1000).sort((a,b)=>Number(b.at)-Number(a.at)).slice(0,8);
     return { statusCode:200, headers, body:JSON.stringify({ sales: activities }) };
   } catch (e) { return { statusCode:200, headers, body:JSON.stringify({ sales:[], error:e.message }) }; }

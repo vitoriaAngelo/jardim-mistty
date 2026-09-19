@@ -27,4 +27,16 @@
       notice.textContent = 'Os números mostram as cópias repetidas disponíveis. Uma cópia de cada figurinha permanece no álbum.';
     }
   };
+
+  const modalBody = document.querySelector('#modal-body');
+  new MutationObserver(() => {
+    const reveal = modalBody.querySelector('.reveal');
+    const card = reveal?.querySelector('.reveal-card');
+    if (!card || card.dataset.farmFindSent) return;
+    const name = card.querySelector('h3')?.textContent?.trim();
+    const rarity = card.querySelector('p')?.textContent?.trim();
+    if (!name || !rarity) return;
+    card.dataset.farmFindSent = 'true';
+    window.parent.postMessage({ type:'card-found', card:{ name, rarity, prismatic:false } }, '*');
+  }).observe(modalBody, { childList:true, subtree:true });
 })();

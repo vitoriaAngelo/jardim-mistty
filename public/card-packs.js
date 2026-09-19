@@ -30,6 +30,7 @@
         const count=Number(G.albumCards[c.key]??G.albumCards[c.legacy]??0);
         c.isNew=count===0;G.albumCards[c.key]=count+1;
       });
+      pulls.forEach(c=>window.recordCardFind?.(c));
       G.albumPacks=Number(G.albumPacks||0)+1;
       window.__farmAlbumCards={...G.albumCards};
       const overlay=document.createElement('div');overlay.className='pack-opening-v2 '+kind;

@@ -244,6 +244,10 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .latest-sales-coin { width:15px; height:15px; margin:0 2px 0 3px; vertical-align:-3px; filter:drop-shadow(0 1px 1px rgba(89,66,34,.2)); }
 .latest-sales-strip { width:100%; min-height:30px; margin:0 0 -12px; display:flex; align-items:center; justify-content:center; text-align:center; }
 .latest-sales-feed strong { color:#5f744e; font-size:11px; }
+.latest-sales-card-name { font-weight:900; }
+.latest-sales-card-name.rare { color:#8960a6; }
+.latest-sales-card-name.legendary { color:#b18422; }
+.latest-sales-card-name.prismatic { color:transparent; background:linear-gradient(100deg,#659fdb,#a675c9,#58aaa8,#d49bc1); background-clip:text; -webkit-background-clip:text; }
 .watering-refill-offer { display:none; position:absolute; left:calc(100% + 9px); top:50%; transform:translateY(-50%); width:150px; padding:8px 9px; border:1px solid #e3c98f; border-radius:12px; background:#fff7df; color:#80652e; font-size:10px; font-weight:800; line-height:1.25; text-align:center; cursor:pointer; box-shadow:0 3px 0 #dec58d, 0 5px 12px rgba(117,91,52,.12); z-index:8; }
 .watering-refill-offer::before { content:''; position:absolute; right:100%; top:50%; border:6px solid transparent; border-right-color:#e3c98f; transform:translateY(-50%); }
 .watering-refill-offer.visible { display:block; }
@@ -3397,7 +3401,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 
   <div class="garden-section">
 
-    <div class="latest-sales-feed latest-sales-strip" id="latest-sales-feed" aria-live="polite"><span class="latest-sales-content">🛒 Últimas vendas: Nenhuma venda recente</span></div>
+    <div class="latest-sales-feed latest-sales-strip" id="latest-sales-feed" aria-live="polite"><span class="latest-sales-content">🌱 Novidades da fazenda: nenhuma novidade recente</span></div>
     <div class="garden-event-banner" id="garden-event-banner" role="status" aria-live="polite">
       <span class="garden-event-icon" id="garden-event-icon">🌦️</span>
       <div class="garden-event-copy"><div class="garden-event-title" id="garden-event-title">Um evento está chegando</div><div class="garden-event-subtitle" id="garden-event-subtitle">Continue cuidando do seu jardim.</div></div>
@@ -4359,6 +4363,7 @@ const G = {
   ordersGlobalResetVersion: 0,
   lastOrder: null,
   lastEvent: null,
+  recentCardFinds: [],
   eventNextAt: 0,
   eventLastType: '',
   discoveredMutations: [],
@@ -9153,6 +9158,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     orderPaidReset:   G.orderPaidReset === true,
     lastOrder:        G.lastOrder || null,
     lastEvent:        G.lastEvent || null,
+    recentCardFinds:  Array.isArray(G.recentCardFinds) ? G.recentCardFinds.slice(0, 20) : [],
     eventNextAt:      Number(G.eventNextAt || 0),
     eventLastType:    G.eventLastType || '',
     discoveredMutations: G.discoveredMutations || [],
@@ -9433,6 +9439,7 @@ async function loadGardenFromSE(username) {
     G.ordersGlobalResetVersion = Number(save.ordersGlobalResetVersion || 0);
     G.lastOrder        = save.lastOrder || null;
     G.lastEvent        = save.lastEvent || null;
+    G.recentCardFinds  = Array.isArray(save.recentCardFinds) ? save.recentCardFinds.slice(0, 20) : [];
     G.eventNextAt      = Number(save.eventNextAt || 0);
     G.eventLastType    = save.eventLastType || '';
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
@@ -9889,12 +9896,26 @@ async function chargeGamePoints(amount, reason = 'Compra no jardim') {
 }
 let latestSalesItems = [];
 let latestSalesIndex = 0;
+window.recordCardFind = function(card) {
+  const rarity = String(card?.rarity || '').trim();
+  const prismatic = card?.prismatic === true;
+  if (!prismatic && !['rara','lendária'].includes(rarity.toLocaleLowerCase('pt-BR'))) return false;
+  const entry = { name:String(card.name || '').slice(0, 80), rarity:rarity.slice(0, 30), prismatic, at:Date.now() };
+  if (!entry.name) return false;
+  G.recentCardFinds = [entry, ...(Array.isArray(G.recentCardFinds) ? G.recentCardFinds : []).filter(item => Number(item?.at) > Date.now() - 86400000)].slice(0, 20);
+  return true;
+};
+function escapeLatestFeedText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
 function renderLatestSale() {
   const feed = document.getElementById('latest-sales-feed');
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
-  if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma venda recente</span>'; return; }
+  if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma novidade recente</span>'; return; }
   const who = String(sale.farmName || `Jardim de @${sale.username || ''}`).trim();
-  feed.innerHTML = sale.activityType === 'event'
+  feed.innerHTML = sale.activityType === 'card'
+    ? `<span class="latest-sales-content sales-slide-in"><strong>${escapeLatestFeedText(who)}</strong> conseguiu a carta <b class="latest-sales-card-name ${sale.card.prismatic ? 'prismatic' : String(sale.card.rarity).toLocaleLowerCase('pt-BR') === 'lendária' ? 'legendary' : 'rare'}">${escapeLatestFeedText(sale.card.name)}</b></span>`
+    : sale.activityType === 'event'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> participou do evento <b>${sale.event || 'do jardim'}</b></span>`
     : sale.activityType === 'order'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> entregou <b>${sale.item || 'um pedido'}</b> e ganhou <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.reward || 0).toLocaleString('pt-BR')} pontos</span>`
@@ -10634,7 +10655,7 @@ const originalPackBuy=buyCardPack;buyCardPack=function(){if(Number(G.pts||0)<1){
 </script>
 <style>.pack-card-front{gap:4px}.pack-card-artwork{display:block;width:100%;border-radius:10px;overflow:hidden;background:#e1e7cb}.pack-card-artwork svg{display:block;width:100%;height:auto}.pack-card-front b{font:normal 16px Georgia,serif;text-align:center}.pack-card-front small{font:800 9px Nunito;color:#778b64}</style>
 <script>
-window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;saveGardenToSE()}});
+window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='card-found'){if(recordCardFind(event.data.card))saveGardenToSE();return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;saveGardenToSE()}});
 const openAlbumWithUserCards=openFarmAlbum;openFarmAlbum=function(e,url){window.__farmAlbumCards={...(G.albumCards||{})};return openAlbumWithUserCards(e,url)};
 </script>
 <style>

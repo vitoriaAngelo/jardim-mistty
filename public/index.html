@@ -2541,7 +2541,7 @@ body.dark-mode .sell-confirm-items { background:#30392d; border-color:#53604f; }
 body.dark-mode .sell-confirm-items .shop-cart-row { color:#e1ecd9; }
 .shop-qty-controls { display:flex; align-items:center; gap:3px; margin-top:3px; }
 .shop-qty-controls button { width:16px; height:16px; padding:0; border:1px solid var(--cozy-line); border-radius:50%; background:var(--cream2); color:var(--text); font-size:10px; font-weight:800; cursor:pointer; line-height:1; }
-.shop-qty-controls span { min-width:20px; text-align:center; font-size:10px; font-weight:800; color:var(--text2); }
+.shop-qty-input { width:38px; height:24px; box-sizing:border-box; padding:1px 3px; border:1px solid var(--cozy-line); border-radius:8px; background:var(--cream2); color:var(--text); font:800 11px 'Nunito',sans-serif; text-align:center; }
 .header-icon-btn { min-width: 44px; min-height: 44px; border-radius: 14px; padding: 9px; }
 .header-icon-btn:hover, .logo:hover, .tool-card:hover, .achiev-tool-btn:hover {
   background: #f0f3e8; border-color: #aab79a; transform: translateY(-2px);
@@ -5687,9 +5687,25 @@ function adjustShopQty(type, delta) {
   else renderShop();
   renderShopCart();
 }
+function setShopQtyFromInput(type, value, input) {
+  const parsed=Number(value);
+  if(!Number.isInteger(parsed)||parsed<1){if(input&&value==='')input.value=SHOP_QTY[type]||1;return;}
+  const qty=Math.max(1,Math.min(99,parsed));
+  SHOP_QTY[type]=qty;
+  if(input&&String(qty)!==String(parsed))input.value=qty;
+  const card=input?.closest('.shop-item, .fertilizer-item');
+  const total=card?.querySelector('[data-shop-total]');
+  if(!total)return;
+  if(card.classList.contains('fertilizer-item')){
+    total.innerHTML=`<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${cartUnitCost(type)*qty}`;
+  }else total.innerHTML=seasonPriceLabel(type,qty);
+  const addButton=card.querySelector('.fertilizer-buy-btn');
+  if(addButton)addButton.disabled=G.pts<cartUnitCost(type)*qty;
+  card.classList.toggle('cant-afford',G.pts<(card.classList.contains('fertilizer-item')?cartUnitCost(type):seasonPrice(type))*qty);
+}
 function shopQtyControls(type) {
   const qty = SHOP_QTY[type] || 1;
-  return `<div class="shop-qty-controls" onclick="event.stopPropagation()"><button type="button" onclick="adjustShopQty('${type}',-1)">−</button><span>×${qty}</span><button type="button" onclick="adjustShopQty('${type}',1)">+</button></div>`;
+  return `<div class="shop-qty-controls" onclick="event.stopPropagation()"><button type="button" aria-label="Diminuir quantidade" onclick="adjustShopQty('${type}',-1)">−</button><input class="shop-qty-input" type="number" min="1" max="99" step="1" value="${qty}" aria-label="Quantidade de ${cartProduct(type)?.name||type}" oninput="setShopQtyFromInput('${type}',this.value,this)"><button type="button" aria-label="Aumentar quantidade" onclick="adjustShopQty('${type}',1)">+</button></div>`;
 }
 
 // ─── FLOWERS ──────────────────────────────────────────────
@@ -5775,7 +5791,7 @@ function renderFlowerShop() {
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
       <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
-      <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
+      <div class="shop-item-price" data-shop-total="${type}">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
         venda <span style="color:var(--soil2);font-weight:800;margin:0 2px"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${sellVal}</span>(${profitLabel})
@@ -7458,7 +7474,7 @@ function renderFertilizerShop() {
           <div class="fertilizer-cost">
             ${locked
               ? `<div class="cozy-level-chip" style="font-size:11px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:3px 10px">🔒 Nv${f.minLevel}</div>`
-              : `<div class="fertilizer-price"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total}</div>
+              : `<div class="fertilizer-price" data-shop-total="${f.id}"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total}</div>
                  ${shopQtyControls(f.id)}<button type="button" class="fertilizer-buy-btn" onclick="event.stopPropagation();addToShopCart('${f.id}', event)" ${G.pts >= total ? '' : 'disabled'}>Adicionar</button>`
             }
           </div>
@@ -7866,7 +7882,7 @@ function renderShop() {
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
       <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
-      <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
+      <div class="shop-item-price" data-shop-total="${type}">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
         venda <span style="color:var(--soil2);font-weight:800;margin:0 2px"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${sellVal}</span>(${profitLabel})

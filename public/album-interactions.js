@@ -32,21 +32,29 @@ newOffer=async function(){
     const match=raw.match(/^(?:card_)?(\d+)$/);
     return match?match[1]:null;
   };
-  openBody(tradeHeader()+'<div class="dialog-title"><h3>🌿 Criar nova oferta</h3><p>Ofereça uma repetida e escolha uma carta que ainda falta no seu álbum.</p></div><div class="offer-builder"><section><label>Você oferece<select id="give">'+(ownDuplicates.length?ownDuplicates.map(c=>'<option value="'+c.id+'">'+c.name+' · REPETIDA ×'+(c.qty-1)+'</option>').join(''):'<option value="">Nenhuma carta repetida disponível</option>')+'</select></label></section><span class="swap-arrow">⇄</span><section><label>Usuário da fazenda<select id="recipient"><option value="">Carregando usuários…</option></select></label><select id="want" aria-label="Carta repetida que falta na sua coleção" disabled><option value="">Selecione um usuário</option></select><div id="recipient-status" class="notice" role="status">Carregando usuários do banco…</div></section></div><div class="offer-actions"><button class="secondary" id="cancel-offer">Cancelar</button><button id="create-offer" '+(ownDuplicates.length?'disabled':'disabled')+'>Enviar oferta</button></div>');
+  openBody(tradeHeader()+'<div class="dialog-title"><h3>🌿 Criar nova oferta</h3><p>Ofereça uma repetida e escolha uma carta que ainda falta no seu álbum.</p></div><div class="offer-builder"><section><label>Você oferece<select id="give">'+(ownDuplicates.length?ownDuplicates.map(c=>'<option value="'+c.id+'">'+c.name+' · REPETIDA ×'+(c.qty-1)+'</option>').join(''):'<option value="">Nenhuma carta repetida disponível</option>')+'</select></label></section><span class="swap-arrow">⇄</span><section><label>Usuário da fazenda<select id="recipient"><option value="">Carregando usuários…</option></select></label><select id="want" aria-label="Cartas repetidas do usuário selecionado que faltam no seu álbum" disabled><option value="">Selecione um usuário acima</option></select><div id="recipient-status" class="notice" role="status">Carregando usuários do banco…</div></section></div><div class="offer-actions"><button class="secondary" id="cancel-offer">Cancelar</button><button id="create-offer" disabled>Enviar oferta</button></div>');
   wireTabs();
   const recipient=document.querySelector('#recipient'),want=document.querySelector('#want'),status=document.querySelector('#recipient-status'),send=document.querySelector('#create-offer');
   let eligibleCards=[];
+  let recipientRequest=0;
+  let availableUsers=0;
   const loadRecipientCards=async()=>{
     const username=recipient.value;
+    const request=++recipientRequest;
     eligibleCards=[];
     want.disabled=true;send.disabled=true;
-    if(!username){want.innerHTML='<option value="">Selecione um usuário</option>';status.textContent='';return}
+    if(!username){
+      want.innerHTML='<option value="">'+(availableUsers?'Selecione um usuário acima':'Nenhum usuário disponível')+'</option>';
+      status.textContent=availableUsers?'Selecione uma pessoa acima para ver as cartas repetidas que faltam no seu álbum.':'Nenhum outro usuário cadastrado no banco.';
+      return;
+    }
     status.textContent='Buscando repetidas que faltam no seu álbum…';
     want.innerHTML='<option value="">Carregando cartas…</option>';
     try{
       const response=await fetch('/.netlify/functions/trade-user-cards?username='+encodeURIComponent(username),{headers});
       if(!response.ok)throw new Error('Não foi possível buscar as cartas desse usuário.');
       const data=await response.json();
+      if(request!==recipientRequest||recipient.value!==username)return;
       const byId=new Map();
       (Array.isArray(data.cards)?data.cards:[]).forEach(row=>{
         const id=decodeCardId(row.card_id),quantity=Number(row.quantity)||0;
@@ -57,7 +65,7 @@ newOffer=async function(){
       want.innerHTML=eligibleCards.map(item=>'<option value="'+item.id+'">'+item.card.name+' · REPETIDA ×'+(item.quantity-1)+'</option>').join('');
       want.disabled=false;send.disabled=!ownDuplicates.length;
       status.textContent='Selecione a carta que falta na sua coleção.';
-    }catch(error){want.innerHTML='<option value="">Não foi possível carregar</option>';status.textContent=error.message||'Não foi possível carregar as cartas deste usuário.'}
+    }catch(error){if(request!==recipientRequest||recipient.value!==username)return;want.innerHTML='<option value="">Falha ao buscar cartas</option>';status.textContent=error.message||'Não foi possível carregar as cartas deste usuário.'}
   };
   try{
     if(!token)throw new Error('Faça login para criar uma oferta.');
@@ -65,11 +73,11 @@ newOffer=async function(){
     if(!response.ok)throw new Error('Não foi possível carregar os usuários cadastrados.');
     const data=await response.json(),self=sessionStorage.getItem('se_username')||'';
     const users=(data.users||[]).filter(username=>String(username).toLowerCase()!==self.toLowerCase());
+    availableUsers=users.length;
     recipient.innerHTML=users.length?'<option value="">Selecione uma pessoa</option>'+users.map(username=>'<option value="'+username+'">@'+username+'</option>').join(''):'<option value="">Nenhum outro usuário cadastrado</option>';
     recipient.onchange=loadRecipientCards;
-    if(!ownDuplicates.length)status.textContent='Você não tem cartas repetidas para oferecer.';
-    else if(!users.length)status.textContent='Nenhum outro usuário cadastrado.';
-  }catch(error){recipient.innerHTML='<option value="">Não foi possível carregar usuários</option>';status.textContent=error.message||'Erro ao buscar usuários cadastrados.'}
+    await loadRecipientCards();
+  }catch(error){recipient.innerHTML='<option value="">Não foi possível carregar usuários</option>';want.innerHTML='<option value="">Aguardando usuários</option>';status.textContent=error.message||'Erro ao buscar usuários cadastrados.'}
   document.querySelector('#cancel-offer').onclick=()=>trades('received');
   send.onclick=async()=>{
     const offered=document.querySelector('#give').value,requested=want.value,target=recipient.value;

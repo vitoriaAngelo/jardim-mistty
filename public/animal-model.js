@@ -79,6 +79,9 @@
         pet.readyAt+=ms;pet.cycleDuration=ms;
       }
       pet.health=healthAt(end);pet.healthUpdatedAt=end;
+      // Super Premium's bonus is a live state, not merely a production-time
+      // condition: once health reaches 80% or less, it stays off until reapplied.
+      if(pet.health<=80)pet.superActive=false;
       pet.booster=pet.boosterUntil>end;
       if(!pet.booster)pet.boosterUntil=0;
       if(pet.health<15)pet.readyAt=0;

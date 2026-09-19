@@ -93,6 +93,19 @@ test('Super Premium exige saúde acima de 80 na conclusão e mantém chance fixa
   s=model.advance(s,start+240000,{criador_dourado:5},()=>.34);
   assert.equal(s.pets.chicken.stock,1);
 });
+test('bônus Super Premium desliga ao chegar a 80% e só reativa ao aplicar Super Premium de novo',()=>{
+  let s=state(85);s.pets.chicken.superActive=true;
+  s=model.advance(s,start+5*60000,{},()=>0);
+  assert.equal(s.pets.chicken.health,80);
+  assert.equal(s.pets.chicken.superActive,false);
+  s=model.feed(s,'chicken',start+5*60000,'premium',()=>0);
+  assert.equal(s.pets.chicken.health,100);
+  assert.equal(s.pets.chicken.superActive,false);
+  s=model.feed(s,'chicken',start+5*60000,'super',()=>0);
+  assert.equal(s.pets.chicken.superActive,true);
+  s=model.advance(s,start+9*60000,{},()=>0);
+  assert.equal(s.pets.chicken.stock,4);
+});
 test('booster funciona em vários ciclos e expira exatamente após 30 minutos',()=>{
   let s=model.boost(state(),'chicken',start,()=>0);
   assert.throws(()=>model.boost(s,'chicken',start+1),/ativo/);

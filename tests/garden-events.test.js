@@ -22,7 +22,7 @@ test('mantém os tempos reais no preview e permite aceleração apenas local par
   assert.doesNotMatch(html, /location\.hostname\.startsWith\('deploy-preview-'\)/);
   assert.match(html, /eventFastMode\(\) \? 8000 \+ Math\.random\(\)\*5000/);
   assert.doesNotMatch(html, /G\.eventNextAt = Date\.now\(\)\+5000/);
-  assert.match(html, /gardenEventDuration\(type\) \{ return eventFastMode\(\) \? 12/);
+  assert.match(html, /function gardenEventDuration\(type\)\s*\{\s*const base = eventFastMode\(\) \? 12 : GARDEN_EVENTS\[type\]\.duration;\s*return base \+ \(skillBranchBonusActive\('colheita'\) \? 15 : 0\);/);
 });
 
 test('mutação é sorteada como evento raro', () => {

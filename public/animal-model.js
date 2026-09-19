@@ -25,7 +25,8 @@
   const HEALTH_MS = 60000; // Um ponto por minuto, sem arredondar o estado salvo.
   const level = (skills, key, max) => Math.min(max, Math.max(0, Number(skills[key]) || 0));
   function duration(id, skills = {}) {
-    return catalog[id].minutes * 60000 * (1 - level(skills,'rotina_rural',5)*.04);
+    const reducedBySkills = catalog[id].minutes * 60000 * (1 - level(skills,'rotina_rural',5)*.04);
+    return Math.max(1000, reducedBySkills - (skills.__animalBranchComplete === true ? 60000 : 0));
   }
   function count(n) { return Number.isFinite(Number(n)) ? Math.max(0, Math.floor(Number(n))) : 0; }
   function normalize(raw, now = Date.now()) {
@@ -66,6 +67,8 @@
       const healthAt=time=>Math.max(0,pet.health-Math.max(0,time-start)/HEALTH_MS);
       const productionEnd=start+Math.max(0,pet.health-15)*HEALTH_MS;
       const ms=duration(id,skills);
+      const previousCycleDuration=Number(pet.cycleDuration)||duration(id);
+      if(pet.readyAt>0&&previousCycleDuration!==ms){pet.readyAt+=ms-previousCycleDuration;pet.cycleDuration=ms;}
       if (!pet.readyAt && pet.health>=15) {pet.readyAt=start+ms;pet.cycleDuration=ms;}
       // Avalia os bônus no instante de cada produto, inclusive durante ausência.
       while (pet.readyAt>0 && pet.readyAt<=end && pet.readyAt<=productionEnd) {

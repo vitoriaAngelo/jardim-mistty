@@ -46,7 +46,7 @@ function switchFarmTab(tab) {
 }
 function openAnimalShop() { openShop(); switchShopTab('animais'); }
 function animalState() {
-  G.livestock = FarmAnimals.advance(G.livestock, Date.now(), G.skillNodes || {});
+  G.livestock = FarmAnimals.advance(G.livestock, Date.now(), effectiveAnimalSkills());
   let delivered = false;
   for (const [id, pet] of Object.entries(G.livestock.pets || {})) {
     const animal = FarmAnimals.catalog[id];
@@ -120,11 +120,11 @@ async function animalAction(action, id, ration = 'normal', quantity = 1) {
       if (!await chargeGamePoints(r.cost*qty, `Ração ${r.name} · ${qty} unidade${qty===1?'':'s'}`)) return;
       state = animalState(); if(!id||id==='normal')state.feed+=qty;else state.rations[id]+=qty;G.livestock = state;
     } else if (action === 'feed') {
-      G.livestock = FarmAnimals.feed(state, id, Date.now(), ration, Math.random, G.skillNodes || {});
+      G.livestock = FarmAnimals.feed(state, id, Date.now(), ration, Math.random, effectiveAnimalSkills());
     } else if (action === 'booster') {
-      G.livestock = FarmAnimals.boost(state,id,Date.now(),Math.random,G.skillNodes || {});
+      G.livestock = FarmAnimals.boost(state,id,Date.now(),Math.random,effectiveAnimalSkills());
     } else if (action === 'collect') {
-      const result = FarmAnimals.collect(state, id);
+      const result = FarmAnimals.collect(state, id, Date.now(), effectiveAnimalSkills());
       G.livestock = result.state;
       for(const [product,quantity] of Object.entries(result.items)) G.harvested[product]=(G.harvested[product]||0)+quantity;
       if (result.items[a.product+'_golden']) toast(`✨ ${state.pets[id].name || a.name} produziu ${result.items[a.product+'_golden']} produto dourado na fazenda!`, 4500);

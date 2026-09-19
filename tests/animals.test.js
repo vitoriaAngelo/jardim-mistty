@@ -6,7 +6,7 @@ const model=require('../public/animal-model');
 const start=1000000;
 const state=(health=100)=>({feed:20,rations:{premium:5,super:5,booster:5},pets:{chicken:{health,healthUpdatedAt:start,readyAt:0}}});
 function harness(charge = async () => true) {
-  const context = vm.createContext({ FarmAnimals:model, G:{livestock:model.normalize(),harvested:{}}, gardenHydrated:true,
+  const context = vm.createContext({ FarmAnimals:model, G:{livestock:model.normalize(),harvested:{},skillNodes:{}}, effectiveAnimalSkills:()=>({}), gardenHydrated:true,
     currentLevel:()=>30, chargeGamePoints:charge, saveGardenToSE:async()=>{}, toast:()=>{},
     renderHarvested:()=>{}, setInterval:()=>{}, document:{getElementById:()=>null}, Date, console });
   vm.runInContext(fs.readFileSync('public/animals.js','utf8'),context);
@@ -110,4 +110,13 @@ test('refeições antigas são devolvidas uma única vez e o estoque preservado'
 test('Rotina Rural reduz duração e mantém ciclos consecutivos',()=>{
   let s=model.advance(state(),start+144000,{rotina_rural:5},()=>1);
   assert.equal(s.pets.chicken.stock,1);assert.equal(s.pets.chicken.readyAt,start+288000);
+});
+test('bônus de domínio dos animais reduz um minuto e a redefinição restaura o ciclo',()=>{
+  const producing=state();producing.pets.chicken.readyAt=start+180000;producing.pets.chicken.cycleDuration=180000;
+  let s=model.advance(producing,start+30000,{__animalBranchComplete:true},()=>1);
+  assert.equal(s.pets.chicken.cycleDuration,120000);
+  assert.equal(s.pets.chicken.readyAt,start+120000);
+  s=model.advance(s,start+60000,{},()=>1);
+  assert.equal(s.pets.chicken.cycleDuration,180000);
+  assert.equal(s.pets.chicken.readyAt,start+180000);
 });

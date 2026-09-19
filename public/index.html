@@ -2708,6 +2708,13 @@ body.dark-mode .st-reset-btn:hover { border-color: #c06878; color: #e8a0ac; box-
 .st-branch-name { font-size: 14px; font-weight: 900; }
 body.dark-mode .st-branch-name { color: var(--text); }
 .st-branch-desc { font-size: 10px; color: var(--cozy-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; }
+.st-branch-bonus { max-width:300px; margin:8px auto 0; padding:8px 10px; border:1px dashed var(--cozy-line); border-radius:12px; background:var(--cream2); color:var(--cozy-muted); font-size:10px; line-height:1.4; }
+.st-branch-bonus strong { display:block; margin-bottom:2px; color:var(--cozy-ink); }
+.st-branch-bonus.active { border-style:solid; border-color:#95ad78; background:linear-gradient(135deg,#eef5df,#e0ebd4); color:#536b43; box-shadow:0 2px 0 #cbd8b7; }
+.st-branch-bonus.active strong { color:#527444; }
+body.dark-mode .st-branch-bonus { background:#30392d; border-color:#59694e; color:#c9d3be; }
+body.dark-mode .st-branch-bonus.active { background:linear-gradient(135deg,#394b36,#2d423c); border-color:#82a989; color:#d9f2df; }
+body.dark-mode .st-branch-bonus.active strong { color:#b9e8c8; }
 body.dark-mode .st-branch-desc { color: #5a6a55; }
 /* branch accent top borders */
 .st-branch-cultivo  { border-top: 3px solid #778b64; }
@@ -4433,7 +4440,10 @@ function eventFastMode() {
   return isLocalHost && new URLSearchParams(location.search).get('events') === 'fast';
 }
 function nextEventDelay() { return eventFastMode() ? 8000 + Math.random()*5000 : 300000 + Math.random()*180000; }
-function gardenEventDuration(type) { return eventFastMode() ? 12 : GARDEN_EVENTS[type].duration; }
+function gardenEventDuration(type) {
+  const base = eventFastMode() ? 12 : GARDEN_EVENTS[type].duration;
+  return base + (skillBranchBonusActive('colheita') ? 15 : 0);
+}
 function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
 function setNextGardenEvent() { G.eventNextAt = Date.now() + nextEventDelay(); saveGardenToSE(); }
 
@@ -4483,6 +4493,7 @@ function announceGardenEvent() {
 
 function startGardenEvent() {
   const def = GARDEN_EVENTS[gardenEvent.type];
+  gardenEvent.skillHarvestBonusApplied = skillBranchBonusActive('colheita');
   gardenEvent.phase = 'active'; gardenEvent.endsAt = Date.now() + gardenEventDuration(gardenEvent.type)*1000;
   G.eventLastType = gardenEvent.type;
   G.eventNextAt = gardenEvent.endsAt + nextEventDelay();
@@ -7941,6 +7952,17 @@ async function onPlotClick(idx) {
     updatePts();
 
     plot.waterCount = Math.min(maxW, plot.waterCount + 1);
+    let bonusWateredIdx = null;
+    if (skillBranchBonusActive('cultivo') && Math.random() < 0.5) {
+      const candidates = G.plots.map((candidate, candidateIdx) => ({ candidate, candidateIdx }))
+        .filter(({ candidate, candidateIdx }) => candidateIdx !== idx && candidate && candidate.waterCount < effectiveMaxWater(candidate.type));
+      if (candidates.length) {
+        const target = candidates[Math.floor(Math.random() * candidates.length)];
+        target.candidate.waterCount = Math.min(effectiveMaxWater(target.candidate.type), target.candidate.waterCount + 1);
+        if (isLocalPreview && target.candidate.waterCount >= effectiveMaxWater(target.candidate.type)) target.candidate.growCount = effectiveMaxGrowWithSkill(target.candidate.type);
+        bonusWateredIdx = target.candidateIdx;
+      }
+    }
     const waterPct = plot.waterCount / maxW;
     const justFull = plot.waterCount >= maxW;
     if (isLocalPreview && justFull) {
@@ -7980,11 +8002,13 @@ async function onPlotClick(idx) {
     }
 
     spawnDrops(idx);
+    if (bonusWateredIdx !== null) { spawnDrops(bonusWateredIdx); renderPlots(); }
     missionProgress('water5');
-    initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + 1; checkAchievements();
+    if (bonusWateredIdx !== null) missionProgress('water5');
+    initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + (bonusWateredIdx !== null ? 2 : 1); checkAchievements();
     updatePlotTooltip(idx);
 
-    toast('💧 Planta regada com sucesso!');
+    toast(bonusWateredIdx !== null ? '💧✨ Rega em dobro! Uma segunda planta também recebeu água sem gastar mais do regador.' : '💧 Planta regada com sucesso!');
     return;
   }
 
@@ -10252,7 +10276,7 @@ const SKILL_BRANCHES = [
       { id:'etiqueta_dourada', emoji:'🏷️', name:'Etiqueta Dourada', effect:'+3% valor de venda por nível',                           max:5, maxLabel:'máx. +15%', req:null,               reqMin:0 },
       { id:'feira_local',      emoji:'🎪', name:'Feira Local',       effect:'+5% por conjunto acima de 15 itens',                   max:7, maxLabel:'máx. +35%', req:'etiqueta_dourada', reqMin:3 },
       { id:'negociador',       emoji:'🤝', name:'Negociador',        effect:'-3% preço de compra por nível',                        max:5, maxLabel:'máx. -15%', req:'feira_local',      reqMin:3 },
-      { id:'venda_epica',      emoji:'💎', name:'Venda Épica',       effect:'+2% chance de um item valer o dobro ao vender',        max:4, maxLabel:'máx. +7%',  req:'negociador',       reqMin:5 },
+      { id:'venda_epica',      emoji:'💎', name:'Venda Épica',       effect:'+2% chance de um item valer o dobro ao vender',        max:4, maxLabel:'máx. +10% com domínio',  req:'negociador',       reqMin:5 },
     ],
   },
   {
@@ -10266,6 +10290,33 @@ const SKILL_BRANCHES = [
     ],
   },
 ];
+
+const SKILL_BRANCH_BONUSES = {
+  cultivo: '50% de chance de uma rega também regar uma segunda planta, sem gastar água extra.',
+  colheita: '+15 segundos à duração de todos os eventos.',
+  mercado: '+2% de chance de uma venda render o dobro.',
+  animais: '-1 minuto no tempo de produção de todos os animais.',
+};
+function skillBranchComplete(branchId) {
+  const branch = SKILL_BRANCHES.find(item => item.id === branchId);
+  return Boolean(branch?.nodes.length && branch.nodes.every(node => Number(G.skillNodes?.[node.id] || 0) >= node.max));
+}
+function skillBranchBonusActive(branchId) { return skillBranchComplete(branchId); }
+function effectiveAnimalSkills() {
+  return { ...(G.skillNodes || {}), __animalBranchComplete:skillBranchBonusActive('animais') };
+}
+function refreshSkillBranchBonusEffects() {
+  if (gardenEvent?.phase === 'active') {
+    const shouldApply = skillBranchBonusActive('colheita');
+    const wasApplied = gardenEvent.skillHarvestBonusApplied === true;
+    if (shouldApply !== wasApplied) gardenEvent.endsAt += shouldApply ? 15000 : -15000;
+    gardenEvent.skillHarvestBonusApplied = shouldApply;
+    renderGardenEvent();
+  }
+  if (typeof renderAnimalYard === 'function') renderAnimalYard();
+  renderPlots();
+  renderWateringCapacity();
+}
 
 // Custo em pts por nível (sobe progressivamente)
 function skillCostPts(nodeId, currentLvl) {
@@ -10339,7 +10390,7 @@ function skillBuyDiscount() {
 }
 // Retorna chance de venda épica (Venda Épica)
 function skillEpicSaleChance() {
-  return (G.skillNodes['venda_epica'] || 0) * 0.02;
+  return (G.skillNodes['venda_epica'] || 0) * 0.02 + (skillBranchBonusActive('mercado') ? 0.02 : 0);
 }
 
 // ── Retroativo: conceder pontos de habilidades para níveis já atingidos ──
@@ -10401,6 +10452,7 @@ function renderSkillTree() {
   renderSkillTreeBadge();
 
   container.innerHTML = SKILL_BRANCHES.map(branch => {
+    const branchBonusActive = skillBranchBonusActive(branch.id);
     const nodesHtml = branch.nodes.map((node, i) => {
       const lvl     = G.skillNodes[node.id] || 0;
       const unlocked= skillNodeUnlocked(node);
@@ -10464,6 +10516,7 @@ function renderSkillTree() {
         <span class="st-branch-icon">${branch.icon}</span>
         <div class="st-branch-name">${branch.name}</div>
         <div class="st-branch-desc">${branch.desc}</div>
+        <div class="st-branch-bonus ${branchBonusActive ? 'active' : ''}"><strong>${branchBonusActive ? '✨ Bônus ativo' : '🔒 Bônus de domínio'}</strong> ${SKILL_BRANCH_BONUSES[branch.id]}</div>
       </div>
       ${nodesHtml}
     </div>`;
@@ -10502,6 +10555,7 @@ function resetSkillTree() {
   G.skillPoints = (G.skillPoints || 0) + spent;
   // Atualizar claimed para o nível atual para evitar re-concessão retroativa
   G.skillPointsClaimed = Math.max(G.skillPointsClaimed || 0, currentLevel());
+  refreshSkillBranchBonusEffects();
   saveGardenToSE();
   renderSkillTree();
   toast('↺ Pontos redistribuídos! Você tem ' + G.skillPoints + ' pontos disponíveis.');
@@ -10530,6 +10584,7 @@ async function upgradeSkillNode(nodeId, branchId) {
 
   const newLvl = G.skillNodes[nodeId];
   const maxed  = newLvl >= node.max;
+  refreshSkillBranchBonusEffects();
   updatePts();
   await saveGardenToSE();
   renderSkillTree();

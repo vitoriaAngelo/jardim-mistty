@@ -7,8 +7,9 @@ const saveSource = fs.readFileSync('netlify/functions/garden-save.js', 'utf8');
 
 test('recargas pagas do regador têm limite de sete por ciclo de estação', () => {
   assert.match(pageSource, /const MAX_WATERING_REFILLS_PER_SEASON = 7/);
-  assert.match(pageSource, /G\.wateringRefillsUsed >= MAX_WATERING_REFILLS_PER_SEASON/);
-  assert.match(pageSource, /G\.wateringRefillsUsed = Math\.min\(MAX_WATERING_REFILLS_PER_SEASON, G\.wateringRefillsUsed \+ 1\)/);
+  assert.match(pageSource, /G\.wateringRefillsUsed >= wateringRefillLimit\(\)/);
+  assert.match(pageSource, /G\.wateringRefillsUsed = Math\.min\(wateringRefillLimit\(\), G\.wateringRefillsUsed \+ 1\)/);
+  assert.match(pageSource, /function wateringRefillLimit\(\)[\s\S]*?MAX_WATERING_REFILLS_PER_SEASON[\s\S]*?G\.wateringRefillsBonus/);
   assert.match(pageSource, /wateringRefillsUsed: Number\(G\.wateringRefillsUsed\) \|\| 0/);
 });
 
@@ -25,7 +26,8 @@ test('contador renova ao virar a estação e é salvo no banco por usuário', ()
   assert.match(pageSource, /G\.seasonCycle = Math\.max\(0, Number\(G\.seasonCycle\) \|\| 0\) \+ 1/);
   assert.match(pageSource, /wateringRefillsSeasonCycle: Number\(G\.wateringRefillsSeasonCycle\) \|\| 0/);
   assert.match(pageSource, /G\.wateringRefillsSeasonCycle = Number\.isFinite\(Number\(save\.wateringRefillsSeasonCycle\)\)/);
-  assert.match(saveSource, /'seasonCycle','wateringRefillsUsed','wateringRefillsSeasonCycle'/);
+  assert.match(saveSource, /'seasonCycle','wateringRefillsUsed','wateringRefillsBonus','wateringRefillsSeasonCycle'/);
+  assert.match(saveSource, /goldenShowerStarted[\s\S]*?\? 2 : 0/);
 });
 
 test('recuperação automática de água não altera o contador de recargas pagas', () => {

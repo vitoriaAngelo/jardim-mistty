@@ -265,6 +265,7 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .garden-event-progress { position:absolute; left:0; bottom:0; height:4px; width:100%; transform-origin:left; background:#7fa66c; }
 .garden-event-layer { position:fixed; inset:0; z-index:120; pointer-events:none; overflow:hidden; }
 .event-rain-drop { position:absolute; top:-30px; color:#8ed4f5; font-size:18px; animation:event-rain 1.2s linear forwards; }
+.event-golden-drop { position:absolute; top:-34px; color:#f3d15b; font-size:18px; text-shadow:0 0 8px #fff2a6,0 0 15px #d79e24; animation:event-golden-rain 1.35s linear forwards; }
 .event-butterfly { position:fixed; z-index:121; pointer-events:auto; cursor:pointer; border:0; background:transparent; font-size:30px; filter:drop-shadow(0 3px 3px rgba(50,45,80,.25)); animation:event-fly 5s ease-in-out forwards; }
 .event-butterfly.rare { font-size:36px; filter:drop-shadow(0 0 8px #e58cff); }
 .event-pest { position:fixed; z-index:121; pointer-events:auto; cursor:pointer; border:2px solid #718c5d; border-radius:999px; background:#fff9df; padding:7px; font-size:25px; line-height:1; box-shadow:0 3px 0 #c9b98f,0 0 0 3px #ffffffaa; animation:pest-wiggle 1.1s ease-in-out infinite; }
@@ -280,9 +281,11 @@ body.event-pests { animation:farm-pest-shake .35s ease-in-out 3; }
 .plot-mutation-label { display:inline-block; margin:2px 0; padding:2px 6px; border-radius:8px; background:#70508c; color:#fff; font-size:9px; font-weight:900; letter-spacing:.1px; }
 .mutation-tooltip-badge { display:inline-block; padding:3px 6px; border-radius:7px; background:#765292; color:#fff; font-weight:900; font-size:10px; }
 body.event-rain::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:linear-gradient(#7193aa22,#a8d7ec16); }
+body.event-goldenshower::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:linear-gradient(180deg,#ffdf6b22,#fff5b516 45%,transparent); }
 body.event-moon::after { content:''; position:fixed; inset:0; z-index:110; pointer-events:none; background:radial-gradient(circle at 78% 12%,#fffbd0 0 3%,#9d83dc33 4% 17%,#33294b44 60%); mix-blend-mode:multiply; }
 @keyframes event-pop { from{opacity:0;transform:translateY(-10px) scale(.98)} to{opacity:1;transform:none} }
 @keyframes event-rain { to{transform:translate(-35px,110vh);opacity:.15} }
+@keyframes event-golden-rain { to{transform:translate(-18px,110vh) rotate(210deg);opacity:.08} }
 @keyframes pest-wiggle { 0%,100%{transform:rotate(-5deg) translateY(0)} 50%{transform:rotate(5deg) translateY(-4px)} }
 @keyframes pest-hit { 50%{transform:scale(1.25) rotate(12deg);filter:brightness(1.6)} 100%{transform:scale(.8);opacity:.35} }
 @keyframes farm-pest-shake { 20%,60%{transform:translateX(-2px)} 40%,80%{transform:translateX(2px)} }
@@ -4419,6 +4422,7 @@ const G = {
   seasonDay: 1,
   seasonCycle: 0,
   wateringRefillsUsed: 0,
+  wateringRefillsBonus: 0,
   wateringRefillsSeasonCycle: 0,
   missions: null,
   achievements: null,
@@ -4478,6 +4482,7 @@ const G = {
 // ─── EVENTOS VIVOS DO JARDIM ─────────────────────────────
 const GARDEN_EVENTS = {
   rain: { icon:'🌧️', name:'Chuva Mágica', duration:45, color:'#67a9c9', intro:'A chuva vai regar suas plantas automaticamente!' },
+  goldenshower: { icon:'🌟', name:'GOLDENSHOWER', duration:5, color:'#e5bd43', intro:'Chuva dourada! Enche o regador e concede +2 recargas nesta estação.' },
   golden: { icon:'☀️', name:'Hora Dourada', duration:60, color:'#d9a82f', intro:'Colheitas feitas durante o evento rendem o dobro!' },
   butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
   moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
@@ -4578,6 +4583,7 @@ function eventFastMode() {
 function nextEventDelay() { return eventFastMode() ? 8000 + Math.random()*5000 : 300000 + Math.random()*180000; }
 function gardenEventDuration(type) {
   const base = eventFastMode() ? 12 : GARDEN_EVENTS[type].duration;
+  if (type === 'goldenshower' && !eventFastMode()) return GARDEN_EVENTS[type].duration;
   return base + (skillBranchBonusActive('colheita') ? 15 : 0);
 }
 function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
@@ -4605,6 +4611,7 @@ function eventLiveSubtitle() {
   if (!gardenEvent) return '';
   const n = gardenEvent.actions || 0;
   if (gardenEvent.type === 'rain') return `${n} planta${n===1?'':'s'} recebeu${n===1?'':'ram'} água mágica`;
+  if (gardenEvent.type === 'goldenshower') return 'Regador cheio · +2 recargas nesta estação';
   if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
   if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
   if (gardenEvent.type === 'pests') return `${n} praga${n===1?'':'s'} removida${n===1?'':'s'} · 🐛 Infestação: ${Math.min(100, gardenEvent.danger || 0)}%`;
@@ -4642,6 +4649,11 @@ function startGardenEvent() {
   if (gardenEvent.type === 'rain') {
     applyMagicRain();
     gardenEventRainTimer = setInterval(() => { spawnEventRain(); applyMagicRain(); }, 3500);
+  }
+  if (gardenEvent.type === 'goldenshower') {
+    applyGoldenShowerReward();
+    spawnGoldenShower();
+    toast('🌟 GOLDENSHOWER! Regador cheio e +2 recargas disponíveis nesta estação.', 5200);
   }
   if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
   if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
@@ -4691,13 +4703,17 @@ function showGardenEventSummary(finished, def) {
   const xp = finished.xp || 0;
   const bonus = finished.bonus || 0;
   const reward = bonus ? `<div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Recompensas extras</strong>${finished.type === 'moon' ? `🌙 ${bonus} Semente${bonus === 1 ? '' : 's'} Lunar${bonus === 1 ? '' : 'es'}` : `✨ ${bonus} bônus do evento`}</div>` : '';
+  const goldenShowerReward = finished.type === 'goldenshower'
+    ? '<div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Presente da chuva dourada</strong>💧 Regador cheio<br>✨ +2 recargas nesta estação</div>'
+    : '';
   overlay.innerHTML = `<div class="mail-modal" style="max-width:420px;text-align:center" onclick="event.stopPropagation()">
     <button class="popup-close-x" aria-label="Fechar resumo do evento" onclick="this.closest('#garden-event-summary-overlay').remove()">×</button>
     <div style="font-size:44px;line-height:1;margin:4px 0 10px">${def.icon}</div>
     <div class="mail-modal-title" id="garden-event-summary-title" style="justify-content:center">${def.name} terminou!</div>
-    <p class="premium-copy">${actions ? `Você participou ${actions} vez${actions === 1 ? '' : 'es'} e aproveitou o evento.` : 'Você participou um pouquinho — fique de olho no próximo evento!'}</p>
+    <p class="premium-copy">${finished.type === 'goldenshower' ? 'A chuva dourada deixou presentes para sua fazenda!' : actions ? `Você participou ${actions} vez${actions === 1 ? '' : 'es'} e aproveitou o evento.` : 'Você participou um pouquinho — fique de olho no próximo evento!'}</p>
     <div class="levelup-rewards" style="margin-left:auto;margin-right:auto;text-align:center"><strong>Resumo da participação</strong>🌱 ${actions} ${actions === 1 ? 'ação realizada' : 'ações realizadas'}<br>✨ +${xp} XP ganhos</div>
     ${reward}
+    ${goldenShowerReward}
     <button class="levelup-dismiss" style="margin:16px auto 0" onclick="this.closest('#garden-event-summary-overlay').remove()">Continuar no jardim 🌱</button>
   </div>`;
   overlay.onclick = event => { if (event.target === overlay) overlay.remove(); };
@@ -5037,14 +5053,19 @@ function wateringRefillCost() {
   return G.bonusRefillDiscount ? Math.ceil(base / 2) : base;
 }
 const MAX_WATERING_REFILLS_PER_SEASON = 7;
+function wateringRefillLimit() {
+  return MAX_WATERING_REFILLS_PER_SEASON + Math.min(10000, Math.max(0, Math.floor(Number(G.wateringRefillsBonus) || 0)));
+}
 function syncWateringRefillSeason() {
   const cycle = Math.max(0, Number(G.seasonCycle) || 0);
   const savedCycle = Number(G.wateringRefillsSeasonCycle);
   if (!Number.isFinite(savedCycle) || savedCycle !== cycle) {
     G.wateringRefillsUsed = 0;
+    G.wateringRefillsBonus = 0;
     G.wateringRefillsSeasonCycle = cycle;
   }
-  G.wateringRefillsUsed = Math.max(0, Math.min(MAX_WATERING_REFILLS_PER_SEASON, Math.floor(Number(G.wateringRefillsUsed) || 0)));
+  G.wateringRefillsBonus = Math.min(10000, Math.max(0, Math.floor(Number(G.wateringRefillsBonus) || 0)));
+  G.wateringRefillsUsed = Math.max(0, Math.min(wateringRefillLimit(), Math.floor(Number(G.wateringRefillsUsed) || 0)));
 }
 function effectiveWaterRecoveryMinutes() {
   const base = G.premiumWateringCan ? 2 : 5;
@@ -5091,15 +5112,16 @@ function renderWateringCapacity() {
   const caption = document.getElementById('water-caption');
   const offer = document.getElementById('watering-refill-offer');
   const refillCounter = document.getElementById('watering-season-refills');
-  const refillsLeft = Math.max(0, MAX_WATERING_REFILLS_PER_SEASON - G.wateringRefillsUsed);
-  if (refillCounter) refillCounter.textContent = `Recargas da estação: ${G.wateringRefillsUsed}/${MAX_WATERING_REFILLS_PER_SEASON}`;
+  const refillLimit = wateringRefillLimit();
+  const refillsLeft = Math.max(0, refillLimit - G.wateringRefillsUsed);
+  if (refillCounter) refillCounter.textContent = `Recargas da estação: ${G.wateringRefillsUsed}/${refillLimit}`;
   if (offer) {
     offer.classList.toggle('visible', amount <= 1 && amount < max);
     offer.setAttribute('aria-disabled', refillsLeft <= 0 || waterRefillPurchaseInFlight ? 'true' : 'false');
     offer.tabIndex = refillsLeft <= 0 || waterRefillPurchaseInFlight ? -1 : 0;
     offer.innerHTML = refillsLeft > 0
-      ? `Regador quase vazio<br>Clique para gastar <img src="points-sprout.svg" alt="" aria-hidden="true"> ${wateringRefillCost()} pontos e encher · ${refillsLeft}/7 restantes`
-      : 'Limite de 7 recargas desta estação atingido';
+      ? `Regador quase vazio<br>Clique para gastar <img src="points-sprout.svg" alt="" aria-hidden="true"> ${wateringRefillCost()} pontos e encher · ${refillsLeft} recargas restantes`
+      : `Limite de ${refillLimit} recargas desta estação atingido`;
   }
   if (caption) {
     if (amount >= max) {
@@ -5247,9 +5269,9 @@ var waterRefillPurchaseInFlight = false;
 async function buyWaterRefillFromNotice() {
   syncWateringRefillSeason();
   if (waterRefillPurchaseInFlight) return;
-  if (G.wateringRefillsUsed >= MAX_WATERING_REFILLS_PER_SEASON) {
+  if (G.wateringRefillsUsed >= wateringRefillLimit()) {
     renderWateringCapacity();
-    toast('Você já usou as 7 recargas desta estação. O limite renova na próxima estação.', 3500);
+    toast(`Você já usou as ${wateringRefillLimit()} recargas desta estação. O limite renova na próxima estação.`, 3500);
     return;
   }
   const cost = wateringRefillCost();
@@ -5273,12 +5295,12 @@ async function buyWaterRefillFromNotice() {
     if (!(await chargeGamePoints(cost, 'Recarga do regador'))) return;
     syncWateringRefillSeason();
     G.waterCapacity = maxWateringCapacity();
-    G.wateringRefillsUsed = Math.min(MAX_WATERING_REFILLS_PER_SEASON, G.wateringRefillsUsed + 1);
+    G.wateringRefillsUsed = Math.min(wateringRefillLimit(), G.wateringRefillsUsed + 1);
     G.wateringRefillsSeasonCycle = Number(G.seasonCycle) || 0;
     renderWateringCapacity();
     updatePts();
     await saveGardenToSE();
-    toast(`Regador cheio! (${G.waterCapacity}/${maxWateringCapacity()}) · ${MAX_WATERING_REFILLS_PER_SEASON - G.wateringRefillsUsed} recargas restantes nesta estação`, 3200);
+    toast(`Regador cheio! (${G.waterCapacity}/${maxWateringCapacity()}) · ${wateringRefillLimit() - G.wateringRefillsUsed} recargas restantes nesta estação`, 3200);
   } finally {
     waterRefillPurchaseInFlight = false;
     renderWateringCapacity();
@@ -6182,6 +6204,27 @@ const PRISMATIC_ALBUM_NAMES = ['Prisma de Orvalho','Prisma de Pétala','Prisma d
 function hasCompleteSpringAlbum(cards=G.albumCards||{}) { return SPRING_ALBUM_NAMES.every(name=>Number(cards[name]||0)>0); }
 function hasCompletePrismaticAlbum(cards=G.albumCards||{}) {
   return PRISMATIC_ALBUM_NAMES.every((name,index)=>Number(cards[`prismatic_${index}`]??cards[name]??0)>0);
+}
+
+function spawnGoldenShower() {
+  const layer=document.getElementById('garden-event-layer');
+  if(!layer)return;
+  layer.replaceChildren();
+  for(let i=0;i<28;i++){
+    const drop=document.createElement('span');
+    drop.className='event-golden-drop';drop.textContent=i%3?'✦':'✧';
+    drop.style.left=`${Math.random()*100}%`;drop.style.animationDelay=`${Math.random()*.75}s`;
+    layer.appendChild(drop);setTimeout(()=>drop.remove(),2200);
+  }
+}
+
+function applyGoldenShowerReward() {
+  syncWateringRefillSeason();
+  G.waterCapacity=maxWateringCapacity();
+  G.waterCapacityLastRefill=Date.now();
+  G.wateringRefillsBonus=Math.min(10000,Math.max(0,Math.floor(Number(G.wateringRefillsBonus)||0))+2);
+  gardenEvent.wateringRefillsBonus=2;
+  renderWateringCapacity();
 }
 function ensureAlbumCompletionRewards() {
   if (!seUser || !gardenHydrated) return false;
@@ -9580,6 +9623,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     seasonDay:        G.seasonDay,
     seasonCycle:      Number(G.seasonCycle) || 0,
     wateringRefillsUsed: Number(G.wateringRefillsUsed) || 0,
+    wateringRefillsBonus: Number(G.wateringRefillsBonus) || 0,
     wateringRefillsSeasonCycle: Number(G.wateringRefillsSeasonCycle) || 0,
     albumPacks:       Number(G.albumPacks || 0),
     packInventory:   G.packInventory || { normal:0, prismatic:0 },
@@ -9866,7 +9910,8 @@ async function loadGardenFromSE(username) {
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
     G.seasonCycle     = Math.max(0, Number(save.seasonCycle) || 0);
-    G.wateringRefillsUsed = Math.max(0, Math.min(MAX_WATERING_REFILLS_PER_SEASON, Math.floor(Number(save.wateringRefillsUsed) || 0)));
+    G.wateringRefillsBonus = Math.min(10000, Math.max(0, Math.floor(Number(save.wateringRefillsBonus) || 0)));
+    G.wateringRefillsUsed = Math.max(0, Math.min(wateringRefillLimit(), Math.floor(Number(save.wateringRefillsUsed) || 0)));
     G.wateringRefillsSeasonCycle = Number.isFinite(Number(save.wateringRefillsSeasonCycle))
       ? Number(save.wateringRefillsSeasonCycle)
       : G.seasonCycle;

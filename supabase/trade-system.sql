@@ -45,8 +45,43 @@ create table if not exists public.trade_notifications (
 
 create index if not exists trade_notifications_user_idx on public.trade_notifications (username, read_at, created_at desc);
 
--- Libera as reservas de ofertas expiradas. Esta função também é chamada antes
--- de criar, responder ou cancelar uma oferta, não dependendo de cron para estar correta.
+-- A fonte de verdade do álbum é gardens.data.albumCards. Os ids numéricos
+-- representam cartas comuns; prismatic_N representa cartas prismáticas.
+create or replace function public.trade_album_key(p_card_id text)
+returns text language plpgsql immutable
+set search_path = public
+as $$
+declare
+  common_names text[] := array['Brotinho de Esperança','Juju entre Margaridas','Alfredo do Orvalho','Ovelhinha Algodão','Cogumelo do Pomar','Abelhinha Bilhetinho','Tulipinha Nuvem','Moranguinho Estrelar','Borboleta Açucarada','Solária da Primavera'];
+  legacy_names text[] := array['Pipo, o brotinho','Juju do galinheiro','Alfredo do lago','Mimi das nuvens','Bento, o cogumelo','Mel, a abelhinha','Luna do luar','Íris cristalina','Aurora das asas','Solária, guardiã do jardim'];
+  card_index integer;
+begin
+  if p_card_id ~ '^prismatic_[0-9]$' then return p_card_id; end if;
+  if p_card_id !~ '^[0-9]$' then raise exception 'Carta inválida'; end if;
+  card_index := p_card_id::integer + 1;
+  if card_index < 1 or card_index > array_length(common_names,1) then raise exception 'Carta inválida'; end if;
+  return common_names[card_index];
+end;
+$$;
+
+create or replace function public.trade_card_quantity(p_cards jsonb, p_card_id text)
+returns integer language plpgsql immutable
+set search_path = public
+as $$
+declare
+  common_names text[] := array['Brotinho de Esperança','Juju entre Margaridas','Alfredo do Orvalho','Ovelhinha Algodão','Cogumelo do Pomar','Abelhinha Bilhetinho','Tulipinha Nuvem','Moranguinho Estrelar','Borboleta Açucarada','Solária da Primavera'];
+  legacy_names text[] := array['Pipo, o brotinho','Juju do galinheiro','Alfredo do lago','Mimi das nuvens','Bento, o cogumelo','Mel, a abelhinha','Luna do luar','Íris cristalina','Aurora das asas','Solária, guardiã do jardim'];
+  card_index integer;
+  card_key text;
+begin
+  card_key := public.trade_album_key(p_card_id);
+  if p_card_id like 'prismatic_%' then return greatest(0, coalesce((p_cards->>card_key)::integer,0)); end if;
+  card_index := p_card_id::integer + 1;
+  return greatest(0, coalesce((p_cards->>common_names[card_index])::integer,(p_cards->>legacy_names[card_index])::integer,0));
+end;
+$$;
+
+-- Libera ofertas expiradas. Reservas são calculadas a partir das ofertas ativas.
 create or replace function public.expire_trade_offers()
 returns integer
 language plpgsql
@@ -57,17 +92,12 @@ declare
   expired_offer record;
   total integer := 0;
 begin
+  perform pg_advisory_xact_lock(89431277);
   for expired_offer in
     select * from public.trade_offers
     where status = 'active' and expires_at <= now()
     for update
   loop
-    update public.player_cards
-      set reserved_quantity = greatest(coalesce(reserved_quantity, 0) - 1, 0),
-          updated_at = now()
-      where username = expired_offer.sender_username
-        and card_id = expired_offer.offered_card_id;
-
     update public.trade_offers
       set status = 'expired', cancelled_at = now()
       where id = expired_offer.id;
@@ -97,27 +127,37 @@ set search_path = public
 as $$
 declare
   created_offer public.trade_offers;
+  sender_ctid tid; recipient_ctid tid;
+  sender_data jsonb; recipient_data jsonb;
+  offered_key text; requested_key text;
+  sender_reserved integer;
 begin
+  perform pg_advisory_xact_lock(89431277);
   perform public.expire_trade_offers();
-  if p_sender_username = p_recipient_username then
+  if lower(p_sender_username) = lower(p_recipient_username) then
     raise exception 'Não é permitido trocar com a própria conta';
   end if;
-  if p_offered_card_id = p_requested_card_id then
-    raise exception 'As cartas da troca precisam ser diferentes';
+  if p_offered_card_id = p_requested_card_id then raise exception 'As cartas da troca precisam ser diferentes'; end if;
+  offered_key := public.trade_album_key(p_offered_card_id);
+  requested_key := public.trade_album_key(p_requested_card_id);
+  perform 1 from public.gardens where lower(username) in (lower(p_sender_username),lower(p_recipient_username)) order by lower(username) for update;
+  select ctid,data into sender_ctid,sender_data from public.gardens where lower(username)=lower(p_sender_username) order by updated_at desc limit 1;
+  select ctid,data into recipient_ctid,recipient_data from public.gardens where lower(username)=lower(p_recipient_username) order by updated_at desc limit 1;
+  if sender_ctid is null or recipient_ctid is null then raise exception 'Uma das fazendas não foi encontrada'; end if;
+  sender_data := coalesce(sender_data,'{}'::jsonb);
+  recipient_data := coalesce(recipient_data,'{}'::jsonb);
+  sender_reserved := (select count(*) from public.trade_offers where sender_username=lower(p_sender_username) and offered_card_id=p_offered_card_id and status='active');
+  if public.trade_card_quantity(coalesce(sender_data->'albumCards','{}'::jsonb),p_offered_card_id)-sender_reserved < 2 then
+    raise exception 'Você precisa ter uma carta repetida não reservada para oferecer';
   end if;
-
-  update public.player_cards
-    set reserved_quantity = coalesce(reserved_quantity, 0) + 1,
-        updated_at = now()
-    where username = p_sender_username
-      and card_id = p_offered_card_id
-      and quantity - coalesce(reserved_quantity, 0) >= 2;
-  if not found then
-    raise exception 'Você precisa ter uma carta repetida disponível para oferecer';
+  if public.trade_card_quantity(coalesce(recipient_data->'albumCards','{}'::jsonb),p_requested_card_id) < 2 then
+    raise exception 'A pessoa selecionada não tem mais essa carta repetida';
   end if;
-
+  if public.trade_card_quantity(coalesce(sender_data->'albumCards','{}'::jsonb),p_requested_card_id) > 0 then
+    raise exception 'Essa carta já está no seu álbum';
+  end if;
   insert into public.trade_offers (sender_username, recipient_username, offered_card_id, requested_card_id)
-    values (p_sender_username, p_recipient_username, p_offered_card_id, p_requested_card_id)
+    values (lower(p_sender_username), lower(p_recipient_username), p_offered_card_id, p_requested_card_id)
     returning * into created_offer;
   insert into public.trade_events (trade_offer_id, event_type, actor_username)
     values (created_offer.id, 'created', p_sender_username);
@@ -136,30 +176,38 @@ set search_path = public
 as $$
 declare
   offer_row public.trade_offers;
+  sender_ctid tid; recipient_ctid tid;
+  sender_data jsonb; recipient_data jsonb;
+  sender_cards jsonb; recipient_cards jsonb;
+  offered_key text; requested_key text;
+  sender_reserved integer; recipient_reserved integer;
+  sender_quantity integer; recipient_quantity integer;
 begin
+  perform pg_advisory_xact_lock(89431277);
   perform public.expire_trade_offers();
   select * into offer_row from public.trade_offers where id = p_offer_id for update;
   if not found or offer_row.status <> 'active' then raise exception 'Esta oferta não está mais ativa'; end if;
   if offer_row.recipient_username <> p_recipient_username then raise exception 'Esta oferta não pertence a você'; end if;
 
-  -- Mantém uma cópia para cada pessoa e confirma a reserva do criador.
-  perform 1 from public.player_cards where username = offer_row.sender_username and card_id = offer_row.offered_card_id for update;
-  perform 1 from public.player_cards where username = offer_row.recipient_username and card_id = offer_row.requested_card_id for update;
-  if not exists (select 1 from public.player_cards where username = offer_row.sender_username and card_id = offer_row.offered_card_id and quantity - coalesce(reserved_quantity,0) >= 1)
-     or not exists (select 1 from public.player_cards where username = offer_row.recipient_username and card_id = offer_row.requested_card_id and quantity - coalesce(reserved_quantity,0) >= 2) then
-    raise exception 'Uma das cartas não está mais disponível para a troca';
-  end if;
-
-  update public.player_cards set quantity = quantity - 1, reserved_quantity = greatest(coalesce(reserved_quantity,0)-1,0), updated_at = now()
-    where username = offer_row.sender_username and card_id = offer_row.offered_card_id;
-  update public.player_cards set quantity = quantity - 1, updated_at = now()
-    where username = offer_row.recipient_username and card_id = offer_row.requested_card_id;
-  insert into public.player_cards (username, card_id, quantity, reserved_quantity, updated_at)
-    values (offer_row.sender_username, offer_row.requested_card_id, 1, 0, now())
-    on conflict (username, card_id) do update set quantity = public.player_cards.quantity + 1, updated_at = now();
-  insert into public.player_cards (username, card_id, quantity, reserved_quantity, updated_at)
-    values (offer_row.recipient_username, offer_row.offered_card_id, 1, 0, now())
-    on conflict (username, card_id) do update set quantity = public.player_cards.quantity + 1, updated_at = now();
+  perform 1 from public.gardens where lower(username) in (offer_row.sender_username,offer_row.recipient_username) order by lower(username) for update;
+  select ctid,data into sender_ctid,sender_data from public.gardens where lower(username)=offer_row.sender_username order by updated_at desc limit 1;
+  select ctid,data into recipient_ctid,recipient_data from public.gardens where lower(username)=offer_row.recipient_username order by updated_at desc limit 1;
+  if sender_ctid is null or recipient_ctid is null then raise exception 'Uma das fazendas não foi encontrada'; end if;
+  sender_cards := coalesce(sender_data->'albumCards','{}'::jsonb);
+  recipient_cards := coalesce(recipient_data->'albumCards','{}'::jsonb);
+  offered_key := public.trade_album_key(offer_row.offered_card_id);
+  requested_key := public.trade_album_key(offer_row.requested_card_id);
+  sender_quantity := public.trade_card_quantity(sender_cards,offer_row.offered_card_id);
+  recipient_quantity := public.trade_card_quantity(recipient_cards,offer_row.requested_card_id);
+  sender_reserved := (select count(*) from public.trade_offers where sender_username=offer_row.sender_username and offered_card_id=offer_row.offered_card_id and status='active' and id<>p_offer_id);
+  recipient_reserved := (select count(*) from public.trade_offers where sender_username=offer_row.recipient_username and offered_card_id=offer_row.requested_card_id and status='active');
+  if sender_quantity-sender_reserved < 2 or recipient_quantity-recipient_reserved < 2 then raise exception 'Uma das cartas repetidas não está mais disponível'; end if;
+  sender_cards := jsonb_set(sender_cards,array[offered_key],to_jsonb(sender_quantity-1),true);
+  sender_cards := jsonb_set(sender_cards,array[requested_key],to_jsonb(public.trade_card_quantity(sender_cards,offer_row.requested_card_id)+1),true);
+  recipient_cards := jsonb_set(recipient_cards,array[requested_key],to_jsonb(recipient_quantity-1),true);
+  recipient_cards := jsonb_set(recipient_cards,array[offered_key],to_jsonb(public.trade_card_quantity(recipient_cards,offer_row.offered_card_id)+1),true);
+  update public.gardens set data=jsonb_set(coalesce(data,'{}'::jsonb),'{albumCards}',sender_cards,true),updated_at=now() where ctid=sender_ctid;
+  update public.gardens set data=jsonb_set(coalesce(data,'{}'::jsonb),'{albumCards}',recipient_cards,true),updated_at=now() where ctid=recipient_ctid;
 
   update public.trade_offers set status='completed', recipient_confirmed_at=now(), completed_at=now() where id=p_offer_id returning * into offer_row;
   insert into public.trade_events (trade_offer_id,event_type,actor_username) values (p_offer_id,'accepted',p_recipient_username),(p_offer_id,'completed',p_recipient_username);
@@ -177,13 +225,13 @@ set search_path = public
 as $$
 declare offer_row public.trade_offers; new_status text;
 begin
+  perform pg_advisory_xact_lock(89431277);
   perform public.expire_trade_offers();
   select * into offer_row from public.trade_offers where id=p_offer_id for update;
   if not found or offer_row.status <> 'active' then raise exception 'Esta oferta não está mais ativa'; end if;
   if p_actor_username <> offer_row.sender_username and p_actor_username <> offer_row.recipient_username then raise exception 'Esta oferta não pertence a você'; end if;
+  if (p_decline and p_actor_username <> offer_row.recipient_username) or (not p_decline and p_actor_username <> offer_row.sender_username) then raise exception 'Ação não permitida para este usuário'; end if;
   new_status := case when p_decline then 'declined' else 'cancelled' end;
-  update public.player_cards set reserved_quantity=greatest(coalesce(reserved_quantity,0)-1,0),updated_at=now()
-    where username=offer_row.sender_username and card_id=offer_row.offered_card_id;
   update public.trade_offers set status=new_status,cancelled_at=now() where id=p_offer_id returning * into offer_row;
   insert into public.trade_events (trade_offer_id,event_type,actor_username) values (p_offer_id,new_status,p_actor_username);
   insert into public.trade_notifications (username,trade_offer_id,kind) values
@@ -196,5 +244,6 @@ alter table public.trade_offers enable row level security;
 alter table public.trade_events enable row level security;
 alter table public.trade_notifications enable row level security;
 revoke all on public.trade_offers, public.trade_events, public.trade_notifications from anon, authenticated;
-revoke all on function public.create_trade_offer(text,text,text,text), public.accept_trade_offer(uuid,text), public.cancel_trade_offer(uuid,text,boolean), public.expire_trade_offers() from public;
+revoke all on function public.create_trade_offer(text,text,text,text), public.accept_trade_offer(uuid,text), public.cancel_trade_offer(uuid,text,boolean), public.expire_trade_offers(), public.trade_album_key(text), public.trade_card_quantity(jsonb,text) from public, anon, authenticated;
+grant execute on function public.create_trade_offer(text,text,text,text), public.accept_trade_offer(uuid,text), public.cancel_trade_offer(uuid,text,boolean), public.expire_trade_offers() to service_role;
 

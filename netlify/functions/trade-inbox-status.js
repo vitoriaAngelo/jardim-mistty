@@ -16,6 +16,12 @@ exports.handler = async event => {
   try {
     const user = await authenticateTwitch(event);
     if (!KEY) throw new Error('Banco de trocas indisponível');
+    const expiryResponse = await fetch(`${SUPABASE_URL}/rest/v1/rpc/expire_trade_offers`, {
+      method:'POST',
+      headers:{ apikey:KEY, Authorization:`Bearer ${KEY}`, 'Content-Type':'application/json' },
+      body:'{}',
+    });
+    if (!expiryResponse.ok) throw new Error('Não foi possível atualizar o estado das ofertas.');
     const params = new URLSearchParams({
       select:'id',
       recipient_username:`eq.${user.username}`,

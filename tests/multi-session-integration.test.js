@@ -4,6 +4,14 @@ const assert = require('node:assert/strict');
 const channel = '5b9a7efe15cd280f04f5891b';
 const authHeaders = (sessionId) => ({ authorization: 'Bearer twitch-token', 'x-garden-session': sessionId });
 
+test('preflight do login libera o cabeçalho de sessão enviado pelo navegador', async () => {
+  delete require.cache[require.resolve('../netlify/functions/garden-session')];
+  const handler = require('../netlify/functions/garden-session').handler;
+  const response = await handler({ httpMethod: 'OPTIONS', headers: {} });
+  assert.equal(response.statusCode, 200);
+  assert.match(response.headers['Access-Control-Allow-Headers'], /X-Garden-Session/i);
+});
+
 test('a segunda tela assume a conta e invalida a sessão anterior', async () => {
   const originalFetch = global.fetch;
   let row = {

@@ -288,6 +288,12 @@ exports.handler = async (event) => {
       premiumFields.forEach((field) => {
         safeData[field] = safeData[field] === true || existingData[field] === true;
       });
+      // O histórico de kits pagos é mantido exclusivamente pelo servidor.
+      // O cliente não serializa esse campo; removê-lo faria o carregamento
+      // entregar o mesmo kit novamente e quebraria a confirmação do logout.
+      safeData.paidKitOrders = Array.isArray(existingData.paidKitOrders)
+        ? existingData.paidKitOrders
+        : [];
       safeData.isPremium = safeData.isPremium === true
         || existingData.isPremium === true
         || premiumFields.some((field) => safeData[field]);

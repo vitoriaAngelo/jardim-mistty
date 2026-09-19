@@ -39,6 +39,7 @@
 .animal-booster-status.active { background:linear-gradient(135deg,#fff0b8,#f1d77a); color:#76552c; opacity:1; box-shadow:0 2px 0 #c49b4a55; }
 .animal-super-status { margin:2px 0 7px; padding:5px 8px 6px; border-radius:11px; background:#eee9f3; color:#756783; opacity:.72; }
 .animal-super-status.active { background:linear-gradient(135deg,#f2e7ff,#d9c2ef); color:#59436f; opacity:1; box-shadow:0 2px 0 #a88ac455; }
+.animal-super-status.paused { background:linear-gradient(135deg,#eee9f3,#e4ddeb); color:#756783; opacity:.9; }
 .animal-booster-heading { display:flex; justify-content:space-between; gap:5px; font:800 9px/1.2 Nunito,sans-serif; }
 .animal-booster-heading b { font-size:8px; }
 .animal-booster-bar,.animal-production-bar { height:5px; margin-top:5px; border-radius:99px; background:#c5b77d55; overflow:hidden; }
@@ -95,6 +96,7 @@ body.dark-mode .animal-feed-choice.ration-premium { background:#655b35; }
 body.dark-mode .animal-feed-choice.ration-super { background:#514265; }
 body.dark-mode .animal-super-status { background:#3e3548; color:#d2c2e0; }
 body.dark-mode .animal-super-status.active { background:linear-gradient(135deg,#554369,#40344f); color:#f0ddff; }
+body.dark-mode .animal-super-status.paused { background:linear-gradient(135deg,#3e3548,#352e3e); color:#c2b4cf; }
 body.dark-mode .animal-feed-choice.ration-booster { background:#38554d; }
 body.dark-mode .animal-product-collect b { background:#51492e; color:#fff2bf; }
 body.dark-mode .ration-quantity button { background:#657858; color:#fffbea; }

@@ -4386,6 +4386,7 @@ const G = {
   totalOrderDeliveries: 0,
   isSubscriber: false,
   welcomeBonusClaimed: false,
+  farmNameChosen: true,
   previewUnlocks: false,
   skillPoints: 0,
   skillNodes: {},
@@ -8837,7 +8838,8 @@ async function saveProfileName() {
   G.dailyPhrase = (phraseInput?.value || '').trim().slice(0, 25);
   document.getElementById('garden-name').textContent = val;
   try {
-    await saveProfilePreferences({ farmName:val, dailyPhrase:G.dailyPhrase });
+    await saveProfilePreferences({ farmName:val, dailyPhrase:G.dailyPhrase, farmNameChosen:true });
+    G.farmNameChosen = true;
     if (typeof window.mascotNotify === 'function') window.mascotNotify('Nome da fazenda alterado!', 2000);
     else toast('🌿 Nome da fazenda alterado!', 2000);
   } catch (e) {
@@ -9288,14 +9290,15 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     // Bônus único de primeira conexão com a Twitch.
     if (!G.welcomeBonusClaimed) {
       if (!hadSave) {
-        G.pts += 120;
-        recordPointsHistory(120, 'Bônus de boas-vindas');
-        await giveSEPoints(120);
+        G.pts += 200;
+        recordPointsHistory(200, 'Bônus de boas-vindas');
+        await giveSEPoints(200);
         seUser.points = G.pts;
-        toast('🎁 Primeira conexão! Você ganhou +120 pontos!', 4000, true);
+        toast('🎁 Primeira conexão! Você ganhou +200 pontos!', 4000, true);
       }
       G.welcomeBonusClaimed = true;
     }
+    if (!hadSave) G.farmNameChosen = false;
     updatePts();
 
     // Re-render level and season (restored from save)
@@ -9325,9 +9328,8 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     saveTimer = setInterval(() => { if (seUser && gardenHydrated) saveGardenToSE(); }, 15000);
     if (!hadSave) await saveGardenToSE();
 
-    // Show help on first login (no saved garden)
-    if (!hadSave) setTimeout(() => openHelp(), 800);
-    if (!hadSave) setTimeout(() => openFirstLoginBonus(), 1500);
+    // O primeiro acesso só continua depois que o nome obrigatório for salvo.
+    if (G.farmNameChosen !== true) setTimeout(() => openFirstLoginBonus(), 500);
 
     // Sincroniza automaticamente a cada 5 minutos com a mesma lógica do botão.
     if (syncTimer) clearInterval(syncTimer);
@@ -9395,6 +9397,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     xp:               G.xp,
     farmerXP:         G.farmerXP || 0,
     farmName:         document.getElementById('garden-name')?.textContent || '',
+    farmNameChosen:   G.farmNameChosen === true,
     inventory:        G.inventory,
     fertilizerInventory: G.fertilizerInventory,
     plotFertilizers:  G.plotFertilizers,
@@ -9671,7 +9674,9 @@ async function loadGardenFromSE(username) {
     if (save.farmName) {
       const el = document.getElementById('garden-name');
       if (el) el.textContent = save.farmName;
+      G.farmName = save.farmName;
     }
+    if (save.farmNameChosen !== undefined) G.farmNameChosen = save.farmNameChosen === true;
     G.inventory       = save.inventory       || {};
     G.fertilizerInventory = save.fertilizerInventory || {};
     G.plotFertilizers = save.plotFertilizers  || {};
@@ -9982,19 +9987,55 @@ function openFirstLoginBonus() {
   const overlay = document.createElement('div');
   overlay.id = 'first-login-bonus-overlay';
   overlay.className = 'modal-overlay';
-  overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="first-login-bonus-title">
-    <button type="button" class="popup-close-x" onclick="event.stopPropagation();closeFirstLoginBonus()" aria-label="Fechar">×</button>
+  overlay.dataset.lockClose = 'true';
+  overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="first-login-bonus-title" style="max-width:460px">
     <div style="font-size:38px;text-align:center;margin-bottom:4px">🎁</div>
     <h2 id="first-login-bonus-title" style="text-align:center">Boas-vindas ao seu jardim!</h2>
-    <p style="text-align:center">Por ser seu primeiro login, você recebeu um bônus especial para começar a cultivar.</p>
-    <div class="market-total-pts" style="width:max-content;margin:14px auto 18px;background:var(--grass);color:#fff">+120 <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> pontos</div>
-    <button type="button" id="first-login-bonus-start" class="profile-close-btn" onclick="event.preventDefault();event.stopPropagation();document.getElementById('first-login-bonus-overlay')?.remove()">Começar a cuidar 🌱</button>
+    <p style="text-align:center">Você recebeu um bônus especial para começar a cultivar.</p>
+    <div class="market-total-pts" style="width:max-content;margin:14px auto 18px;background:var(--grass);color:#fff">+200 <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> pontos</div>
+    <label for="first-login-farm-name" style="display:block;font-weight:800;margin-bottom:7px">Nome da fazenda</label>
+    <input id="first-login-farm-name" type="text" maxlength="20" autocomplete="off" placeholder="Ex.: Cantinho das Flores" style="box-sizing:border-box;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--cream);color:var(--ink);font:inherit" onkeydown="if(event.key==='Enter'){event.preventDefault();completeFirstLoginSetup()}">
+    <p style="font-size:12px;margin:7px 0 0;opacity:.72">Esse nome aparecerá no seu perfil e poderá ser alterado depois.</p>
+    <p id="first-login-farm-status" role="status" style="min-height:18px;margin:8px 0;color:#a04f45;font-size:12px;font-weight:700"></p>
+    <button type="button" id="first-login-save-name" class="profile-close-btn" onclick="event.preventDefault();event.stopPropagation();completeFirstLoginSetup()">Salvar e começar 🌱</button>
   </div>`;
+  document.body.classList.add('first-login-required');
   document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('first-login-farm-name')?.focus(), 50);
 }
 
-function closeFirstLoginBonus() {
-  document.getElementById('first-login-bonus-overlay')?.remove();
+async function completeFirstLoginSetup() {
+  const input = document.getElementById('first-login-farm-name');
+  const status = document.getElementById('first-login-farm-status');
+  const button = document.getElementById('first-login-save-name');
+  const farmName = String(input?.value || '').trim();
+  if (farmName.length < 3 || farmName.length > 20) {
+    if (status) status.textContent = 'Digite um nome entre 3 e 20 caracteres.';
+    input?.focus();
+    return;
+  }
+  if (!seUser || !gardenHydrated || button?.disabled) return;
+  if (button) { button.disabled = true; button.textContent = 'Salvando…'; }
+  if (status) status.textContent = '';
+  try {
+    await saveProfilePreferences({ farmName, farmNameChosen:true });
+    G.farmName = farmName;
+    G.farmNameChosen = true;
+    const gardenName = document.getElementById('garden-name');
+    if (gardenName) gardenName.textContent = farmName;
+    const profileName = document.getElementById('profile-level-name');
+    if (profileName) profileName.textContent = farmName;
+    const profileInput = document.getElementById('profile-farm-name');
+    if (profileInput) profileInput.value = farmName;
+    await saveGardenToSE();
+    document.getElementById('first-login-bonus-overlay')?.remove();
+    document.body.classList.remove('first-login-required');
+    toast('🌿 Nome da fazenda salvo!', 2500);
+    setTimeout(() => openHelp(), 300);
+  } catch (error) {
+    if (status) status.textContent = 'Não foi possível salvar. Tente novamente.';
+    if (button) { button.disabled = false; button.textContent = 'Salvar e começar 🌱'; }
+  }
 }
 
 function applyTheme(isDark) {
@@ -10886,7 +10927,7 @@ function closeDeployHistory() { document.getElementById('deploy-history-overlay'
 
 // Fechamento padrão de popups: clique fora ou tecla Esc.
 function closePopupOverlay(overlay) {
-  if (!overlay || overlay.id === 'login-overlay') return;
+  if (!overlay || overlay.id === 'login-overlay' || overlay.dataset.lockClose === 'true') return;
   if (overlay.classList.contains('levelup-overlay')) {
     overlay.classList.remove('show');
     overlay.classList.add('hidden');

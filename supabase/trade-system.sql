@@ -245,6 +245,9 @@ alter table public.trade_events enable row level security;
 alter table public.trade_notifications enable row level security;
 revoke all on public.trade_offers, public.trade_events, public.trade_notifications from anon, authenticated;
 revoke all on function public.create_trade_offer(text,text,text,text), public.accept_trade_offer(uuid,text), public.cancel_trade_offer(uuid,text,boolean), public.expire_trade_offers(), public.trade_album_key(text), public.trade_card_quantity(jsonb,text) from public, anon, authenticated;
+grant usage on schema public to service_role;
+grant select, insert, update, delete on public.trade_offers, public.trade_events, public.trade_notifications to service_role;
+grant usage, select on sequence public.trade_events_id_seq, public.trade_notifications_id_seq to service_role;
 grant execute on function public.create_trade_offer(text,text,text,text), public.accept_trade_offer(uuid,text), public.cancel_trade_offer(uuid,text,boolean), public.expire_trade_offers() to service_role;
 
 -- Atualiza o cache do PostgREST para que a função RPC fique disponível imediatamente.

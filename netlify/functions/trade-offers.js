@@ -13,7 +13,11 @@ exports.handler=async event=>{
     if(!rpc.ok)console.error('Falha não bloqueante na limpeza de trocas:',rpc.status,await rpc.text());
     const query='?status=eq.active&expires_at=gt.'+encodeURIComponent(new Date().toISOString())+'&select=id,sender_username,recipient_username,offered_card_id,requested_card_id,status,created_at,expires_at&order=created_at.desc&limit=100';
     const results=await Promise.all(['sender_username','recipient_username'].map(key=>fetch(SUPABASE_URL+'/rest/v1/trade_offers'+query+'&'+key+'=eq.'+encodeURIComponent(user.username),{headers:{apikey:KEY,Authorization:'Bearer '+KEY}})));
-    if(results.some(response=>!response.ok))throw new Error('Não foi possível carregar as ofertas do banco.');
+    if(results.some(response=>!response.ok)){
+      const failures=await Promise.all(results.filter(response=>!response.ok).map(async response=>({status:response.status,detail:await response.text()})));
+      console.error('Falha ao consultar trade_offers:',failures);
+      throw new Error('Não foi possível carregar as ofertas do banco (HTTP '+failures[0].status+').');
+    }
     const rows=(await Promise.all(results.map(response=>response.json()))).flat();
     const offers=[...new Map(rows.map(row=>[row.id,row])).values()].sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
     const gardenResponse=await fetch(SUPABASE_URL+'/rest/v1/gardens?username=eq.'+encodeURIComponent(user.username)+'&select=data,updated_at&order=updated_at.desc&limit=1',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}});

@@ -2268,6 +2268,26 @@ body.dark-mode .profile-current-value { color:#f1f5e9; }
   display: flex; flex-direction: column; gap: 14px;
   cursor: var(--cozy-cursor, default);
 }
+.exclusive-store-modal { width:min(720px,calc(100% - 24px)); max-width:720px; }
+.exclusive-store-intro { margin:-5px 0 2px; color:var(--text2); font-size:13px; line-height:1.5; }
+.exclusive-store-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.exclusive-store-card { display:flex; flex-direction:column; gap:12px; padding:16px; border:1.5px solid var(--cozy-line); border-radius:18px; background:linear-gradient(145deg,var(--cream),var(--cream2)); box-shadow:0 4px 0 #d8d2bd; }
+.exclusive-store-card h3 { margin:0; color:var(--text); font:700 19px Georgia,serif; }
+.exclusive-store-card .exclusive-store-art { display:grid; place-items:center; min-height:100px; border:1px solid #e5d5ad; border-radius:14px; background:linear-gradient(135deg,#fff4dc,#f5d8c9); color:#a84f41; font-size:30px; font-weight:900; }
+.exclusive-store-price { color:var(--soil2); font-size:13px; font-weight:900; }
+.exclusive-store-stock { padding:8px 10px; border-radius:10px; background:var(--cream2); color:var(--text); font-size:12px; font-weight:800; }
+.exclusive-store-redeemers { display:grid; gap:5px; max-height:86px; overflow:auto; color:var(--text2); font-size:11px; }
+.exclusive-store-redeemer { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.exclusive-store-claim { min-height:42px; border:0; border-radius:12px; background:#778b64; color:#fffdf7; box-shadow:0 3px 0 #586e47; font:800 13px 'Nunito',sans-serif; cursor:pointer; }
+.exclusive-store-claim:disabled { opacity:.48; cursor:not-allowed; box-shadow:none; }
+.exclusive-store-launcher { width:100%; min-height:48px; padding:9px 10px; border:1px solid #d8c997; border-radius:14px; background:linear-gradient(135deg,#fff4cf,#f2db9c); color:#6c5428; font:800 12px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 3px 0 #c2a967; }
+.exclusive-store-launcher:hover { transform:translateY(-1px); box-shadow:0 4px 0 #c2a967; }
+body.dark-mode .exclusive-store-card { border-color:#586b52; background:linear-gradient(145deg,#30392d,#252d24); box-shadow:0 4px 0 #20271f; }
+body.dark-mode .exclusive-store-card h3, body.dark-mode .exclusive-store-stock { color:#e1ecd9; }
+body.dark-mode .exclusive-store-card .exclusive-store-art { border-color:#80684a; background:linear-gradient(135deg,#443b2b,#49332e); }
+body.dark-mode .exclusive-store-claim { background:#667d58; color:#f2f7ea; box-shadow:0 3px 0 #43563b; }
+body.dark-mode .exclusive-store-launcher { border-color:#887343; background:linear-gradient(135deg,#51462f,#3f3929); color:#f2dfa9; box-shadow:0 3px 0 #342d20; }
+.exclusive-store-launcher:focus-visible, .exclusive-store-claim:focus-visible { outline:3px solid #9bbd7a; outline-offset:2px; }
 .mail-overlay, .modal-overlay, .help-overlay, .profile-overlay, .levelup-overlay { cursor:var(--cozy-cursor, default); }
 .mail-modal-title { font-size: 18px; font-weight: 800; color: var(--text); }
 .shop-modal, .inventory-modal { width: min(760px, calc(100% - 32px)); max-width: 760px; max-height: 88vh; }
@@ -3199,6 +3219,7 @@ body.dark-mode .plot-grow-label { color: #b8d39c !important; }
   }
   .mail-modal-title, .help-title { font-size: 21px; }
   .mail-modal, .profile-modal { padding: 18px 14px; }
+  .exclusive-store-grid { grid-template-columns:1fr; }
   .modal-actions { flex-wrap: wrap; }
   .modal-actions button { flex: 1 1 120px; }
   .shop-cart.side-cart { left: 8px; right: 8px; bottom: 8px; width: auto; min-width: 0; max-width: none; }
@@ -3982,6 +4003,17 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div id="card-pack-inventory"></div>
     <div id="inventory-bar"></div>
     <div id="fertilizer-inv-bar"></div>
+  </div>
+</div>
+
+<!-- EXCLUSIVE REWARD STORE -->
+<div class="mail-overlay hidden" id="exclusive-store-overlay">
+  <div class="mail-modal exclusive-store-modal" role="dialog" aria-modal="true" aria-labelledby="exclusive-store-title">
+    <button class="popup-close-x" type="button" aria-label="Fechar loja exclusiva" onclick="closeExclusiveStore()">×</button>
+    <div class="mail-modal-title" id="exclusive-store-title">🎁 Loja Exclusiva</div>
+    <p class="exclusive-store-intro">Troque seus pontos por cartões iFood. Os resgates são limitados; o nome da conta aparece aqui após a confirmação para organizar a entrega.</p>
+    <div class="shop-points-badge" style="align-self:flex-start"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"><span id="exclusive-store-points">0</span> pts</div>
+    <div id="exclusive-store-content" aria-live="polite"></div>
   </div>
 </div>
 
@@ -11116,11 +11148,114 @@ document.addEventListener('keydown', event => {
     toolsPanel.appendChild(toggle);
     alwaysVisible.forEach(child => toolsPanel.appendChild(child));
     toolsPanel.appendChild(dropdown);
+    const exclusiveStoreButton = document.createElement('button');
+    exclusiveStoreButton.type = 'button';
+    exclusiveStoreButton.className = 'exclusive-store-launcher';
+    exclusiveStoreButton.textContent = '🎁 Loja Exclusiva';
+    exclusiveStoreButton.addEventListener('click', openExclusiveStore);
+    dropdown.appendChild(exclusiveStoreButton);
     dropdown.hidden = true;
   }
 </script>
 
 <!-- ── ANTI-FRAUDE: Proteção via servidor (garden-save.js) ── -->
+
+<script>
+const EXCLUSIVE_STORE_PRODUCTS = {
+  ifood_20:{ name:'Cartão iFood de R$ 20', cost:5_000_000, limit:3, art:'🍔 iFood R$ 20' },
+  ifood_50:{ name:'Cartão iFood de R$ 50', cost:10_000_000, limit:1, art:'🍟 iFood R$ 50' },
+};
+let exclusiveStoreBusy = false;
+let exclusiveStoreSnapshot = {};
+
+function escapeExclusiveStoreText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+
+function closeExclusiveStore() {
+  document.getElementById('exclusive-store-overlay')?.classList.add('hidden');
+}
+
+async function openExclusiveStore() {
+  if (!seUser || !gardenHydrated) { toast('Conecte-se à fazenda para acessar a Loja Exclusiva.', 2600); return; }
+  const dropdown = document.querySelector('.tools-dropdown-content');
+  if (dropdown) dropdown.hidden = true;
+  const toggle = document.querySelector('.tools-dropdown-toggle');
+  if (toggle) toggle.setAttribute('aria-expanded','false');
+  document.getElementById('exclusive-store-overlay')?.classList.remove('hidden');
+  const points = document.getElementById('exclusive-store-points');
+  if (points) points.textContent = Number(G.pts || 0).toLocaleString('pt-BR');
+  await refreshExclusiveStore();
+}
+
+function renderExclusiveStore(products=exclusiveStoreSnapshot) {
+  const host = document.getElementById('exclusive-store-content');
+  if (!host) return;
+  const points = Number(G.pts || 0);
+  document.getElementById('exclusive-store-points').textContent = points.toLocaleString('pt-BR');
+  host.innerHTML = `<div class="exclusive-store-grid">${Object.entries(EXCLUSIVE_STORE_PRODUCTS).map(([key, product]) => {
+    const status = products?.[key] || { remaining:product.limit, redeemers:[], processing:0 };
+    const enough = points >= product.cost;
+    const remaining = Math.max(0, Number(status.remaining) || 0);
+    const redeemers = Array.isArray(status.redeemers) ? status.redeemers : [];
+    const people = redeemers.length
+      ? redeemers.map(person => `<div class="exclusive-store-redeemer">🌿 ${escapeExclusiveStoreText(person.name || person.username)} <span>@${escapeExclusiveStoreText(person.username)}</span></div>`).join('')
+      : '<div class="exclusive-store-redeemer">Ainda não resgatado</div>';
+    const availability = remaining === 1 ? '1 resgate disponível' : `${remaining} resgates disponíveis`;
+    const buttonText = exclusiveStoreBusy ? 'Processando…' : remaining === 0 ? 'Esgotado' : enough ? `Resgatar · ${product.cost.toLocaleString('pt-BR')} pts` : `Faltam ${(product.cost-points).toLocaleString('pt-BR')} pts`;
+    return `<article class="exclusive-store-card"><div class="exclusive-store-art">${product.art}</div><h3>${product.name}</h3><div class="exclusive-store-price">Custo: ${product.cost.toLocaleString('pt-BR')} pontos</div><div class="exclusive-store-stock">${availability}${status.processing ? ` · ${status.processing} em processamento` : ''}</div><div class="exclusive-store-redeemers"><strong>Quem já resgatou</strong>${people}</div><button class="exclusive-store-claim" type="button" ${exclusiveStoreBusy || remaining===0 || !enough ? 'disabled' : ''} onclick="redeemExclusiveReward('${key}')">${buttonText}</button></article>`;
+  }).join('')}</div>`;
+}
+
+async function refreshExclusiveStore() {
+  const host = document.getElementById('exclusive-store-content');
+  if (host) host.innerHTML = '<p class="exclusive-store-intro">Carregando disponibilidade dos cartões…</p>';
+  try {
+    const response = await fetch('/.netlify/functions/exclusive-store', { headers:authenticatedHeaders() });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Não foi possível carregar a loja agora.');
+    exclusiveStoreSnapshot = payload.products || {};
+    renderExclusiveStore();
+  } catch (error) {
+    if (host) host.innerHTML = `<p role="alert" class="exclusive-store-intro">${escapeExclusiveStoreText(error.message)}</p>`;
+  }
+}
+
+async function redeemExclusiveReward(rewardKey) {
+  const product = EXCLUSIVE_STORE_PRODUCTS[rewardKey];
+  if (!product || exclusiveStoreBusy) return;
+  if (Number(G.pts || 0) < product.cost) { toast(`Você precisa de ${product.cost.toLocaleString('pt-BR')} pontos para esse resgate.`, 3000); return; }
+  if (!window.confirm(`Resgatar ${product.name} por ${product.cost.toLocaleString('pt-BR')} pontos? O desconto será imediato.`)) return;
+
+  exclusiveStoreBusy = true;
+  renderExclusiveStore();
+  try {
+    const syncReady = await syncPtsToSE();
+    if (!syncReady) throw new Error('Não foi possível confirmar seu saldo com o StreamElements. Tente novamente.');
+    if (Number(G.pts || 0) < product.cost) throw new Error(`Seu saldo atualizado é menor que ${product.cost.toLocaleString('pt-BR')} pontos.`);
+    const response = await fetch('/.netlify/functions/exclusive-store', {
+      method:'POST',
+      headers:authenticatedHeaders({ 'Content-Type':'application/json' }),
+      body:JSON.stringify({ reward_key:rewardKey, request_id:crypto.randomUUID() }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Não foi possível concluir o resgate.');
+    if (payload.alreadyRedeemed) { toast('Esse resgate já foi confirmado anteriormente.', 3000); return; }
+    G.pts = Math.max(0, Number(payload.pointsRemaining ?? (G.pts-product.cost)));
+    lastKnownSEPoints = G.pts;
+    if (seUser) seUser.points = G.pts;
+    recordPointsHistory(-product.cost, `Loja Exclusiva: ${product.name}`);
+    updatePts();
+    try { await saveGardenToSE(); } catch (saveError) { console.warn('O saldo foi descontado pelo StreamElements, mas o histórico do jardim não sincronizou:', saveError); }
+    toast(`🎁 ${product.name} resgatado! Confira o contato oficial da fazenda para receber o cartão.`, 5200);
+  } catch (error) {
+    toast(error.message || 'Não foi possível concluir o resgate.', 4500);
+  } finally {
+    exclusiveStoreBusy = false;
+    await refreshExclusiveStore();
+  }
+}
+</script>
 
 <script src="garden-mascot.js?v=12"></script>
 <script>

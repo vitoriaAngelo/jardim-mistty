@@ -12,6 +12,7 @@ test('Twitchzinho resgatado pode ser selecionado outra vez depois de trocar de m
   assert.match(render, /premiumOnly&&!owned\?'✦ Resgate no Premium'/);
   assert.match(render, /owned\?'Selecionar'/);
   assert.match(render, /btn\.disabled=selected\|\|\(premiumOnly&&!owned\)\|\|locked\|\|prismaticLocked/);
+  assert.match(render, /if \(id === 'twitchzinho'\) btn\.onclick = \(\) => buyMascot\('twitchzinho'\)/);
 
   const selectStart = html.indexOf('async function buyMascot(id)');
   const selectEnd = html.indexOf('\nwindow.buyMascot', selectStart);

@@ -6005,6 +6005,9 @@ function renderMascotShop() {
     btn.classList.toggle('selected',selected); btn.classList.toggle('locked',locked||prismaticLocked);
     btn.textContent=selected?'Selecionado':premiumOnly&&!owned?'✦ Resgate no Premium':locked?`🔒 Nível ${required}`:prismaticLocked?'🔒 Complete o álbum':owned?'Selecionar':labels[id];
     btn.disabled=selected||(premiumOnly&&!owned)||locked||prismaticLocked;
+    // O botão começa desabilitado no HTML; atribuir a ação durante a renderização
+    // garante que ele continue clicável depois de o Twitchzinho ser resgatado.
+    if (id === 'twitchzinho') btn.onclick = () => buyMascot('twitchzinho');
   });
   const info = { orange:['🍊','Laranjinha','+1 item na colheita.'], apple:['🍎','Maçanzinha','+15% no valor das vendas.'], strawberry:['🍓','Moranguinho','Adiciona +2 na recuperação de água a cada 5 minutos.'], premium:['🌱','Brotinho Premium','+1 colheita · +15% nas vendas · +2 na recuperação de água a cada 5 minutos.'], twitchzinho:['💜','Twitchzinho','Quantidade aleatória de moedas a cada 5 minutos.'], prismatic:['🌈','Brotinho Prismático','Aumenta a chance de Chuva Mágica nos eventos.'] };
   const panel=document.getElementById('mascot-active-benefit'); const data=info[G.selectedMascot];
@@ -10110,7 +10113,7 @@ window.recordCardFind = function(card) {
   const rarity = String(card?.rarity || '').trim();
   const prismatic = card?.prismatic === true;
   if (!prismatic && !['rara','lendária'].includes(rarity.toLocaleLowerCase('pt-BR'))) return false;
-  const entry = { name:String(card.name || '').slice(0, 80), rarity:rarity.slice(0, 30), prismatic, at:Date.now() };
+  const entry = { name:String(card.name || '').slice(0, 80), cardId:String(card.key || card.cardId || ''), rarity:rarity.slice(0, 30), prismatic, at:Date.now() };
   if (!entry.name) return false;
   G.recentCardFinds = [entry, ...(Array.isArray(G.recentCardFinds) ? G.recentCardFinds : []).filter(item => Number(item?.at) > Date.now() - 86400000)].slice(0, 20);
   return true;
@@ -10141,7 +10144,7 @@ async function updateLatestSales() {
       { username:'flores', farmName:'CantinhoDasFlores', total:980 },
       { username:'girassol', farmName:'SitioGirassol', total:760 },
     ];
-    latestSalesIndex = 0;
+    latestSalesIndex = latestSalesItems.length ? latestSalesIndex % latestSalesItems.length : 0;
     renderLatestSale();
     return;
   }
@@ -10149,7 +10152,7 @@ async function updateLatestSales() {
     const res = await fetch('/latest-sales', { cache:'no-store' });
     const data = await res.json();
     latestSalesItems = Array.isArray(data.sales) ? data.sales : [];
-    latestSalesIndex = 0;
+    latestSalesIndex = latestSalesItems.length ? latestSalesIndex % latestSalesItems.length : 0;
     renderLatestSale();
   } catch(e) { /* mantém o estado inicial */ }
 }
@@ -10158,13 +10161,13 @@ async function updateLatestSales() {
 checkLiveStatus();
 setInterval(() => { if (!document.hidden) checkLiveStatus(); }, 120000);
 updateLatestSales();
-setInterval(() => { if (!document.hidden) updateLatestSales(); }, 30000);
+setInterval(() => { if (!document.hidden) updateLatestSales(); }, 120000);
 setInterval(() => {
   if (!document.hidden && latestSalesItems.length > 1) {
     latestSalesIndex = (latestSalesIndex + 1) % latestSalesItems.length;
     renderLatestSale();
   }
-}, 7000);
+}, 8000);
 selectTool('water');
 renderShop();
 renderFlowerShop();

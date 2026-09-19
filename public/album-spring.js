@@ -1,7 +1,7 @@
 /* Prévia interativa: nenhuma operação altera contas ou inventários reais. */
 const tiers=[['comum',55],['incomum',25],['rara',12],['épica',6],['lendária',2]];
 const springNames=['Brotinho de Esperança','Juju entre Margaridas','Alfredo do Orvalho','Ovelhinha Algodão','Cogumelo do Pomar','Abelhinha Bilhetinho','Tulipinha Nuvem','Moranguinho Estrelar','Borboleta Açucarada','Solária da Primavera'];
-collection.forEach((c,i)=>{c.name=springNames[i];c.rarity=tiers[i<3?0:i<5?1:i<7?2:i<9?3:4][0];c.qty=[4,3,2,1,3,1,2,0,1,0][i];});
+const demoQuantities=[4,3,2,1,3,1,2,0,1,0];const farmAlbumCards=window.parent!==window&&window.parent.__farmAlbumCards?window.parent.__farmAlbumCards:{};const baseNames=['Pipo, o brotinho','Juju do galinheiro','Alfredo do lago','Mimi das nuvens','Bento, o cogumelo','Mel, a abelhinha','Luna do luar','Íris cristalina','Aurora das asas','Solária, guardiã do jardim'];collection.forEach((c,i)=>{c.name=springNames[i];c.rarity=tiers[i<3?0:i<5?1:i<7?2:i<9?3:4][0];const saved=farmAlbumCards[springNames[i]]??farmAlbumCards[baseNames[i]];c.qty=saved===undefined?0:Number(saved)||0;});
 const originalArt=art;
 art=function(c){let svg=originalArt(c);const scenery='<g opacity=".65"><path d="M4 90V63l21-17 21 17v32" fill="#e4c7a7"/><path d="m1 64 24-21 25 21" fill="none" stroke="#ae9b79" stroke-width="4" stroke-linecap="round"/><path d="M17 91V73h14v18" fill="#b7bc96"/><path d="M114 119v-17m19 19V99m18 25v-18M109 109l47 6" stroke="#c1ab85" stroke-width="4" stroke-linecap="round"/></g>';
 svg=svg.replace('<g class="creature">',scenery+'<g class="creature">');
@@ -25,6 +25,8 @@ document.querySelector('#trade').onclick=()=>trades();render();
 const prismaticLink=document.createElement('a');prismaticLink.href='album-prismatic.html';prismaticLink.textContent='✦ Abrir Prismas da Primavera';prismaticLink.className='prismatic-link';document.querySelector('nav').append(prismaticLink);
 prismaticLink.innerHTML='✦ <strong>Próxima página</strong> · 10 cartinhas prismáticas';
 const nextAlbum=document.createElement('a');nextAlbum.href='album-prismatic.html';nextAlbum.className='next-album-button';nextAlbum.textContent='Próxima página →';const albumFooter=document.querySelector('.album footer');if(albumFooter)albumFooter.append(nextAlbum);
+function syncAlbumToFarm(){if(window.parent===window)return;const cards={...(window.parent.__farmAlbumCards||{})};collection.forEach(c=>{cards[c.name]=Math.max(0,Number(c.qty)||0)});window.parent.postMessage({type:'album-state',cards},'*')}
+const albumRenderWithSync=render;render=function(){albumRenderWithSync();syncAlbumToFarm()};render();
 const prismOdds='<div class="prism-odds"><span>Prismática 0,80%</span><span>Rara 0,35%</span><span>Épica 0,12%</span><span>Arco-Íris 0,03%</span></div>';const prismObserver=new MutationObserver(()=>{const b=document.querySelector('#modal-body');if(b&&b.textContent.includes('Oficina')&&!b.querySelector('.prism-odds'))b.insertAdjacentHTML('afterbegin',prismOdds)});prismObserver.observe(document.querySelector('#modal-body'),{childList:true,subtree:true});
 document.querySelector('nav a:first-child')?.remove();
 new MutationObserver(()=>{const b=document.querySelector('#modal-body'),p=b?.querySelector('.prism-odds'),o=b?.querySelector('.odds');if(p&&o&&p.previousElementSibling!==o)o.after(p)}).observe(document.querySelector('#modal-body'),{childList:true,subtree:true});

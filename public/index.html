@@ -2471,6 +2471,9 @@ body.dark-mode .shop-cart.side-cart { box-shadow:0 10px 30px #111811aa; }
 .sell-confirm-toolbar { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
 .sell-confirm-toolbar button { min-height:30px; padding:4px 10px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:999px; background:var(--cream); color:var(--text); font-size:12px; font-weight:800; cursor:pointer; }
 .sell-confirm-toolbar button:hover { transform:translateY(-1px); }
+.sell-confirm-items .shop-cart-row-controls { gap:5px; }
+.sell-confirm-items .shop-cart-row-controls button { flex:0 0 23px; width:23px; height:23px; font-size:12px; }
+.sell-confirm-items .shop-cart-row-controls button.sell-qty-all { width:26px; flex-basis:26px; border-radius:8px; font-size:13px; }
 @media (min-width:700px) { #sell-all-confirm-overlay .modal { width:min(560px,calc(100vw - 32px)); max-height:92vh; overflow:auto; } }
 @media (max-width:480px) { .sell-confirm-items { max-height:48vh; } }
 #sell-all-confirm-overlay { z-index:1200; }
@@ -4171,6 +4174,11 @@ const LEVELS = [
     LEVELS.push(previous);
   }
 }
+.market-fair-indicator { display:inline-flex; align-items:center; gap:4px; margin-top:5px; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:800; line-height:1.3; }
+.market-fair-indicator.active { color:#31533a; background:#dcebd3; border:1px solid #9fbd8b; }
+.market-fair-indicator.pending { color:var(--text2); background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); }
+body.dark-mode .market-fair-indicator.active { color:#e5f2d9; background:#344a35; border-color:#718b62; }
+body.dark-mode .market-fair-indicator.pending { color:#d5dfcc; background:#30392d; border-color:#53604f; }
 
 // XP per action
 const XP_ACTIONS = {
@@ -6345,13 +6353,20 @@ function renderHarvested() {
 
   const total = sellTotal();
   const anySelected = allTypes.some(t => (SELL[t] || 0) > 0);
+  const selectedCount = harvestedTypes.reduce((sum, type) => sum + (SELL[type] || 0), 0);
+  const baseSelectedTotal = harvestedTypes.reduce((sum, type) => sum + (SELL[type] || 0) * effectiveSellValue(type), 0);
+  const fairBonusPoints = Math.max(0, total - baseSelectedTotal);
+  const fairStatus = selectedCount >= 300 ? `ATIVO · ${selectedCount} itens` : `${selectedCount}/300 itens`;
+  const fairLabel = Number(G.skillNodes?.feira_local || 0) > 0
+    ? `🎪 Feira Local: +${fairBonusPoints} pts · ${fairStatus}`
+    : `🎪 Feira Local: habilidade não desbloqueada · ${selectedCount}/300 itens`;
   const grandTotal = harvestedTypes.reduce((sum, t) => sum + (G.harvested[t] || 0) * effectiveSellValue(t), 0);
 
   bag.innerHTML = `
     <div class="market-slots">${slots}</div>
     <div class="market-footer">
       <div class="market-total-wrap">
-        <div class="market-total-pts">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div>
+        <div><div class="market-total-pts">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div><small class="market-fair-indicator ${selectedCount >= 300 && Number(G.skillNodes?.feira_local || 0) > 0 ? 'active' : 'pending'}">${fairLabel}</small></div>
         <button class="sell-btn" onclick="sellAll()" style="background:var(--soil2);box-shadow:0 3px 0 #3a1a08">Vender tudo 🧺</button>
         <button class="sell-btn" onclick="sellSelected()" ${total === 0 ? 'disabled' : ''}>Vender 💰</button>
       </div>
@@ -7364,7 +7379,7 @@ function renderSellAllConfirm() {
     const item = getPlantable(type);
     const qty = SELL[type] || 0;
     const max = G.harvested[type] || 0;
-    return `<div class="shop-cart-row"><span>${item.emoji} ${item.name}</span><div class="shop-cart-row-controls"><button onclick="adjustSellAllQty('${type}',-1)" aria-label="Remover ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1)" aria-label="Adicionar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button></div></div>`;
+    return `<div class="shop-cart-row"><span>${item.emoji} ${item.name}</span><div class="shop-cart-row-controls"><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',false)" aria-label="Remover ${item.name} da venda">⇤</button><button onclick="adjustSellAllQty('${type}',-1)" aria-label="Diminuir ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1)" aria-label="Aumentar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',true)" aria-label="Adicionar todo o estoque de ${item.name} à venda">⇥</button></div></div>`;
   }).join('');
   document.getElementById('sell-all-confirm-overlay')?.remove();
   const overlay = document.createElement('div');
@@ -7374,7 +7389,6 @@ function renderSellAllConfirm() {
     <button class="popup-close-x" onclick="closeSellAllConfirm()" aria-label="Fechar">×</button>
     <h2 id="sell-all-confirm-title">Escolha o que vender</h2>
     <p>Confira os itens e ajuste as quantidades antes de confirmar.${fairBonus ? ` 🎪 Feira Local: +${Math.round(fairBonus * 100)}% por vender ${selectedCount} itens.` : ''}</p>
-    <div class="sell-confirm-toolbar"><button type="button" onclick="setAllSellAllQty(true)" aria-label="Selecionar todos os itens">≪ Selecionar todos</button><button type="button" onclick="setAllSellAllQty(false)" aria-label="Remover todos os itens">Limpar seleção ≫</button></div>
     <div class="sell-confirm-items">${rows}</div>
     <div class="market-total-pts" style="width:max-content;margin:14px auto 4px">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div>
     <div class="modal-actions"><button type="button" class="btn-cancel" onclick="event.stopPropagation();closeSellAllConfirm()">Cancelar</button><button type="button" class="btn-ok" onclick="event.stopPropagation();confirmSellAll()" ${total === 0 ? 'disabled' : ''}>Confirmar</button></div>
@@ -8898,9 +8912,8 @@ function specialLevelReward(lv) {
   return rewards[lv] ? { ...rewards[lv] } : null;
 }
 
-function setAllSellAllQty(selectAll) {
-  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
-  allTypes.forEach(type => { SELL[type] = selectAll ? (G.harvested[type] || 0) : 0; });
+function setSellAllItemQty(type, addAll) {
+  SELL[type] = addAll ? (G.harvested[type] || 0) : 0;
   renderSellAllConfirm();
 }
 

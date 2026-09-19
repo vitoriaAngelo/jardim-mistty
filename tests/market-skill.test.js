@@ -45,3 +45,18 @@ test('venda abaixo de 50 itens não recebe bônus da Feira Local', () => {
   const context = marketHarness(7, { tomato: 49 });
   assert.equal(context.sellTotal(), 490);
 });
+
+test('setas por item limpam ou selecionam todo o estoque somente daquele item', () => {
+  const start = html.indexOf('function setSellAllItemQty(');
+  const end = html.indexOf('function levelPackReward(', start);
+  const context = vm.createContext({
+    G: { harvested: { tomato: 12, flower: 8 } },
+    SELL: { tomato: 3, flower: 2 },
+    renderSellAllConfirm() {},
+  });
+  vm.runInContext(html.slice(start, end), context);
+  context.setSellAllItemQty('tomato', false);
+  assert.deepEqual({ ...context.SELL }, { tomato: 0, flower: 2 });
+  context.setSellAllItemQty('flower', true);
+  assert.deepEqual({ ...context.SELL }, { tomato: 0, flower: 8 });
+});

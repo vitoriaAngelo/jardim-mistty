@@ -1,6 +1,5 @@
 const TWITCH_USERS_URL = 'https://api.twitch.tv/helix/users';
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID || '5vs8ms3nlbs1blwlot6j0fx1diabhp';
-const ACTIVE_SESSION_VERSION = 'launch-2.0';
 
 function bearerToken(event) {
   const value = event.headers?.authorization || event.headers?.Authorization || '';
@@ -8,10 +7,6 @@ function bearerToken(event) {
 }
 
 async function authenticateTwitch(event) {
-  const gardenSession = String(event.headers?.['x-garden-session'] || event.headers?.['X-Garden-Session'] || '');
-  if (!gardenSession.startsWith(`${ACTIVE_SESSION_VERSION}:`)) {
-    throw Object.assign(new Error('Sessão encerrada. Entre novamente.'), { statusCode: 401, code: 'SESSION_REVOKED' });
-  }
   const token = bearerToken(event);
   if (!token) throw Object.assign(new Error('Login da Twitch necessário'), { statusCode: 401 });
   const response = await fetch(TWITCH_USERS_URL, {
@@ -30,4 +25,4 @@ function requireSameUser(auth, username) {
   }
 }
 
-module.exports = { authenticateTwitch, requireSameUser, ACTIVE_SESSION_VERSION };
+module.exports = { authenticateTwitch, requireSameUser };

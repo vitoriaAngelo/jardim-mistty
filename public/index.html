@@ -3331,7 +3331,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <span class="achiev-tool-badge inventory-tool-badge hidden" id="inventory-tool-badge">0</span>
       </button>
       <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Inventário<br><span>Escolha uma muda para plantar</span></div>
-      <a href="#album-overlay" onclick="openFarmAlbum(event,'album.html')" style="display:block;text-align:center;margin-top:10px;padding:10px 6px;border-radius:14px;background:#eee7d4;color:#526342;font:800 12px Nunito,sans-serif;text-decoration:none">✦ Álbum de figurinhas</a>
+      <a id="album-button" href="#album-overlay" onclick="openFarmAlbum(event,'album.html')" style="position:relative;display:block;text-align:center;margin-top:10px;padding:10px 22px 10px 6px;border-radius:14px;background:#eee7d4;color:#526342;font:800 12px Nunito,sans-serif;text-decoration:none"><span>✦ Álbum de figurinhas</span><span class="album-trade-badge" id="album-trade-badge" aria-label="Ofertas de troca pendentes" title="Você tem ofertas de troca">!</span></a>
     </div>
     <div class="header-icon-wrap" style="width:100%">
       <button class="achiev-tool-btn cozy-bonus" onclick="openBonusShop()" aria-label="Bônus da fazenda">
@@ -10677,5 +10677,7 @@ const packAlbumNames={'Pipo, o brotinho':'Brotinho de Esperança','Juju do galin
 buyCardPack=function(){if(Number(G.pts||0)<1){toast('Você precisa de 1 ponto para comprar o pack.');return}G.pts-=1;G.albumPacks=Number(G.albumPacks||0)+1;G.albumCards=G.albumCards||{};const pulls=Array.from({length:3},drawPackCard),overlay=document.createElement('div');overlay.className='mail-overlay card-pack-opening';overlay.innerHTML='<div class="mail-modal card-pack-modal"><button class="popup-close-x" id="close-pack-opening">×</button><div class="mail-modal-title">🃏 Seu pack chegou!</div><p class="premium-copy">Clique nas cartinhas para descobrir suas surpresas.</p><div class="pack-cards">'+pulls.map((card,i)=>'<button class="pack-card" data-card="'+i+'"><span class="pack-card-back">✦</span><span class="pack-card-front"><span class="pack-card-artwork">'+packArtFor(card)+'</span><b>'+card.name+'</b><small>'+card.rarity+'</small></span></button>').join('')+'</div><p class="pack-opening-status">Revele as 3 cartas para guardar o pack.</p></div>';document.body.appendChild(overlay);let revealed=0;const persist=()=>saveGardenToSE().catch(()=>toast('Não foi possível salvar o álbum agora.'));overlay.querySelectorAll('.pack-card').forEach(button=>button.onclick=()=>{if(button.classList.contains('revealed'))return;button.classList.add('revealed');const card=pulls[Number(button.dataset.card)],key=packAlbumNames[card.name]||card.name;G.albumCards[key]=Number(G.albumCards[key]||0)+1;revealed++;overlay.querySelector('.pack-opening-status').textContent=revealed===3?'As 3 cartas foram adicionadas ao seu álbum!':'Revele as outras cartinhas.';persist()});overlay.querySelector('#close-pack-opening').onclick=()=>{persist();overlay.remove();renderCardPackShop()};renderCardPackShop()};
 </script>
 <link rel="stylesheet" href="card-packs.css">
+<link rel="stylesheet" href="album-trade-badge.css">
 <script src="album-artwork.js"></script>
 <script src="card-packs.js"></script>
+<script src="album-trade-badge.js"></script>

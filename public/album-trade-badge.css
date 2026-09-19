@@ -1,0 +1,4 @@
+.album-trade-badge{display:none;position:absolute;top:-7px;right:-7px;z-index:2;place-items:center;min-width:20px;height:20px;padding:0 5px;border:2px solid #fffaf0;border-radius:999px;background:#d96e79;color:white;font:900 11px/1 Nunito,sans-serif;box-shadow:0 2px 5px #70404744;animation:album-notice-pulse 1.8s ease-in-out infinite}
+.album-trade-badge.visible{display:grid}
+@keyframes album-notice-pulse{50%{transform:scale(1.12);box-shadow:0 0 0 4px #d96e7930,0 2px 5px #70404744}}
+@media(prefers-reduced-motion:reduce){.album-trade-badge{animation:none}}

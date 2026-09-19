@@ -3947,6 +3947,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <button class="shop-tab plots-tab" id="tab-canteiros" onclick="switchShopTab('canteiros')">🪵 Canteiros</button>
       <button class="shop-tab" id="tab-animais" onclick="switchShopTab('animais')">🐾 Animais</button>
       <button class="shop-tab" id="tab-racoes" onclick="switchShopTab('racoes')">🌾 Rações</button>
+      <button class="shop-tab cards-tab" id="tab-packs" onclick="switchShopTab('packs')">🃏 Packs</button>
     </div>
     <div class="shop-panel visible" id="panel-vegetais"><div class="shop-items" id="shop-items"></div></div>
     <div class="shop-panel" id="panel-flores"><div class="shop-items" id="flower-items"></div></div>
@@ -3954,6 +3955,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="shop-panel" id="panel-canteiros"><div class="plot-shop-grid" id="plot-shop-grid"></div></div>
     <div class="shop-panel" id="panel-animais"><div id="animal-shop"></div></div>
     <div class="shop-panel" id="panel-racoes"><div id="ration-shop"></div></div>
+    <div class="shop-panel" id="panel-packs"><div id="card-pack-shop"></div></div>
   </div>
 </div>
 <div class="shop-cart empty shop-cart-closed" id="shop-cart"></div>
@@ -4784,12 +4786,13 @@ async function refreshPoints() {
 
 // ─── SHOP TABS ───────────────────────────────────────────
 function switchShopTab(tab) {
-  ['vegetais','flores','adubos','canteiros','animais','racoes'].forEach(t => {
+  ['vegetais','flores','adubos','canteiros','animais','racoes','packs'].forEach(t => {
     document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
     document.getElementById(`panel-${t}`)?.classList.toggle('visible', t === tab);
   });
   if (tab === 'animais') renderAnimalShop();
   if (tab === 'racoes') renderRationShop();
+  if (tab === 'packs') renderCardPackShop();
 }
 
 // ─── PLOT SHOP DATA ───────────────────────────────────────
@@ -10618,3 +10621,5 @@ document.addEventListener('keydown', event => {
 if(location.hash!=='#album'){const initialAlbum=document.getElementById('album-overlay');if(initialAlbum){initialAlbum.classList.add('hidden');document.getElementById('farm-album-frame').src='';document.body.style.overflow=''}}
 document.head.insertAdjacentHTML('beforeend','<style>#album-overlay.hidden{display:none!important}</style>');</script>
 <script>const closeAlbumWithSave=closeFarmAlbum;closeFarmAlbum=function(){const f=document.getElementById('farm-album-frame'),l=document.getElementById('album-loading');l.textContent='💾 Salvando álbum...';l.style.display='flex';f.style.opacity='0';f.contentWindow?.postMessage({type:'save-album'},'*');setTimeout(()=>closeAlbumWithSave(),700)};</script>
+function renderCardPackShop(){const el=document.getElementById('card-pack-shop');if(!el)return;const can=Number(G.pts||0)>=1;el.innerHTML='<div class="card-pack-shop"><div class="card-pack-art">🃏✨🌈</div><div class="card-pack-copy"><h3>Pack Primavera Encantada</h3><p>Abra 1 pack para receber uma figurinha do álbum. Pode vir uma carta comum, rara, épica ou lendária.</p><div class="pack-odds"><span>Comum 55%</span><span>Incomum 25%</span><span>Rara 12%</span><span>Épica 6%</span><span>Lendária 2%</span></div></div><div class="pack-buy"><strong>1 ponto</strong><button '+(can?'':'disabled')+' onclick="buyCardPack()">Comprar pack</button></div></div>'}function buyCardPack(){if(Number(G.pts||0)<1){toast('Você precisa de 1 ponto para comprar o pack.');return}G.pts-=1;G.albumPacks=(Number(G.albumPacks||0)+1);saveGardenToSE();renderCardPackShop();toast('🃏 Pack adicionado ao seu álbum!');}
+.cards-tab{background:linear-gradient(135deg,#ead2ff,#9feee4)!important;color:#46345f!important}.card-pack-shop{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:18px;padding:20px;border:1px solid #c9b5d8;border-radius:18px;background:linear-gradient(135deg,#fff8e5,#efe4f7);box-shadow:0 4px 0 #d5c5b4}.card-pack-art{display:grid;place-items:center;min-height:130px;border-radius:16px;background:linear-gradient(135deg,#7051a1,#5bc8bd,#f4c968);font-size:44px;box-shadow:inset 0 0 0 3px #fff7}.card-pack-copy h3{margin:0 0 6px;color:#4b3a55;font:normal 22px Georgia,serif}.card-pack-copy p{margin:0;color:#6d6270;font-size:12px;line-height:1.5}.pack-odds{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px}.pack-odds span{padding:5px 8px;border-radius:12px;background:#fffdf1;border:1px solid #d5c5a7;font-size:9px;font-weight:800;color:#6a5b45}.pack-buy{text-align:center}.pack-buy strong{display:block;color:#735597;font-size:16px;margin-bottom:10px}.pack-buy button{border:0;border-radius:12px;padding:11px 14px;background:#778b64;color:#fff;font:800 11px Nunito;cursor:pointer;box-shadow:0 3px 0 #526342}@media(max-width:650px){.card-pack-shop{grid-template-columns:1fr;text-align:center}.card-pack-art{min-height:90px}.pack-odds{justify-content:center}}

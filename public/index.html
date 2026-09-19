@@ -3594,7 +3594,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <div class="help-tip"><div class="help-tip-icon">💰</div><div>Vendendo colhidos você <strong>recupera pontos</strong> no canal da Twitch!</div></div>
           <div class="help-tip"><div class="help-tip-icon">🔄</div><div>Use o botão de <strong>sincronizar</strong> quando quiser atualizar o saldo imediatamente.</div></div>
           <div class="help-tip"><div class="help-tip-icon">💾</div><div>Seu jardim é salvo automaticamente enquanto você joga. Pode ficar AFK, trocar de aba ou usar outro aplicativo: o crescimento continua pelo tempo real.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">📈</div><div>Você começa no nível 1 e pode chegar ao <strong>nível 30</strong>. Cada nível libera novas sementes, melhorias e uma recompensa no Correio.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">📈</div><div>Você começa no nível 1 e pode chegar ao <strong>nível 100</strong>. Cada nível libera novas sementes, melhorias e uma recompensa no Correio.</div></div>
         </div>
       </div>
 
@@ -3928,6 +3928,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <button class="inventory-shop-link" type="button" onclick="goToShopFromInventory()">🛒 Ir para a loja</button>
     </div>
     <div id="inventory-filter"></div>
+    <div id="card-pack-inventory"></div>
     <div id="inventory-bar"></div>
     <div id="fertilizer-inv-bar"></div>
   </div>
@@ -4140,6 +4141,21 @@ const LEVELS = [
   { lv: 30, name: 'O Eterno Jardim',   emoji: '🌌', color: '#000040', minXP: 87190  },
 ];
 
+// Continua a progressão até o nível 100 para comportar os marcos de packs.
+// A curva extrapola o intervalo crescente de XP usado nos níveis finais atuais.
+{
+  let previous = LEVELS[LEVELS.length - 1];
+  let interval = previous.minXP - LEVELS[LEVELS.length - 2].minXP;
+  const titles = ['Guardião do Jardim', 'Mestre das Estações', 'Lenda da Colheita', 'Sábio da Primavera', 'Protetor da Fazenda'];
+  const emojis = ['🌿', '🌻', '✨', '🪴', '🌈'];
+  const colors = ['#477a55', '#b17b32', '#7954a8', '#35818a', '#66833f'];
+  for (let lv = 31; lv <= 100; lv += 1) {
+    interval += 20;
+    previous = { lv, name: titles[(lv - 31) % titles.length], emoji: emojis[(lv - 31) % emojis.length], color: colors[(lv - 31) % colors.length], minXP: previous.minXP + interval };
+    LEVELS.push(previous);
+  }
+}
+
 // XP per action
 const XP_ACTIONS = {
   plant:   { xp: 10, label: '+10 XP 🌱 Plantou!' },
@@ -4190,6 +4206,7 @@ function gainXP(action, sourceEl, overrideXp = null, overrideLabel = null) {
   }
 
   if (leveledUp) {
+    for (let lv = before.current.lv + 1; lv <= after.current.lv; lv += 1) addLevelMail(lv);
     const levelUpDelay = typeof isLocalPreview !== 'undefined' && isLocalPreview ? 0 : 400;
     setTimeout(() => triggerLevelUp(after.current), levelUpDelay);
     renderShop();
@@ -4247,8 +4264,6 @@ function triggerLevelUp(lvData) {
   overlay.classList.add('show');
 
   try {
-    // Send level-up mail reward
-    addLevelMail(lvData.lv);
     // Dar ponto de habilidade ao subir de nível
     const spGained = spForLevel(lvData.lv);
     G.skillPoints = (G.skillPoints || 0) + spGained;
@@ -5269,6 +5284,7 @@ async function removePlantFromPlot(idx) {
 }
 
 function renderInventory() {
+  renderPackInventory();
   const bar = document.getElementById('inventory-bar');
   const filter = document.getElementById('inventory-filter');
   if (filter) filter.innerHTML = `<div class="inventory-filter-label"><span>Filtrar:</span><div class="inventory-filter-buttons">
@@ -8690,17 +8706,19 @@ function mailRewardForLevel(lv) {
 }
 
 function addLevelMail(lv) {
+  if (G_MAIL.some(mail => Number(mail.lv) === Number(lv))) return;
   const reward = mailRewardForLevel(lv);
   const specialReward = specialLevelReward(lv);
   const lvData = LEVELS.find(l => l.lv === lv) || { name: `Nível ${lv}`, emoji: '🌱' };
   G_MAIL.unshift({
-    id: Date.now(),
+    id: `level-${lv}`,
     lv,
     emoji: lvData.emoji,
     title: `Parabéns pelo nível ${lv}!`,
-    msg: `Você chegou ao nível ${lv} — ${lvData.name}! O jardim está cada vez mais florido.${specialReward ? ` Recompensa especial: ${specialReward.text}` : ''}`,
+    msg: `Você chegou ao nível ${lv} — ${lvData.name}! O jardim está cada vez mais florido.${specialReward ? ` Recompensa especial: ${specialReward.text}` : ''}${levelPackReward(lv) ? ` Packs: ${packRewardText(levelPackReward(lv))}. Resgate para guardar no Inventário.` : ''}`,
     reward,
     specialReward,
+    packReward: levelPackReward(lv),
     opened: false,
   });
   updateMailBadge();
@@ -8714,8 +8732,31 @@ function specialLevelReward(lv) {
     20: { text:'+2 de capacidade permanente no Regador', waterCapacity:2 },
     25: { text:'3x Frutas Cristalinas', crystalFruits:3 },
     30: { text:'1x semente de cada cultivo', allSeeds:1 },
+    40: { text:'+800 moedas', pts:800 },
+    45: { text:'+1.200 moedas', pts:1200 },
+    50: { text:'+1.500 moedas', pts:1500 },
+    55: { text:'+2.000 moedas', pts:2000 },
+    60: { text:'+2.500 moedas', pts:2500 },
+    65: { text:'+3.000 moedas', pts:3000 },
   };
   return rewards[lv] ? { ...rewards[lv] } : null;
+}
+
+function levelPackReward(lv) {
+  if ([5, 10, 15, 20].includes(lv)) return { normal:1, prismatic:0 };
+  if ([25, 30, 40, 45].includes(lv)) return { normal:2, prismatic:2 };
+  if ([50, 55, 60, 65].includes(lv)) return { normal:0, prismatic:3 };
+  if ([70, 75, 80, 90].includes(lv)) return { normal:0, prismatic:5 };
+  if (lv === 100) return { normal:10, prismatic:10 };
+  return null;
+}
+
+function packRewardText(reward) {
+  if (!reward) return '';
+  const parts = [];
+  if (reward.normal) parts.push(`${reward.normal}x pack comum`);
+  if (reward.prismatic) parts.push(`${reward.prismatic}x pack prismático`);
+  return parts.join(' + ');
 }
 
 function applySpecialLevelReward(reward) {
@@ -8745,8 +8786,30 @@ function applySpecialLevelReward(reward) {
     [...Object.keys(PLANTS), ...Object.keys(FLOWERS)].forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + 1; });
     received.push('1x semente de cada cultivo');
   }
+  if (reward.packs) {
+    G.packInventory = G.packInventory || { normal:0, prismatic:0 };
+    G.packInventory.normal = Number(G.packInventory.normal || 0) + Number(reward.packs.normal || 0);
+    G.packInventory.prismatic = Number(G.packInventory.prismatic || 0) + Number(reward.packs.prismatic || 0);
+    received.push(`${packRewardText(reward.packs)} enviados ao Inventário`);
+    renderPackInventory();
+  }
   renderLevelWidget(); renderInventory(); renderFertilizerInventory(); renderWateringCapacity(); updatePts();
   return received;
+}
+
+function renderPackInventory() {
+  const host = document.getElementById('card-pack-inventory');
+  if (!host) return;
+  const packs = G.packInventory || {};
+  const normal = Math.max(0, Number(packs.normal || 0));
+  const prismatic = Math.max(0, Number(packs.prismatic || 0));
+  host.innerHTML = normal + prismatic ? `<section class="inventory-group card-pack-inventory-group">
+    <h3 class="inventory-group-title">🎴 Packs de figurinhas</h3>
+    <div class="pack-inventory-items">
+      ${normal ? `<button class="pack-inventory-item normal" type="button" onclick="openEarnedCardPack('normal')"><span>🌼 Pack comum</span><strong>×${normal}</strong><small>Clique para abrir 3 cartas</small></button>` : ''}
+      ${prismatic ? `<button class="pack-inventory-item prismatic" type="button" onclick="openEarnedCardPack('prismatic')"><span>🌈 Pack prismático</span><strong>×${prismatic}</strong><small>Clique para abrir 3 cartas</small></button>` : ''}
+    </div>
+  </section>` : '';
 }
 
 function updateMailBadge() {
@@ -8775,7 +8838,7 @@ async function openLetter(id) {
   letter.opened = true;
   G.pts += letter.reward;
   recordPointsHistory(letter.reward, `Correio: ${letter.title}`);
-  const specialReceived = applySpecialLevelReward(letter.specialReward);
+  const specialReceived = applySpecialLevelReward({ ...(letter.specialReward || {}), packs:letter.packReward || levelPackReward(letter.lv) });
   updatePts();
   updateMailBadge();
   renderMailList();
@@ -8813,7 +8876,7 @@ function renderMailList() {
         <div class="mail-letter">
           ${m.emoji} ${m.msg}
           <br><br>
-          <div class="mail-reward-badge">🌟 +${m.reward} pts${m.specialReward ? `<br>🎁 ${m.specialReward.text}` : ''}</div>
+          <div class="mail-reward-badge">🌟 +${m.reward} pts${m.specialReward ? `<br>🎁 ${m.specialReward.text}` : ''}${(m.packReward || levelPackReward(m.lv)) ? `<br>🎴 ${packRewardText(m.packReward || levelPackReward(m.lv))}` : ''}</div>
         </div>
       </div>
     </div>`).join('');
@@ -9148,6 +9211,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     seasonIdx:        G.seasonIdx,
     seasonDay:        G.seasonDay,
     albumPacks:       Number(G.albumPacks || 0),
+    packInventory:   G.packInventory || { normal:0, prismatic:0 },
     albumCards:       G.albumCards || {},
     seasonDayEndsAt:  seasonDayEndsAt,
     orders:           G.orders || [],
@@ -9282,7 +9346,7 @@ async function confirmGardenSaved(saved) {
   });
   if (!response.ok) throw new Error('Não foi possível confirmar o jardim no banco. Tente novamente.');
   const confirmed = await response.json();
-  const fields = ['xp', 'farmerXP', 'inventory', 'fertilizerInventory', 'plots', 'harvested', 'livestock', 'skillNodes', 'achievements', 'missions', 'mail'];
+  const fields = ['xp', 'farmerXP', 'inventory', 'fertilizerInventory', 'plots', 'harvested', 'livestock', 'skillNodes', 'achievements', 'missions', 'mail', 'packInventory', 'albumCards'];
   if (!confirmed.data || fields.some(key => !sameGardenValue(saved.data[key], confirmed.data[key]))) {
     throw new Error('O banco ainda não confirmou todo o progresso. Tente novamente.');
   }
@@ -9421,6 +9485,7 @@ async function loadGardenFromSE(username) {
     G.seasonIdx       = save.seasonIdx        ?? 0;
     G.seasonDay       = save.seasonDay        ?? 1;
     G.albumPacks      = Number(save.albumPacks || 0);
+    G.packInventory   = { normal:Number(save.packInventory?.normal || 0), prismatic:Number(save.packInventory?.prismatic || 0) };
     G.albumCards      = save.albumCards || {};
     seasonDayEndsAt   = Number(save.seasonDayEndsAt) || (Date.now() + SEASON_DAY_MS);
     // Corrige estados antigos: a marca só vale enquanto a estação atual

@@ -19,12 +19,18 @@
     el.innerHTML=['normal','prismatic'].map(kind=>'<section class="pack-product '+kind+'"><div class="pack-envelope"><span>✦</span><strong>'+(kind==='normal'?'PRIMAVERA':'PRISMAS')+'</strong><small>3 FIGURINHAS</small></div><div><h3>'+(kind==='normal'?'Primavera Encantada':'Prismas da Primavera')+'</h3><p>'+(kind==='normal'?'Três cartas do álbum normal.':'Três cartas: normais ou prismáticas, com chance de Arco-Íris.')+'</p><small>'+(kind==='normal'?'Comum 55% · Incomum 25% · Rara 12% · Épica 6% · Lendária 2%':'Normais 98,70% · Prismáticas 0,80% · Raras prismáticas 0,35% · Épicas prismáticas 0,12% · Arco-Íris 0,03%')+'</small></div><div><strong>'+packPrices[kind].toLocaleString('pt-BR')+' pontos</strong><button data-buy-pack="'+kind+'" '+(busy?'disabled':'')+'>Comprar pack</button></div></section>').join('');
     el.querySelectorAll('[data-buy-pack]').forEach(b=>b.onclick=()=>buyCardPack(b.dataset.buyPack));
   };
-  window.buyCardPack=async function(kind='normal'){
+  async function openPack(kind='normal', earned=false){
     if(busy)return;busy=true;renderCardPackShop();
     let charged=false;
     try{
-      if(!(await chargeGamePoints(packPrices[kind],'Pack '+kind)))return;
-      charged=true;
+      if(earned){
+        G.packInventory=G.packInventory||{normal:0,prismatic:0};
+        if(Number(G.packInventory[kind]||0)<1){toast('Você não tem esse pack no Inventário.');return;}
+        G.packInventory[kind]=Number(G.packInventory[kind])-1;
+      }else{
+        if(!(await chargeGamePoints(packPrices[kind],'Pack '+kind)))return;
+        charged=true;
+      }
       const pulls=Array.from({length:3},()=>draw(kind));
       G.albumCards={...(G.albumCards||{})};
       pulls.forEach(c=>{
@@ -32,7 +38,7 @@
         c.isNew=count===0;G.albumCards[c.key]=count+1;
       });
       pulls.forEach(c=>window.recordCardFind?.(c));
-      G.albumPacks=Number(G.albumPacks||0)+1;
+      if(!earned)G.albumPacks=Number(G.albumPacks||0)+1;
       window.__farmAlbumCards={...G.albumCards};
       const overlay=document.createElement('div');overlay.className='pack-opening-v2 '+kind;
       overlay.innerHTML='<section role="dialog" aria-modal="true" aria-label="Abrir pack" class="pack-dialog"><button class="pack-close" aria-label="Guardar e fechar">×</button><small>UM PRESENTE PARA SUA COLEÇÃO</small><h2>Seu pack chegou!</h2><p>Clique em cada carta para revelar.</p><div class="pack-three">'+pulls.map((c,i)=>'<button class="pack-flip" data-reveal="'+i+'" aria-label="Revelar carta '+(i+1)+'"><span class="pack-back"><span>✦</span><b>'+(kind==='normal'?'JARDIM ENCANTADO':'PRISMAS DA PRIMAVERA')+'</b><small>TOQUE PARA REVELAR</small></span><span class="pack-face '+(c.prismatic?'is-prismatic':'')+'" hidden><small>'+c.rarity+'</small><span class="pack-illustration" style="--prism-hue:'+c.i*29+'deg">'+AlbumArtwork.render(AlbumArtwork.card(c.i))+'</span><b>'+c.name+'</b>'+(c.isNew?'<em>NOVA!</em>':'<em>Repetida</em>')+'</span></button>').join('')+'</div><p class="pack-save-status" role="status">Salvando suas três cartas…</p><button class="pack-save-retry" hidden>Tentar salvar novamente</button></section>';
@@ -60,10 +66,12 @@
       overlay.querySelector('.pack-close').onclick=async()=>{
         if(saving)return;
         if(!saved&&!(await persist()))return;
-        overlay.remove();busy=false;renderCardPackShop();
+        overlay.remove();busy=false;renderCardPackShop();renderInventory();
       };
       await persist();
     }catch(error){toast('Não foi possível abrir o pack. '+(charged?'A compra precisa ser verificada.':'Tente novamente.'));busy=false;}
     finally{if(!charged)busy=false;renderCardPackShop();}
-  };
+  }
+  window.buyCardPack=kind=>openPack(kind||'normal',false);
+  window.openEarnedCardPack=kind=>openPack(kind||'normal',true);
 })();

@@ -19,3 +19,68 @@ document.addEventListener('click',event=>{const button=event.target?.closest('[d
 const prismWorkshopCards=[['Prisma de Orvalho','💧'],['Prisma de Pétala','🌸'],['Prisma do Galinheiro','🐔'],['Prisma do Lago','🦆'],['Prisma de Cristal','💎'],['Prisma Borboleta','🦋'],['Prisma Lunar','🌙'],['Prisma Aurora','🌌'],['Prisma Estelar','⭐'],['Arco-Íris Primaveril','🌈']];let unifiedChoices=[];function openUnifiedWorkshop(){const farmCards=window.parent!==window?(window.parent.__farmAlbumCards||{}):{};const entries=[...collection.map(c=>({key:'normal-'+c.id,type:'normal',id:c.id,name:c.name,qty:c.qty,visual:art(c)})),...prismWorkshopCards.map(([name,icon],id)=>({key:'prism-'+id,type:'prism',id,name,qty:Number(farmCards['prismatic_'+id]??farmCards[name]??0),visual:'<div class="art" style="display:grid;place-items:center;min-height:84px;font-size:36px;background:linear-gradient(135deg,#3b315b,#244f5d,#6d376a)">'+icon+'</div>'}))].filter(card=>card.qty>1);const selected=key=>unifiedChoices.filter(x=>x===key).length;const get=key=>entries.find(card=>card.key===key);openBody('<div class="dialog-title"><span>✧</span><h2>Oficina de Combinação</h2><p>Combine 3 figurinhas repetidas, normais ou prismáticas.</p></div>'+rates()+'<p class="hint">Sua primeira cópia permanece no álbum.</p><div class="mix-slots">'+[0,1,2].map(i=>{const card=get(unifiedChoices[i]);return '<button data-unified-remove="'+i+'">'+(card?card.visual:'+')+'</button>'}).join('')+'</div><div class="mini-grid">'+entries.map(card=>{const left=card.qty-1-selected(card.key);return '<button data-unified-pick="'+card.key+'" '+(left<=0||unifiedChoices.length===3?'disabled':'')+' title="'+card.name+'"><span>×'+left+'</span>'+card.visual+'<small>'+card.name+(card.type==='prism'?' · PRISMÁTICA':'')+'</small></button>'}).join('')+'</div><p class="notice">Escolha três cartas repetidas para descobrir uma nova figurinha.</p><button class="wide" id="unified-mix" '+(unifiedChoices.length===3?'':'disabled')+'>Combinar 3 repetidas</button>');document.querySelectorAll('[data-unified-pick]').forEach(button=>button.onclick=()=>{unifiedChoices.push(button.dataset.unifiedPick);openUnifiedWorkshop()});document.querySelectorAll('[data-unified-remove]').forEach(button=>button.onclick=()=>{unifiedChoices.splice(Number(button.dataset.unifiedRemove),1);openUnifiedWorkshop()});document.querySelector('#unified-mix').onclick=()=>{if(unifiedChoices.length!==3)return;const updatedCards={...farmCards};unifiedChoices.forEach(key=>{const card=get(key);if(card.type==='normal')collection[card.id].qty--;else updatedCards['prismatic_'+card.id]=card.qty-1});if(window.parent!==window){window.parent.__farmAlbumCards=updatedCards;window.parent.postMessage({type:'album-state',cards:updatedCards},'*')}let roll=Math.random()*100,tier=tiers[4][0];for(const[t,p]of tiers){roll-=p;if(roll<0){tier=t;break;}}const pool=collection.filter(c=>c.rarity===tier),reward=pool[Math.floor(Math.random()*pool.length)];reward.qty++;unifiedChoices=[];render();openBody('<div class="reveal" role="status"><div class="eyebrow">A PRIMAVERA GUARDOU UMA SURPRESA…</div><h2>Nova figurinha recebida!</h2><div class="reveal-stage"><article class="reveal-card '+(tier==='lendária'?'legend':'')+'"><div class="art">'+art(reward)+'</div><h3>'+reward.name+'</h3><p>'+tier+'</p></article></div><p>Você recebeu 1 cópia de '+reward.name+'.</p><button id="unified-reveal-done">Voltar à oficina</button></div>');document.querySelector('#unified-reveal-done').onclick=openUnifiedWorkshop}}document.querySelector('#combine').onclick=()=>{unifiedChoices=[];openUnifiedWorkshop()};
 // Remove a linguagem de demonstração e mantém a interface pronta para o salvamento real.
 const fixTradeDuration=new MutationObserver(()=>{document.querySelectorAll('#modal-body *').forEach(el=>{if(el.childElementCount===0&&el.textContent.includes('24 horas'))el.textContent=el.textContent.replaceAll('24 horas','30 minutos')})});fixTradeDuration.observe(document.body,{childList:true,subtree:true});
+
+// Real offer builder: the recipient must have a duplicate that the current
+// player has not discovered yet. Keep card IDs as strings to match player_cards.
+newOffer=async function(){
+  const token=sessionStorage.getItem('twitch_access_token')||'';
+  const headers={Authorization:'Bearer '+token,'Content-Type':'application/json'};
+  const ownDuplicates=collection.filter(c=>Number(c.qty)>1);
+  const ownInventory=new Map(collection.map(c=>[String(c.id),Number(c.qty)||0]));
+  const decodeCardId=value=>{
+    const raw=String(value??'');
+    const match=raw.match(/^(?:card_)?(\d+)$/);
+    return match?match[1]:null;
+  };
+  openBody(tradeHeader()+'<div class="dialog-title"><h3>🌿 Criar nova oferta</h3><p>Ofereça uma repetida e escolha uma carta que ainda falta no seu álbum.</p></div><div class="offer-builder"><section><label>Você oferece<select id="give">'+(ownDuplicates.length?ownDuplicates.map(c=>'<option value="'+c.id+'">'+c.name+' · REPETIDA ×'+(c.qty-1)+'</option>').join(''):'<option value="">Nenhuma carta repetida disponível</option>')+'</select></label></section><span class="swap-arrow">⇄</span><section><label>Usuário da fazenda<select id="recipient"><option value="">Carregando usuários…</option></select></label><select id="want" aria-label="Carta repetida que falta na sua coleção" disabled><option value="">Selecione um usuário</option></select><div id="recipient-status" class="notice" role="status">Carregando usuários do banco…</div></section></div><div class="offer-actions"><button class="secondary" id="cancel-offer">Cancelar</button><button id="create-offer" '+(ownDuplicates.length?'disabled':'disabled')+'>Enviar oferta</button></div>');
+  wireTabs();
+  const recipient=document.querySelector('#recipient'),want=document.querySelector('#want'),status=document.querySelector('#recipient-status'),send=document.querySelector('#create-offer');
+  let eligibleCards=[];
+  const loadRecipientCards=async()=>{
+    const username=recipient.value;
+    eligibleCards=[];
+    want.disabled=true;send.disabled=true;
+    if(!username){want.innerHTML='<option value="">Selecione um usuário</option>';status.textContent='';return}
+    status.textContent='Buscando repetidas que faltam no seu álbum…';
+    want.innerHTML='<option value="">Carregando cartas…</option>';
+    try{
+      const response=await fetch('/.netlify/functions/trade-user-cards?username='+encodeURIComponent(username),{headers});
+      if(!response.ok)throw new Error('Não foi possível buscar as cartas desse usuário.');
+      const data=await response.json();
+      const byId=new Map();
+      (Array.isArray(data.cards)?data.cards:[]).forEach(row=>{
+        const id=decodeCardId(row.card_id),quantity=Number(row.quantity)||0;
+        if(id!==null&&quantity>1&&ownInventory.get(id)===0)byId.set(id,Math.max(quantity,byId.get(id)||0));
+      });
+      eligibleCards=[...byId].map(([id,quantity])=>({id,quantity,card:collection[Number(id)]})).filter(item=>item.card);
+      if(!eligibleCards.length){want.innerHTML='<option value="">NENHUMA CARTA PARA TROCA</option>';status.textContent='Esse usuário não tem repetidas que estejam faltando no seu álbum.';return}
+      want.innerHTML=eligibleCards.map(item=>'<option value="'+item.id+'">'+item.card.name+' · REPETIDA ×'+(item.quantity-1)+'</option>').join('');
+      want.disabled=false;send.disabled=!ownDuplicates.length;
+      status.textContent='Selecione a carta que falta na sua coleção.';
+    }catch(error){want.innerHTML='<option value="">Não foi possível carregar</option>';status.textContent=error.message||'Não foi possível carregar as cartas deste usuário.'}
+  };
+  try{
+    if(!token)throw new Error('Faça login para criar uma oferta.');
+    const response=await fetch('/.netlify/functions/trade-users',{headers});
+    if(!response.ok)throw new Error('Não foi possível carregar os usuários cadastrados.');
+    const data=await response.json(),self=sessionStorage.getItem('se_username')||'';
+    const users=(data.users||[]).filter(username=>String(username).toLowerCase()!==self.toLowerCase());
+    recipient.innerHTML=users.length?'<option value="">Selecione uma pessoa</option>'+users.map(username=>'<option value="'+username+'">@'+username+'</option>').join(''):'<option value="">Nenhum outro usuário cadastrado</option>';
+    recipient.onchange=loadRecipientCards;
+    if(!ownDuplicates.length)status.textContent='Você não tem cartas repetidas para oferecer.';
+    else if(!users.length)status.textContent='Nenhum outro usuário cadastrado.';
+  }catch(error){recipient.innerHTML='<option value="">Não foi possível carregar usuários</option>';status.textContent=error.message||'Erro ao buscar usuários cadastrados.'}
+  document.querySelector('#cancel-offer').onclick=()=>trades('received');
+  send.onclick=async()=>{
+    const offered=document.querySelector('#give').value,requested=want.value,target=recipient.value;
+    if(!target||!eligibleCards.some(card=>card.id===requested)||!ownDuplicates.some(card=>String(card.id)===offered))return;
+    send.disabled=true;status.textContent='Enviando oferta…';
+    try{
+      const response=await fetch('/.netlify/functions/trade-offer-create',{method:'POST',headers,body:JSON.stringify({recipient_username:target,offered_card_id:offered,requested_card_id:requested})});
+      const result=await response.json();
+      if(!response.ok)throw new Error(result.error||'Não foi possível enviar a oferta.');
+      sent.push({name:target,give:Number(offered),want:Number(requested),expiresAt:Date.parse(result.offer.expires_at),id:result.offer.id});
+      trades('sent');
+    }catch(error){status.textContent=error.message||'Não foi possível enviar a oferta.';send.disabled=false}
+  };
+};

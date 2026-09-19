@@ -1,34 +1,12 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const vm = require('node:vm');
-const fs = require('node:fs');
-const model = require('../public/animal-model');
-
-for (const [id, animal] of Object.entries(model.catalog)) {
-  test(`${animal.name}: alimentação, espera offline, coleta única e novo ciclo`, () => {
-    const original = { feed:10, pets:{ [id]:{ readyAt:0 } } };
-    const fed = model.feed(original, id, 1000);
-    assert.equal(original.feed, 10);
-    assert.equal(fed.feed, 10-animal.feed);
-    assert.equal(fed.pets[id].readyAt, 1000+animal.minutes*60000);
-    assert.equal(model.feed(fed,id,1001).pets[id].queue.length,1);
-    assert.throws(() => model.collect(fed,id,1001));
-    const loaded = model.normalize(JSON.parse(JSON.stringify(fed)));
-    const result = model.collect(loaded,id,1000+animal.minutes*60000);
-    assert.equal(result.product, animal.product);
-    assert.equal(result.quantity,1);
-    assert.equal(model.status(result.state.pets[id]), 'hungry');
-    assert.throws(() => model.collect(result.state,id,Date.now()));
-    assert.ok(model.products[result.product].sell > animal.feed*model.feedCost);
-  });
-}
-test('sem ração não inicia produção e conta nova começa vazia', () => {
-  assert.deepEqual(model.normalize(null), { feed:0, pets:{},rations:{premium:0,super:0,booster:0} });
-  assert.throws(() => model.feed({feed:0,pets:{cow:{readyAt:0}}},'cow'));
-  assert.deepEqual(model.normalize({feed:Infinity,pets:{unknown:{}}}), {feed:0,pets:{},rations:{premium:0,super:0,booster:0}});
-});
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+const model=require('../public/animal-model');
+const start=1000000;
+const state=(health=100)=>({feed:20,rations:{premium:5,super:5,booster:5},pets:{chicken:{health,healthUpdatedAt:start,readyAt:0}}});
 function harness(charge = async () => true) {
-  const context = vm.createContext({ FarmAnimals:model, G:{livestock:model.normalize(),harvested:{}}, gardenHydrated:true,
+  const context = vm.createContext({ FarmAnimals:model, G:{livestock:model.normalize(),harvested:{},skillNodes:{}}, effectiveAnimalSkills:()=>({}), gardenHydrated:true,
     currentLevel:()=>30, chargeGamePoints:charge, saveGardenToSE:async()=>{}, toast:()=>{},
     renderHarvested:()=>{}, setInterval:()=>{}, document:{getElementById:()=>null}, Date, console });
   vm.runInContext(fs.readFileSync('public/animals.js','utf8'),context);
@@ -65,62 +43,80 @@ test('cliques simultâneos não cobram duas vezes', async () => {
   assert.ok(ctx.G.livestock.pets.cow);
 });
 
-test('Premium alimenta a vaca com uma unidade e preserva ração normal antiga',()=>{
-  const state=model.feed({feed:7,rations:{premium:1},pets:{cow:{readyAt:0}}},'cow',100,'premium');
-  assert.equal(state.feed,7);assert.equal(state.rations.premium,0);
-  assert.equal(state.pets.cow.quantity,1);
+
+test('saúde cai gradualmente; atualizações frequentes e F5 não mudam a perda',()=>{
+  let s=state();
+  for(let i=1;i<=600;i++)s=model.advance(s,start+i*1000,{},()=>1);
+  assert.ok(Math.abs(s.pets.chicken.health-90)<1e-8);
+  const once=model.advance(state(),start+600000,{},()=>1);
+  assert.equal(s.pets.chicken.stock,once.pets.chicken.stock);
+  const loaded=model.normalize(JSON.parse(JSON.stringify(s)),start+600000);
+  assert.ok(Math.abs(model.advance(loaded,start+1200000).pets.chicken.health-80)<1e-8);
 });
-test('Super Premium sorteia 35% e mantém resultado após recarregar',()=>{
-  for(const [roll,expected] of [[.349,2],[.35,1],[.99,1]]) {
-    const state=model.feed({rations:{super:1},pets:{pig:{readyAt:0}}},'pig',100,'super',()=>roll);
-    const loaded=model.normalize(JSON.parse(JSON.stringify(state)));
-    assert.equal(model.collect(loaded,'pig',9999999).quantity,expected);
+test('todos os animais produzem continuamente sem novas refeições',()=>{
+  for(const [id,a]of Object.entries(model.catalog)){
+    let s={pets:{[id]:{health:100,healthUpdatedAt:start}}};
+    s=model.advance(s,start+3*a.minutes*60000,{},()=>1);
+    assert.equal(s.pets[id].stock,3);assert.ok(s.pets[id].readyAt>start+3*a.minutes*60000);
   }
 });
-test('Booster combina com Super Premium, não repete e produto dourado vale o dobro',()=>{
-  let state=model.feed({rations:{super:1,booster:2},pets:{cow:{readyAt:0}}},'cow',100,'super',()=>0);
-  state=model.boost(state,'cow',200,()=>0);
-  assert.throws(()=>model.boost(state,'cow',201,()=>0));
-  assert.equal(state.rations.booster,1);
-  const result=model.collect(model.normalize(JSON.parse(JSON.stringify(state))),'cow',999999);
-  assert.equal(result.quantity,2);assert.equal(result.product,'farm_milk_golden');
-  assert.equal(model.products[result.product].sell,model.products.farm_milk.sell*2);
-  assert.equal(result.state.pets.cow.booster,false);
+test('15 produz, abaixo de 15 pausa e não recupera ciclos atrasados ao alimentar',()=>{
+  let s=state(15);s.pets.chicken.readyAt=start;
+  s=model.advance(s,start,{},()=>1);assert.equal(s.pets.chicken.stock,1);
+  s=model.advance(s,start+60000);assert.equal(s.pets.chicken.readyAt,0);
+  assert.equal(model.status(s.pets.chicken),'hungry');
+  s=model.feed(s,'chicken',start+60000,'normal',()=>1);
+  assert.equal(s.pets.chicken.readyAt,start+60000+240000);
+  assert.equal(s.pets.chicken.stock,1);
 });
-test('Booster antes da refeição não alimenta; após produzir não pode ser aplicado',()=>{
-  const state=model.boost({rations:{booster:1},pets:{duck:{readyAt:0}}},'duck',100,()=>.2);
-  assert.equal(model.status(state.pets.duck),'hungry');assert.equal(state.pets.duck.golden,false);
-  assert.throws(()=>model.boost({rations:{booster:1},pets:{duck:{readyAt:10}}},'duck',100));
+test('zero remove animal e estoque não recolhido, permitindo nova compra',()=>{
+  const s=state(1);s.pets.chicken.stock=7;
+  assert.equal(model.advance(s,start+60000).pets.chicken,undefined);
 });
-
-test('reserva produz todos os ciclos offline, para sem comida e não duplica no F5',()=>{
-  let state={feed:5,pets:{chicken:{readyAt:0}}};
-  for(let i=0;i<5;i++)state=model.feed(state,'chicken',1000);
-  assert.equal(state.feed,0);assert.equal(state.pets.chicken.queue.length,4);
-  state=model.advance(JSON.parse(JSON.stringify(state)),1000+3*180000+500);
-  assert.equal(state.pets.chicken.stock,3);assert.equal(state.pets.chicken.queue.length,1);
-  const again=model.advance(JSON.parse(JSON.stringify(state)),1000+3*180000+500);
-  assert.deepEqual(again,state);
-  state=model.advance(state,1000+30*180000);
-  assert.equal(state.pets.chicken.stock,5);assert.equal(state.pets.chicken.readyAt,0);
-  const result=model.collect(state,'chicken',1000+30*180000);
-  assert.deepEqual(result.items,{farm_egg:5});
-  assert.throws(()=>model.collect(result.state,'chicken',999999999));
+test('rações recuperam 20, 50 e 80 e consomem uma unidade sem criar fila',()=>{
+  for(const [ration,recovery]of [['normal',20],['premium',50],['super',80]]){
+    const s=model.feed(state(10),'chicken',start,ration);
+    assert.equal(s.pets.chicken.health,10+recovery);
+    assert.equal(s.pets.chicken.queue,undefined);
+    assert.equal(ration==='normal'?s.feed:s.rations[ration],ration==='normal'?19:4);
+  }
 });
-test('coleta de comuns e dourados preserva ciclo em andamento e Booster não se repete',()=>{
-  let state={feed:3,rations:{super:1,booster:1},pets:{pig:{readyAt:0}}};
-  state=model.feed(state,'pig',1000,'super',()=>0);
-  state=model.boost(state,'pig',1001,()=>0);
-  state=model.feed(state,'pig',1002);
-  state.rations.premium=1;state=model.feed(state,'pig',1003,'premium');
-  const result=model.collect(state,'pig',1000+2*360000+10);
-  assert.deepEqual(result.items,{farm_bacon:1,farm_bacon_golden:2});
-  assert.equal(result.state.pets.pig.readyAt,1000+3*360000);
-  assert.equal(result.state.pets.pig.booster,false);
+test('Super Premium exige saúde acima de 80 na conclusão e mantém chance fixa',()=>{
+  for(const [health,roll,expected]of [[85,.339,2],[84,.1,1],[85,.34,1]]){
+    let s=state(health);s.pets.chicken.superActive=true;
+    s=model.advance(s,start+240000,{criador_dourado:5},()=>roll);
+    assert.equal(s.pets.chicken.stock,expected);
+  }
+  let s=model.feed(state(20),'chicken',start,'super',()=>0);
+  s=model.feed(s,'chicken',start,'normal',()=>0);
+  s=model.feed(s,'chicken',start,'super',()=>0);
+  s=model.advance(s,start+240000,{criador_dourado:5},()=>.34);
+  assert.equal(s.pets.chicken.stock,1);
 });
-test('nova refeição após pausa inicia agora e não produz retroativamente',()=>{
-  let state=model.feed({feed:2,pets:{duck:{readyAt:0}}},'duck',1000);
-  state=model.feed(state,'duck',10000000);
-  assert.equal(state.pets.duck.stock,1);
-  assert.equal(state.pets.duck.readyAt,10000000+240000);
+test('booster funciona em vários ciclos e expira exatamente após 30 minutos',()=>{
+  let s=model.boost(state(),'chicken',start,()=>0);
+  assert.throws(()=>model.boost(s,'chicken',start+1),/ativo/);
+  s=model.advance(s,start+1800000,{},()=>0);
+  assert.equal(s.pets.chicken.goldStock,7);assert.equal(s.pets.chicken.stock,0);
+  assert.equal(s.pets.chicken.booster,false);
+  const again=model.advance(JSON.parse(JSON.stringify(s)),start+1800000,{},()=>0);
+  assert.deepEqual(again,s);
+});
+test('refeições antigas são devolvidas uma única vez e o estoque preservado',()=>{
+  let s=state();s.pets.chicken.stock=3;s.pets.chicken.queue=[{ration:'normal'},{ration:'super'}];
+  s=model.normalize(s,start);assert.equal(s.feed,21);assert.equal(s.rations.super,6);
+  assert.equal(s.pets.chicken.stock,3);assert.deepEqual(model.normalize(s,start),s);
+});
+test('Rotina Rural reduz duração e mantém ciclos consecutivos',()=>{
+  let s=model.advance(state(),start+192000,{rotina_rural:5},()=>1);
+  assert.equal(s.pets.chicken.stock,1);assert.equal(s.pets.chicken.readyAt,start+384000);
+});
+test('bônus de domínio dos animais reduz um minuto e a redefinição restaura o ciclo',()=>{
+  const producing=state();producing.pets.chicken.readyAt=start+240000;producing.pets.chicken.cycleDuration=240000;
+  let s=model.advance(producing,start+30000,{__animalBranchComplete:true},()=>1);
+  assert.equal(s.pets.chicken.cycleDuration,180000);
+  assert.equal(s.pets.chicken.readyAt,start+180000);
+  s=model.advance(s,start+60000,{},()=>1);
+  assert.equal(s.pets.chicken.cycleDuration,240000);
+  assert.equal(s.pets.chicken.readyAt,start+240000);
 });

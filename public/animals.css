@@ -26,14 +26,32 @@
 .animal-scene { position:relative; background:linear-gradient(180deg,#f4efe2,#e7eed7); border-radius:17px; margin:10px 0; overflow:hidden; }
 .animal-scene svg { width:100%; height:150px; display:block; }
 .animal-scene.empty svg { opacity:.3; }
+.animal-pen.booster-active .animal-scene { border:2px solid #e5bf58; box-shadow:0 0 0 3px #e5bf5833,0 0 18px #e5bf5866; background:linear-gradient(180deg,#fff2be,#e7eed7); }
+.animal-pen.booster-active .animal-body { filter:sepia(.38) saturate(1.35) brightness(1.06); }
+.animal-pen.booster-active { border-color:#d6ab47; box-shadow:0 4px 0 #b8893222,0 0 18px #e5bf584d; }
 .animal-body { transform-origin:80px 115px; animation:animal-breathe 3.5s ease-in-out infinite; }
 .animal-pen.ready .animal-body { animation:animal-breathe 1.5s ease-in-out infinite; }
 @keyframes animal-breathe { 50% { transform:translateY(-2px) rotate(1deg); } }
 .animal-status { min-height:36px; font-size:12px; line-height:1.5; margin:6px 0; }
+.animal-status:empty { min-height:0; margin:0; }
 .animal-name-input { width:100%; box-sizing:border-box; margin:0 0 5px; border:1px solid var(--cozy-line,#c9cfb9); border-radius:9px; background:var(--cream2); color:inherit; text-align:center; font:800 11px Nunito,sans-serif; padding:5px; }
+.animal-booster-status { margin:2px 0 7px; padding:5px 8px 6px; border-radius:11px; background:#eee9d5; color:#837344; opacity:.72; }
+.animal-booster-status.active { background:linear-gradient(135deg,#fff0b8,#f1d77a); color:#76552c; opacity:1; box-shadow:0 2px 0 #c49b4a55; }
+.animal-booster-heading { display:flex; justify-content:space-between; gap:5px; font:800 9px/1.2 Nunito,sans-serif; }
+.animal-booster-heading b { font-size:8px; }
+.animal-booster-bar,.animal-production-bar { height:5px; margin-top:5px; border-radius:99px; background:#c5b77d55; overflow:hidden; }
+.animal-booster-bar span { display:block; height:100%; border-radius:inherit; background:#c99b3f; transition:width .4s linear; }
+.animal-production-summary { margin:0 0 7px; }
+.animal-production-bar { height:6px; background:#9cac8733; }
+.animal-production-bar span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#91a77b,#c6a76c); transition:width .4s linear; }
+.animal-production-summary small { display:block; margin-top:4px; color:var(--text2); font:700 9px/1.2 Nunito,sans-serif; }
 .animal-ration-tag { display:inline-block; margin-left:4px; padding:3px 7px; border-radius:999px; font-size:10px; font-weight:900; color:#5b4a2d; background:#d5bc91; }
 .animal-ration-tag.premium { background:#e6c66f; }
 .animal-ration-tag.super { background:#b9a0d7; color:#3f2e58; }
+.animal-super-symbol { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; margin:2px 0; border:1px solid #f2e5ff; border-radius:50%; background:#9772b6; color:#fff6ff; font:900 14px/1 Nunito,sans-serif; cursor:help; box-shadow:0 2px 5px #51366855; }
+.animal-super-symbol.bonus-paused { background:#b5a5bf; color:#493753; border-style:dashed; }
+.animal-super-symbol:focus-visible { outline:2px solid #fff9e3; outline-offset:2px; }
+.animal-scene .animal-super-symbol { position:absolute; top:8px; right:8px; z-index:3; margin:0; }
 .animal-booster-tag { display:inline-block; margin-left:4px; padding:3px 7px; border-radius:999px; background:#9cc8bc; color:#29483e; font-size:10px; font-weight:900; }
 .animal-meta { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; color:var(--text2); font-size:11px; line-height:1.3; margin:5px 0 7px; }
 .animal-meta span { background:var(--cream2); border-radius:999px; padding:4px 7px; }
@@ -59,6 +77,9 @@ body.dark-mode .animal-feed-tooltip::after { border-color:#65725b; background:#3
 .ration-quantity strong { min-width:18px; font-size:15px; }
 .animal-progress { height:5px; border-radius:8px; background:#9cac8733; overflow:hidden; margin:9px 0; }
 .animal-progress span { display:block; height:100%; background:#9aa989; }
+.animal-health { position:relative; height:14px; border-radius:99px; background:#c98b8b55; overflow:hidden; margin:4px 0 7px; }
+.animal-health span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#c56f6f,#d7a45c 55%,#8ba66d); transition:width .3s ease; }
+.animal-health b { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fffdf5; font:800 9px/1 Nunito,sans-serif; text-shadow:0 1px 2px #303b2c99; }
 .animal-product-art { display:inline-flex; width:60px; height:60px; align-items:center; justify-content:center; }
 .animal-product-art svg { width:100%; height:100%; }
 .animal-shop-details { font-size:12px; line-height:1.65; min-height:76px; margin-bottom:10px; }

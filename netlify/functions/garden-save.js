@@ -243,6 +243,16 @@ exports.handler = async (event) => {
     if (existingRes.ok) {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
+      safeData.extraMascotSlotPurchased = safeData.extraMascotSlotPurchased === true || existingData.extraMascotSlotPurchased === true;
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'secondaryMascot')) {
+        safeData.secondaryMascot = safeData.selectedMascot === 'premium' ? (existingData.secondaryMascot || null) : null;
+      }
+      if (safeData.secondaryMascot && (safeData.secondaryMascot !== 'prismatic'
+        || safeData.selectedMascot !== 'premium'
+        || safeData.extraMascotSlotPurchased !== true
+        || safeData.ownedMascots?.prismatic !== true)) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Combinação de mascotes inválida' }) };
+      }
       const storedXP = Number(existingData.xp || 0);
       const incomingXP = Number(safeData.xp || 0);
       if (Number.isFinite(storedXP) && storedXP > 0 && (!Number.isFinite(incomingXP) || incomingXP < storedXP)) {

@@ -588,11 +588,21 @@ body.dark-mode .cozy-mascot { background:#30392d; border-color:#485644; color:va
 .mail-modal.mascot-modal { width:min(760px,calc(100% - 32px)) !important; max-width:760px !important; max-height:88vh; }
 .mascot-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
 .mascot-active-benefit { display:flex; align-items:center; gap:10px; margin:0 0 12px; padding:11px 13px; border:1px solid #d7bd8b; border-radius:15px; background:linear-gradient(135deg,#fff5dc,#f3e1bb); color:var(--text); }
+.mascot-active-benefit { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:8px; }
+.mascot-benefit-card { display:flex; align-items:center; gap:10px; min-width:0; padding:7px; border-radius:11px; background:#ffffff70; }
+.mascot-slot-card { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 12px; padding:12px 14px; border:1px solid #bca66c; border-radius:15px; background:linear-gradient(135deg,#fff6d7,#f4e7b6); color:var(--text); }
+.mascot-slot-card strong { display:block; font:900 13px 'Nunito',sans-serif; }
+.mascot-slot-card small { display:block; margin-top:3px; color:var(--text2); font:700 11px/1.35 'Nunito',sans-serif; }
+.mascot-slot-buy { flex:none; border:1px solid #8b7543; border-radius:11px; padding:9px 12px; background:#fffdf3; color:var(--text); font:900 12px 'Nunito',sans-serif; cursor:pointer; }
+.mascot-slot-buy:disabled { opacity:.75; cursor:default; }
 .mascot-active-benefit.empty { opacity:.78; }
 .mascot-active-benefit-icon { display:flex; align-items:center; justify-content:center; flex:0 0 38px; width:38px; height:38px; border-radius:12px; background:linear-gradient(145deg,#ffe8ad,#d9aa62); font-size:23px; box-shadow:0 2px 0 #c1975a; }
 .mascot-active-benefit strong { display:block; font:900 12px 'Nunito',sans-serif; }
 .mascot-active-benefit small { display:block; margin-top:2px; color:var(--text2); font:700 11px/1.35 'Nunito',sans-serif; }
 body.dark-mode .mascot-active-benefit { border-color:#806a43; background:linear-gradient(135deg,#51452d,#3d3525); }
+body.dark-mode .mascot-benefit-card { background:#ffffff0c; }
+body.dark-mode .mascot-slot-card { border-color:#806a43; background:linear-gradient(135deg,#51452d,#3d3525); }
+body.dark-mode .mascot-slot-buy { border-color:#806a43; background:#30392d; color:#f4f6e9; }
 body.dark-mode .mascot-active-benefit-icon { background:linear-gradient(145deg,#9a7d43,#6a542d); box-shadow:0 2px 0 #2a2318; }
 body.dark-mode .mascot-active-benefit strong, body.dark-mode .mascot-option strong { color:#f4f6e9; }
 body.dark-mode .mascot-active-benefit small, body.dark-mode .mascot-option small { color:#d9e5d0; opacity:1; }
@@ -2531,7 +2541,7 @@ body.dark-mode .sell-confirm-items { background:#30392d; border-color:#53604f; }
 body.dark-mode .sell-confirm-items .shop-cart-row { color:#e1ecd9; }
 .shop-qty-controls { display:flex; align-items:center; gap:3px; margin-top:3px; }
 .shop-qty-controls button { width:16px; height:16px; padding:0; border:1px solid var(--cozy-line); border-radius:50%; background:var(--cream2); color:var(--text); font-size:10px; font-weight:800; cursor:pointer; line-height:1; }
-.shop-qty-controls span { min-width:20px; text-align:center; font-size:10px; font-weight:800; color:var(--text2); }
+.shop-qty-input { width:38px; height:24px; box-sizing:border-box; padding:1px 3px; border:1px solid var(--cozy-line); border-radius:8px; background:var(--cream2); color:var(--text); font:800 11px 'Nunito',sans-serif; text-align:center; }
 .header-icon-btn { min-width: 44px; min-height: 44px; border-radius: 14px; padding: 9px; }
 .header-icon-btn:hover, .logo:hover, .tool-card:hover, .achiev-tool-btn:hover {
   background: #f0f3e8; border-color: #aab79a; transform: translateY(-2px);
@@ -4097,7 +4107,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 </div>
 
 <div class="mail-overlay hidden" id="mascot-overlay">
-  <div class="mail-modal mascot-modal"><button class="popup-close-x" aria-label="Fechar Mascotes" onclick="closeMascotShop()">×</button><div class="mail-modal-title">🐾 Companheiros do jardim</div><p class="premium-copy">Escolha um mascote para acompanhar suas colheitas.</p><div class="mascot-active-benefit empty" id="mascot-active-benefit"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div><div class="mascot-grid">
+  <div class="mail-modal mascot-modal"><button class="popup-close-x" aria-label="Fechar Mascotes" onclick="closeMascotShop()">×</button><div class="mail-modal-title">🐾 Companheiros do jardim</div><p class="premium-copy">Escolha um mascote para acompanhar suas colheitas.</p><div class="mascot-active-benefit empty" id="mascot-active-benefit"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div><div class="mascot-slot-card"><div><strong>🐾 +1 espaço de mascote</strong><small>Permite usar o Brotinho Premium junto com o Brotinho Prismático. Compra única.</small></div><button type="button" class="mascot-slot-buy" id="mascot-slot-buy" onclick="buyExtraMascotSlot()">Obter · 200.000 pts</button></div><div class="mascot-grid">
     <div class="mascot-option"><div class="mascot-option-art" aria-hidden="true"><svg viewBox="0 0 54 64"><ellipse cx="27" cy="59" rx="14" ry="3" fill="#ba8b55" opacity=".35"/><circle cx="27" cy="35" r="17" fill="#ffab35" stroke="#db792c" stroke-width="2"/><ellipse cx="21" cy="28" rx="6" ry="4" fill="#ffe2a0" opacity=".7" transform="rotate(-30 21 28)"/><path d="M27 18Q26 10 32 7" stroke="#66854c" stroke-width="2.5" stroke-linecap="round"/><path d="M30 12Q38 5 44 10Q38 17 30 15Z" fill="#a8c77b" stroke="#66854c" stroke-width="1.4"/><circle cx="21" cy="36" r="2" fill="#493928"/><circle cx="33" cy="36" r="2" fill="#493928"/><path d="M23 43Q27 47 31 43" fill="none" stroke="#493928" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="41" r="3" fill="#f58d72" opacity=".7"/><circle cx="37" cy="41" r="3" fill="#f58d72" opacity=".7"/></svg></div><div><strong>Laranjinha</strong><small>Aumenta a colheita em +1 · disponível desde o nível 1.</small></div><div class="mascot-actions"><button class="mascot-preview" onclick="previewMascot('orange')">Prévia</button><button class="mascot-buy" data-mascot="orange" onclick="buyMascot('orange')">Comprar · 2.500 pts</button></div></div>
     <div class="mascot-option"><div class="mascot-option-art" aria-hidden="true"><svg viewBox="0 0 54 64"><ellipse cx="27" cy="59" rx="14" ry="3" fill="#ba8b55" opacity=".35"/><path d="M11 33Q11 17 23 17Q27 12 31 17Q43 17 43 33Q43 51 27 53Q11 51 11 33Z" fill="#ee6f78" stroke="#b94a58" stroke-width="2"/><ellipse cx="19" cy="25" rx="6" ry="4" fill="#ffc9c4" opacity=".75" transform="rotate(-30 19 25)"/><path d="M27 17Q27 8 32 6" stroke="#66854c" stroke-width="2.5" stroke-linecap="round"/><path d="M31 11Q38 5 44 10Q40 17 31 14Z" fill="#a8c77b" stroke="#66854c" stroke-width="1.4"/><circle cx="21" cy="34" r="2" fill="#4b3032"/><circle cx="33" cy="34" r="2" fill="#4b3032"/><path d="M23 41Q27 45 31 41" fill="none" stroke="#4b3032" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="39" r="3" fill="#ffabb0"/><circle cx="37" cy="39" r="3" fill="#ffabb0"/></svg></div><div><strong>Maçanzinha</strong><small>Aumenta as vendas em 15% · desbloqueia no nível 10.</small></div><div class="mascot-actions"><button class="mascot-preview" onclick="previewMascot('apple')">Prévia</button><button class="mascot-buy" data-mascot="apple" onclick="buyMascot('apple')">Comprar · 7.500 pts</button></div></div>
     <div class="mascot-option"><div class="mascot-option-art" aria-hidden="true"><svg viewBox="0 0 54 64"><ellipse cx="27" cy="59" rx="14" ry="3" fill="#ba8b55" opacity=".35"/><path d="M11 28Q15 16 27 16Q39 16 43 28L38 47Q27 56 16 47Z" fill="#e63d56" stroke="#961f35" stroke-width="2"/><path d="M27 17Q20 10 18 6Q25 5 28 12Q32 5 39 7Q37 14 28 17Z" fill="#8daf60" stroke="#52703d" stroke-width="1.4"/><circle cx="20" cy="30" r="1.3" fill="#2f2024"/><circle cx="29" cy="27" r="1.3" fill="#2f2024"/><circle cx="35" cy="33" r="1.3" fill="#2f2024"/><circle cx="23" cy="40" r="1.3" fill="#2f2024"/><circle cx="32" cy="43" r="1.3" fill="#2f2024"/><path d="M19 35L23 33" stroke="#2b2022" stroke-width="1.8" stroke-linecap="round"/><path d="M31 33L35 35" stroke="#2b2022" stroke-width="1.8" stroke-linecap="round"/><circle cx="21" cy="37" r="2" fill="#21171b"/><circle cx="33" cy="37" r="2" fill="#21171b"/><path d="M24 44Q27 41 30 44" fill="none" stroke="#21171b" stroke-width="1.8" stroke-linecap="round"/></svg></div><div><strong>Moranguinho</strong><small>Adiciona +2 na recuperação de água a cada 5 minutos · desbloqueia no nível 15.</small></div><div class="mascot-actions"><button class="mascot-preview" onclick="previewMascot('strawberry')">Prévia</button><button type="button" class="mascot-buy" data-mascot="strawberry" onclick="event.stopPropagation();buyMascot('strawberry')">Comprar · 15.000 pts</button></div></div>
@@ -4461,6 +4471,8 @@ const G = {
   premiumSpecialPlotClaimed: false,
   isPremium: false,
   selectedMascot: null,
+  secondaryMascot: null,
+  extraMascotSlotPurchased: false,
   ownedMascots: {},
   twitchzinhoNextRewardAt: 0,
   twitchzinhoPendingCoins: 0,
@@ -4626,7 +4638,7 @@ function announceGardenEvent() {
   const mutationChance = keys.includes('mutation') ? 0.08 : 0;
   const regularKeys = keys.filter(key => key !== 'mutation');
   const eventPool = regularKeys.length ? regularKeys : ['mutation'];
-  const prismaticPetBonus = G.selectedMascot === 'prismatic' && eventPool.includes('rain');
+  const prismaticPetBonus = hasActiveMascot('prismatic') && eventPool.includes('rain');
   const weightedPool = prismaticPetBonus ? [...eventPool, 'rain'] : eventPool;
   const type = Math.random() < mutationChance
     ? 'mutation'
@@ -5154,7 +5166,7 @@ function effectiveMaxGrow(type) {
 }
 function effectiveSellValue(type, epicOverride) {
   const base = FarmAnimals.products[type]?.sell ?? SELL_VALUE[type];
-  const mascotBonus = ['apple','premium'].includes(G.selectedMascot) ? 1.15 : 1;
+  const mascotBonus = hasActiveMascot('apple') || hasActiveMascot('premium') ? 1.15 : 1;
   let val = Math.round(base * mascotBonus);
   // Skill: Etiqueta Dourada (+3% por nível)
   val = Math.round(val * (1 + skillSellBonus()));
@@ -5162,10 +5174,12 @@ function effectiveSellValue(type, epicOverride) {
   if (epicOverride) val *= 2;
   return val;
 }
-function effectiveHarvestBonus() { return ['orange','premium'].includes(G.selectedMascot) ? 1 : 0; }
+function activeMascots() { return [G.selectedMascot, G.secondaryMascot].filter(Boolean); }
+function hasActiveMascot(id) { return activeMascots().includes(id); }
+function effectiveHarvestBonus() { return hasActiveMascot('orange') || hasActiveMascot('premium') ? 1 : 0; }
 function effectiveWaterRefillAmount() {
   const skillRecovery = Number(G.skillNodes?.irrigacao || 0);
-  const mascotRecovery = ['strawberry', 'premium'].includes(G.selectedMascot) ? 1 : 0;
+  const mascotRecovery = hasActiveMascot('strawberry') || hasActiveMascot('premium') ? 1 : 0;
   return 1 + skillRecovery + mascotRecovery;
 }
 // 15 seg reais = 1 grow tick. Solo Vivo reduz até -12%.
@@ -5673,9 +5687,25 @@ function adjustShopQty(type, delta) {
   else renderShop();
   renderShopCart();
 }
+function setShopQtyFromInput(type, value, input) {
+  const parsed=Number(value);
+  if(!Number.isInteger(parsed)||parsed<1){if(input&&value==='')input.value=SHOP_QTY[type]||1;return;}
+  const qty=Math.max(1,Math.min(99,parsed));
+  SHOP_QTY[type]=qty;
+  if(input&&String(qty)!==String(parsed))input.value=qty;
+  const card=input?.closest('.shop-item, .fertilizer-item');
+  const total=card?.querySelector('[data-shop-total]');
+  if(!total)return;
+  if(card.classList.contains('fertilizer-item')){
+    total.innerHTML=`<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${cartUnitCost(type)*qty}`;
+  }else total.innerHTML=seasonPriceLabel(type,qty);
+  const addButton=card.querySelector('.fertilizer-buy-btn');
+  if(addButton)addButton.disabled=G.pts<cartUnitCost(type)*qty;
+  card.classList.toggle('cant-afford',G.pts<(card.classList.contains('fertilizer-item')?cartUnitCost(type):seasonPrice(type))*qty);
+}
 function shopQtyControls(type) {
   const qty = SHOP_QTY[type] || 1;
-  return `<div class="shop-qty-controls" onclick="event.stopPropagation()"><button type="button" onclick="adjustShopQty('${type}',-1)">−</button><span>×${qty}</span><button type="button" onclick="adjustShopQty('${type}',1)">+</button></div>`;
+  return `<div class="shop-qty-controls" onclick="event.stopPropagation()"><button type="button" aria-label="Diminuir quantidade" onclick="adjustShopQty('${type}',-1)">−</button><input class="shop-qty-input" type="number" min="1" max="99" step="1" value="${qty}" aria-label="Quantidade de ${cartProduct(type)?.name||type}" oninput="setShopQtyFromInput('${type}',this.value,this)"><button type="button" aria-label="Aumentar quantidade" onclick="adjustShopQty('${type}',1)">+</button></div>`;
 }
 
 // ─── FLOWERS ──────────────────────────────────────────────
@@ -5761,7 +5791,7 @@ function renderFlowerShop() {
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
       <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
-      <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
+      <div class="shop-item-price" data-shop-total="${type}">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
         venda <span style="color:var(--soil2);font-weight:800;margin:0 2px"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${sellVal}</span>(${profitLabel})
@@ -6159,21 +6189,23 @@ function renderMascotShop() {
   const levels = { orange:1, apple:10, strawberry:15, premium:25 };
   const albumComplete = hasCompletePrismaticAlbum();
   if (albumComplete && G.ownedMascots?.prismatic !== true) G.ownedMascots.prismatic = true;
+  const slotButton=document.getElementById('mascot-slot-buy');
+  if(slotButton){slotButton.textContent=G.extraMascotSlotPurchased?'✓ Espaço adquirido':'Obter · 200.000 pts';slotButton.disabled=G.extraMascotSlotPurchased;}
   document.querySelectorAll('.mascot-buy[data-mascot]').forEach(btn => {
-    const id=btn.dataset.mascot, owned=G.ownedMascots?.[id]===true, selected=G.selectedMascot===id;
+    const id=btn.dataset.mascot, owned=G.ownedMascots?.[id]===true, selected=G.selectedMascot===id, selectedExtra=G.secondaryMascot===id;
     const required=levels[id], locked=required!==undefined && currentLevel()<required && !owned;
     const prismaticLocked=id==='prismatic'&&!albumComplete;
     const premiumOnly=id==='twitchzinho';
-    btn.classList.toggle('selected',selected); btn.classList.toggle('locked',locked||prismaticLocked);
-    btn.textContent=selected?'Selecionado':premiumOnly&&!owned?'✦ Resgate no Premium':locked?`🔒 Nível ${required}`:prismaticLocked?'🔒 Complete o álbum':owned?'Selecionar':labels[id];
-    btn.disabled=selected||(premiumOnly&&!owned)||locked||prismaticLocked;
+    btn.classList.toggle('selected',selected||selectedExtra); btn.classList.toggle('locked',locked||prismaticLocked);
+    btn.textContent=selected?'Selecionado':selectedExtra?'Desequipar extra':premiumOnly&&!owned?'✦ Resgate no Premium':locked?`🔒 Nível ${required}`:prismaticLocked?'🔒 Complete o álbum':owned?'Selecionar':labels[id];
+    btn.disabled=(selected&&!selectedExtra)||(premiumOnly&&!owned)||locked||prismaticLocked;
     // O botão começa desabilitado no HTML; atribuir a ação durante a renderização
     // garante que ele continue clicável depois de o Twitchzinho ser resgatado.
     if (id === 'twitchzinho') btn.onclick = () => buyMascot('twitchzinho');
   });
   const info = { orange:['🍊','Laranjinha','+1 item na colheita.'], apple:['🍎','Maçanzinha','+15% no valor das vendas.'], strawberry:['🍓','Moranguinho','Adiciona +2 na recuperação de água a cada 5 minutos.'], premium:['🌱','Brotinho Premium','+1 colheita · +15% nas vendas · +2 na recuperação de água a cada 5 minutos.'], twitchzinho:['💜','Twitchzinho','Quantidade aleatória de moedas a cada 5 minutos.'], prismatic:['🌈','Brotinho Prismático','Aumenta a chance de Chuva Mágica nos eventos.'] };
-  const panel=document.getElementById('mascot-active-benefit'); const data=info[G.selectedMascot];
-  if (panel) { panel.classList.toggle('empty', !data); panel.innerHTML=data ? `<span class="mascot-active-benefit-icon">${data[0]}</span><div><strong>Você está ganhando com ${data[1]}</strong><small>${data[2]}</small></div>` : '<span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div>'; }
+  const panel=document.getElementById('mascot-active-benefit'); const active=activeMascots().map(id=>info[id]).filter(Boolean);
+  if (panel) { panel.classList.toggle('empty', !active.length); panel.innerHTML=active.length ? active.map(data=>`<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">${data[0]}</span><div><strong>${data[1]} ativo</strong><small>${data[2]}</small></div></div>`).join('') : '<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div>'; }
 }
 function previewMascot(id) {
   if (typeof window.setGardenMascot === 'function') window.setGardenMascot(id, true);
@@ -6189,16 +6221,16 @@ function previewMascot(id) {
 function applySelectedMascotAppearance(animate=false) {
   const premium = G.selectedMascot === 'premium';
   document.body.classList.toggle('mascot-premium-active', premium);
-  document.body.classList.toggle('mascot-prismatic-active', G.selectedMascot === 'prismatic');
+  document.body.classList.toggle('mascot-prismatic-active', hasActiveMascot('prismatic'));
   document.body.classList.toggle('mascot-orange-active', G.selectedMascot === 'orange');
   document.body.classList.toggle('mascot-twitchzinho-active', G.selectedMascot === 'twitchzinho');
-  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(G.selectedMascot, animate);
+  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(G.selectedMascot, animate, G.secondaryMascot);
   else if (typeof window.setMascotPremium === 'function') window.setMascotPremium(premium, animate);
   const pouch = document.getElementById('twitchzinho-pouch');
   if (pouch) pouch.dataset.preview = 'false';
   updateTwitchzinhoPouch();
 }
-const MASCOT_COSTS = { orange:2500, apple:7500, strawberry:15000, premium:75000 };
+const MASCOT_COSTS = { orange:2500, apple:7500, strawberry:15000, premium:75000, extraSlot:200000 };
 const SPRING_ALBUM_NAMES = ['Brotinho de Esperança','Juju entre Margaridas','Alfredo do Orvalho','Ovelhinha Algodão','Cogumelo do Pomar','Abelhinha Bilhetinho','Tulipinha Nuvem','Moranguinho Estrelar','Borboleta Açucarada','Solária da Primavera'];
 const PRISMATIC_ALBUM_NAMES = ['Prisma de Orvalho','Prisma de Pétala','Prisma do Galinheiro','Prisma do Lago','Prisma de Cristal','Prisma Borboleta','Prisma Lunar','Prisma Aurora','Prisma Estelar','Arco-Íris Primaveril'];
 function hasCompleteSpringAlbum(cards=G.albumCards||{}) { return SPRING_ALBUM_NAMES.every(name=>Number(cards[name]||0)>0); }
@@ -6261,6 +6293,7 @@ async function buyMascot(id) {
   if (id==='prismatic'&&!hasCompletePrismaticAlbum()) { toast('🌈 Complete as 10 cartas do álbum prismático para desbloquear este mascote.',3500); renderMascotShop(); return; }
   if (id === 'twitchzinho' && !alreadyOwned) { toast('💜 Resgate o Twitchzinho no benefício Premium.'); return; }
   const cost=MASCOT_COSTS[id]||0;
+  if (G.secondaryMascot === id) { G.secondaryMascot=null; applySelectedMascotAppearance(); renderMascotShop(); saveGardenToSE(); toast('🐾 Brotinho Prismático retirado do espaço extra.'); return; }
   if (G.selectedMascot === id) { toast('🐾 Este mascote já está selecionado!'); return; }
   if (!alreadyOwned) {
     if (id==='prismatic') { toast('🌈 Este mascote é uma recompensa do álbum, não pode ser comprado.'); return; }
@@ -6268,9 +6301,27 @@ async function buyMascot(id) {
     if (!(await chargeGamePoints(cost))) return;
     G.ownedMascots[id] = true;
   }
-  G.selectedMascot = id; applySelectedMascotAppearance(true); updatePts(); renderMascotShop(); renderWateringCapacity(); saveGardenToSE(); toast(id === 'premium' ? '✨ O Brotinho se transformou! Todos os benefícios Premium estão ativos.' : id==='prismatic' ? '🌈 Brotinho Prismático selecionado! A chance de Chuva Mágica aumentou.' : '🐾 Mascote selecionado! Seus benefícios já estão ativos.', 3500);
+  if ((id==='prismatic' && G.selectedMascot==='premium') || (id==='premium' && G.selectedMascot==='prismatic')) {
+    if (G.extraMascotSlotPurchased) {
+      G.selectedMascot='premium'; G.secondaryMascot='prismatic';
+    } else {
+      G.selectedMascot=id; G.secondaryMascot=null;
+    }
+  } else {
+    G.selectedMascot=id; G.secondaryMascot=null;
+  }
+  applySelectedMascotAppearance(true); updatePts(); renderMascotShop(); renderWateringCapacity(); saveGardenToSE(); toast(G.secondaryMascot ? '✨ Brotinho Premium e Brotinho Prismático estão ativos juntos!' : id === 'premium' ? '✨ O Brotinho se transformou! Todos os benefícios Premium estão ativos.' : id==='prismatic' ? '🌈 Brotinho Prismático selecionado! A chance de Chuva Mágica aumentou.' : '🐾 Mascote selecionado! Seus benefícios já estão ativos.', 3500);
 }
 window.buyMascot = buyMascot;
+async function buyExtraMascotSlot() {
+  if(G.extraMascotSlotPurchased){toast('🐾 O espaço extra já foi adquirido.');return;}
+  if(!(await chargeGamePoints(MASCOT_COSTS.extraSlot,'Espaço extra de mascote')))return;
+  G.extraMascotSlotPurchased=true;
+  if(G.selectedMascot==='premium'&&G.ownedMascots?.prismatic&&hasCompletePrismaticAlbum())G.secondaryMascot='prismatic';
+  applySelectedMascotAppearance();renderMascotShop();updatePts();await saveGardenToSE();
+  toast('🐾 Espaço extra adquirido! Agora você pode usar o Brotinho Premium junto com o Prismático.');
+}
+window.buyExtraMascotSlot=buyExtraMascotSlot;
 function renderPremiumBenefits() {
   const states = { watering:G.premiumWateringCan, shovel:G.premiumShovel, plants:G.premiumPlantsUnlocked, fertilizers:G.premiumFertilizersClaimed, plot:G.premiumSpecialPlotClaimed, mascot:G.ownedMascots?.twitchzinho === true };
   document.querySelectorAll('#premium-overlay .premium-claim').forEach(btn => {
@@ -6320,7 +6371,7 @@ function claimPremium(kind) {
     renderPlots();
     renderPlotShop();
   }
-  if (kind === 'mascot') { G.ownedMascots = G.ownedMascots || {}; G.ownedMascots.twitchzinho = true; G.selectedMascot = 'twitchzinho'; applySelectedMascotAppearance(true); renderMascotShop(); }
+  if (kind === 'mascot') { G.ownedMascots = G.ownedMascots || {}; G.ownedMascots.twitchzinho = true; G.selectedMascot = 'twitchzinho'; G.secondaryMascot = null; applySelectedMascotAppearance(true); renderMascotShop(); }
   updatePts(); renderPremiumBenefits(); renderWateringCapacity(); refreshShovelTool(); saveGardenToSE(); toast('✦ Presente Premium resgatado! Aproveite seu mimo do jardim 💜', 3200);
 }
 function claimAllPremium() {
@@ -7423,7 +7474,7 @@ function renderFertilizerShop() {
           <div class="fertilizer-cost">
             ${locked
               ? `<div class="cozy-level-chip" style="font-size:11px;font-weight:800;background:#7040c0;color:#fff;border-radius:99px;padding:3px 10px">🔒 Nv${f.minLevel}</div>`
-              : `<div class="fertilizer-price"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total}</div>
+              : `<div class="fertilizer-price" data-shop-total="${f.id}"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total}</div>
                  ${shopQtyControls(f.id)}<button type="button" class="fertilizer-buy-btn" onclick="event.stopPropagation();addToShopCart('${f.id}', event)" ${G.pts >= total ? '' : 'disabled'}>Adicionar</button>`
             }
           </div>
@@ -7831,7 +7882,7 @@ function renderShop() {
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
       <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
-      <div class="shop-item-price">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
+      <div class="shop-item-price" data-shop-total="${type}">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
         venda <span style="color:var(--soil2);font-weight:800;margin:0 2px"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${sellVal}</span>(${profitLabel})
@@ -9674,6 +9725,8 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     premiumSpecialPlotClaimed: G.premiumSpecialPlotClaimed === true,
     isPremium: G.isPremium === true,
     selectedMascot: G.selectedMascot || null,
+    secondaryMascot: G.secondaryMascot || null,
+    extraMascotSlotPurchased: G.extraMascotSlotPurchased === true,
     ownedMascots: G.ownedMascots || {},
     twitchzinhoNextRewardAt: Number(G.twitchzinhoNextRewardAt || 0),
     twitchzinhoPendingCoins: Number(G.twitchzinhoPendingCoins || 0),
@@ -9984,7 +10037,10 @@ async function loadGardenFromSE(username) {
     G.isPremium = save.isPremium === true || G.premiumWateringCan || G.premiumShovel || G.premiumPlantsUnlocked || G.premiumFertilizersClaimed || G.premiumSpecialPlotClaimed;
     restorePremiumClaimsCache(username);
     G.selectedMascot = save.selectedMascot || null;
+    G.secondaryMascot = save.secondaryMascot === 'prismatic' ? 'prismatic' : null;
+    G.extraMascotSlotPurchased = save.extraMascotSlotPurchased === true;
     G.ownedMascots = save.ownedMascots || (G.selectedMascot ? {[G.selectedMascot]: true} : {});
+    if (!G.extraMascotSlotPurchased || G.selectedMascot !== 'premium' || G.ownedMascots.prismatic !== true) G.secondaryMascot = null;
     syncPrismaticMascotUnlock();
     G.twitchzinhoNextRewardAt = Number(save.twitchzinhoNextRewardAt || 0);
     G.twitchzinhoPendingCoins = Number(save.twitchzinhoPendingCoins || 0);
@@ -10528,6 +10584,8 @@ if (isLocalPreview) {
   G.premiumFertilizersClaimed = false;
   G.premiumSpecialPlotClaimed = false;
   G.selectedMascot = null;
+  G.secondaryMascot = null;
+  G.extraMascotSlotPurchased = false;
   G.bonusRefillDiscount = false;
   G.bonusWateringCapacity = 0;
   G.bonusWaterRecoveryMinutes = 0;
@@ -10582,7 +10640,7 @@ setInterval(() => {
 }, 600000);
 
 // Twitchzinho: recompensa passiva aleatória a cada 5 minutos.
-function twitchzinhoBenefitActive() { return ['twitchzinho','premium'].includes(G.selectedMascot); }
+function twitchzinhoBenefitActive() { return hasActiveMascot('twitchzinho') || hasActiveMascot('premium'); }
 function updateTwitchzinhoPouch(preview = false) {
   if (!seUser) return;
   let pouch = document.getElementById('twitchzinho-pouch');
@@ -11314,7 +11372,7 @@ async function redeemExclusiveReward(rewardKey) {
 }
 </script>
 
-<script src="garden-mascot.js?v=12"></script>
+<script src="garden-mascot.js?v=13"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
@@ -11358,8 +11416,8 @@ PACK_CARDS.length=0;[['Pipo, o brotinho','Comum',55/3],['Juju do galinheiro','Co
 const packAlbumNames={'Pipo, o brotinho':'Brotinho de Esperança','Juju do galinheiro':'Juju entre Margaridas','Alfredo do lago':'Alfredo do Orvalho','Mimi das nuvens':'Ovelhinha Algodão','Bento, o cogumelo':'Cogumelo do Pomar','Mel, a abelhinha':'Abelhinha Bilhetinho','Luna do luar':'Tulipinha Nuvem','Íris cristalina':'Moranguinho Estrelar','Aurora das asas':'Borboleta Açucarada','Solária, guardiã do jardim':'Solária da Primavera'};
 buyCardPack=function(){if(Number(G.pts||0)<1){toast('Você precisa de 1 ponto para comprar o pack.');return}G.pts-=1;G.albumPacks=Number(G.albumPacks||0)+1;G.albumCards=G.albumCards||{};const pulls=Array.from({length:3},drawPackCard),overlay=document.createElement('div');overlay.className='mail-overlay card-pack-opening';overlay.innerHTML='<div class="mail-modal card-pack-modal"><button class="popup-close-x" id="close-pack-opening">×</button><div class="mail-modal-title">🃏 Seu pack chegou!</div><p class="premium-copy">Clique nas cartinhas para descobrir suas surpresas.</p><div class="pack-cards">'+pulls.map((card,i)=>'<button class="pack-card" data-card="'+i+'"><span class="pack-card-back">✦</span><span class="pack-card-front"><span class="pack-card-artwork">'+packArtFor(card)+'</span><b>'+card.name+'</b><small>'+card.rarity+'</small></span></button>').join('')+'</div><p class="pack-opening-status">Revele as 3 cartas para guardar o pack.</p></div>';document.body.appendChild(overlay);let revealed=0;const persist=()=>saveGardenToSE().catch(()=>toast('Não foi possível salvar o álbum agora.'));overlay.querySelectorAll('.pack-card').forEach(button=>button.onclick=()=>{if(button.classList.contains('revealed'))return;button.classList.add('revealed');const card=pulls[Number(button.dataset.card)],key=packAlbumNames[card.name]||card.name;G.albumCards[key]=Number(G.albumCards[key]||0)+1;revealed++;overlay.querySelector('.pack-opening-status').textContent=revealed===3?'As 3 cartas foram adicionadas ao seu álbum!':'Revele as outras cartinhas.';syncPrismaticMascotUnlock();persist()});overlay.querySelector('#close-pack-opening').onclick=()=>{persist();overlay.remove();renderCardPackShop()};renderCardPackShop()};
 </script>
-<link rel="stylesheet" href="card-packs.css">
+<link rel="stylesheet" href="card-packs.css?v=10-card-packs">
 <link rel="stylesheet" href="album-trade-badge.css">
 <script src="album-artwork.js"></script>
-<script src="card-packs.js"></script>
+<script src="card-packs.js?v=10-card-packs"></script>
 <script src="album-trade-badge.js"></script>

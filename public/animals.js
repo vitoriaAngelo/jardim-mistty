@@ -29,10 +29,19 @@ function rationArt(type) {
 function openRationShop() { openShop();switchShopTab('racoes'); }
 const rationShopQty = {};
 function changeRationQty(id, delta) { rationShopQty[id] = Math.max(1, Math.min(99, Number(rationShopQty[id] || 1) + delta)); renderRationShop(); }
+function setRationShopQty(id, value, input) {
+  const parsed=Number(value);
+  if(!Number.isInteger(parsed)||parsed<1){if(input&&value==='')input.value=rationShopQty[id]||1;return;}
+  const qty=Math.max(1,Math.min(99,parsed));rationShopQty[id]=qty;
+  if(input&&qty!==parsed)input.value=qty;
+  const ration=FarmAnimals.rations[id],button=document.querySelector(`[data-ration-buy="${id}"]`);
+  if(button&&ration)button.textContent=`Comprar · ${(ration.cost*qty).toLocaleString('pt-BR')} pts`;
+}
+function buyRationFromShop(id) { return animalAction('ration',id,'normal',rationShopQty[id]||1); }
 function renderRationShop() {
   const root=document.getElementById('ration-shop');if(!root)return;
   const state=animalState();
-  root.innerHTML='<p class="animal-note">Escolha a quantidade e compre várias unidades de uma vez.</p><div class="animal-shop-grid">'+Object.entries(FarmAnimals.rations).map(([id,r])=>{const qty=Number(rationShopQty[id]||1);return `<article class="animal-shop-card">${rationArt(id)}<h4>Ração ${r.name}</h4><p class="animal-shop-details">${r.description}</p><p>Na despensa: ${id==='normal'?state.feed:state.rations[id]}</p><div class="ration-quantity"><button type="button" aria-label="Diminuir quantidade" onclick="changeRationQty('${id}',-1)">−</button><strong>${qty}</strong><button type="button" aria-label="Aumentar quantidade" onclick="changeRationQty('${id}',1)">+</button></div><button class="animal-action" onclick="animalAction('ration','${id}','normal',${qty})" ${animalActionInFlight?'disabled':''}>Comprar · ${(r.cost*qty).toLocaleString('pt-BR')} pts</button></article>`;}).join('')+'</div>';
+  root.innerHTML='<p class="animal-note">Digite a quantidade desejada (até 99) ou use − e +. O valor total é atualizado antes da compra.</p><div class="animal-shop-grid">'+Object.entries(FarmAnimals.rations).map(([id,r])=>{const qty=Number(rationShopQty[id]||1);return `<article class="animal-shop-card">${rationArt(id)}<h4>Ração ${r.name}</h4><p class="animal-shop-details">${r.description}</p><p>Na despensa: ${id==='normal'?state.feed:state.rations[id]}</p><div class="ration-quantity"><button type="button" aria-label="Diminuir quantidade" onclick="changeRationQty('${id}',-1)">−</button><input type="number" min="1" max="99" step="1" value="${qty}" aria-label="Quantidade de Ração ${r.name}" oninput="setRationShopQty('${id}',this.value,this)"><button type="button" aria-label="Aumentar quantidade" onclick="changeRationQty('${id}',1)">+</button></div><button class="animal-action" data-ration-buy="${id}" onclick="buyRationFromShop('${id}')" ${animalActionInFlight?'disabled':''}>Comprar · ${(r.cost*qty).toLocaleString('pt-BR')} pts</button></article>`;}).join('')+'</div>';
 }
 function feedAnimalChoice(id, ration = 'normal') { return animalAction('feed', id, ration); }
 let animalActionInFlight = false;

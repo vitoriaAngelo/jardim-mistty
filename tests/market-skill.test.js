@@ -60,3 +60,14 @@ test('setas por item limpam ou selecionam todo o estoque somente daquele item', 
   context.setSellAllItemQty('flower', true);
   assert.deepEqual({ ...context.SELL }, { tomato: 0, flower: 8 });
 });
+
+test('indicador da Feira Local aparece dentro do popup logo abaixo do total', () => {
+  const popupStart = html.indexOf('function renderSellAllConfirm()');
+  const popupEnd = html.indexOf('function adjustSellAllQty(', popupStart);
+  const popupSource = html.slice(popupStart, popupEnd);
+  assert.match(popupSource, /market-total-pts[\s\S]*market-fair-indicator/);
+
+  const marketStart = html.indexOf('function renderHarvested()');
+  const marketEnd = html.indexOf('// ─── RANKING', marketStart);
+  assert.doesNotMatch(html.slice(marketStart, marketEnd), /market-fair-indicator/);
+});

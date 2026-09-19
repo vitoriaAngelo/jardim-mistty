@@ -6358,20 +6358,13 @@ function renderHarvested() {
 
   const total = sellTotal();
   const anySelected = allTypes.some(t => (SELL[t] || 0) > 0);
-  const selectedCount = harvestedTypes.reduce((sum, type) => sum + (SELL[type] || 0), 0);
-  const baseSelectedTotal = harvestedTypes.reduce((sum, type) => sum + (SELL[type] || 0) * effectiveSellValue(type), 0);
-  const fairBonusPoints = Math.max(0, total - baseSelectedTotal);
-  const fairStatus = selectedCount >= 300 ? `ATIVO · ${selectedCount} itens` : `${selectedCount}/300 itens`;
-  const fairLabel = Number(G.skillNodes?.feira_local || 0) > 0
-    ? `🎪 Feira Local: +${fairBonusPoints} pts · ${fairStatus}`
-    : `🎪 Feira Local: habilidade não desbloqueada · ${selectedCount}/300 itens`;
   const grandTotal = harvestedTypes.reduce((sum, t) => sum + (G.harvested[t] || 0) * effectiveSellValue(t), 0);
 
   bag.innerHTML = `
     <div class="market-slots">${slots}</div>
     <div class="market-footer">
       <div class="market-total-wrap">
-        <div><div class="market-total-pts">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div><small class="market-fair-indicator ${selectedCount >= 300 && Number(G.skillNodes?.feira_local || 0) > 0 ? 'active' : 'pending'}">${fairLabel}</small></div>
+        <div class="market-total-pts">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div>
         <button class="sell-btn" onclick="sellAll()" style="background:var(--soil2);box-shadow:0 3px 0 #3a1a08">Vender tudo 🧺</button>
         <button class="sell-btn" onclick="sellSelected()" ${total === 0 ? 'disabled' : ''}>Vender 💰</button>
       </div>
@@ -7380,6 +7373,12 @@ function renderSellAllConfirm() {
     return sum + (SELL[type] || 0) * effectiveSellValue(type, isEpic);
   }, 0);
   const total = Math.round(baseTotal * (1 + fairBonus));
+  const fairBonusPoints = Math.max(0, total - baseTotal);
+  const fairUnlocked = Number(G.skillNodes?.feira_local || 0) > 0;
+  const fairStatus = selectedCount >= 300 ? `ATIVO · ${selectedCount} itens` : `${selectedCount}/300 itens`;
+  const fairLabel = fairUnlocked
+    ? `🎪 Feira Local: +${fairBonusPoints} pts · ${fairStatus}`
+    : `🎪 Feira Local: habilidade não desbloqueada · ${selectedCount}/300 itens`;
   const rows = available.map(type => {
     const item = getPlantable(type);
     const qty = SELL[type] || 0;
@@ -7393,9 +7392,10 @@ function renderSellAllConfirm() {
   overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="sell-all-confirm-title">
     <button class="popup-close-x" onclick="closeSellAllConfirm()" aria-label="Fechar">×</button>
     <h2 id="sell-all-confirm-title">Escolha o que vender</h2>
-    <p>Confira os itens e ajuste as quantidades antes de confirmar.${fairBonus ? ` 🎪 Feira Local: +${Math.round(fairBonus * 100)}% por vender ${selectedCount} itens.` : ''}</p>
+    <p>Confira os itens e ajuste as quantidades antes de confirmar.</p>
     <div class="sell-confirm-items">${rows}</div>
     <div class="market-total-pts" style="width:max-content;margin:14px auto 4px">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div>
+    <div style="display:flex;justify-content:center"><small class="market-fair-indicator ${selectedCount >= 300 && fairUnlocked ? 'active' : 'pending'}">${fairLabel}</small></div>
     <div class="modal-actions"><button type="button" class="btn-cancel" onclick="event.stopPropagation();closeSellAllConfirm()">Cancelar</button><button type="button" class="btn-ok" onclick="event.stopPropagation();confirmSellAll()" ${total === 0 ? 'disabled' : ''}>Confirmar</button></div>
   </div>`;
   document.body.appendChild(overlay);

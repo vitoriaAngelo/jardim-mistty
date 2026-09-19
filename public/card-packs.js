@@ -6,6 +6,7 @@
   const weights = [55/3,55/3,55/3,12.5,12.5,6,6,3,3,2];
   const prismWeights = [.2,.2,.2,.2,.35/3,.35/3,.35/3,.06,.06,.03];
   const rarities = ['Comum','Comum','Comum','Incomum','Incomum','Rara','Rara','Épica','Épica','Lendária'];
+  const packPrices = { normal:300, prismatic:750 };
   let busy = false;
   function draw(kind) {
     const pool = normalNames.map((name,i)=>({name,i,key:name,legacy:oldNames[i],rarity:rarities[i],weight:weights[i]*(kind==='prismatic'?.987:1),prismatic:false}));
@@ -15,14 +16,14 @@
   }
   window.renderCardPackShop=function(){
     const el=document.getElementById('card-pack-shop');if(!el)return;
-    el.innerHTML=['normal','prismatic'].map(kind=>'<section class="pack-product '+kind+'"><div class="pack-envelope"><span>✦</span><strong>'+(kind==='normal'?'PRIMAVERA':'PRISMAS')+'</strong><small>3 FIGURINHAS</small></div><div><h3>'+(kind==='normal'?'Primavera Encantada':'Prismas da Primavera')+'</h3><p>'+(kind==='normal'?'Três cartas do álbum normal.':'Três cartas: normais ou prismáticas, com chance de Arco-Íris.')+'</p><small>'+(kind==='normal'?'Comum 55% · Incomum 25% · Rara 12% · Épica 6% · Lendária 2%':'Normais 98,70% · Prismáticas 0,80% · Raras prismáticas 0,35% · Épicas prismáticas 0,12% · Arco-Íris 0,03%')+'</small></div><div><strong>'+(kind==='normal'?'1 ponto':'2 pontos')+'</strong><button data-buy-pack="'+kind+'" '+(busy?'disabled':'')+'>Comprar pack</button></div></section>').join('');
+    el.innerHTML=['normal','prismatic'].map(kind=>'<section class="pack-product '+kind+'"><div class="pack-envelope"><span>✦</span><strong>'+(kind==='normal'?'PRIMAVERA':'PRISMAS')+'</strong><small>3 FIGURINHAS</small></div><div><h3>'+(kind==='normal'?'Primavera Encantada':'Prismas da Primavera')+'</h3><p>'+(kind==='normal'?'Três cartas do álbum normal.':'Três cartas: normais ou prismáticas, com chance de Arco-Íris.')+'</p><small>'+(kind==='normal'?'Comum 55% · Incomum 25% · Rara 12% · Épica 6% · Lendária 2%':'Normais 98,70% · Prismáticas 0,80% · Raras prismáticas 0,35% · Épicas prismáticas 0,12% · Arco-Íris 0,03%')+'</small></div><div><strong>'+packPrices[kind].toLocaleString('pt-BR')+' pontos</strong><button data-buy-pack="'+kind+'" '+(busy?'disabled':'')+'>Comprar pack</button></div></section>').join('');
     el.querySelectorAll('[data-buy-pack]').forEach(b=>b.onclick=()=>buyCardPack(b.dataset.buyPack));
   };
   window.buyCardPack=async function(kind='normal'){
     if(busy)return;busy=true;renderCardPackShop();
     let charged=false;
     try{
-      if(!(await chargeGamePoints(kind==='prismatic'?2:1,'Pack '+kind)))return;
+      if(!(await chargeGamePoints(packPrices[kind],'Pack '+kind)))return;
       charged=true;
       const pulls=Array.from({length:3},()=>draw(kind));
       G.albumCards={...(G.albumCards||{})};

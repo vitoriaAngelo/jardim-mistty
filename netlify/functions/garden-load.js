@@ -7,6 +7,11 @@ const MANUAL_PAID_KITS = {
     username: 'goularttw',
     kit: 'Kit Jardineiro Especialista',
   },
+  misttylol: {
+    order_id: 'manual-kit-especialista-misttylol-2026-09-19',
+    username: 'misttylol',
+    kit: 'Kit Jardineiro Especialista',
+  },
 };
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1dmpyaWRxeHFweG5sanVjbnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDM3ODQsImV4cCI6MjEwNDgxOTc4NH0.shmGCDtE-XDPROUCezVjR27WFYD3VYfvQaE1-OVewGc';
 

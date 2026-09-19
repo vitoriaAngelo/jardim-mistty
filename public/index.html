@@ -498,6 +498,12 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
   transition: background .12s;
 }
 .user-menu-item:hover { background: var(--cream2); color: #c03030; }
+.user-audio-settings { margin:0 8px 8px; padding:10px; border:1px solid var(--cozy-line); border-radius:11px; background:var(--cream2); color:var(--text); }
+.user-audio-settings[hidden] { display:none; }
+.user-audio-settings label { display:flex; justify-content:space-between; gap:8px; margin-bottom:7px; font-size:11px; font-weight:800; }
+.user-audio-settings input { width:100%; accent-color:#80629c; cursor:pointer; }
+.user-audio-settings .audio-volume-hint { display:block; margin-top:3px; color:var(--text2); font-size:10px; text-align:right; }
+body.dark-mode .user-audio-settings { background:#30392d; border-color:#53604f; color:#e1ecd9; }
 
 /* ─── MAIN LAYOUT ────────────────────────── */
 .game-wrap {
@@ -3343,6 +3349,12 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         <button class="user-menu-item user-menu-mail-item" onclick="openMailbox(); document.getElementById('user-menu').classList.add('hidden');"><span>✉️ Correio</span><span class="user-menu-mail-badge hidden" id="mail-menu-badge">0</span></button>
         <button class="user-menu-item user-menu-mail-item" onclick="openAchievements(); document.getElementById('user-menu').classList.add('hidden');"><span>🏆 Conquistas</span><span class="user-menu-mail-badge hidden" id="achiev-menu-badge">0</span></button>
         <button class="user-menu-item" onclick="openPointsHistory(); document.getElementById('user-menu').classList.add('hidden');">📒 Histórico de pontos</button>
+        <button class="user-menu-item" id="event-audio-settings-toggle" type="button" aria-expanded="false" onclick="toggleEventAudioSettings()">⚙️ Configurações</button>
+        <div class="user-audio-settings" id="event-audio-settings" hidden>
+          <label for="event-audio-volume"><span>🔔 Volume dos eventos</span><span id="event-audio-volume-value">100%</span></label>
+          <input id="event-audio-volume" type="range" min="0" max="200" step="5" value="100" aria-label="Volume do som de eventos" oninput="setEventAudioVolume(this.value)">
+          <span class="audio-volume-hint">Você pode aumentar até 200%</span>
+        </div>
         <button class="user-menu-item" onclick="logout()">🚪 Sair</button>
       </div>
     </div>
@@ -4443,6 +4455,36 @@ let gardenEventTimer = null;
 let gardenEventRainTimer = null;
 let gardenEventButterflyTimer = null;
 let eventAudioContext = null;
+let eventAudioVolume = (() => {
+  try {
+    const stored = Number(localStorage.getItem('mistty-event-audio-volume'));
+    return Number.isFinite(stored) ? Math.max(0, Math.min(2, stored)) : 1;
+  } catch { return 1; }
+})();
+
+function syncEventAudioVolumeControl() {
+  const slider = document.getElementById('event-audio-volume');
+  const output = document.getElementById('event-audio-volume-value');
+  if (slider) slider.value = String(Math.round(eventAudioVolume * 100));
+  if (output) output.textContent = `${Math.round(eventAudioVolume * 100)}%`;
+}
+
+function toggleEventAudioSettings() {
+  const panel = document.getElementById('event-audio-settings');
+  const button = document.getElementById('event-audio-settings-toggle');
+  if (!panel || !button) return;
+  panel.hidden = !panel.hidden;
+  button.setAttribute('aria-expanded', String(!panel.hidden));
+  syncEventAudioVolumeControl();
+}
+
+function setEventAudioVolume(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return;
+  eventAudioVolume = Math.max(0, Math.min(2, parsed / 100));
+  try { localStorage.setItem('mistty-event-audio-volume', String(eventAudioVolume)); } catch {}
+  syncEventAudioVolumeControl();
+}
 
 function unlockEventAudio() {
   if (!eventAudioContext) {
@@ -4454,6 +4496,7 @@ function unlockEventAudio() {
 }
 
 function playEventStartSound() {
+  if (eventAudioVolume <= 0) return;
   unlockEventAudio();
   if (!eventAudioContext || eventAudioContext.state !== 'running') return;
   const now = eventAudioContext.currentTime;
@@ -4463,7 +4506,7 @@ function playEventStartSound() {
     oscillator.type = 'sine';
     oscillator.frequency.value = frequency;
     gain.gain.setValueAtTime(0.0001, now + index * 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.09, now + index * 0.1 + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.09 * eventAudioVolume, now + index * 0.1 + 0.025);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.1 + 0.42);
     oscillator.connect(gain).connect(eventAudioContext.destination);
     oscillator.start(now + index * 0.1);

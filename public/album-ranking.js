@@ -27,7 +27,7 @@
     const token = sessionStorage.getItem('twitch_access_token') || '';
     try {
       const response = await fetch('/.netlify/functions/album-ranking', {
-        headers: token ? { Authorization:'Bearer ' + token } : {},
+        headers: token ? { Authorization:'Bearer ' + token, 'X-Garden-Session':sessionStorage.getItem('garden_session_id') || '' } : {},
         cache: 'no-store',
       });
       if (!response.ok) throw new Error(response.status === 401 ? 'Entre na sua conta para ver o ranking.' : 'Não foi possível carregar o ranking agora.');

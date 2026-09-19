@@ -9085,7 +9085,7 @@ let saveTimer = null;
 let syncTimer = null;
 let gardenHydrated = false;
 // Troque esta versão para invalidar todas as sessões abertas no lançamento.
-const GLOBAL_SESSION_VERSION = 'launch-1.0';
+const GLOBAL_SESSION_VERSION = 'launch-2.0';
 if (sessionStorage.getItem('mistty-session-version') !== GLOBAL_SESSION_VERSION) {
   ['se_username', 'se_display', 'twitch_access_token', 'twitch_is_subscriber', 'twitch_oauth_return_url'].forEach((key) => sessionStorage.removeItem(key));
   sessionStorage.setItem('mistty-session-version', GLOBAL_SESSION_VERSION);
@@ -9094,10 +9094,24 @@ let twitchAuthToken = sessionStorage.getItem('twitch_access_token') || '';
 let gardenRevision = null;
 // Sempre único por carregamento: abas duplicadas não podem herdar a mesma sessão.
 // Um F5 assume uma nova sessão e invalida com segurança a página anterior.
-const gardenSessionId = crypto.randomUUID();
+const gardenSessionId = `${GLOBAL_SESSION_VERSION}:${crypto.randomUUID()}`;
+sessionStorage.setItem('garden_session_id', gardenSessionId);
 
 function authenticatedHeaders(extra = {}) {
   return { ...extra, Authorization: `Bearer ${twitchAuthToken}`, 'X-Garden-Session': gardenSessionId };
+}
+
+function handleRevokedSession(message = 'Sua sessão foi encerrada. Entre novamente.') {
+  gardenHydrated = false;
+  if (saveTimer) clearInterval(saveTimer);
+  if (syncTimer) clearInterval(syncTimer);
+  ['se_username', 'se_display', 'twitch_access_token', 'twitch_is_subscriber', 'garden_session_id'].forEach(key => sessionStorage.removeItem(key));
+  twitchAuthToken = '';
+  seUser = null;
+  setLoginLoading(false);
+  document.getElementById('login-overlay')?.classList.remove('hidden');
+  const status = document.getElementById('login-status');
+  if (status) status.textContent = `🌿 ${message}`;
 }
 
 function handleGardenSessionConflict(message = 'Seu jardim foi aberto em outra tela.') {
@@ -9117,7 +9131,11 @@ async function claimGardenSession(username) {
     headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ username, sessionId: gardenSessionId }),
   });
-  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || 'Não foi possível iniciar uma sessão segura.');
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401) handleRevokedSession(payload.error);
+    throw new Error(payload.error || 'Não foi possível iniciar uma sessão segura.');
+  }
   const result = await response.json();
   gardenRevision = result.revision || null;
 }
@@ -9478,6 +9496,11 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     });
     if (!response.ok) {
       const errBody = await response.text().catch(() => '');
+      if (response.status === 401) {
+        let revoked = {}; try { revoked = JSON.parse(errBody || '{}'); } catch (_) { revoked = {}; }
+        handleRevokedSession(revoked.error);
+        throw new Error('Sessão encerrada. Entre novamente.');
+      }
       if (response.status === 400 && errBody.includes('Crescimento impossível')) {
         console.warn('⚠️ Save bloqueado pelo anti-fraude:', errBody);
         throw new Error('O servidor recusou o crescimento informado.');
@@ -10942,7 +10965,7 @@ const originalPackBuy=buyCardPack;buyCardPack=function(){if(Number(G.pts||0)<1){
 </script>
 <style>.pack-card-front{gap:4px}.pack-card-artwork{display:block;width:100%;border-radius:10px;overflow:hidden;background:#e1e7cb}.pack-card-artwork svg{display:block;width:100%;height:auto}.pack-card-front b{font:normal 16px Georgia,serif;text-align:center}.pack-card-front small{font:800 9px Nunito;color:#778b64}</style>
 <script>
-window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='card-found'){if(recordCardFind(event.data.card)){syncPrismaticMascotUnlock();saveGardenToSE()}return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;syncPrismaticMascotUnlock();saveGardenToSE()}});
+window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='garden-session-revoked'){closeFarmAlbum();handleRevokedSession();return}if(event.data?.type==='card-found'){if(recordCardFind(event.data.card)){syncPrismaticMascotUnlock();saveGardenToSE()}return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;syncPrismaticMascotUnlock();saveGardenToSE()}});
 const openAlbumWithUserCards=openFarmAlbum;openFarmAlbum=function(e,url){window.__farmAlbumCards={...(G.albumCards||{})};return openAlbumWithUserCards(e,url)};
 </script>
 <style>

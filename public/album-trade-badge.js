@@ -10,7 +10,7 @@
     checking = true;
     try {
       const response = await fetch('/.netlify/functions/trade-inbox-status', {
-        headers:{ Authorization:'Bearer ' + token },
+        headers:{ Authorization:'Bearer ' + token, 'X-Garden-Session':sessionStorage.getItem('garden_session_id') || '' },
         cache:'no-store',
       });
       if (!response.ok) return;

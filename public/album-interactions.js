@@ -24,7 +24,7 @@ const fixTradeDuration=new MutationObserver(()=>{document.querySelectorAll('#mod
 // player has not discovered yet. Keep card IDs as strings to match player_cards.
 newOffer=async function(){
   const token=sessionStorage.getItem('twitch_access_token')||'';
-  const headers={Authorization:'Bearer '+token,'Content-Type':'application/json'};
+  const headers={Authorization:'Bearer '+token,'Content-Type':'application/json','X-Garden-Session':sessionStorage.getItem('garden_session_id')||''};
   const ownDuplicates=collection.filter(c=>Number(c.qty)>1);
   const ownInventory=new Map(collection.map(c=>[String(c.id),Number(c.qty)||0]));
   const decodeCardId=value=>{

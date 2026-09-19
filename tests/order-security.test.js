@@ -42,7 +42,7 @@ test('venda ignora pedidos locais atrasados sem apagar a venda', async () => {
   const revision = '2026-09-18T10:00:00.000Z';
   const stored = {
     ...base, orderSearches: 0, orders: [normalOrder], harvested: { potato: 7 },
-    _activeSessionId: 'tela-venda', _sessionLeaseUntil: Date.now() + 60000,
+    _activeSessionId: 'launch-2.0:tela-venda', _sessionLeaseUntil: Date.now() + 60000,
   };
   let saved;
   global.fetch = async (url, options = {}) => {
@@ -56,8 +56,8 @@ test('venda ignora pedidos locais atrasados sem apagar a venda', async () => {
   try {
     const handler = require('../netlify/functions/garden-save').handler;
     const response = await handler({
-      httpMethod: 'POST', headers: { authorization: 'Bearer token' },
-      body: JSON.stringify({ username: 'misttylol', sessionId: 'tela-venda', expectedRevision: revision,
+      httpMethod: 'POST', headers: { authorization: 'Bearer token', 'x-garden-session': 'launch-2.0:test' },
+      body: JSON.stringify({ username: 'misttylol', sessionId: 'launch-2.0:tela-venda', expectedRevision: revision,
         data: { ...stored, orderSearches: 1, orders: [{ ...normalOrder, reward: 999999 }], harvested: { potato: 0 }, lastSale: { total: 399 } } }),
     });
     assert.equal(response.statusCode, 200);
@@ -70,7 +70,7 @@ test('venda ignora pedidos locais atrasados sem apagar a venda', async () => {
 test('ação explícita de pedidos continua bloqueando recompensa adulterada', async () => {
   const originalFetch = global.fetch;
   const revision = '2026-09-18T10:00:00.000Z';
-  const stored = { ...base, orderSearches: 0, _activeSessionId: 'tela-venda', _sessionLeaseUntil: Date.now() + 60000 };
+  const stored = { ...base, orderSearches: 0, _activeSessionId: 'launch-2.0:tela-venda', _sessionLeaseUntil: Date.now() + 60000 };
   global.fetch = async (url, options = {}) => {
     if (url.includes('api.twitch.tv')) return { ok: true, json: async () => ({ data: [{ login: 'misttylol' }] }) };
     if (options.method === 'PATCH') throw new Error('Não deveria gravar');
@@ -79,8 +79,8 @@ test('ação explícita de pedidos continua bloqueando recompensa adulterada', a
   try {
     const handler = require('../netlify/functions/garden-save').handler;
     const response = await handler({
-      httpMethod: 'POST', headers: { authorization: 'Bearer token' },
-      body: JSON.stringify({ username: 'misttylol', sessionId: 'tela-venda', expectedRevision: revision, orderAction: true,
+      httpMethod: 'POST', headers: { authorization: 'Bearer token', 'x-garden-session': 'launch-2.0:test' },
+      body: JSON.stringify({ username: 'misttylol', sessionId: 'launch-2.0:tela-venda', expectedRevision: revision, orderAction: true,
         data: { ...stored, orderSearches: 1, orders: [{ ...normalOrder, reward: 999999 }] } }),
     });
     assert.equal(response.statusCode, 500);

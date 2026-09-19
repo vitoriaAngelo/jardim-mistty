@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const channel = '5b9a7efe15cd280f04f5891b';
-const authHeaders = (sessionId) => ({ authorization: 'Bearer twitch-token', 'x-garden-session': sessionId });
+const authHeaders = (sessionId) => ({ authorization: 'Bearer twitch-token', 'x-garden-session': `launch-2.0:${sessionId}` });
 
 test('preflight do login libera o cabeçalho de sessão enviado pelo navegador', async () => {
   delete require.cache[require.resolve('../netlify/functions/garden-session')];
@@ -15,7 +15,7 @@ test('preflight do login libera o cabeçalho de sessão enviado pelo navegador',
 test('a segunda tela assume a conta e invalida a sessão anterior', async () => {
   const originalFetch = global.fetch;
   let row = {
-    data: { farmName: 'Jardim seguro', _activeSessionId: 'tela-1', _sessionLeaseUntil: Date.now() + 60000 },
+    data: { farmName: 'Jardim seguro', _activeSessionId: 'launch-2.0:tela-1', _sessionLeaseUntil: Date.now() + 60000 },
     updated_at: '2026-09-16T10:00:00.000Z',
   };
   global.fetch = async (url, options = {}) => {
@@ -33,10 +33,10 @@ test('a segunda tela assume a conta e invalida a sessão anterior', async () => 
     const handler = require('../netlify/functions/garden-session').handler;
     const response = await handler({
       httpMethod: 'POST', headers: authHeaders('tela-2'),
-      body: JSON.stringify({ username: 'misttylol', sessionId: 'tela-2' }),
+      body: JSON.stringify({ username: 'misttylol', sessionId: 'launch-2.0:tela-2' }),
     });
     assert.equal(response.statusCode, 200);
-    assert.equal(row.data._activeSessionId, 'tela-2');
+    assert.equal(row.data._activeSessionId, 'launch-2.0:tela-2');
     assert.ok(row.data._sessionLeaseUntil > Date.now());
   } finally { global.fetch = originalFetch; }
 });
@@ -47,7 +47,7 @@ test('a tela invalidada não consegue alterar pontos', async () => {
   let streamElementsCalled = false;
   global.fetch = async (url) => {
     if (url.includes('api.twitch.tv')) return { ok: true, json: async () => ({ data: [{ login: 'misttylol' }] }) };
-    if (url.includes('supabase.co')) return { ok: true, json: async () => [{ data: { _activeSessionId: 'tela-2', _sessionLeaseUntil: Date.now() + 60000 } }] };
+    if (url.includes('supabase.co')) return { ok: true, json: async () => [{ data: { _activeSessionId: 'launch-2.0:tela-2', _sessionLeaseUntil: Date.now() + 60000 } }] };
     streamElementsCalled = true;
     return { status: 200, text: async () => '{"ok":true}' };
   };
@@ -67,7 +67,7 @@ test('a tela invalidada não consegue alterar pontos', async () => {
 test('uma gravação com versão antiga é rejeitada antes de sobrescrever o jardim', async () => {
   const originalFetch = global.fetch;
   const current = {
-    data: { _activeSessionId: 'tela-2', _sessionLeaseUntil: Date.now() + 60000, plots: [], orders: [] },
+    data: { _activeSessionId: 'launch-2.0:tela-2', _sessionLeaseUntil: Date.now() + 60000, plots: [], orders: [] },
     updated_at: '2026-09-16T11:00:00.000Z',
   };
   let patchCalled = false;
@@ -83,7 +83,7 @@ test('uma gravação com versão antiga é rejeitada antes de sobrescrever o jar
     const response = await handler({
       httpMethod: 'POST', headers: authHeaders('tela-2'),
       body: JSON.stringify({
-        username: 'misttylol', sessionId: 'tela-2', expectedRevision: 'versao-antiga',
+        username: 'misttylol', sessionId: 'launch-2.0:tela-2', expectedRevision: 'versao-antiga',
         data: { plots: [], orders: [], savedAt: Date.now() },
       }),
     });
@@ -97,7 +97,7 @@ test('a mesma tela renova a sessão depois de ficar suspensa', async () => {
   const originalFetch = global.fetch;
   const revision = '2026-09-17T10:00:00.000Z';
   const current = {
-    data: { _activeSessionId: 'tela-1', _sessionLeaseUntil: Date.now() - 60000, plots: [], orders: [] },
+    data: { _activeSessionId: 'launch-2.0:tela-1', _sessionLeaseUntil: Date.now() - 60000, plots: [], orders: [] },
     updated_at: revision,
   };
   global.fetch = async (url, options = {}) => {
@@ -115,7 +115,7 @@ test('a mesma tela renova a sessão depois de ficar suspensa', async () => {
     const response = await handler({
       httpMethod: 'POST', headers: authHeaders('tela-1'),
       body: JSON.stringify({
-        username: 'misttylol', sessionId: 'tela-1', expectedRevision: revision,
+        username: 'misttylol', sessionId: 'launch-2.0:tela-1', expectedRevision: revision,
         data: { plots: [], orders: [], savedAt: Date.now() },
       }),
     });

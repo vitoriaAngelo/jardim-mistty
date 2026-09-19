@@ -31,11 +31,11 @@ test('aceita mutação somente para a conta e sessão ativas', async () => {
   global.fetch = async (url, options = {}) => {
     calls.push({ url, options });
     if (url.includes('api.twitch.tv')) return { ok: true, json: async () => ({ data: [{ login: 'user' }] }) };
-    if (url.includes('supabase.co')) return { ok: true, json: async () => [{ data: { _activeSessionId: 'session-1', _sessionLeaseUntil: Date.now() + 60000 }, updated_at: 'rev' }] };
+    if (url.includes('supabase.co')) return { ok: true, json: async () => [{ data: { _activeSessionId: 'launch-2.0:session-1', _sessionLeaseUntil: Date.now() + 60000 }, updated_at: 'rev' }] };
     return { status: 200, text: async () => '{"ok":true}' };
   };
   try {
-    const response = await loadHandler()(event('PUT', `/points/${channel}/user/100`, { authorization: 'Bearer twitch-token', 'x-garden-session': 'session-1' }));
+    const response = await loadHandler()(event('PUT', `/points/${channel}/user/100`, { authorization: 'Bearer twitch-token', 'x-garden-session': 'launch-2.0:session-1' }));
     assert.equal(response.statusCode, 200);
     assert.equal(calls.at(-1).options.headers.Authorization, 'Bearer test-token');
   } finally { global.fetch = originalFetch; }
@@ -49,7 +49,7 @@ test('rejeita outra tela mesmo usando a mesma conta', async () => {
     return { ok: true, json: async () => [{ data: { _activeSessionId: 'new-session', _sessionLeaseUntil: Date.now() + 60000 } }] };
   };
   try {
-    const response = await loadHandler()(event('PUT', `/points/${channel}/user/100`, { authorization: 'Bearer twitch-token', 'x-garden-session': 'old-session' }));
+    const response = await loadHandler()(event('PUT', `/points/${channel}/user/100`, { authorization: 'Bearer twitch-token', 'x-garden-session': 'launch-2.0:old-session' }));
     assert.equal(response.statusCode, 409);
   } finally { global.fetch = originalFetch; }
 });

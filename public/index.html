@@ -2466,8 +2466,13 @@ body.dark-mode .shop-cart-total { color:#c7d3be; }
 body.dark-mode .shop-cart-toggle, body.dark-mode .shop-cart-row { color:#e1ecd9; }
 body.dark-mode .shop-cart-row-controls button { background:#252b24; border-color:#53604f; color:#e1ecd9; }
 body.dark-mode .shop-cart.side-cart { box-shadow:0 10px 30px #111811aa; }
-.sell-confirm-items { display:flex; flex-direction:column; gap:7px; max-height:240px; overflow:auto; margin:14px 0 10px; padding:10px; background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; }
+.sell-confirm-items { display:flex; flex-direction:column; gap:7px; max-height:min(55vh,520px); overflow:auto; margin:10px 0; padding:10px; background:var(--cream2); border:1px solid var(--cozy-line,#d8c9ac); border-radius:14px; }
 .sell-confirm-items .shop-cart-row { font-size:12px; }
+.sell-confirm-toolbar { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+.sell-confirm-toolbar button { min-height:30px; padding:4px 10px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:999px; background:var(--cream); color:var(--text); font-size:12px; font-weight:800; cursor:pointer; }
+.sell-confirm-toolbar button:hover { transform:translateY(-1px); }
+@media (min-width:700px) { #sell-all-confirm-overlay .modal { width:min(560px,calc(100vw - 32px)); max-height:92vh; overflow:auto; } }
+@media (max-width:480px) { .sell-confirm-items { max-height:48vh; } }
 #sell-all-confirm-overlay { z-index:1200; }
 #sell-all-confirm-overlay .modal-actions button { position:relative; z-index:1; pointer-events:auto; }
 #sell-all-confirm-overlay .modal-actions { justify-content:center; }
@@ -5154,6 +5159,15 @@ async function buyWaterRefillFromNotice() {
     renderWateringCapacity();
   }
 }
+function selectedSellQuantity() {
+  return Object.values(SELL || {}).reduce((sum, qty) => sum + Math.max(0, Number(qty) || 0), 0);
+}
+function localFairSaleBonus(itemCount) {
+  const skillLevel = Math.max(0, Number(G.skillNodes?.feira_local) || 0);
+  if (!skillLevel) return 0;
+  // Cada nível libera mais um degrau: +5% por 50 itens na mesma venda.
+  return Math.min(skillLevel, Math.floor(Math.max(0, Number(itemCount) || 0) / 50)) * 5 / 100;
+}
 
 // ─── TOOLS ───────────────────────────────────────────────
 function selectTool(t) {
@@ -5633,7 +5647,8 @@ async function buyFlower(type, el) {
 }
 
 function sellTotal() {
-  return Object.entries(SELL).reduce((sum, [type, qty]) => sum + qty * effectiveSellValue(type), 0);
+  const baseTotal = Object.entries(SELL).reduce((sum, [type, qty]) => sum + qty * effectiveSellValue(type), 0);
+  return Math.round(baseTotal * (1 + localFairSaleBonus(selectedSellQuantity())));
 }
 
 function changeSellQty(type, delta) {
@@ -7338,10 +7353,13 @@ function applyOfflineProgress(savedAt) {
 function renderSellAllConfirm() {
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const available = allTypes.filter(type => (G.harvested[type] || 0) > 0);
-  const total = available.reduce((sum, type) => {
+  const selectedCount = available.reduce((sum, type) => sum + (SELL[type] || 0), 0);
+  const fairBonus = localFairSaleBonus(selectedCount);
+  const baseTotal = available.reduce((sum, type) => {
     const isEpic = window._epicSaleType === type;
     return sum + (SELL[type] || 0) * effectiveSellValue(type, isEpic);
   }, 0);
+  const total = Math.round(baseTotal * (1 + fairBonus));
   const rows = available.map(type => {
     const item = getPlantable(type);
     const qty = SELL[type] || 0;
@@ -7355,7 +7373,8 @@ function renderSellAllConfirm() {
   overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="sell-all-confirm-title">
     <button class="popup-close-x" onclick="closeSellAllConfirm()" aria-label="Fechar">×</button>
     <h2 id="sell-all-confirm-title">Escolha o que vender</h2>
-    <p>Confira os itens e ajuste as quantidades antes de confirmar.</p>
+    <p>Confira os itens e ajuste as quantidades antes de confirmar.${fairBonus ? ` 🎪 Feira Local: +${Math.round(fairBonus * 100)}% por vender ${selectedCount} itens.` : ''}</p>
+    <div class="sell-confirm-toolbar"><button type="button" onclick="setAllSellAllQty(true)" aria-label="Selecionar todos os itens">≪ Selecionar todos</button><button type="button" onclick="setAllSellAllQty(false)" aria-label="Remover todos os itens">Limpar seleção ≫</button></div>
     <div class="sell-confirm-items">${rows}</div>
     <div class="market-total-pts" style="width:max-content;margin:14px auto 4px">Total: <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${total} pts</div>
     <div class="modal-actions"><button type="button" class="btn-cancel" onclick="event.stopPropagation();closeSellAllConfirm()">Cancelar</button><button type="button" class="btn-ok" onclick="event.stopPropagation();confirmSellAll()" ${total === 0 ? 'disabled' : ''}>Confirmar</button></div>
@@ -8879,6 +8898,12 @@ function specialLevelReward(lv) {
   return rewards[lv] ? { ...rewards[lv] } : null;
 }
 
+function setAllSellAllQty(selectAll) {
+  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
+  allTypes.forEach(type => { SELL[type] = selectAll ? (G.harvested[type] || 0) : 0; });
+  renderSellAllConfirm();
+}
+
 function levelPackReward(lv) {
   if ([5, 10, 15, 20].includes(lv)) return { normal:1, prismatic:0 };
   if ([25, 30, 40, 45].includes(lv)) return { normal:2, prismatic:2 };
@@ -10398,7 +10423,7 @@ const SKILL_BRANCHES = [
     desc: 'Negocie melhor e lucre mais',
     nodes: [
       { id:'etiqueta_dourada', emoji:'🏷️', name:'Etiqueta Dourada', effect:'+3% valor de venda por nível',                           max:5, maxLabel:'máx. +15%', req:null,               reqMin:0 },
-      { id:'feira_local',      emoji:'🎪', name:'Feira Local',       effect:'+5% por conjunto acima de 15 itens',                   max:7, maxLabel:'máx. +35%', req:'etiqueta_dourada', reqMin:3 },
+      { id:'feira_local',      emoji:'🎪', name:'Feira Local',       effect:'+5% por cada 50 itens vendidos na mesma venda',       max:7, maxLabel:'máx. +35% (300 itens = +30%)', req:'etiqueta_dourada', reqMin:3 },
       { id:'negociador',       emoji:'🤝', name:'Negociador',        effect:'-3% preço de compra por nível',                        max:5, maxLabel:'máx. -15%', req:'feira_local',      reqMin:3 },
       { id:'venda_epica',      emoji:'💎', name:'Venda Épica',       effect:'+2% chance de um item valer o dobro ao vender',        max:4, maxLabel:'máx. +10% com domínio',  req:'negociador',       reqMin:5 },
     ],
@@ -10465,7 +10490,7 @@ function skillCurrentLabel(node, level) {
     maos_ligeiras: `Atual: +${value * 3}% de chance de colher e encher +1 no regador`,
     sementes_fortes: `Atual: +${value * 2}% de chance de recuperar semente`,
     etiqueta_dourada: `Atual: +${value * 3}% no valor de venda`,
-    feira_local: `Atual: +${value * 5}% por conjunto acima de 15 itens`,
+    feira_local: `Atual: até +${value * 5}% · +5% a cada 50 itens na mesma venda (300 itens = +30%)`,
     negociador: `Atual: -${value * 3}% no preço de compra`,
     venda_epica: `Atual: +${value * 2}% de chance de venda em dobro`,
     trato_amigo: `Atual: +${value * 5}% de saúde com Ração Normal`,

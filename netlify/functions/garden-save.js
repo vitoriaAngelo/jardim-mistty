@@ -9,9 +9,9 @@ const ORDER_SEASONS = [
   ['pumpkin','beetroot','broccoli','cassava','ruby_kale','rose','lavender','orchid','moon_lily','royal_dahlia'],
   ['potato','broccoli','ruby_kale','star_radish','moon_lily'],
 ];
-const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338,purple_cabbage:155,crystal_kale:245,yellow_eggplant:178,pink_cucumber:205,green_mushroom:225,daisy:43,rose:85,tulip:76,sunflower:99,lavender:113,orchid:127,hibiscus:118,bluebell:95,cherry:136,poppy:81,jasmine:104,cherry_blossom:170,orange_blossom:178,moon_flower:260,sun_flower:235,guarana_flower:198,moon_lily:1000,royal_dahlia:383 };
+const ORDER_VALUES = { potato:52,lettuce:76,carrot:70,tomato:88,beetroot:112,cassava:140,corn:84,pumpkin:108,eggplant:94,pepper:103,broccoli:117,ruby_kale:335,star_radish:338,purple_cabbage:155,crystal_kale:245,yellow_eggplant:178,pink_cucumber:205,green_mushroom:225,daisy:43,rose:85,tulip:76,sunflower:99,lavender:113,orchid:127,hibiscus:118,bluebell:95,cherry:136,poppy:81,jasmine:104,cherry_blossom:170,orange_blossom:178,moon_flower:260,sun_flower:235,guarana_flower:198,moon_lily:1000,royal_dahlia:383,farm_egg:65,farm_milk:220,farm_bacon:155,farm_wool:175,farm_duck_egg:95 };
 const ORDER_TYPES = new Set(Object.keys(ORDER_VALUES));
-const ORDER_TIERS = { A:{ mult:1,min:1,max:12 }, S:{ mult:2.2,min:8,max:26 }, SS:{ mult:4.5,min:20,max:40 } };
+const ORDER_TIERS = { A:{ mult:1,min:1,max:12 }, S:{ mult:2.2,min:8,max:26 }, SS:{ mult:4.5,min:40,max:70 } };
 const ORDER_TIER_LEGACY = { normal:'A', epic:'S', legendary:'SS' };
 
 function validOrder(order, seasonIdx, data) {

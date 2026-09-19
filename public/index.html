@@ -5687,6 +5687,7 @@ function adjustShopQty(type, delta) {
   else renderShop();
   renderShopCart();
 }
+.plot.ready-aquatic { border-color:#63b8d2 !important; box-shadow:0 4px 0 #428da7,0 0 0 3px rgba(99,184,210,.24) !important; }
 function setShopQtyFromInput(type, value, input) {
   const parsed=Number(value);
   if(!Number.isInteger(parsed)||parsed<1){if(input&&value==='')input.value=SHOP_QTY[type]||1;return;}
@@ -7394,7 +7395,17 @@ const FERTILIZERS = {
     minLevel: 8,
     color: '#e0a020',
   },
+  aquatic: {
+    id: 'aquatic', name: 'Adubo Aquático', emoji: '💧', icon: '🫧',
+    desc: 'Na próxima rega, adiciona 2 níveis de água ao canteiro gastando apenas 1 carga do regador.',
+    effect: 'Próxima rega em dobro', cost: 300, minLevel: 1, color: '#63b8d2',
+  },
 };
+
+function fertilizersOnPlot(index) {
+  const value = G.plotFertilizers?.[index];
+  return Array.isArray(value) ? value : value ? [value] : [];
+}
 
 function renderFertilizerInventory() {
   const bar = document.getElementById('fertilizer-inv-bar');
@@ -7407,7 +7418,8 @@ function renderFertilizerInventory() {
 
   bar.innerHTML = `<section class="inventory-group fertilizer-group"><h3 class="inventory-group-title">🧪 Adubos</h3><div class="fert-inv-slots">${validEntries.map(([id, f]) => {
     const count = G.fertilizerInventory[id] || 0;
-    const currentEffect = id === 'golden_soil'
+    const currentEffect = id === 'aquatic' ? 'Próxima rega em dobro'
+      : id === 'golden_soil'
       ? '+1 unidade extra'
       : id === 'quick_grow' ? 'Cresce 2× mais rápido' : f.effect;
     const selClass = G.selectedFertilizer === id
@@ -7427,8 +7439,8 @@ function renderFertilizerInventory() {
 
 function selectFertilizer(id) {
   const target = G.inventoryTargetPlot;
-  if (target !== null && G.plotFertilizers?.[target]) {
-    toast('🌱 Este canteiro já tem adubo. Escolha uma planta para ele!', 3000);
+  if (target !== null && (fertilizersOnPlot(target).length >= 2 || fertilizersOnPlot(target).includes(id))) {
+    toast(fertilizersOnPlot(target).length >= 2 ? '🌱 Este canteiro já tem dois adubos. Escolha uma planta para ele!' : '🌱 Esse adubo já foi aplicado. Escolha outro ou plante!', 3000);
     return;
   }
   G.selectedFertilizer = G.selectedFertilizer === id ? null : id;
@@ -7507,8 +7519,9 @@ function applyFertilizer(plotIdx, fertilizerId) {
     toast('⚠️ Aplique o adubo num canteiro vazio — ele ficará preparado para a próxima planta!');
     return;
   }
-  if (G.plotFertilizers?.[plotIdx]) {
-    toast('🌱 Este canteiro já está adubado. Agora escolha uma planta!');
+  const applied = fertilizersOnPlot(plotIdx);
+  if (applied.length >= 2 || applied.includes(fertilizerId)) {
+    toast(applied.length >= 2 ? '🌱 Este canteiro já tem dois adubos. Agora escolha uma planta!' : '🌱 Esse adubo já está aplicado. Escolha outro ou plante!');
     return;
   }
   const f = FERTILIZERS[fertilizerId];
@@ -7518,7 +7531,7 @@ function applyFertilizer(plotIdx, fertilizerId) {
 
   // Mark the empty plot with the fertilizer for the next plant
   if (!G.plotFertilizers) G.plotFertilizers = {};
-  G.plotFertilizers[plotIdx] = fertilizerId;
+  G.plotFertilizers[plotIdx] = [...applied, fertilizerId];
 
   // Mantém o adubo selecionado para permitir aplicar em vários canteiros.
   // A seleção só termina quando o estoque chega a zero.
@@ -7535,18 +7548,21 @@ function applyFertilizer(plotIdx, fertilizerId) {
     toast(`⚡ Adubo Rápido aplicado no canteiro ${plotIdx + 1}! A próxima planta crescerá 2× mais rápido.`);
   } else if (fertilizerId === 'golden_soil') {
     toast(`✨ Terra Dourada aplicada no canteiro ${plotIdx + 1}! A próxima colheita renderá +1 unidade.`);
+  } else if (fertilizerId === 'aquatic') {
+    toast(`💧 Adubo Aquático aplicado no canteiro ${plotIdx + 1}! A próxima rega contará como duas.`);
   }
 }
 
 function updateFertilizerCursor() {
   document.querySelectorAll('.plot').forEach(el => {
-    el.classList.remove('ready-quick-grow', 'ready-golden-soil', 'fertilizer-ready');
+    el.classList.remove('ready-quick-grow', 'ready-golden-soil', 'ready-aquatic', 'fertilizer-ready');
     if (!G.selectedFertilizer) return;
     const idx = parseInt(el.dataset.idx);
     const isEmpty = !G.plots[idx];
     if (!isEmpty) return; // only empty plots
     if (G.selectedFertilizer === 'quick_grow') el.classList.add('ready-quick-grow');
     if (G.selectedFertilizer === 'golden_soil') el.classList.add('ready-golden-soil');
+    if (G.selectedFertilizer === 'aquatic') el.classList.add('ready-aquatic');
   });
 }
 
@@ -7711,7 +7727,7 @@ function updateHeldItemCursor() {
 
 function clearSelectionIfNoAvailablePlots() {
   const hasFreePlot = Array.from({ length: G.unlockedPlots || 0 }, (_, idx) => idx)
-    .some(idx => !G.plots[idx] && (!G.selectedFertilizer || !G.plotFertilizers?.[idx]));
+    .some(idx => !G.plots[idx] && (!G.selectedFertilizer || !fertilizersOnPlot(idx).includes(G.selectedFertilizer)) && fertilizersOnPlot(idx).length < 2);
   if (hasFreePlot || (!G.selectedSeed && !G.selectedFertilizer)) return;
   G.selectedSeed = null;
   G.selectedFertilizer = null;
@@ -7976,7 +7992,8 @@ function buildPlotEl(plot, idx) {
   inner.className = 'plot-inner';
 
   if (!plot) {
-    const prepFert = G.plotFertilizers && G.plotFertilizers[idx];
+    const prepFerts = fertilizersOnPlot(idx);
+    const prepFert = prepFerts[0];
     inner.innerHTML = `<div class="empty-slot-hint">
       <svg viewBox="0 0 32 32" fill="none">
         <circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-dasharray="4 3"/>
@@ -7984,15 +8001,13 @@ function buildPlotEl(plot, idx) {
       </svg>
       <span>${prepFert ? 'adubado!' : 'plantar'}</span>
     </div>`;
-    if (prepFert) {
+    if (prepFerts.length) {
       const badge = document.createElement('div');
-      badge.className = 'fertilizer-status-badge ' + (prepFert === 'quick_grow' ? 'quick' : 'golden');
-      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;';
-      badge.innerHTML = prepFert === 'quick_grow'
-        ? `<span class="fert-effect-quick">⚡</span>`
-        : `<span class="fert-effect-golden">✨</span>`;
+      badge.className = 'fertilizer-status-badge fertilizer-stack';
+      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;display:flex;gap:2px;width:auto;height:auto;padding:3px;';
+      badge.innerHTML = prepFerts.map(id => `<span title="${FERTILIZERS[id]?.name || id}">${FERTILIZERS[id]?.emoji || '🧪'}</span>`).join('');
       div.appendChild(badge);
-      div.style.borderColor = prepFert === 'quick_grow' ? '#f0a020' : '#d4a000';
+      div.style.borderColor = prepFerts.includes('aquatic') ? '#63b8d2' : prepFert === 'quick_grow' ? '#f0a020' : '#d4a000';
     }
     if (isSpecialPlotActive(idx)) {
       const specialBadge = document.createElement('div');
@@ -8031,18 +8046,17 @@ function buildPlotEl(plot, idx) {
       }
       ${plot.quickGrow ? '<br>⚡ Adubo Rápido ativo' : ''}
       ${plot.goldenSoil ? '<br>✨ Terra Dourada ativa' : ''}
+      ${plot.aquaticWater ? '<br>💧 Adubo Aquático: próxima rega conta como duas' : ''}
       ${plot.goldenPlot ? '<br>✨ Canteiro Especial · plantas valem 3× mais' : ''}
     `;
     div.appendChild(tooltip);
 
     // Show fertilizer badge on growing plant
-    if (plot.quickGrow || plot.goldenSoil) {
+    if (plot.quickGrow || plot.goldenSoil || plot.aquaticWater) {
       const badge = document.createElement('div');
-      badge.className = 'fertilizer-status-badge ' + (plot.quickGrow ? 'quick' : 'golden');
-      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;';
-      badge.innerHTML = plot.quickGrow
-        ? `<span class="fert-effect-quick">⚡</span>`
-        : `<span class="fert-effect-golden">✨</span>`;
+      badge.className = 'fertilizer-status-badge fertilizer-stack';
+      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;display:flex;gap:2px;width:auto;height:auto;padding:3px;';
+      badge.innerHTML = [plot.quickGrow && '⚡', plot.goldenSoil && '✨', plot.aquaticWater && '💧'].filter(Boolean).join('');
       div.appendChild(badge);
     }
     if (plot.goldenPlot || isSpecialPlotActive(idx)) {
@@ -8262,12 +8276,12 @@ async function onPlotClick(idx) {
 
   // APLICAR ADUBO: se um adubo estiver selecionado e o canteiro estiver VAZIO
   if (!plot && G.selectedFertilizer) {
-    if (G.plotFertilizers?.[idx]) {
+    const applied = fertilizersOnPlot(idx);
+    if (applied.length >= 2 || applied.includes(G.selectedFertilizer)) {
       G.selectedFertilizer = null;
       updateFertilizerCursor();
-      G.inventoryTargetPlot = idx;
-      openInventory();
-      toast('🌱 Este canteiro já está adubado. Escolha uma planta!', 2600);
+      if (applied.length >= 2) { G.inventoryTargetPlot = idx; openInventory(); }
+      toast(applied.length >= 2 ? '🌱 Este canteiro já tem dois adubos. Escolha uma planta!' : '🌱 Esse adubo já está aplicado. Escolha outro ou plante!', 2600);
       return;
     }
     applyFertilizer(idx, G.selectedFertilizer);
@@ -8302,9 +8316,11 @@ async function onPlotClick(idx) {
     const newPlot = { type, waterCount: activeGardenEvent('rain') ? 1 : 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: isSpecialPlotActive(idx) };
     // Apply any pre-applied fertilizer on this slot
     if (G.plotFertilizers && G.plotFertilizers[idx]) {
-      const fid = G.plotFertilizers[idx];
-      if (fid === 'quick_grow') newPlot.quickGrow = true;
-      if (fid === 'golden_soil') newPlot.goldenSoil = true;
+      const stored = G.plotFertilizers[idx];
+      const applied = Array.isArray(stored) ? stored : [stored];
+      if (applied.includes('quick_grow')) newPlot.quickGrow = true;
+      if (applied.includes('golden_soil')) newPlot.goldenSoil = true;
+      if (applied.includes('aquatic')) newPlot.aquaticWater = true;
       delete G.plotFertilizers[idx];
     }
     G.plots[idx] = newPlot;
@@ -8343,7 +8359,10 @@ async function onPlotClick(idx) {
     renderWateringCapacity();
     updatePts();
 
-    plot.waterCount = Math.min(maxW, plot.waterCount + 1);
+    const aquaticWater = plot.aquaticWater === true;
+    const directWaterSteps = Math.min(aquaticWater ? 2 : 1, maxW - plot.waterCount);
+    plot.waterCount = Math.min(maxW, plot.waterCount + directWaterSteps);
+    if (aquaticWater) plot.aquaticWater = false;
     let bonusWateredIdx = null;
     if (skillBranchBonusActive('cultivo') && Math.random() < 0.5) {
       const candidates = G.plots.map((candidate, candidateIdx) => ({ candidate, candidateIdx }))
@@ -8395,12 +8414,12 @@ async function onPlotClick(idx) {
 
     spawnDrops(idx);
     if (bonusWateredIdx !== null) { spawnDrops(bonusWateredIdx); renderPlots(); }
-    missionProgress('water5');
+    for (let i = 0; i < directWaterSteps; i++) missionProgress('water5');
     if (bonusWateredIdx !== null) missionProgress('water5');
-    initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + (bonusWateredIdx !== null ? 2 : 1); checkAchievements();
+    initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + directWaterSteps + (bonusWateredIdx !== null ? 1 : 0); checkAchievements();
     updatePlotTooltip(idx);
 
-    toast(bonusWateredIdx !== null ? '💧✨ Rega em dobro! Uma segunda planta também recebeu água sem gastar mais do regador.' : '💧 Planta regada com sucesso!');
+    toast(aquaticWater ? `💧🫧 Adubo Aquático: ${directWaterSteps} regas aplicadas com 1 carga do regador!` : bonusWateredIdx !== null ? '💧✨ Rega em dobro! Uma segunda planta também recebeu água sem gastar mais do regador.' : '💧 Planta regada com sucesso!');
     return;
   }
 

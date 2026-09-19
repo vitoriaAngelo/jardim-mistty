@@ -249,6 +249,7 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .latest-sales-card-name.rare { color:#8960a6; }
 .latest-sales-card-name.legendary { color:#b18422; }
 .latest-sales-card-name.prismatic { color:transparent; background:linear-gradient(100deg,#659fdb,#a675c9,#58aaa8,#d49bc1); background-clip:text; -webkit-background-clip:text; }
+.latest-sales-golden-item { color:#a87a16; font-weight:900; text-shadow:0 1px 0 #f8e9ae; }
 .watering-refill-offer { display:none; position:absolute; left:calc(100% + 9px); top:50%; transform:translateY(-50%); width:150px; padding:8px 9px; border:1px solid #e3c98f; border-radius:12px; background:#fff7df; color:#80652e; font-size:10px; font-weight:800; line-height:1.25; text-align:center; cursor:pointer; box-shadow:0 3px 0 #dec58d, 0 5px 12px rgba(117,91,52,.12); z-index:8; }
 .watering-refill-offer::before { content:''; position:absolute; right:100%; top:50%; border:6px solid transparent; border-right-color:#e3c98f; transform:translateY(-50%); }
 .watering-refill-offer.visible { display:block; }
@@ -305,6 +306,7 @@ body.dark-mode #garden-event-summary-overlay .levelup-rewards strong { color:#f4
 @keyframes sales-slide-in { from { opacity:.2; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 body.dark-mode .latest-sales-feed { border-color:#677c62; background:linear-gradient(135deg,#354332 0%,#2d392d 100%); color:#d9e5d0; box-shadow:0 3px 0 #202b20, 0 7px 16px rgba(0,0,0,.2); }
 body.dark-mode .latest-sales-feed strong { color:#f0f5e8; }
+body.dark-mode .latest-sales-golden-item { color:#f2d16a; text-shadow:0 1px 2px #1c1608; }
 
 .header-btn-tip {
   display: none; position: absolute;
@@ -9594,6 +9596,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     lastOrder:        G.lastOrder || null,
     lastEvent:        G.lastEvent || null,
     recentCardFinds:  Array.isArray(G.recentCardFinds) ? G.recentCardFinds.slice(0, 20) : [],
+    recentGoldenEggFinds: Array.isArray(G.recentGoldenEggFinds) ? G.recentGoldenEggFinds.slice(0, 20) : [],
     eventNextAt:      Number(G.eventNextAt || 0),
     eventLastType:    G.eventLastType || '',
     discoveredMutations: G.discoveredMutations || [],
@@ -9891,6 +9894,7 @@ async function loadGardenFromSE(username) {
     G.lastOrder        = save.lastOrder || null;
     G.lastEvent        = save.lastEvent || null;
     G.recentCardFinds  = Array.isArray(save.recentCardFinds) ? save.recentCardFinds.slice(0, 20) : [];
+    G.recentGoldenEggFinds = Array.isArray(save.recentGoldenEggFinds) ? save.recentGoldenEggFinds.slice(0, 20) : [];
     G.eventNextAt      = Number(save.eventNextAt || 0);
     G.eventLastType    = save.eventLastType || '';
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
@@ -10406,6 +10410,8 @@ function renderLatestSale() {
     ? `<span class="latest-sales-content sales-slide-in"><strong>${escapeLatestFeedText(who)}</strong> conseguiu a carta <b class="latest-sales-card-name ${sale.card.prismatic ? 'prismatic' : String(sale.card.rarity).toLocaleLowerCase('pt-BR') === 'lendária' ? 'legendary' : 'rare'}">${escapeLatestFeedText(sale.card.name)}</b></span>`
     : sale.activityType === 'event'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> participou do evento <b>${sale.event || 'do jardim'}</b></span>`
+    : sale.activityType === 'golden-egg'
+    ? `<span class="latest-sales-content sales-slide-in"><strong>${escapeLatestFeedText(who)}</strong> · ${escapeLatestFeedText(sale.animalName || 'Um animal')} produziu <b class="latest-sales-golden-item">${escapeLatestFeedText(sale.item || 'ovo dourado')}</b>${Number(sale.quantity) > 1 ? ` ×${Number(sale.quantity)}` : ''}</span>`
     : sale.activityType === 'order'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> entregou <b>${sale.item || 'um pedido'}</b> e ganhou <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.reward || 0).toLocaleString('pt-BR')} pontos</span>`
     : `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> acabou de faturar <img class="latest-sales-coin" src="points-sprout.svg" alt="" aria-hidden="true">${Number(sale.total).toLocaleString('pt-BR')} pontos vendendo</span>`;

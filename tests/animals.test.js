@@ -66,7 +66,7 @@ test('15 produz, abaixo de 15 pausa e não recupera ciclos atrasados ao alimenta
   s=model.advance(s,start+60000);assert.equal(s.pets.chicken.readyAt,0);
   assert.equal(model.status(s.pets.chicken),'hungry');
   s=model.feed(s,'chicken',start+60000,'normal',()=>1);
-  assert.equal(s.pets.chicken.readyAt,start+60000+180000);
+  assert.equal(s.pets.chicken.readyAt,start+60000+240000);
   assert.equal(s.pets.chicken.stock,1);
 });
 test('zero remove animal e estoque não recolhido, permitindo nova compra',()=>{
@@ -82,22 +82,22 @@ test('rações recuperam 20, 50 e 80 e consomem uma unidade sem criar fila',()=>
   }
 });
 test('Super Premium exige saúde acima de 80 na conclusão e mantém chance fixa',()=>{
-  for(const [health,roll,expected]of [[84,.339,2],[83,.1,1],[84,.34,1]]){
+  for(const [health,roll,expected]of [[85,.339,2],[84,.1,1],[85,.34,1]]){
     let s=state(health);s.pets.chicken.superActive=true;
-    s=model.advance(s,start+180000,{criador_dourado:5},()=>roll);
+    s=model.advance(s,start+240000,{criador_dourado:5},()=>roll);
     assert.equal(s.pets.chicken.stock,expected);
   }
   let s=model.feed(state(20),'chicken',start,'super',()=>0);
   s=model.feed(s,'chicken',start,'normal',()=>0);
   s=model.feed(s,'chicken',start,'super',()=>0);
-  s=model.advance(s,start+180000,{criador_dourado:5},()=>.34);
+  s=model.advance(s,start+240000,{criador_dourado:5},()=>.34);
   assert.equal(s.pets.chicken.stock,1);
 });
 test('booster funciona em vários ciclos e expira exatamente após 30 minutos',()=>{
   let s=model.boost(state(),'chicken',start,()=>0);
   assert.throws(()=>model.boost(s,'chicken',start+1),/ativo/);
   s=model.advance(s,start+1800000,{},()=>0);
-  assert.equal(s.pets.chicken.goldStock,9);assert.equal(s.pets.chicken.stock,1);
+  assert.equal(s.pets.chicken.goldStock,7);assert.equal(s.pets.chicken.stock,0);
   assert.equal(s.pets.chicken.booster,false);
   const again=model.advance(JSON.parse(JSON.stringify(s)),start+1800000,{},()=>0);
   assert.deepEqual(again,s);
@@ -108,15 +108,15 @@ test('refeições antigas são devolvidas uma única vez e o estoque preservado'
   assert.equal(s.pets.chicken.stock,3);assert.deepEqual(model.normalize(s,start),s);
 });
 test('Rotina Rural reduz duração e mantém ciclos consecutivos',()=>{
-  let s=model.advance(state(),start+144000,{rotina_rural:5},()=>1);
-  assert.equal(s.pets.chicken.stock,1);assert.equal(s.pets.chicken.readyAt,start+288000);
+  let s=model.advance(state(),start+192000,{rotina_rural:5},()=>1);
+  assert.equal(s.pets.chicken.stock,1);assert.equal(s.pets.chicken.readyAt,start+384000);
 });
 test('bônus de domínio dos animais reduz um minuto e a redefinição restaura o ciclo',()=>{
-  const producing=state();producing.pets.chicken.readyAt=start+180000;producing.pets.chicken.cycleDuration=180000;
+  const producing=state();producing.pets.chicken.readyAt=start+240000;producing.pets.chicken.cycleDuration=240000;
   let s=model.advance(producing,start+30000,{__animalBranchComplete:true},()=>1);
-  assert.equal(s.pets.chicken.cycleDuration,120000);
-  assert.equal(s.pets.chicken.readyAt,start+120000);
-  s=model.advance(s,start+60000,{},()=>1);
   assert.equal(s.pets.chicken.cycleDuration,180000);
   assert.equal(s.pets.chicken.readyAt,start+180000);
+  s=model.advance(s,start+60000,{},()=>1);
+  assert.equal(s.pets.chicken.cycleDuration,240000);
+  assert.equal(s.pets.chicken.readyAt,start+240000);
 });

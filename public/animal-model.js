@@ -1,11 +1,11 @@
 (function (root) {
   'use strict';
   const catalog = {
-    chicken: { name:'Galinha', home:'Galinheiro', product:'farm_egg', cost:450, level:1, feed:1, minutes:3, color:'#e9d5a5' },
-    cow: { name:'Vaca', home:'Estábulo', product:'farm_milk', cost:1800, level:5, feed:4, minutes:8, color:'#c4d5bd' },
-    pig: { name:'Porco', home:'Chiqueirinho', product:'farm_bacon', cost:1200, level:4, feed:3, minutes:6, color:'#e2b9b8' },
-    sheep: { name:'Ovelha', home:'Aprisco', product:'farm_wool', cost:1600, level:5, feed:3, minutes:7, color:'#d4c9e4' },
-    duck: { name:'Pato', home:'Laguinho', product:'farm_duck_egg', cost:800, level:3, feed:1, minutes:4, color:'#b8d4d2' },
+    chicken: { name:'Galinha', home:'Galinheiro', product:'farm_egg', cost:450, level:1, feed:1, minutes:4, color:'#e9d5a5' },
+    cow: { name:'Vaca', home:'Estábulo', product:'farm_milk', cost:1800, level:5, feed:4, minutes:9, color:'#c4d5bd' },
+    pig: { name:'Porco', home:'Chiqueirinho', product:'farm_bacon', cost:1200, level:4, feed:3, minutes:7, color:'#e2b9b8' },
+    sheep: { name:'Ovelha', home:'Aprisco', product:'farm_wool', cost:1600, level:5, feed:3, minutes:8, color:'#d4c9e4' },
+    duck: { name:'Pato', home:'Laguinho', product:'farm_duck_egg', cost:800, level:3, feed:1, minutes:5, color:'#b8d4d2' },
   };
   const products = {
     farm_egg: { name:'Ovo', emoji:'🥚', sell:65 },

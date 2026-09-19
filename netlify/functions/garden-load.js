@@ -1,6 +1,13 @@
 const SUPABASE_URL = 'https://luvjridqxqpxnljucnur.supabase.co';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const { deliverPaidKit } = require('./mercadopago-webhook');
+const MANUAL_PAID_KITS = {
+  goularttw: {
+    order_id: 'manual-kit-especialista-goularttw-2026-09-19',
+    username: 'goularttw',
+    kit: 'Kit Jardineiro Especialista',
+  },
+};
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1dmpyaWRxeHFweG5sanVjbnVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDM3ODQsImV4cCI6MjEwNDgxOTc4NH0.shmGCDtE-XDPROUCezVjR27WFYD3VYfvQaE1-OVewGc';
 
 exports.handler = async (event) => {
@@ -19,6 +26,8 @@ exports.handler = async (event) => {
 
   try {
     if (SERVICE_KEY) {
+      const manualKit = MANUAL_PAID_KITS[String(username).trim().toLowerCase()];
+      if (manualKit) await deliverPaidKit(manualKit, manualKit.order_id);
       const paidRes = await fetch(`${SUPABASE_URL}/rest/v1/payment_orders?username=eq.${encodeURIComponent(username)}&status=eq.paid&select=order_id,username,kit&order=id.asc`, { headers: { apikey: SERVICE_KEY, Authorization: `Bearer ${SERVICE_KEY}` } });
       if (paidRes.ok) {
         const paidOrders = await paidRes.json();

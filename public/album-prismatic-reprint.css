@@ -9,7 +9,6 @@
 .prism-reprint.legend h3 { color:#322544; }
 .prism-reprint:not(.owned) .art svg { filter:hue-rotate(var(--prism-hue)) saturate(1.7) blur(8px); }
 .prism-reprint:not(.owned) h3,.prism-reprint:not(.owned) p { filter:blur(5px); user-select:none; }
-.peek-card { display:block; width:calc(100% - 8px); margin:12px 4px 4px; padding:8px; background:#243955; color:#e1fff8; }
-.prism-peek { text-align:center; }
-.prism-peek .card { max-width:290px; margin:20px auto; text-align:left; }
+.prism-reprint .art { position:relative; }
+.prism-reprint .undiscovered { position:absolute; bottom:7px; left:6px; right:6px; z-index:1; padding:4px; border:1px solid #b7d9d0; border-radius:10px; background:#20264a; color:#e1fff8; font-size:9px; text-align:center; }
 @media(prefers-reduced-motion:reduce){.prism-reprint *,.prism-reprint .art::after{animation:none!important}}

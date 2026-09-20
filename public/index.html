@@ -5929,20 +5929,48 @@ async function buyGlobalMessage() {
   composer.querySelector('.btn-ok').onclick=async()=>{
     const message=String(input.value||'').trim().replace(/[\\u0000-\\u001F\\u007F]/g,'').slice(0,120);
     if(!message){input.focus();return;}
+    const cooldownRemaining=120000-(Date.now()-Number(G.lastGlobalMessage?.at||0));
+    if(cooldownRemaining>0){toast(`⏳ Aguarde ${Math.ceil(cooldownRemaining/1000)}s para enviar outra mensagem.`,2800);renderGlobalMessageShop();input.focus();return;}
     globalMessagePurchaseInFlight=true;
     const sendButton=composer.querySelector('.btn-ok');
     sendButton.disabled=true;
     sendButton.textContent='Enviando…';
     renderGlobalMessageShop();
+    const previousGlobalMessage=G.lastGlobalMessage?{text:G.lastGlobalMessage.text,at:G.lastGlobalMessage.at}:null;
+    let pointsCharged=false;
+    let attemptedGlobalMessage=null;
     try {
       if (!(await chargeGamePoints(GLOBAL_MESSAGE_COST, 'Mensagem Global'))) return;
-      G.lastGlobalMessage={text:message,at:Date.now()};
-      await saveGardenToSE();
+      pointsCharged=true;
+      attemptedGlobalMessage={text:message,at:Date.now()};
+      G.lastGlobalMessage=attemptedGlobalMessage;
+      try {
+        await saveGardenToSE();
+      } catch(firstSaveError) {
+        if (/Aguarde 2 minutos entre mensagens globais/i.test(String(firstSaveError?.message||''))) throw firstSaveError;
+        // Uma resposta de rede pode falhar depois que o servidor já gravou.
+        // Reenviar o mesmo estado é seguro e evita cobrança sem publicação.
+        await saveGardenToSE();
+      }
       toast('📣 Mensagem enviada para o global!',3200);
       close();
     } catch(error) {
       console.error('Falha ao enviar Mensagem Global:', error);
-      toast('❌ Não foi possível enviar a mensagem. Tente novamente.', 3200);
+      if(pointsCharged && G.lastGlobalMessage?.at===attemptedGlobalMessage?.at) {
+        G.lastGlobalMessage=previousGlobalMessage;
+        let refunded=previewAccess();
+        if(!refunded) refunded=await giveSEPoints(GLOBAL_MESSAGE_COST);
+        if(refunded) {
+          G.pts=Number(G.pts||0)+GLOBAL_MESSAGE_COST;
+          recordPointsHistory(GLOBAL_MESSAGE_COST,'Reembolso de Mensagem Global não enviada');
+          updatePts();
+        }
+        toast(refunded
+          ? `❌ A mensagem não foi enviada; os ${GLOBAL_MESSAGE_COST} pontos foram devolvidos. ${error.message||''}`
+          : '❌ O envio falhou e o reembolso não foi confirmado. Entre em contato com o suporte antes de tentar novamente.', 5200);
+      } else {
+        toast(`❌ Não foi possível enviar a mensagem. ${error.message||'Tente novamente.'}`, 4200);
+      }
     } finally {
       globalMessagePurchaseInFlight=false;
       renderGlobalMessageShop();

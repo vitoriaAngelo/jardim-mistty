@@ -3355,6 +3355,8 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 <link rel="stylesheet" href="cozy-cursors.css">
 <script src="mature-plants.js"></script>
 <script defer src="cozy-tooltips.js"></script>
+<script src="rainbow-rewards.js"></script>
+<link rel="stylesheet" href="rainbow-rewards.css">
 </head>
 <body>
 
@@ -5015,6 +5017,7 @@ function initGardenEvents(){
 // maxWater = regas para encher (habilitar crescimento)
 // maxGrow  = estágios de crescimento por tempo (30min cada)
 const PLANTS = {
+  rainbow_seed:{name:'Fruto Arco-Íris',emoji:'🌈',cost:0,maxWater:6,maxGrow:15,harvests:1,color:'#d4abc9',leafColor:'#9abf9b',minLevel:1,eventOnly:true,rewardOnly:true},
   potato:   { name:'Batata',      emoji:'🥔', cost:30,  maxWater:3,  maxGrow:6,  harvests:3, color:'#c8a060', leafColor:'#4e8a28', minLevel:1  },
   lettuce:  { name:'Alface',      emoji:'🥬', cost:50,  maxWater:4,  maxGrow:8,  color:'#4ab848', leafColor:'#2a8a28', minLevel:1  },
   carrot:   { name:'Cenoura',     emoji:'🥕', cost:45,  maxWater:5,  maxGrow:10, color:'#f07030', leafColor:'#6aaa3a', minLevel:2  },
@@ -5413,6 +5416,7 @@ function effectiveMaxGrow(type) {
   return getPlantable(type).maxGrow * 2;
 }
 function effectiveSellValue(type, epicOverride) {
+  if(type==='rainbow_seed')return 200;
   const base = FarmAnimals.products[type]?.sell ?? SELL_VALUE[type];
   const mascotBonus = hasActiveMascot('apple') || hasActiveMascot('premium') ? 1.15 : 1;
   let val = Math.round(base * mascotBonus);
@@ -5786,7 +5790,7 @@ function renderInventory() {
   if (inventorySeasonFilter !== 'all') {
     const season = SEASONS.find(item => item.id === inventorySeasonFilter);
     const seasonTypes = season ? [...season.vegetables, ...season.flowers] : [];
-    entries = allEntries.filter(([type]) => seasonTypes.includes(type) || (G.crazySeedModifiers?.[type] || []).length > 0);
+    entries = allEntries.filter(([type]) => type==='rainbow_seed' || seasonTypes.includes(type) || (G.crazySeedModifiers?.[type] || []).length > 0);
   }
 
   if (!allEntries.length) {
@@ -5818,6 +5822,7 @@ function renderInventory() {
           <div class="inv-slot-name">${p.name}</div>
           ${(G.crazySeedModifiers?.[type] || []).length ? `<div style="color:#b53636;font-size:10px;font-weight:900">★ MALUCO ×${G.crazySeedModifiers[type].length}</div>` : ''}
           <div class="inv-slot-count">×${count}</div>
+          ${type==='rainbow_seed'?'<div class="inv-slot-name">Permanente · 1–100 frutos</div>':''}
           <div class="inv-tip">
             <strong>${p.name}</strong><br>
             💧 ${p.maxWater} regas · 🌱 ${effectiveMaxGrow(type)} crescimentos<br>
@@ -5860,6 +5865,7 @@ function crazySeedBonusLines(type) {
 // Venda base já cobre: semente (rega e colheita são gratuitas)
 // mantendo uma margem cozy de lucro para cada cultivo. (rega não tem custo)
 const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce: 76, cassava: 140,
+                     rainbow_seed:200,
                      corn: 84, pumpkin: 108, eggplant: 94, pepper: 103, broccoli: 117,
                      rose: 85, sunflower: 99, lavender: 113, daisy: 43, tulip: 76,
                      orchid: 127, hibiscus: 118, bluebell: 95, cherry: 136, poppy: 81, jasmine: 104,
@@ -5978,7 +5984,7 @@ async function buyShopCart() {
   for (const [type, qty] of entries) {
     const p = cartProduct(type);
     const fertilizer = typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type];
-    if (!p || (p.subscriberOnly && !hasSubscriberBadge()) || (!previewAccess() && currentLevel() < p.minLevel)) { toast('🌱 Remova da sacola os itens indisponíveis para sua conta ou nível.'); return; }
+    if (!p || p.rewardOnly || (p.subscriberOnly && !hasSubscriberBadge()) || (!previewAccess() && currentLevel() < p.minLevel)) { toast('🌱 Remova da sacola os itens indisponíveis para sua conta ou nível.'); return; }
     total += cartUnitCost(type) * qty;
   }
   if (G.pts < total) { toast('✨ Pontos insuficientes para concluir a compra!'); return; }
@@ -6307,6 +6313,7 @@ function spawnCoinBurst(el, pts) {
 }
 
 function harvestedProduceArt(type) {
+  if(type==='rainbow_seed')return RainbowRewards.art('seed');
   if (FarmAnimals.products[type]) return animalProductArt(type);
   const item = getPlantable(type);
   const isFlower = Boolean(FLOWERS[type]);
@@ -6539,6 +6546,12 @@ if (window.location.hostname === 'localhost' && new URLSearchParams(window.locat
   setTimeout(() => document.getElementById('update-news-overlay')?.classList.remove('hidden'), 500);
 }
 function renderMascotShop() {
+  RainbowRewards.grant(G);
+  if(!document.getElementById('rainbow-mascot-card')){
+    const card=document.createElement('article');card.id='rainbow-mascot-card';card.className='rainbow-mascot-card';
+    card.innerHTML=RainbowRewards.art('mascot')+'<h3>Brotinho Arco-Íris</h3><p>+1 rega em todas as plantas a cada 5 segundos, sem gastar água. Chance de 1% por ciclo de colher uma planta pronta para o Mercado.</p><button class="mascot-buy" data-mascot="rainbow" onclick="buyMascot(\'rainbow\')">Complete o álbum Arco-Íris</button>';
+    document.querySelector('.mascot-grid')?.append(card);
+  }
   const labels = { orange:'Comprar · 2.500 pts', apple:'Comprar · 7.500 pts', strawberry:'Comprar · 15.000 pts', premium:'Comprar · 75.000 pts', twitchzinho:'✦ Resgate no Premium', prismatic:'Complete o álbum' };
   const levels = { orange:1, apple:10, strawberry:15, premium:25 };
   const albumComplete = hasCompletePrismaticAlbum();
@@ -6548,7 +6561,7 @@ function renderMascotShop() {
   document.querySelectorAll('.mascot-buy[data-mascot]').forEach(btn => {
     const id=btn.dataset.mascot, owned=G.ownedMascots?.[id]===true, selected=G.selectedMascot===id, selectedExtra=G.secondaryMascot===id;
     const required=levels[id], locked=required!==undefined && currentLevel()<required && !owned;
-    const prismaticLocked=id==='prismatic'&&!albumComplete;
+    const prismaticLocked=(id==='prismatic'&&!albumComplete)||(id==='rainbow'&&!owned);
     const premiumOnly=id==='twitchzinho';
     btn.classList.toggle('selected',selected||selectedExtra); btn.classList.toggle('locked',locked||prismaticLocked);
     btn.textContent=selected?'Selecionado':selectedExtra?'Desequipar extra':premiumOnly&&!owned?'✦ Resgate no Premium':locked?`🔒 Nível ${required}`:prismaticLocked?'🔒 Complete o álbum':owned?'Selecionar':labels[id];
@@ -6558,6 +6571,7 @@ function renderMascotShop() {
     if (id === 'twitchzinho') btn.onclick = () => buyMascot('twitchzinho');
   });
   const info = { orange:['🍊','Laranjinha','+1 item na colheita.'], apple:['🍎','Maçanzinha','+15% no valor das vendas.'], strawberry:['🍓','Moranguinho','Adiciona +2 na recuperação de água a cada 5 minutos.'], premium:['🌱','Brotinho Premium','+1 colheita · +15% nas vendas · +2 na recuperação de água a cada 5 minutos.'], twitchzinho:['💜','Twitchzinho','Quantidade aleatória de moedas a cada 5 minutos.'], prismatic:['🌈','Brotinho Prismático','Aumenta a chance de Chuva Mágica nos eventos.'] };
+  info.rainbow=['🌈','Brotinho Arco-Íris','+1 rega gratuita a cada 5 segundos em todas as plantas · 1% de chance por ciclo de colher uma planta pronta para o Mercado.'];
   const panel=document.getElementById('mascot-active-benefit'); const active=activeMascots().map(id=>info[id]).filter(Boolean);
   if (panel) { panel.classList.toggle('empty', !active.length); panel.innerHTML=active.length ? active.map(data=>`<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">${data[0]}</span><div><strong>${data[1]} ativo</strong><small>${data[2]}</small></div></div>`).join('') : '<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div>'; }
 }
@@ -6645,6 +6659,7 @@ async function buyMascot(id) {
     return;
   }
   if (id==='prismatic'&&!hasCompletePrismaticAlbum()) { toast('🌈 Complete as 10 cartas do álbum prismático para desbloquear este mascote.',3500); renderMascotShop(); return; }
+  if(id==='rainbow'&&!alreadyOwned){toast('🌈 Complete as 10 figurinhas Arco-Íris para desbloquear este Brotinho.');return;}
   if (id === 'twitchzinho' && !alreadyOwned) { toast('💜 Resgate o Twitchzinho no benefício Premium.'); return; }
   const cost=MASCOT_COSTS[id]||0;
   if (G.secondaryMascot === id) { G.secondaryMascot=null; applySelectedMascotAppearance(); renderMascotShop(); saveGardenToSE(); toast('🐾 Brotinho Prismático retirado do espaço extra.'); return; }
@@ -7100,7 +7115,7 @@ function renderRankingPage() {
       : `<span style="font-size:20px;font-weight:800;color:var(--text2)">${pos}</span>`;
     return `<div class="ranking-item ${topClass} ${isMe ? 'me' : ''} ${bgClass}" role="button" tabindex="0" aria-label="Abrir perfil de ${farmName}" onclick="openRankingProfile(${rankingPage * pageSize + i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRankingProfile(${rankingPage * pageSize + i})}">
       <div class="ranking-pos">${medal}</div><div class="ranking-frame" data-frame="${frame}" aria-label="Nível ${userLevel}" title="Nível ${userLevel}" aria-hidden="false">${levelIcon}</div>
-      <div class="ranking-name"><div class="ranking-farm-title"><div class="ranking-farm-name">${farmName}</div></div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${selectedTitle ? `<div class="ranking-custom-title">🏅 ${selectedTitle}</div>` : ''}${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
+      <div class="ranking-name"><div class="ranking-farm-title"><div class="ranking-farm-name">${farmName}</div></div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${selectedTitle ? `<div class="ranking-custom-title ${selectedTitle==='Pote de Arco-Íris'?'rainbow-title':''}">🏅 ${selectedTitle}</div>` : ''}${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
       <div class="ranking-pts">${rankingMode === 'level' ? `⭐ Nível ${userLevel}` : `<img class="points-token" src="points-sprout.svg" width="20" height="20" alt="" aria-hidden="true"> ${pts.toLocaleString()}`}</div>
     </div>`;
   }).join('');
@@ -7286,6 +7301,7 @@ function unlockAchievement(id) {
 
 function checkAchievements() {
   initAchievements();
+  RainbowRewards.grant(G);
   const rainbowCount=(start,end)=>Array.from({length:end-start},(_,i)=>Number(G.albumCards?.['rainbow_'+(start+i)])>0).filter(Boolean).length;
   if(rainbowCount(0,10)>=1)unlockAchievement('rainbow_first');
   if(rainbowCount(0,3)===3)unlockAchievement('rainbow_common');
@@ -7641,6 +7657,7 @@ let seasonDayTimer = null;
 function currentSeason() { return SEASONS[G.seasonIdx]; }
 
 function isInSeason(type) {
+  if(type==='rainbow_seed')return true;
   const s = currentSeason();
   return s.vegetables.includes(type) || s.flowers.includes(type);
 }
@@ -7730,7 +7747,7 @@ function openRankingProfile(index) {
   overlay.id = 'ranking-profile-overlay';
   overlay.innerHTML = `<div class="mail-modal ranking-profile-modal" data-profile-background="${profileBackground}"><button class="popup-close-x" aria-label="Fechar perfil" onclick="this.closest('#ranking-profile-overlay').remove()">×</button>
     <div class="mail-modal-title">🌱 Perfil do fazendeiro</div>
-    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-label="Nível ${level}" title="Nível ${level}">${levelIcon}</div><div class="ranking-profile-main"><div class="ranking-farm-title"><strong>${farmName}</strong></div><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${selectedTitle ? `<small class="ranking-custom-title">🏅 ${selectedTitle}</small>` : ''}${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
+    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-label="Nível ${level}" title="Nível ${level}">${levelIcon}</div><div class="ranking-profile-main"><div class="ranking-farm-title"><strong>${farmName}</strong></div><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${selectedTitle ? `<small class="ranking-custom-title ${selectedTitle==='Pote de Arco-Íris'?'rainbow-title':''}">🏅 ${selectedTitle}</small>` : ''}${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
     <div class="profile-label">Estatísticas da fazenda</div><div class="ranking-profile-stats">${statsHtml}</div><div class="profile-label">Badges desbloqueados</div><div class="ranking-profile-badges">${badgeHtml}</div><button class="mail-close-btn" onclick="this.closest('#ranking-profile-overlay').remove()">Fechar</button></div>`;
   document.body.appendChild(overlay);
 }
@@ -8220,7 +8237,8 @@ document.addEventListener('contextmenu', event => {
 
 // XP is earned on harvest, with a distinct value for each crop.
 function harvestXP(type) {
-  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
+  if(type==='rainbow_seed')return 50;
+  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)].filter(id=>!getPlantable(id)?.rewardOnly);
   const index = Math.max(0, allTypes.indexOf(type));
   return 20 + index * 3;
 }
@@ -8293,6 +8311,7 @@ function seedProductIcon(type, primary, secondary) {
 }
 
 function seedBagSVG(type, locked = false) {
+  if(type==='rainbow_seed')return RainbowRewards.art('seed',.35);
   const p = getPlantable(type);
   const seasons = p && typeof SEASONS !== 'undefined'
     ? SEASONS.filter(s => s.vegetables.includes(type) || s.flowers.includes(type))
@@ -8324,7 +8343,7 @@ function renderShop() {
   renderGlobalMessageShop();
 
   // season filter
-  let entries = Object.entries(PLANTS);
+  let entries = Object.entries(PLANTS).filter(([,plant])=>!plant.rewardOnly);
   if (shopSeasonFilter === 'promo') {
     entries = entries.filter(([type]) => isOutOfSeason(type));
   } else if (shopSeasonFilter !== 'all') {
@@ -8613,7 +8632,7 @@ function buildPlotEl(plot, idx) {
     const growReady = plot.growCount >= maxG;
     const harvestTotal = Number(plot.harvestsTotal) || (legacyHarvestCyclesFor(plot.type) + Math.max(0, Number(plot.crazyExtraHarvests) || 0));
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestTotal);
-    const harvestInfo = harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
+    const harvestInfo = plot.type==='rainbow_seed' ? '<div class="plot-harvest-count">🌈 Permanente · 1–100 frutos</div>' : harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
     const mutationInfo = plot.mutated ? '<div class="plot-mutation-label">🧬 mutação cristalina ativa</div>' : '';
     const specialDays = G.specialPlotExpiresAt ? Math.max(1, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS)) : 1;
     const specialLabel = `${specialDays.toLocaleString('pt-BR')} dia${specialDays > 1 ? 's' : ''}`;
@@ -8644,11 +8663,12 @@ function buildPlotEl(plot, idx) {
   return div;
 }
 
-async function onPlotClick(idx) {
+async function onPlotClick(idx, rainbowAutoHarvest = false) {
   if (idx >= G.unlockedPlots && !(idx === 5 && premiumSpecialPlotAccess())) return;
   const plot = G.plots[idx];
+  if(rainbowAutoHarvest&&(!hasActiveMascot('rainbow')||!G.ownedMascots?.rainbow||!plot||!isReady(plot)))return;
   const tool = G.selectedTool;
-  if (tool === 'water' && G.taxPending) {
+  if (!rainbowAutoHarvest && tool === 'water' && G.taxPending) {
     toast(`🧾 Regador bloqueado: pague ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts de imposto.`, 3200);
     renderWateringCapacity();
     return;
@@ -8657,7 +8677,7 @@ async function onPlotClick(idx) {
   if (plot && plot.outOfSeason && isInSeason(plot.type)) plot.outOfSeason = false;
   const outOfSeason = plot ? (!plot.crazySeasonProtected && (plot.outOfSeason || !isInSeason(plot.type))) : false;
 
-  if (G.specialPlotPending) {
+  if (G.specialPlotPending && !rainbowAutoHarvest) {
     if (plot) { toast('Escolha um canteiro vazio para o upgrade.'); return; }
     G.specialPlot = idx;
     G.specialPlotPending = false;
@@ -8669,23 +8689,23 @@ async function onPlotClick(idx) {
   }
 
   // Se adubo selecionado mas canteiro TEM planta → avisar
-  if (G.selectedFertilizer && plot) {
+  if (G.selectedFertilizer && plot && !rainbowAutoHarvest) {
     toast(`⚠️ O ${FERTILIZERS[G.selectedFertilizer].name} precisa ser aplicado num canteiro VAZIO antes de plantar!`, 3000);
     return;
   }
 
   // AUTO-COLHEITA: se pronto, colhe direto ao clicar (sem custo de pts)
-  if (plot && isReady(plot) && G.selectedTool !== 'shovel') {
+  if (plot && isReady(plot) && (rainbowAutoHarvest || G.selectedTool !== 'shovel')) {
     const type = plot.type;
     const plant = getPlantable(type);
     const harvestsTotal = Number(plot.harvestsTotal) || legacyHarvestCyclesFor(type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);
     const mutationProtectsSeason = outOfSeason && plot.mutated === true;
     const lostToSeason = outOfSeason && !mutationProtectsSeason;
-    const regrows = !lostToSeason && harvestsRemaining > 1;
+    const regrows = type==='rainbow_seed' || (!lostToSeason && harvestsRemaining > 1);
     const hasGolden = plot.goldenSoil;
     if (regrows) {
-      plot.harvestsRemaining = harvestsRemaining - 1;
+      plot.harvestsRemaining = type==='rainbow_seed' ? 1 : harvestsRemaining - 1;
       plot.waterCount = 0;
       plot.growCount = 0;
     } else {
@@ -8722,6 +8742,7 @@ async function onPlotClick(idx) {
           ? `💎 Planta cristalina protegida da estação! +1 ${getPlantable(type).name}`
           : `🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
       }
+      if(type==='rainbow_seed')finalQty=RainbowRewards.harvestQuantity();
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
       if (plot.pestInfested) G.pestHarvested[type] = (G.pestHarvested[type] || 0) + finalQty;
       if (plot.crazyDoubleSale) G.crazyDoubleHarvested[type] = (G.crazyDoubleHarvested[type] || 0) + finalQty;
@@ -8733,7 +8754,7 @@ async function onPlotClick(idx) {
 
       // Skill: Recuperar Semente (Sementes Fortes)
       const seedRecoverChance = skillSeedRecoverChance();
-      if (seedRecoverChance > 0 && Math.random() < seedRecoverChance) {
+      if (type!=='rainbow_seed' && seedRecoverChance > 0 && Math.random() < seedRecoverChance) {
         G.inventory[type] = (G.inventory[type] || 0) + 1;
         spawnSkillEffect(idx, '🌾', '+1 Semente recuperada', '#a87828');
         setTimeout(() => toast(`🌾 Semente de ${getPlantable(type).name} recuperada!`), 400);
@@ -8766,7 +8787,7 @@ async function onPlotClick(idx) {
       updatePts();
       missionProgress('harvest2');
       initAchievements();
-      G.achievStats.totalHarvest = (G.achievStats.totalHarvest||0) + qty;
+      G.achievStats.totalHarvest = (G.achievStats.totalHarvest||0) + (type==='rainbow_seed'?finalQty:qty);
       checkHarvestTitles();
       if (FLOWERS[type]) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0); // tracked at sell
       checkAchievements();
@@ -8778,7 +8799,7 @@ async function onPlotClick(idx) {
       renderFertilizerInventory();
       const toastMsg = gotDouble ? `🧺🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} COLHEITA DUPLA!` :
         `🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!${plot.goldenPlot ? ' ✨ Canteiro Especial: planta dourada vale 3x!' : hasGolden ? ' ✨ Terra Dourada: +1 unidade extra!' : ''}`;
-      toast(regrows ? `${toastMsg} 🌱 Ela continuará plantada — regue novamente! (${plot.harvestsRemaining} colheita${plot.harvestsRemaining > 1 ? 's' : ''} restante${plot.harvestsRemaining > 1 ? 's' : ''})` : toastMsg);
+      toast(type==='rainbow_seed' ? `🌈 +${finalQty} frutos no Mercado! A planta continua no canteiro para a próxima colheita.` : regrows ? `${toastMsg} 🌱 Ela continuará plantada — regue novamente! (${plot.harvestsRemaining} colheita${plot.harvestsRemaining > 1 ? 's' : ''} restante${plot.harvestsRemaining > 1 ? 's' : ''})` : toastMsg);
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
 
       // Save em background — não bloqueia a interface
@@ -8963,6 +8984,7 @@ function cozyPlantPalette(svg) {
 }
 
 function plantSVG(type, progress) {
+  if(type==='rainbow_seed')return RainbowRewards.art('seed',Math.max(0,Math.min(1,progress)));
   const plant = getPlantable(type);
   const t = clamp(progress, 0, 1);
   if (t >= 1) return cozyPlantPalette(bloomSVG(type, plant.leafColor, plant.color));
@@ -9352,6 +9374,7 @@ const HARVEST_TITLES = [
   { icon:'💎', name:'Lenda Agronômica', target:7500 },
   { icon:'🌸', name:'Colecionador da Primavera', target:0, albumKey:'spring' },
   { icon:'🌈', name:'Guardião dos Prismas', target:0, albumKey:'prismatic' },
+  { icon:'🌈', name:'Pote de Arco-Íris', target:0, albumKey:'rainbow_title' },
 ];
 function titleForName(name) { return HARVEST_TITLES.find(t => t.name === name) || null; }
 function harvestTitleUnlocked(title) { return Boolean(title && (title.albumKey ? G.albumRewardsClaimed?.[title.albumKey] === true : Number(G.achievStats?.totalHarvest || 0) >= title.target)); }
@@ -9456,13 +9479,14 @@ async function selectHarvestTitle(name) {
   }
 }
 function renderProfileTitles() {
+  document.getElementById('profile-selected-title')?.classList.toggle('rainbow-title',G.selectedHarvestTitle==='Pote de Arco-Íris');
   const container = document.getElementById('profile-titles');
   if (!container) return;
   const harvested = Number(G.achievStats?.totalHarvest || 0);
   container.innerHTML = HARVEST_TITLES.map(title => {
     const unlocked = harvestTitleUnlocked(title);
     const progress = title.albumKey ? (unlocked ? 100 : 0) : Math.min(100, Math.round(harvested / title.target * 100));
-    const requirement = title.albumKey ? (unlocked ? 'Desbloqueado ao completar o álbum' : `Complete o álbum ${title.albumKey === 'spring' ? 'Primavera Encantada' : 'Prismático'}`) : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`;
+    const requirement = title.albumKey==='rainbow_title' ? 'Descubra sua primeira figurinha Arco-Íris' : title.albumKey ? (unlocked ? 'Desbloqueado ao completar o álbum' : `Complete o álbum ${title.albumKey === 'spring' ? 'Primavera Encantada' : 'Prismático'}`) : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`;
     return `<button type="button" class="profile-title-card ${unlocked ? 'unlocked' : 'locked'} ${G.selectedHarvestTitle === title.name ? 'selected' : ''}" ${unlocked ? `onclick="selectHarvestTitle('${title.name}')"` : 'disabled'}><div class="profile-title-icon">${title.icon}</div><div><div class="profile-title-name">${title.name} ${G.selectedHarvestTitle === title.name ? '⭐' : (unlocked ? '✓' : '🔒')}</div><div class="profile-title-requirement">${G.selectedHarvestTitle === title.name ? 'Título equipado' : (unlocked ? 'Clique para escolher' : requirement)}</div><div class="profile-title-progress"><span style="width:${progress}%"></span></div></div></button>`;
   }).join('');
 }
@@ -9489,7 +9513,7 @@ function openProfile() {
   initAchievements();
   document.querySelectorAll('.album-frame-option').forEach(option => {
     const frame = option.querySelector('[data-frame]')?.dataset.frame;
-    const unlocked = frame === 'spring_album' ? G.albumFrameUnlocks?.spring === true : frame === 'prism_album' ? G.albumFrameUnlocks?.prismatic === true : false;
+    const unlocked = frame === 'spring_album' ? G.albumFrameUnlocks?.spring === true : frame === 'prism_album' ? (G.albumFrameUnlocks?.prismatic === true || G.albumFrameUnlocks?.rainbow === true) : false;
     option.style.display = unlocked ? '' : 'none';
   });
   const stats = G.achievStats;
@@ -9565,7 +9589,7 @@ function selectProfileFrame(frame) {
   const subscriber = Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
   if (!['purple', 'pink', 'blue', 'red', 'yellow', 'vip', 'spring_album', 'prism_album'].includes(frame)) return;
   if (frame === 'spring_album' && G.albumFrameUnlocks?.spring !== true) { toast('🔒 Complete o álbum Primavera Encantada para liberar esta moldura.', 2600); return; }
-  if (frame === 'prism_album' && G.albumFrameUnlocks?.prismatic !== true) { toast('🔒 Complete o álbum Prismático para liberar esta moldura.', 2600); return; }
+  if (frame === 'prism_album' && G.albumFrameUnlocks?.prismatic !== true && G.albumFrameUnlocks?.rainbow !== true) { toast('🔒 Colecione as 3 comuns Arco-Íris ou complete o álbum Prismático para liberar esta moldura.', 2600); return; }
   if (frame === 'yellow' && !G.supporterFrameUnlocked) {
     toast('🔒 A moldura amarela é desbloqueada ao comprar um kit de bônus.', 2600);
     return;
@@ -9756,7 +9780,7 @@ function applySpecialLevelReward(reward) {
   if (reward.waterCapacity) { G.bonusWateringCapacity = Number(G.bonusWateringCapacity || 0) + reward.waterCapacity; received.push('+2 de capacidade no Regador'); }
   if (reward.crystalFruits) { G.crystalFruits = Number(G.crystalFruits || 0) + reward.crystalFruits; received.push(`${reward.crystalFruits}x Frutas Cristalinas`); }
   if (reward.allSeeds) {
-    [...Object.keys(PLANTS), ...Object.keys(FLOWERS)].forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + 1; });
+    [...Object.keys(PLANTS), ...Object.keys(FLOWERS)].filter(id=>!getPlantable(id)?.rewardOnly).forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + 1; });
     received.push('1x semente de cada cultivo');
   }
   if (reward.packs) {
@@ -10112,6 +10136,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
       document.getElementById('garden-name').textContent = `Jardim de ${displayName}`;
     }
     gardenHydrated = true;
+    RainbowRewards.grant(G);
     if (hasCompletePrismaticAlbum() && G.ownedMascots?.prismatic) saveGardenToSE();
     initGardenEvents();
     document.getElementById('twitch-btn').innerHTML =
@@ -10279,6 +10304,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     secondaryMascot: G.secondaryMascot || null,
     extraMascotSlotPurchased: G.extraMascotSlotPurchased === true,
     ownedMascots: G.ownedMascots || {},
+    rainbowMascotPulseAt:Number(G.rainbowMascotPulseAt||0),
     twitchzinhoNextRewardAt: Number(G.twitchzinhoNextRewardAt || 0),
     twitchzinhoPendingCoins: Number(G.twitchzinhoPendingCoins || 0),
     profileFrame:      G.profileFrame || 'red',
@@ -10611,6 +10637,7 @@ async function loadGardenFromSE(username) {
     G.secondaryMascot = save.secondaryMascot === 'prismatic' ? 'prismatic' : null;
     G.extraMascotSlotPurchased = save.extraMascotSlotPurchased === true;
     G.ownedMascots = save.ownedMascots || (G.selectedMascot ? {[G.selectedMascot]: true} : {});
+    G.rainbowMascotPulseAt=Number(save.rainbowMascotPulseAt)||Date.now();
     if (!G.extraMascotSlotPurchased || G.selectedMascot !== 'premium' || G.ownedMascots.prismatic !== true) G.secondaryMascot = null;
     syncPrismaticMascotUnlock();
     G.twitchzinhoNextRewardAt = Number(save.twitchzinhoNextRewardAt || 0);
@@ -11998,3 +12025,4 @@ buyCardPack=function(){if(Number(G.pts||0)<1){toast('Você precisa de 1 ponto pa
 <link rel="stylesheet" href="album-rainbow.css">
 <script src="card-packs.js?v=10-card-packs"></script>
 <script src="album-trade-badge.js"></script>
+<script src="rainbow-rewards-game.js"></script>

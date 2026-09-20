@@ -1,0 +1,12 @@
+.rainbow-reward-art{display:block;width:100%;max-width:110px;height:100px;margin:auto;filter:drop-shadow(0 3px 2px #82687b22)}
+.inv-slot-svg .rainbow-reward-art{height:100%;max-height:64px}.harvest-item .rainbow-reward-art{height:60px;max-width:60px}
+.rainbow-title,.profile-title-card[onclick*="Pote de Arco"] .profile-title-name{background:linear-gradient(90deg,#cd688e,#ba8034,#89842c,#4b916d,#527faf,#9765b5)!important;background-clip:text!important;-webkit-background-clip:text!important;color:transparent!important}
+.dark-mode .rainbow-title,.dark-mode .profile-title-card[onclick*="Pote de Arco"] .profile-title-name{background-image:linear-gradient(90deg,#ffadc9,#ffd29e,#ece6a0,#ade5be,#b4daff,#dabaff)!important}
+.rainbow-mascot-card{padding:18px;border:1px solid #cbb1ca;border-radius:20px;text-align:center;background:linear-gradient(145deg,#fff4d9,#ecdff0,#dfefe7);color:#655768}
+.rainbow-mascot-card h3{font:700 16px Georgia,serif;margin:6px 0}.rainbow-mascot-card p{font-size:11px;line-height:1.6}
+.mascot-button.mascot-render-rainbow .mascot-sprout-form [fill="#bbcf9e"],.mascot-button.mascot-render-rainbow .mascot-sprout-form [fill="#a5bc89"]{fill:url(#mascotRainbowBody);stroke:#94819c}
+.mascot-button.mascot-render-rainbow .mascot-sprout-form [fill="#e3e9c5"]{fill:#fff2db}
+.mascot-button.mascot-render-rainbow>svg{filter:drop-shadow(0 0 5px #d9b4ee88) drop-shadow(0 3px 3px #70896c66)}
+.rainbow-page .rainbow-achievements article{display:flex;flex-direction:column;align-items:center;text-align:center;background:linear-gradient(145deg,var(--paper),#edd7e722);gap:8px}
+.rainbow-page .rainbow-achievements h3{font:700 16px Georgia,serif;margin:0}.rainbow-page .rainbow-achievements p{font-size:11px;line-height:1.6;margin:0}.rainbow-page .rainbow-achievements small{margin-top:auto;font-size:10px}.rainbow-page .rainbow-achievements .reward-state{font-weight:800;color:#789268}.rainbow-page.dark-mode .rainbow-achievements .reward-state{color:#bfdbad}
+.rainbow-page .reward-locked .rainbow-reward-art{filter:grayscale(.5);opacity:.7}.rainbow-page .reward-number{font-size:9px;letter-spacing:2px}

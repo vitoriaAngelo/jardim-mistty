@@ -53,6 +53,39 @@ try{
  assert.equal(await page.locator('.pack-flip').count(),10);
  await page.evaluate(()=>{RainbowAlbum.cards.forEach(c=>G.albumCards[c.id]=1);checkAchievements()});
  assert.equal(await page.evaluate(()=>['rainbow_first','rainbow_common','rainbow_rare','rainbow_complete','badge_rainbow'].every(id=>G.achievements.has(id))),true);
+ await page.evaluate(()=>document.querySelector('.pack-close').click());
+ assert.equal(await page.evaluate(()=>G.inventory.rainbow_seed),1);
+ assert.equal(await page.evaluate(()=>G.albumFrameUnlocks.rainbow),true);
+ assert.equal(await page.evaluate(()=>harvestTitleUnlocked(titleForName('Pote de Arco-Íris'))),true);
+ await page.evaluate(async()=>{
+   G.plots[0]=null;G.selectedFertilizer=null;G.specialPlotPending=false;G.selectedTool='water';G.taxPending=false;
+   G.selectedSeed='rainbow_seed';await onPlotClick(0);
+ });
+ assert.equal(await page.evaluate(()=>G.inventory.rainbow_seed),0);
+ for(const [random,expected] of [[0,1],[.99999,100]]){
+   const result=await page.evaluate(async random=>{
+     const before=Number(G.harvested.rainbow_seed||0);G.plots[0].growCount=effectivePlotMaxGrow(G.plots[0]);
+     const old=Math.random;Math.random=()=>random;try{await onPlotClick(0)}finally{Math.random=old}
+     return {quantity:G.harvested.rainbow_seed-before,type:G.plots[0]?.type,growth:G.plots[0]?.growCount,seeds:G.inventory.rainbow_seed,price:effectiveSellValue('rainbow_seed',true)};
+   },random);
+   assert.deepEqual(result,{quantity:expected,type:'rainbow_seed',growth:0,seeds:0,price:200});
+ }
+ await page.evaluate(async()=>{await buyMascot('rainbow');G.rainbowMascotPulseAt=0;G.waterCount=3;G.waterCapacity=3;G.plots=[{type:'rainbow_seed',growCount:0,waterCount:0},{type:'potato',growCount:0,waterCount:0},null,null,null,null];await tickRainbowMascot(Date.now()+50000,()=>.5)});
+ assert.deepEqual(await page.evaluate(()=>[G.plots[0].waterCount,G.plots[1].waterCount,G.waterCapacity]),[1,1,3]);
+ await page.evaluate(async()=>{G.plots[0].growCount=effectivePlotMaxGrow(G.plots[0]);G.selectedTool='shovel';G.taxPending=true;await tickRainbowMascot(Date.now()+60000,()=>0)});
+ assert.equal(await page.evaluate(()=>G.plots[0].growCount),0);
+ assert.equal(await page.evaluate(()=>G.plots[0].type),'rainbow_seed');
+ assert.equal(await page.evaluate(()=>G.waterCapacity),3);
+ assert.equal(await page.locator('.mascot-render-rainbow').count(),1);
+ const persisted=await page.evaluate(async()=>{const saved=await saveGardenToSENow();return {title:saved.data.albumRewardsClaimed.rainbow_title,seed:saved.data.albumRewardsClaimed.rainbow_seed,inventory:saved.data.inventory.rainbow_seed,plant:saved.data.plots[0].type,mascot:saved.data.selectedMascot,frame:saved.data.albumFrameUnlocks.rainbow,pulse:saved.data.rainbowMascotPulseAt>0}});
+ assert.deepEqual(persisted,{title:true,seed:true,inventory:0,plant:'rainbow_seed',mascot:'rainbow',frame:true,pulse:true});
+ await page.setViewportSize({width:1320,height:1000});
+ await page.evaluate(()=>{G.selectedHarvestTitle='Pote de Arco-Íris';openProfile();renderProfileTitles()});
+ assert.equal(await page.locator('#profile-selected-title').evaluate(el=>el.classList.contains('rainbow-title')),true);
+ await page.evaluate(()=>{closeProfile();openFarmAlbum(new Event('click'),'album-rainbow.html')});
+ await page.frameLocator('#farm-album-frame').locator('#rainbow-rewards').scrollIntoViewIfNeeded();
+ await page.frameLocator('#farm-album-frame').locator('#rainbow-rewards').screenshot({path:'tmp/rainbow-rewards-desktop.png'});
+ assert.equal(await page.frameLocator('#farm-album-frame').locator('.reward-unlocked').count(),4);
  assert.deepEqual(errors,[]);
- console.log('Rainbow: designs, tiers, odds, combine/retry, mobile/dark, reduced motion and real 3/10-card pack integration OK');
+ console.log('Rainbow: album, rewards, permanent seed, 1–100 fruit yield, free watering, auto harvest, persistence, mobile/dark and packs OK');
 }finally{await browser?.close();server.close();}})().catch(e=>{console.error(e);process.exitCode=1});

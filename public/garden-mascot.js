@@ -228,6 +228,7 @@
     const twitchzinho = type === 'twitchzinho';
     const premium = type === 'premium';
     const prismatic = type === 'prismatic';
+    const rainbow = type === 'rainbow';
     document.body.classList.toggle('mascot-orange-active', orange);
     document.body.classList.toggle('mascot-apple-active', apple);
     document.body.classList.toggle('mascot-strawberry-active', strawberry);
@@ -242,6 +243,7 @@
     const mascotName = mascot.querySelector('.mascot-bubble strong');
     if (mascotName) mascotName.textContent = orange ? 'LARANJINHA' : apple ? 'MAÇANZINHA' : strawberry ? 'MORANGUINHO' : twitchzinho ? 'TWITCHZINHO' : prismatic ? 'BROTINHO PRISMÁTICO' : premium ? 'BROTINHO PREMIUM' : 'BROTINHO';
     mascot.setAttribute('aria-label', orange ? 'Laranjinha, seu companheiro de jardim' : apple ? 'Maçanzinha, seu companheiro de jardim' : strawberry ? 'Moranguinho, seu companheiro de jardim' : twitchzinho ? 'Twitchzinho, seu companheiro roxo de jardim' : prismatic ? 'Brotinho Prismático, seu companheiro de jardim' : premium ? 'Brotinho Premium, seu companheiro dourado' : 'Brotinho, seu companheiro de jardim');
+    if(rainbow){if(mascotName)mascotName.textContent='BROTINHO ARCO-ÍRIS';mascot.setAttribute('aria-label','Brotinho Arco-Íris, seu companheiro de jardim');}
     if ((orange || apple || strawberry) && animate) {
       petButton.classList.remove('mascot-orange-celebrate','mascot-apple-celebrate','mascot-strawberry-celebrate');
       void petButton.offsetWidth;

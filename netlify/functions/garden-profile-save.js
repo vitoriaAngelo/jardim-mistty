@@ -11,6 +11,7 @@ const headers = {
 
 const VALID_BACKGROUNDS = new Set(['spring','sunny','rain','night','autumn','winter','rainbow','forest']);
 const VALID_TITLES = new Set(['','Primeira Colheita','Mãos na Terra','Jardineiro Dedicado','Mestre da Colheita','Lenda do Jardim','Imperador da Colheita','Eterno do Jardim','Colecionador da Primavera','Guardião dos Prismas']);
+VALID_TITLES.add('Pote de Arco-Íris');
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
@@ -31,6 +32,7 @@ exports.handler = async (event) => {
     }
     if (selectedHarvestTitle !== undefined) {
       if (!VALID_TITLES.has(selectedHarvestTitle)) return { statusCode:400, headers, body:JSON.stringify({ error:'Título inválido' }) };
+      if(selectedHarvestTitle==='Pote de Arco-Íris'&&current.data.albumRewardsClaimed?.rainbow_title!==true)return {statusCode:403,headers,body:JSON.stringify({error:'Descubra uma figurinha Arco-Íris para liberar este título'})};
       if (selectedHarvestTitle === 'Colecionador da Primavera' && current.data.albumRewardsClaimed?.spring !== true) return { statusCode:403, headers, body:JSON.stringify({ error:'Complete o álbum Primavera Encantada para liberar este título' }) };
       if (selectedHarvestTitle === 'Guardião dos Prismas' && current.data.albumRewardsClaimed?.prismatic !== true) return { statusCode:403, headers, body:JSON.stringify({ error:'Complete o álbum Prismático para liberar este título' }) };
       next.selectedHarvestTitle = selectedHarvestTitle;

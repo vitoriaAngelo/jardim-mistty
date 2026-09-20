@@ -54,5 +54,16 @@
   window.addEventListener('message',e=>{if(e.source!==window.parent)return;if(e.data?.type==='album-theme')document.body.classList.toggle('dark-mode',e.data.dark===true);});
   window.parent.postMessage({type:'album-theme-ready'},location.origin);
   try{document.body.classList.toggle('dark-mode',localStorage.getItem('mistty-theme')==='dark');}catch{}
-  render();
+  function renderRewards(){
+    const states=window.parent.rainbowRewardStatus?.()||RainbowRewards.grant({albumCards:inventory()});
+    const rewards=[
+      ['title','Pote de Arco-Íris','Um título inteirinho colorido para seu perfil.','Descubra sua primeira figurinha Arco-Íris.','Equipar título'],
+      ['frame','Moldura Arco-Íris','Sete cores para abraçar o seu perfil.','Colecione as 3 comuns Arco-Íris.','Equipar moldura'],
+      ['seed','Semente Arco-Íris ×1','Uma planta permanente: cada colheita produz de 1 a 100 frutos, com valor base de 200 pontos cada.','Colecione as 4 raras Arco-Íris.','Ver inventário'],
+      ['mascot','Brotinho Arco-Íris','+1 rega em todas as plantas a cada 5 segundos, sem gastar água. Chance de 1% por ciclo de colher uma planta pronta para o Mercado.','Complete as 10 figurinhas Arco-Íris.','Usar Brotinho']
+    ];
+    document.getElementById('rainbow-rewards').innerHTML=rewards.map(([kind,name,desc,requirement,action],i)=>`<article class="${states[i]?'reward-unlocked':'reward-locked'}"><span class="reward-number">RECOMPENSA 0${i+1}</span>${RainbowRewards.art(kind)}<h3 class="${kind==='title'?'rainbow-title':''}">${name}</h3><p>${desc}</p><small>${requirement}</small><span class="reward-state">${states[i]?'✓ Desbloqueada':'🔒 Ainda não desbloqueada'}</span><button data-reward="${i}" ${!states[i]||!window.parent.useRainbowReward?'disabled':''}>${action}</button></article>`).join('');
+    document.querySelectorAll('[data-reward]').forEach(button=>button.onclick=async()=>{button.disabled=true;try{await window.parent.useRainbowReward(Number(button.dataset.reward));}finally{button.disabled=false;}});
+  }
+  render();renderRewards();
 })();

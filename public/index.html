@@ -6765,6 +6765,14 @@ async function deliverOrder(id) {
   if (!order || (G.orderDeliveries || 0) >= 4) { toast('🌿 Você já entregou 4 pedidos nesta estação.', 2800); return; }
   const availableClean = Math.max(0, (G.harvested[order.type] || 0) - (G.pestHarvested?.[order.type] || 0));
   if (availableClean < order.qty) return;
+  const deliverySnapshot = JSON.parse(JSON.stringify({
+    harvested:G.harvested, pestHarvested:G.pestHarvested, crazyDoubleHarvested:G.crazyDoubleHarvested,
+    crazyDoublePestHarvested:G.crazyDoublePestHarvested, pts:G.pts, xp:G.xp, farmerXP:G.farmerXP,
+    pointsHistory:G.pointsHistory, lastOrder:G.lastOrder, orderDeliveries:G.orderDeliveries,
+    totalOrderDeliveries:G.totalOrderDeliveries, orders:G.orders, achievements:[...(G.achievements || [])],
+    achievStats:G.achievStats, missions:G.missions
+  }));
+  const ordersSnapshot = gardenOrders.slice();
   const pestStock = Math.min(G.harvested[order.type] || 0, G.pestHarvested?.[order.type] || 0);
   const cleanStock = (G.harvested[order.type] || 0) - pestStock;
   const pestUsed = Math.max(0, order.qty - cleanStock);
@@ -6786,7 +6794,17 @@ async function deliverOrder(id) {
   checkProfileBackgroundUnlocks();
   if (G.orderDeliveries < 4) gardenOrders.push(createOrder(gardenOrders.length));
   G.orders = gardenOrders;
-  updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE(true);
+  updatePts(); renderHarvested(); renderOrders();
+  try { await saveGardenToSE(true); }
+  catch (error) {
+    Object.assign(G, deliverySnapshot);
+    G.achievements = new Set(deliverySnapshot.achievements || []);
+    gardenOrders = ordersSnapshot;
+    G.orders = gardenOrders;
+    updatePts(); renderHarvested(); renderOrders();
+    toast(`❌ Entrega não confirmada: ${error.message || 'estoque atualizado em outra tela.'}`, 4200);
+    return;
+  }
   toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
 }
 async function openOrders(event) {

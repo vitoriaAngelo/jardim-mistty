@@ -41,3 +41,9 @@ body.dark-mode .empty{border-color:#6f7c57;color:#d7cda9}
 body.dark-mode .offer-card>small{color:#bdcf9c}
 body.dark-mode .hint{color:#c9d2bb!important}
 body.dark-mode .prism-odds span{background:#303b3d;border-color:#66848a;color:#d1edeb}
+.mini-grid button{position:relative;padding-top:25px!important}
+.mix-rarity-badge{display:block;margin:4px auto 0;padding:3px 6px;border:1px solid #c5b875;border-radius:999px;background:#f7edc8;color:#655728;font-size:8px;line-height:1.2;letter-spacing:.25px}
+.mix-slots .mix-rarity-badge{position:absolute;left:50%;bottom:5px;transform:translateX(-50%);white-space:nowrap;background:#f8f3df}
+.mini-grid button:has(.art[style*="linear-gradient"]) .mix-rarity-badge{background:#e5ddfb;border-color:#b5a1dc;color:#594176}
+body.dark-mode .mix-rarity-badge{background:#423a2a;border-color:#8b7a4a;color:#f2df9d}
+body.dark-mode .mini-grid button:has(.art[style*="linear-gradient"]) .mix-rarity-badge{background:#39314d;border-color:#8973b7;color:#e1d3ff}

@@ -13,7 +13,7 @@
     if(!response.ok)throw new Error('Não foi possível conferir as figurinhas reservadas para trocas. Tente novamente.');
     available=Object.fromEntries((data.cards||[]).map(c=>[c.card_id,Math.max(0,Number(c.available_quantity)-1)]));
   }
-  function cardMarkup(card,qty){return `<article class="rainbow-card ${qty?'owned':'undiscovered'}" data-tier="${card.rarity}"><div class="rarity"><span>${card.rarity} Arco-Íris</span><span>✧ ${card.i+21}</span></div>${RainbowAlbum.render(card)}<h3>${qty?card.name:'Encontro por descobrir'}</h3><p>${qty?card.desc:'Uma companhia colorida espera pelo seu primeiro encontro.'}</p><div class="card-bottom"><span>ALÉM DO ARCO-ÍRIS</span><strong>${qty?'×'+qty:'?'}</strong></div></article>`;}
+  function cardMarkup(card,qty){return `<article class="rainbow-card ${qty?'owned':'undiscovered'}" data-tier="${card.rarity}"><div class="rarity"><span>${card.rarity} Arco-Íris</span><span>✧ ${card.i+21}</span></div>${RainbowAlbum.render(card)}<h3>${card.name}</h3><p>${qty?card.desc:'Uma companhia colorida espera pelo seu primeiro encontro.'}</p><div class="card-bottom"><span>ALÉM DO ARCO-ÍRIS</span><strong>${qty?'×'+qty:'?'}</strong></div></article>`;}
   function render(){const inv=inventory(),owned=RainbowAlbum.cards.filter(c=>Number(inv[c.id])>0).length;document.getElementById('count').textContent=owned+' / 10 descobertas';document.querySelector('.progress i').style.width=owned*10+'%';document.getElementById('cards').innerHTML=RainbowAlbum.cards.filter(c=>filter==='all'||filter===c.rarity).map(c=>cardMarkup(c,Number(inv[c.id])||0)).join('');}
   async function persist(next){
     if(window.parent===window)throw new Error('Abra o álbum pela sua fazenda para salvar.');

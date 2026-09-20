@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+<defs><linearGradient id="rim" x2="1" y2="1"><stop stop-color="#e2f4f3"/><stop offset=".5" stop-color="#91bdd3"/><stop offset="1" stop-color="#b5c5e8"/></linearGradient></defs>
+<rect x="11" y="11" width="98" height="98" rx="29" stroke="#708fae" stroke-width="10"/><rect x="11" y="10" width="98" height="98" rx="29" stroke="url(#rim)" stroke-width="7"/><rect x="16" y="15" width="88" height="88" rx="24" stroke="#f3ffff" stroke-width="1.4"/>
+<path d="M5 23C-1 17 5 10 11 12C13-2 28 0 30 11C42 8 44 24 33 25H8Z" fill="#f6f7ef" stroke="#8fadc5" stroke-width="1.3"/><path d="M88 106C82 101 85 94 92 95C94 83 107 85 109 94C121 92 122 108 113 109H92Z" fill="#edf5f6" stroke="#8fadc5" stroke-width="1.3"/>
+<g fill="#a8d6e3" stroke="#759db8" stroke-width="1.2"><path d="M12 34Q2 46 12 49Q22 46 12 34Z"/><path d="M104 64Q94 76 104 79Q114 76 104 64Z"/></g>
+<g fill="#fff2c9" stroke="#b9ab86"><path d="m94 8 2 6 6 2-6 2-2 6-2-6-6-2 6-2Z"/><path d="m24 100 2 4 4 2-4 2-2 4-2-4-4-2 4-2Z"/></g>
+<path d="M9 62q5 4 0 8 5 4 0 8M52 108q4-5 8 0 4-5 8 0" stroke="#f2ffff" stroke-width="1.6"/>
+</svg>

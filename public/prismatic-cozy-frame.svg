@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+<defs><linearGradient id="rim" x2="1" y2="1"><stop stop-color="#f4b7d3"/><stop offset=".25" stop-color="#f5dc95"/><stop offset=".5" stop-color="#ace0c9"/><stop offset=".75" stop-color="#a6c9f2"/><stop offset="1" stop-color="#d2ace8"/></linearGradient><g id="gem"><path d="m0-15 11 9-2 16L0 18-10 9-12-14Z" fill="url(#rim)" stroke="#88729f" stroke-width="1.2"/><path d="M0-15 4 0 0 18-5 0Z" fill="#fff5ff" opacity=".65"/><path d="M-12-14-5 0 4 0 11-6M-10 9-5 0" stroke="#f9f6ff"/></g></defs>
+<rect x="11" y="11" width="98" height="98" rx="29" stroke="#8d7b9f" stroke-width="10"/><rect x="11" y="10" width="98" height="98" rx="29" stroke="url(#rim)" stroke-width="7"/><rect x="16" y="15" width="88" height="88" rx="24" stroke="#fffaed" stroke-width="1.4"/>
+<use href="#gem" transform="translate(19 20) rotate(-25) scale(.8)"/><use href="#gem" transform="translate(100 99) rotate(25) scale(.9)"/>
+<g fill="#fff3bf" stroke="#b599ad"><path d="m93 5 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><path d="m12 76 2 6 6 2-6 2-2 6-2-6-6-2 6-2Z"/></g>
+<g fill="#fff9f0" stroke="#ad94bc"><circle cx="47" cy="10" r="2.5"/><circle cx="108" cy="46" r="2"/><circle cx="44" cy="108" r="2.5"/></g>
+<path d="M62 10h12M11 49v12M59 108h13" stroke="#fff7fa" stroke-width="2" stroke-linecap="round"/>
+</svg>

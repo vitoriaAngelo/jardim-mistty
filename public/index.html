@@ -5574,7 +5574,8 @@ function selectSeed(type) {
   });
   if (G.selectedSeed) {
     const p = getPlantable(G.selectedSeed);
-    if (isOutOfSeason(G.selectedSeed)) {
+    const hasCrazySeed=(G.crazySeedModifiers?.[G.selectedSeed]||[]).length>0;
+    if (isOutOfSeason(G.selectedSeed) && !hasCrazySeed) {
       G.selectedSeed = null;
       renderInventory();
       document.querySelectorAll('.plot.empty').forEach(el => el.classList.remove('ready-to-plant'));
@@ -5689,12 +5690,12 @@ function renderInventory() {
         <div class="inv-slot ${sel ? 'selected' : ''}" onclick="selectSeed('${type}')">
           <div class="inv-slot-svg">${seedBagSVG(type)}</div>
           <div class="inv-slot-name">${p.name}</div>
-          ${(G.crazySeedModifiers?.[type] || []).length ? '<div style="color:#b53636;font-size:10px;font-weight:900">★ MALUCO</div>' : ''}
+          ${(G.crazySeedModifiers?.[type] || []).length ? `<div style="color:#b53636;font-size:10px;font-weight:900">★ MALUCO ×${G.crazySeedModifiers[type].length}</div>` : ''}
           <div class="inv-slot-count">×${count}</div>
           <div class="inv-tip">
             <strong>${p.name}</strong><br>
             💧 ${p.maxWater} regas · 🌱 ${effectiveMaxGrow(type)} crescimentos<br>
-            ${(G.crazySeedModifiers?.[type] || []).length ? '<strong style="color:#b53636">★ Semente da Loja Maluca</strong><br>' : ''}
+            ${crazySeedBonusLines(type)}
             <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> Venda: ${SELL_VALUE[type]} pts
           </div>
           </div>`;
@@ -5715,6 +5716,19 @@ function ensureSaleTypes() {
   [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)].forEach(type => {
     if (!Object.prototype.hasOwnProperty.call(SELL, type)) SELL[type] = 0;
   });
+}
+
+function crazySeedBonusLines(type) {
+  const modifiers=G.crazySeedModifiers?.[type]||[];
+  return modifiers.map((modifier,index)=>{
+    const bonuses=[];
+    if(modifier.noWater)bonuses.push('🚿 Não precisa de rega');
+    else if(Number(modifier.waterReduction)>0)bonuses.push(`💧 ${modifier.waterReduction} rega${Number(modifier.waterReduction)>1?'s':''} a menos`);
+    if(Number(modifier.growReduction)>0)bonuses.push(`⏱️ ${Math.max(1,effectiveMaxGrow(type)-Number(modifier.growReduction))} crescimentos (${modifier.growReduction} a menos)`);
+    if(Number(modifier.extraHarvests)>0)bonuses.push(`🧺 +${modifier.extraHarvests} colheita${Number(modifier.extraHarvests)>1?'s':''}`);
+    if(modifier.doubleSale)bonuses.push('💰 Venda pelo dobro');
+    return `<strong style="color:#b53636">★ Bônus da Loja Maluca · muda ${index+1}</strong><br>🌦️ Pode plantar em qualquer estação<br>${bonuses.length?bonuses.join('<br>'):'✨ Semente especial'}`;
+  }).join('<br><br>');
 }
 
 // Venda base já cobre: semente (rega e colheita são gratuitas)

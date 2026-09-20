@@ -6549,7 +6549,7 @@ function renderMascotShop() {
   RainbowRewards.grant(G);
   if(!document.getElementById('rainbow-mascot-card')){
     const card=document.createElement('article');card.id='rainbow-mascot-card';card.className='rainbow-mascot-card';
-    card.innerHTML=RainbowRewards.art('mascot')+'<h3>Brotinho Arco-Íris</h3><p>+1 rega em todas as plantas a cada 5 segundos, sem gastar água. Chance de 1% por ciclo de colher uma planta pronta para o Mercado.</p><button class="mascot-buy" data-mascot="rainbow" onclick="buyMascot(\'rainbow\')">Complete o álbum Arco-Íris</button>';
+    card.innerHTML=RainbowRewards.art('mascot')+'<h3>Brotinho Arco-Íris</h3><p>+1 rega aleatória a cada 5 segundos sem gastar água. Chance de 0,01% por ciclo de regar todas as plantas sedentas e 1% de colher uma pronta para o Mercado.</p><button class="mascot-buy" data-mascot="rainbow" onclick="buyMascot(\'rainbow\')">Complete o álbum Arco-Íris</button>';
     document.querySelector('.mascot-grid')?.append(card);
   }
   const labels = { orange:'Comprar · 2.500 pts', apple:'Comprar · 7.500 pts', strawberry:'Comprar · 15.000 pts', premium:'Comprar · 75.000 pts', twitchzinho:'✦ Resgate no Premium', prismatic:'Complete o álbum' };
@@ -6571,7 +6571,7 @@ function renderMascotShop() {
     if (id === 'twitchzinho') btn.onclick = () => buyMascot('twitchzinho');
   });
   const info = { orange:['🍊','Laranjinha','+1 item na colheita.'], apple:['🍎','Maçanzinha','+15% no valor das vendas.'], strawberry:['🍓','Moranguinho','Adiciona +2 na recuperação de água a cada 5 minutos.'], premium:['🌱','Brotinho Premium','+1 colheita · +15% nas vendas · +2 na recuperação de água a cada 5 minutos.'], twitchzinho:['💜','Twitchzinho','Quantidade aleatória de moedas a cada 5 minutos.'], prismatic:['🌈','Brotinho Prismático','Aumenta a chance de Chuva Mágica nos eventos.'] };
-  info.rainbow=['🌈','Brotinho Arco-Íris','+1 rega gratuita a cada 5 segundos em todas as plantas · 1% de chance por ciclo de colher uma planta pronta para o Mercado.'];
+  info.rainbow=['🌈','Brotinho Arco-Íris','+1 rega aleatória a cada 5 segundos sem gastar água · 0,01% por ciclo de regar todas as plantas sedentas · 1% de colher uma pronta para o Mercado.'];
   const panel=document.getElementById('mascot-active-benefit'); const active=activeMascots().map(id=>info[id]).filter(Boolean);
   if (panel) { panel.classList.toggle('empty', !active.length); panel.innerHTML=active.length ? active.map(data=>`<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">${data[0]}</span><div><strong>${data[1]} ativo</strong><small>${data[2]}</small></div></div>`).join('') : '<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div>'; }
 }

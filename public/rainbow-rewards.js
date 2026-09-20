@@ -19,18 +19,26 @@
   }
   const harvestQuantity=(random=Math.random)=>1+Math.min(99,Math.max(0,Math.floor(random()*100)));
   function pulse(state,{now=Date.now(),random=Math.random,maxWater,ready,accessible=()=>true}={}){
-    if(state.selectedMascot!=='rainbow'||state.ownedMascots?.rainbow!==true)return {changed:false,harvest:-1};
-    if(now-Number(state.rainbowMascotPulseAt||0)<5000)return {changed:false,harvest:-1};
+    if(state.selectedMascot!=='rainbow'||state.ownedMascots?.rainbow!==true)return {changed:false,harvest:-1,wateredPlot:-1,wateredAll:false};
+    if(now-Number(state.rainbowMascotPulseAt||0)<5000)return {changed:false,harvest:-1,wateredPlot:-1,wateredAll:false};
     state.rainbowMascotPulseAt=now;
-    let changed=false;const candidates=[];
+    const candidates=[],needsWater=[];
     (state.plots||[]).forEach((plot,i)=>{
       if(!plot||!accessible(i))return;
       if(ready(plot)){candidates.push(i);return;}
       const maximum=maxWater(plot);
-      if(Number(plot.waterCount||0)<maximum){plot.waterCount=Math.min(maximum,Number(plot.waterCount||0)+1);changed=true;}
+      if(Number(plot.waterCount||0)<maximum)needsWater.push(i);
     });
+    let changed=false,wateredPlot=-1,wateredAll=false;
+    if(needsWater.length&&random()<.0001){
+      needsWater.forEach(i=>{const plot=state.plots[i];plot.waterCount=Math.min(maxWater(plot),Number(plot.waterCount||0)+1);});
+      changed=true;wateredAll=true;
+    }else if(needsWater.length){
+      wateredPlot=needsWater[Math.min(needsWater.length-1,Math.floor(random()*needsWater.length))];
+      const plot=state.plots[wateredPlot];plot.waterCount=Math.min(maxWater(plot),Number(plot.waterCount||0)+1);changed=true;
+    }
     const harvest=candidates.length&&random()<.01?candidates[Math.min(candidates.length-1,Math.floor(random()*candidates.length))]:-1;
-    return {changed,harvest};
+    return {changed,harvest,wateredPlot,wateredAll};
   }
   let serial=0;
   function art(kind='seed',progress=1){

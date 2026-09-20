@@ -22,6 +22,8 @@
     busy=true;
     try{
       const result=RainbowRewards.pulse(G,{now,random,maxWater:effectivePlotMaxWater,ready:isReady,accessible:i=>i<G.unlockedPlots||(i===5&&premiumSpecialPlotAccess())});
+      if(result.wateredAll)toast('🌈 Milagre Arco-Íris! Todas as plantas sedentas receberam água grátis!',3500);
+      else if(result.wateredPlot>=0)spawnSkillEffect(result.wateredPlot,'💧','+1 Rega grátis!','#a883c5');
       if(result.harvest>=0)await onPlotClick(result.harvest,true);
       if(result.changed||result.harvest>=0){renderPlots();await saveGardenToSE();}
     }finally{busy=false;}

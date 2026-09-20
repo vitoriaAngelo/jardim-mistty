@@ -107,7 +107,6 @@
       if(!pet.booster)pet.boosterUntil=0;
       if(pet.health<15)pet.readyAt=0;
       const protectedByHabitat=skills.__premiumHabitats?.[id]===true;
-      if(protectedByHabitat) pet.health=Math.max(1,pet.health);
       if(pet.health<=0&&!protectedByHabitat){state.deaths.push({id,name:pet.name,reason:'health',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
     }
     return state;

@@ -5885,7 +5885,11 @@ async function buyGlobalMessage() {
     toast(`✨ Faltam ${GLOBAL_MESSAGE_COST - Number(G.pts || 0)} pts para concluir.`, 2400);
     return;
   }
-  if (Date.now() - Number(G.lastGlobalMessage?.at || 0) < 120000) { renderGlobalMessageShop(); return; }
+  if (Date.now() - Number(G.lastGlobalMessage?.at || 0) < 120000) {
+    toast('⏳ Aguarde o limite de 2 minutos para enviar outra mensagem.', 2600);
+    renderGlobalMessageShop();
+    return;
+  }
   const existing = document.getElementById('global-message-composer');
   if (existing) { existing.hidden = false; existing.querySelector('textarea')?.focus(); return; }
   const composer = document.createElement('div');
@@ -5924,10 +5928,20 @@ async function buyGlobalMessage() {
 function renderGlobalMessageShop() {
   const host = document.getElementById('global-message-shop');
   if (!host) return;
+  let button = host.querySelector('[data-global-message-buy]');
+  if (!button) {
+    host.innerHTML = `<div><strong>📣 Mensagem Global</strong><p>Compre o destaque e envie uma mensagem para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pts. Limite: 1 a cada 2 minutos.</p></div><button type="button" data-global-message-buy>Comprar e enviar</button>`;
+    button = host.querySelector('[data-global-message-buy]');
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      buyGlobalMessage();
+    });
+  }
   const remaining = Math.max(0, 120000 - (Date.now() - Number(G.lastGlobalMessage?.at || 0)));
   const cooldown = remaining > 0;
   const label = cooldown ? `Aguarde ${Math.ceil(remaining / 1000)}s` : (globalMessagePurchaseInFlight ? 'Confirmando…' : 'Comprar e enviar');
-  host.innerHTML = `<div><strong>📣 Mensagem Global</strong><p>Compre o destaque e envie uma mensagem para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pts. Limite: 1 a cada 2 minutos.</p></div><button type="button" onclick="buyGlobalMessage()" ${globalMessagePurchaseInFlight || cooldown || G.pts < GLOBAL_MESSAGE_COST ? 'disabled' : ''}>${label}</button>`;
+  button.textContent = label;
+  button.disabled = globalMessagePurchaseInFlight || cooldown || Number(G.pts) < GLOBAL_MESSAGE_COST;
 }
 async function payGardenTax() {
   const due = Math.max(0, Math.floor(Number(G.taxDue) || 0));

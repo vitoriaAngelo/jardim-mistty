@@ -53,7 +53,8 @@ exports.handler = async event => {
         farmName: String(data.farmName || `Fazenda de @${row.username}`),
         normalCount,
         prismaticCount,
-        total: normalCount + prismaticCount,
+        rainbowCount: countUniqueCards(inventory, Array.from({length:10}, (_,i) => `rainbow_${i}`)),
+        total: normalCount + prismaticCount + countUniqueCards(inventory, Array.from({length:10}, (_,i) => `rainbow_${i}`)),
       };
     }).sort((a, b) => b.total - a.total || b.normalCount - a.normalCount || b.prismaticCount - a.prismaticCount || a.username.localeCompare(b.username));
     return { statusCode: 200, headers, body: JSON.stringify({ ranking }) };

@@ -7022,7 +7022,7 @@ function normalizeBadgeId(value) {
     .toLowerCase();
 }
 
-const VALID_BADGE_IDS = new Set(['beginner', 'dedicated', 'master', 'subscriber']);
+const VALID_BADGE_IDS = new Set(['beginner', 'dedicated', 'master', 'subscriber', 'rainbow']);
 
 function validBadgeIds(values) {
   if (!Array.isArray(values)) return [];
@@ -7183,6 +7183,12 @@ function closeRanking() {
   document.getElementById('ranking-overlay').classList.add('hidden');
 }
 const ACHIEV_GROUPS = [
+  { id:'rainbow', name:'Além do Arco-Íris', badge:'🌈', color:'#bd8cab', achievements:[
+    {id:'rainbow_first',icon:'🌦️',name:'Primeiro Raio',desc:'Descubra uma figurinha Arco-Íris'},
+    {id:'rainbow_common',icon:'🎨',name:'Paleta de Carinho',desc:'Colecione as 3 comuns Arco-Íris'},
+    {id:'rainbow_rare',icon:'✨',name:'Raridades do Céu',desc:'Colecione as 4 raras Arco-Íris'},
+    {id:'rainbow_complete',icon:'🌈',name:'Um Céu Inteiro',desc:'Complete as 10 figurinhas Arco-Íris'}
+  ]},
   {
     id: 'beginner',
     badge: '🌱',
@@ -7247,6 +7253,11 @@ function unlockAchievement(id) {
 
 function checkAchievements() {
   initAchievements();
+  const rainbowCount=(start,end)=>Array.from({length:end-start},(_,i)=>Number(G.albumCards?.['rainbow_'+(start+i)])>0).filter(Boolean).length;
+  if(rainbowCount(0,10)>=1)unlockAchievement('rainbow_first');
+  if(rainbowCount(0,3)===3)unlockAchievement('rainbow_common');
+  if(rainbowCount(3,7)===4)unlockAchievement('rainbow_rare');
+  if(rainbowCount(0,10)===10)unlockAchievement('rainbow_complete');
   const s  = G.achievStats;
   const lv = currentLevel();
   if ((s.totalPlant || 0) >= 5)     unlockAchievement('first_plant');
@@ -7301,7 +7312,12 @@ function achievementProgress(id) {
   const claimedMissions = G.missions
     ? MISSION_DEFS.filter(mission => G.missions.claimed?.[mission.id]).length
     : 0;
+  const rainbowCount=(start,end)=>Array.from({length:end-start},(_,i)=>Number(G.albumCards?.['rainbow_'+(start+i)])>0).filter(Boolean).length;
   const definitions = {
+    rainbow_first:[rainbowCount(0,10),1,'figurinha'],
+    rainbow_common:[rainbowCount(0,3),3,'comuns'],
+    rainbow_rare:[rainbowCount(3,7),4,'raras'],
+    rainbow_complete:[rainbowCount(0,10),10,'figurinhas'],
     first_plant:   [stats.totalPlant || 0, 5, 'plantios'],
     first_harvest: [stats.totalHarvest || 0, 5, 'colheitas'],
     buy5:          [stats.totalBuy || 0, 15, 'compras'],
@@ -11919,7 +11935,7 @@ const originalPackBuy=buyCardPack;buyCardPack=function(){if(Number(G.pts||0)<1){
 </script>
 <style>.pack-card-front{gap:4px}.pack-card-artwork{display:block;width:100%;border-radius:10px;overflow:hidden;background:#e1e7cb}.pack-card-artwork svg{display:block;width:100%;height:auto}.pack-card-front b{font:normal 16px Georgia,serif;text-align:center}.pack-card-front small{font:800 9px Nunito;color:#778b64}</style>
 <script>
-window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='garden-session-revoked'){closeFarmAlbum();handleRevokedSession();return}if(event.data?.type==='card-found'){if(recordCardFind(event.data.card)){syncPrismaticMascotUnlock();saveGardenToSE()}return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;syncPrismaticMascotUnlock();ensureAlbumCompletionRewards();saveGardenToSE()}});
+window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='garden-session-revoked'){closeFarmAlbum();handleRevokedSession();return}if(event.data?.type==='card-found'){if(recordCardFind(event.data.card)){syncPrismaticMascotUnlock();saveGardenToSE()}return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;checkAchievements();syncPrismaticMascotUnlock();ensureAlbumCompletionRewards();saveGardenToSE()}});
 const openAlbumWithUserCards=openFarmAlbum;openFarmAlbum=function(e,url){window.__farmAlbumCards={...(G.albumCards||{})};return openAlbumWithUserCards(e,url)};
 window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow||event.data?.type!=='album-theme-ready')return;event.source.postMessage({type:'album-theme',dark:document.body.classList.contains('dark-mode')},'*')});
 new MutationObserver(()=>{const frame=document.getElementById('farm-album-frame');if(!frame?.contentWindow)return;frame.contentWindow.postMessage({type:'album-theme',dark:document.body.classList.contains('dark-mode')},'*')}).observe(document.body,{attributes:true,attributeFilter:['class']});
@@ -11945,5 +11961,7 @@ buyCardPack=function(){if(Number(G.pts||0)<1){toast('Você precisa de 1 ponto pa
 <link rel="stylesheet" href="card-packs.css?v=10-card-packs">
 <link rel="stylesheet" href="album-trade-badge.css">
 <script src="album-artwork.js"></script>
+<script src="album-rainbow-art.js"></script>
+<link rel="stylesheet" href="album-rainbow.css">
 <script src="card-packs.js?v=10-card-packs"></script>
 <script src="album-trade-badge.js"></script>

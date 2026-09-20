@@ -4843,7 +4843,8 @@ function triggerEventMutation() {
   if(!choices.length)return;
   const idx=choices[Math.floor(Math.random()*choices.length)];
   G.plots[idx].mutated=true;
-  G.plots[idx].harvestsRemaining = Number(G.plots[idx].harvestsRemaining || harvestCyclesFor(G.plots[idx].type)) + 1;
+  G.plots[idx].harvestsRemaining = Number(G.plots[idx].harvestsRemaining ?? legacyHarvestCyclesFor(G.plots[idx].type)) + 1;
+  G.plots[idx].harvestsTotal = Number(G.plots[idx].harvestsTotal ?? legacyHarvestCyclesFor(G.plots[idx].type)) + 1;
   gardenEvent.actions=1;
   const name=getPlantable(G.plots[idx].type)?.name||'planta'; if(!G.discoveredMutations.includes(G.plots[idx].type))G.discoveredMutations.push(G.plots[idx].type);
   setTimeout(()=>toast(`🧬 Sua ${name} sofreu uma mutação de cor!`,4500),700);
@@ -5742,8 +5743,7 @@ const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce:
                      ruby_kale: 335, star_radish: 338, moon_lily: 1000, royal_dahlia: 383 };
 
 function cultivationCost(type) {
-  const item = getPlantable(type);
-  return item.cost + 10;
+  return seasonPrice(type) + 10;
 }
 const SHOP_QTY = {};
 const SHOP_CART = {};
@@ -5917,7 +5917,7 @@ function renderFlowerShop() {
     const fs = SEASONS.find(s => s.id === shopSeasonFilter);
     if (fs) entries = entries.filter(([type]) => fs.flowers.includes(type));
   }
-  if (shopSort === 'price_asc')  entries.sort(([,a],[,b]) => a.cost - b.cost);
+  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => seasonPrice(a) - seasonPrice(b));
   if (shopSort === 'grow_asc')   entries.sort(([,a],[,b]) => a.maxGrow - b.maxGrow);
   if (shopSort === 'water_asc')  entries.sort(([,a],[,b]) => a.maxWater - b.maxWater);
   if (shopSort === 'sell_desc')  entries.sort(([a],[b]) => SELL_VALUE[b] - SELL_VALUE[a]);
@@ -5958,7 +5958,7 @@ function renderFlowerShop() {
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
-      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
+      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheitas · até ${harvestCyclesFor(type)} itens por muda</div>
       <div class="shop-item-price" data-shop-total="${type}">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
@@ -7555,6 +7555,7 @@ function advanceSeasonDay() {
     // Re-render shop to lock/unlock plants by season
     renderShop();
     renderFlowerShop();
+    renderShopCart();
     // Check planted items that are now out of season
     checkOutOfSeasonPlants();
     // A cota concluída pertence à estação anterior. Na nova estação,
@@ -7962,8 +7963,20 @@ function harvestCyclesFor(type) {
   const item = getPlantable(type);
   if (!item) return 1;
   if (Number.isFinite(Number(item.harvests))) return Number(item.harvests);
-  // Cultivos mais baratos compensam com mais ciclos de colheita.
-  return Number(item.cost) <= 60 ? 3 : 2;
+  // Cultivos mais demorados compensam com mais ciclos de colheita.
+  const growStages=Number(item.maxGrow)||0;
+  if(growStages<=7)return 3;
+  if(growStages<=11)return 4;
+  if(growStages<=15)return 5;
+  if(growStages<=19)return 6;
+  if(growStages<=22)return 7;
+  return 8;
+}
+function legacyHarvestCyclesFor(type) {
+  const item=getPlantable(type);
+  if(!item)return 1;
+  if(Number.isFinite(Number(item.harvests)))return Number(item.harvests);
+  return Number(item.cost)<=60?3:2;
 }
 
 function updateHeldItemCursor() {
@@ -8013,16 +8026,29 @@ function seasonDiscountRate(type) {
   const seed = [...type].reduce((sum, char) => sum + char.charCodeAt(0), G.seasonIdx * 17);
   return choices[seed % choices.length];
 }
+function seasonMarketRate(type) {
+  const rates=[.85,.90,.95,1,1.05,1.10,1.15];
+  const key=Math.max(0,Math.floor(Number(G.seasonCycle)||0))*SEASONS.length+Math.max(0,Math.floor(Number(G.seasonIdx)||0));
+  let hash=0;
+  for(const char of String(type))hash=(hash*31+char.charCodeAt(0))%rates.length;
+  return rates[(hash+key*3)%rates.length];
+}
 function seasonPrice(type) {
   const p = getPlantable(type);
   if (!p) return 0;
-  return isOutOfSeason(type) ? Math.max(1, Math.floor(p.cost * (1 - seasonDiscountRate(type)))) : p.cost;
+  const marketPrice=Math.max(1,Math.round(p.cost*seasonMarketRate(type)));
+  return isOutOfSeason(type) ? Math.max(1, Math.floor(marketPrice * (1 - seasonDiscountRate(type)))) : marketPrice;
 }
 function seasonPriceLabel(type, qty = 1) {
   const p = getPlantable(type);
   const price = seasonPrice(type) * qty;
-  if (!p || !isOutOfSeason(type)) return `<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
-  return `<s style="opacity:.55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${p.cost * qty}</s> <strong style="color:#6f8e55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}</strong> <span class="cozy-promo-chip">-${Math.round(seasonDiscountRate(type) * 100)}%</span>`;
+  if (!p) return `<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
+  const marketRate=seasonMarketRate(type),marketPrice=Math.max(1,Math.round(p.cost*marketRate));
+  const changed=marketPrice!==p.cost||isOutOfSeason(type);
+  const priceMarkup=changed?`<s style="opacity:.55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${p.cost*qty}</s> <strong style="color:#6f8e55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}</strong>`:`<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
+  const trend=marketRate===1?'':` <span class="cozy-promo-chip" title="Preço sazonal da feira">🏪 ${marketRate>1?'+':''}${Math.round((marketRate-1)*100)}%</span>`;
+  const promo=isOutOfSeason(type)?` <span class="cozy-promo-chip" title="Desconto de fora de estação">-${Math.round(seasonDiscountRate(type)*100)}%</span>`:'';
+  return priceMarkup+trend+promo;
 }
 
 // ─── SEED BAG SVG ────────────────────────────────────────
@@ -8100,7 +8126,7 @@ function renderShop() {
   }
 
   // sort order
-  if (shopSort === 'price_asc')  entries.sort(([,a],[,b]) => a.cost - b.cost);
+  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => seasonPrice(a) - seasonPrice(b));
   if (shopSort === 'grow_asc')   entries.sort(([,a],[,b]) => a.maxGrow - b.maxGrow);
   if (shopSort === 'water_asc')  entries.sort(([,a],[,b]) => a.maxWater - b.maxWater);
   if (shopSort === 'sell_desc')  entries.sort(([a],[b]) => SELL_VALUE[b] - SELL_VALUE[a]);
@@ -8148,7 +8174,7 @@ function renderShop() {
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
-      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
+      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheitas · até ${harvestCyclesFor(type)} itens por muda</div>
       <div class="shop-item-price" data-shop-total="${type}">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
@@ -8374,7 +8400,7 @@ function buildPlotEl(plot, idx) {
     const maxG = effectivePlotMaxGrow(plot);
     const waterFull = plot.waterCount >= maxW;
     const growReady = plot.growCount >= maxG;
-    const harvestTotal = harvestCyclesFor(plot.type) + Math.max(0, Number(plot.crazyExtraHarvests) || 0);
+    const harvestTotal = Number(plot.harvestsTotal) || (legacyHarvestCyclesFor(plot.type) + Math.max(0, Number(plot.crazyExtraHarvests) || 0));
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestTotal);
     const harvestInfo = harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
     const mutationInfo = plot.mutated ? '<div class="plot-mutation-label">🧬 mutação cristalina ativa</div>' : '';
@@ -8436,7 +8462,7 @@ async function onPlotClick(idx) {
   if (plot && isReady(plot) && G.selectedTool !== 'shovel') {
     const type = plot.type;
     const plant = getPlantable(type);
-    const harvestsTotal = harvestCyclesFor(type);
+    const harvestsTotal = Number(plot.harvestsTotal) || legacyHarvestCyclesFor(type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);
     const mutationProtectsSeason = outOfSeason && plot.mutated === true;
     const lostToSeason = outOfSeason && !mutationProtectsSeason;
@@ -8587,7 +8613,8 @@ async function onPlotClick(idx) {
     updateHeldItemCursor();
     const crazyModifier = G.crazySeedModifiers?.[type]?.shift() || null;
     const crazyNoWater = crazyModifier?.noWater === true;
-    const newPlot = { type, waterCount: crazyNoWater ? 0 : (activeGardenEvent('rain') ? 1 : 0), growCount: 0, harvestsRemaining: harvestCyclesFor(type) + Math.max(0, Number(crazyModifier?.extraHarvests) || 0), goldenPlot: isSpecialPlotActive(idx), ...(crazyModifier ? { crazySeasonProtected:true, crazyNoWater, crazyWaterReduction:Math.max(0,Number(crazyModifier.waterReduction)||0), crazyGrowReduction:Math.max(0,Number(crazyModifier.growReduction)||0), crazyExtraHarvests:Math.max(0,Number(crazyModifier.extraHarvests)||0), crazyDoubleSale:crazyModifier.doubleSale===true } : {}) };
+    const harvestsTotal=harvestCyclesFor(type)+Math.max(0,Number(crazyModifier?.extraHarvests)||0);
+    const newPlot = { type, waterCount: crazyNoWater ? 0 : (activeGardenEvent('rain') ? 1 : 0), growCount: 0, harvestsTotal, harvestsRemaining:harvestsTotal, goldenPlot: isSpecialPlotActive(idx), ...(crazyModifier ? { crazySeasonProtected:true, crazyNoWater, crazyWaterReduction:Math.max(0,Number(crazyModifier.waterReduction)||0), crazyGrowReduction:Math.max(0,Number(crazyModifier.growReduction)||0), crazyExtraHarvests:Math.max(0,Number(crazyModifier.extraHarvests)||0), crazyDoubleSale:crazyModifier.doubleSale===true } : {}) };
     // Apply any pre-applied fertilizer on this slot
     if (G.plotFertilizers && G.plotFertilizers[idx]) {
       const stored = G.plotFertilizers[idx];

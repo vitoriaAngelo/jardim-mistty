@@ -6822,7 +6822,13 @@ async function openOrders(event) {
     toast('🔒 Os Pedidos do jardim serão liberados no nível 5.', 3000);
     return;
   }
-  // Pedidos de estações anteriores permanecem válidos até serem entregues.
+  // Migra saves antigos que ficaram presos no contador da estação anterior.
+  // O painel é um ponto seguro para corrigir o estado sem apagar o restante do progresso.
+  if (G.ordersSeasonKey !== orderSeasonKey()) {
+    resetOrdersForSeason(false);
+    try { await saveGardenToSE(true); } catch (error) { toast('❌ Não foi possível corrigir os pedidos desta estação.', 3200); }
+  }
+  // Repara também listas incompletas sem alterar pedidos já existentes.
   if (gardenOrders.length < 3 && (G.orderDeliveries || 0) < 4) {
     while (gardenOrders.length < 3) gardenOrders.push(createOrder(gardenOrders.length));
     G.orders = gardenOrders;

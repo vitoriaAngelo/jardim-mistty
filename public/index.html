@@ -274,6 +274,9 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .event-pest.hit { animation:pest-hit .2s ease both; }
 .pest-danger { display:inline-block; margin-left:8px; color:#a85a43; font-weight:900; }
 .plot-pest-badge { position:absolute;left:50%;bottom:3px;transform:translateX(-50%);z-index:5;padding:2px 5px;border:1px solid #a63b32;border-radius:99px;background:#fff0e8;color:#a32626;font-size:10px;font-weight:900;box-shadow:0 2px 4px #0003;pointer-events:auto;cursor:help;white-space:nowrap; }
+.plot-status-symbol { position:absolute; left:5px; z-index:6; display:grid; place-items:center; width:22px; height:22px; border:1px solid #53624d; border-radius:8px; background:#303a30; color:#fff; font-size:13px; line-height:1; cursor:help; }
+.plot-status-symbol::after { content:attr(data-tooltip); display:none; position:absolute; left:calc(100% + 8px); top:0; width:220px; padding:8px 13px; border:1px solid #53624d; border-radius:12px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.plot-status-symbol:hover::after, .plot-status-symbol:focus-visible::after { display:block; }
 .plot-pest-badge::after { content:attr(data-tooltip); display:none; position:absolute; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); z-index:120; width:220px; padding:8px 13px; border:1px solid #53624d; border-radius:12px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
 .plot-pest-badge::before { content:''; display:none; position:absolute; left:50%; bottom:calc(100% + 2px); transform:translateX(-50%); border:6px solid transparent; border-top-color:#303a30; z-index:121; }
 .plot-pest-badge:hover::after, .plot-pest-badge:focus-visible::after { display:block; }
@@ -8393,18 +8396,21 @@ function buildPlotEl(plot, idx) {
     }
     if (plot.crazySeasonProtected) {
       const crazyBadge = document.createElement('div');
-      crazyBadge.title = 'Semente da Loja Maluca';
-      crazyBadge.style.cssText = `position:absolute;left:50%;bottom:${plot.pestInfested ? '28px' : '3px'};transform:translateX(-50%);z-index:4;border-radius:99px;background:#b53636;color:#fff;padding:2px 5px;font-size:10px;font-weight:900;pointer-events:none;`;
-      crazyBadge.textContent = '★ MALUCO';
+      crazyBadge.className = 'plot-status-symbol';
+      crazyBadge.tabIndex = 0;
+      crazyBadge.dataset.tooltip = 'Semente especial da Loja Maluca: mantém efeitos extras até o fim das colheitas.';
+      crazyBadge.style.top = '29px';
+      crazyBadge.textContent = '🤪';
       div.appendChild(crazyBadge);
     }
     if (plot.pestInfested) {
       const pestBadge = document.createElement('div');
-      pestBadge.className = 'plot-pest-badge';
+      pestBadge.className = 'plot-status-symbol';
       pestBadge.tabIndex = 0;
       pestBadge.dataset.tooltip = 'Praga permanente: todas as colheitas desta planta serão vendidas por 50% do preço.';
       pestBadge.setAttribute('aria-label', 'Planta infestada por pragas; suas colheitas valem metade do preço');
-      pestBadge.textContent = '🐛 PRAGA';
+      pestBadge.style.top = plot.crazySeasonProtected ? '53px' : '29px';
+      pestBadge.textContent = '🐛';
       div.appendChild(pestBadge);
     }
     if (plot.goldenPlot || isSpecialPlotActive(idx)) {

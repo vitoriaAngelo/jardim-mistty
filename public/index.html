@@ -7397,8 +7397,8 @@ const FERTILIZERS = {
   },
   aquatic: {
     id: 'aquatic', name: 'Adubo Aquático', emoji: '💧', icon: '🫧',
-    desc: 'Na próxima rega, adiciona 2 níveis de água ao canteiro gastando apenas 1 carga do regador.',
-    effect: 'Próxima rega em dobro', cost: 300, minLevel: 1, color: '#63b8d2',
+    desc: 'Enquanto a planta tiver colheitas restantes, cada rega adiciona 2 níveis de água gastando apenas 1 carga do regador.',
+    effect: 'Rega em dobro durante as colheitas', cost: 300, minLevel: 1, color: '#63b8d2',
   },
 };
 
@@ -7418,7 +7418,7 @@ function renderFertilizerInventory() {
 
   bar.innerHTML = `<section class="inventory-group fertilizer-group"><h3 class="inventory-group-title">🧪 Adubos</h3><div class="fert-inv-slots">${validEntries.map(([id, f]) => {
     const count = G.fertilizerInventory[id] || 0;
-    const currentEffect = id === 'aquatic' ? 'Próxima rega em dobro'
+    const currentEffect = id === 'aquatic' ? 'Rega em dobro enquanto houver colheitas'
       : id === 'golden_soil'
       ? '+1 unidade extra'
       : id === 'quick_grow' ? 'Cresce 2× mais rápido' : f.effect;
@@ -7549,7 +7549,7 @@ function applyFertilizer(plotIdx, fertilizerId) {
   } else if (fertilizerId === 'golden_soil') {
     toast(`✨ Terra Dourada aplicada no canteiro ${plotIdx + 1}! A próxima colheita renderá +1 unidade.`);
   } else if (fertilizerId === 'aquatic') {
-    toast(`💧 Adubo Aquático aplicado no canteiro ${plotIdx + 1}! A próxima rega contará como duas.`);
+    toast(`💧 Adubo Aquático aplicado no canteiro ${plotIdx + 1}! As regas contarão em dobro até acabar as colheitas desta planta.`);
   }
 }
 
@@ -8046,7 +8046,7 @@ function buildPlotEl(plot, idx) {
       }
       ${plot.quickGrow ? '<br>⚡ Adubo Rápido ativo' : ''}
       ${plot.goldenSoil ? '<br>✨ Terra Dourada ativa' : ''}
-      ${plot.aquaticWater ? '<br>💧 Adubo Aquático: próxima rega conta como duas' : ''}
+      ${plot.aquaticWater ? '<br>💧 Adubo Aquático ativo até terminar as colheitas desta planta' : ''}
       ${plot.goldenPlot ? '<br>✨ Canteiro Especial · plantas valem 3× mais' : ''}
     `;
     div.appendChild(tooltip);
@@ -8362,7 +8362,6 @@ async function onPlotClick(idx) {
     const aquaticWater = plot.aquaticWater === true;
     const directWaterSteps = Math.min(aquaticWater ? 2 : 1, maxW - plot.waterCount);
     plot.waterCount = Math.min(maxW, plot.waterCount + directWaterSteps);
-    if (aquaticWater) plot.aquaticWater = false;
     let bonusWateredIdx = null;
     if (skillBranchBonusActive('cultivo') && Math.random() < 0.5) {
       const candidates = G.plots.map((candidate, candidateIdx) => ({ candidate, candidateIdx }))

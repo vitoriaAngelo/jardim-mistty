@@ -179,6 +179,8 @@ header .header-icon-wrap:has(.points-refresh:hover) > .header-btn-tip { display:
 .pts-feedback.gain { color: #9ad477; }
 .pts-feedback.loss { color: #e59a9a; }
 .market-points-badge { margin-left:auto; display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; background:var(--cream2); color:var(--text2); border:1px solid var(--cozy-line); font-size:11px; font-weight:800; white-space:nowrap; }
+.market-stock-total { display:inline-flex; align-items:center; padding:4px 9px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:999px; background:var(--cream2); color:var(--text2); font:800 10px 'Nunito',sans-serif; white-space:nowrap; }
+body.dark-mode .market-stock-total { border-color:#53604f; background:#30392d; color:#e3e8d7; }
 .shop-points-badge { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:#fff3c7; color:#6f5730; border:1px solid #d3b765; font-size:12px; font-weight:900; white-space:nowrap; }
 .shop-points-badge .points-token { width:20px; height:20px; }
 body.dark-mode .shop-points-badge { background:#4b4228; color:#ffe7a1; border-color:#b99b4f; }
@@ -3582,6 +3584,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <path d="M5 2 Q8 0 11 2" stroke="#5c3820" stroke-width="1.2" fill="none" stroke-linecap="round"/>
         </svg>
         Mercado
+        <span id="market-stock-total" class="market-stock-total" aria-live="polite">0 itens para vender</span>
         <span class="market-points-badge" aria-label="Seus pontos no Mercado">Seus pontos: <img class="points-token" src="points-sprout.svg" width="26" height="26" alt="" aria-hidden="true"> <span id="market-pts-num">0</span> pts</span>
       </div>
       <div id="harvest-bag"></div>
@@ -7079,7 +7082,10 @@ function renderHarvested() {
   updateOrdersReadyBadge();
   const bag = document.getElementById('harvest-bag');
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
-  const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
+  const totalMarketStock = allTypes.reduce((sum, type) => sum + Math.max(0, Number(G.harvested[type]) || 0), 0);
+  const stockBadge = document.getElementById('market-stock-total');
+  if (stockBadge) stockBadge.textContent = `${totalMarketStock.toLocaleString('pt-BR')} ${totalMarketStock === 1 ? 'item' : 'itens'} para vender`;
+  const hasAny = totalMarketStock > 0;
 
   if (!hasAny) {
     bag.innerHTML = `<div class="market-empty">

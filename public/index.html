@@ -3341,6 +3341,15 @@ body.dark-mode .support-dev-link { background:linear-gradient(135deg,#e4c76b99,#
 body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc,#202a21cc); border-color:#687d5f; color:#dce8d4; box-shadow:0 5px 20px #11181166, inset 0 1px 0 #dce8d41c; backdrop-filter:blur(10px); }
 @media (max-width:650px) { .site-footer { padding-top:10px; } .site-footer-actions { width:100%; } .support-dev-link, .live-status-link { flex:1 1 145px; justify-content:center; } .site-footer-credit { width:calc(100% - 18px); box-sizing:border-box; } }
 
+/* Recompensas do primeiro álbum: guirlanda ilustrada e jardim de primavera. */
+:is(.subscriber-frame,.ranking-frame)[data-frame="spring_album"] { background:linear-gradient(145deg,#fff5df,#d8e5bd 55%,#efcad8); border-color:#a9bc8d; box-shadow:0 3px 0 #82966c,0 0 0 2px #fff0db; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="spring_album"]::before { content:''; inset:-13%; width:auto; height:auto; background:url('spring-floral-frame.svg') center/100% 100% no-repeat; z-index:2; pointer-events:none; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="spring_album"]::after { content:none; }
+body .frame-picker-btn[data-frame="spring_album"] { background:url('spring-floral-frame.svg') center/contain no-repeat,#edf0d8; border-color:#fff0db; }
+.profile-background-option.enchanted_spring { background:url('enchanted-spring.svg') center/cover,linear-gradient(135deg,#fff5df,#e8f0d9,#f4dce6); }
+.profile-background-option.enchanted_spring::before { content:'✿'; color:#8f5f77; background:#f5d9e3; }
+:is(#profile-overlay .profile-modal,.ranking-profile-modal,#plots-card)[data-profile-background="enchanted_spring"],#ranking-overlay .ranking-item.ranking-bg-enchanted_spring { background:url('enchanted-spring.svg') center bottom/100% auto no-repeat,linear-gradient(145deg,#fff9eb,#edf2df 55%,#f6e1e9) !important; border-color:#c6cfae; }
+body.dark-mode :is(#profile-overlay .profile-modal,.ranking-profile-modal,#plots-card)[data-profile-background="enchanted_spring"],body.dark-mode #ranking-overlay .ranking-item.ranking-bg-enchanted_spring { background:url('enchanted-spring.svg') center bottom/100% auto no-repeat,linear-gradient(145deg,#25352d,#354331 55%,#503b48) !important; border-color:#849475; }
 </style>
 <link rel="stylesheet" href="cozy-garden.css">
 <link rel="stylesheet" href="cozy-cursors.css">
@@ -9477,14 +9486,17 @@ const HARVEST_TITLES = [
 function titleForName(name) { return HARVEST_TITLES.find(t => t.name === name) || null; }
 function harvestTitleUnlocked(title) { return Boolean(title && (title.albumKey ? G.albumRewardsClaimed?.[title.albumKey] === true : Number(G.achievStats?.totalHarvest || 0) >= title.target)); }
 const PROFILE_BACKGROUNDS = [
+  ['enchanted_spring','🌸 Primavera encantada'],
   ['spring','🌱 Jardim de primavera'], ['sunny','🌻 Campo ensolarado'], ['rain','🌧️ Dia chuvoso'], ['night','🌙 Noite estrelada'],
   ['autumn','🍂 Outono dourado'], ['winter','❄️ Inverno mágico'], ['rainbow','🌈 Arco-íris'], ['forest','🔮 Floresta encantada'],
 ];
 const PROFILE_BACKGROUND_RULES = {
+  enchanted_spring:'Complete o primeiro álbum Primavera Encantada.',
   spring:'Já vem desbloqueado.', sunny:'Já vem desbloqueado.', rain:'Já vem desbloqueado.', night:'Participe 5 vezes de qualquer evento.',
   autumn:'Tenha 5 dias consecutivos de presença.', winter:'Entregue 35 pedidos no total.', rainbow:'Alcance 3.000.000 de pontos.', forest:'Apoie a desenvolvedora com qualquer valor.',
 };
 function profileBackgroundUnlocked(id) {
+  if (id === 'enchanted_spring') return G.albumFrameUnlocks?.spring === true || hasCompleteSpringAlbum();
   if (['spring','sunny','rain'].includes(id)) return true;
   if (id === 'night') return Number(G.eventParticipations || 0) >= 5;
   if (id === 'autumn') return Number(G.presenceStreak || 0) >= 5;
@@ -9897,7 +9909,7 @@ function applySpecialLevelReward(reward) {
       const key = `prismatic_${Number(reward.prismaticCard)}`;
       G.albumCards[key] = Number(G.albumCards[key] || 0) + 1;
     }
-    received.push(album === 'spring' ? 'Título Colecionador da Primavera e moldura floral desbloqueados' : 'Título Guardião dos Prismas e moldura Arco-Íris desbloqueados');
+    received.push(album === 'spring' ? 'Título Colecionador da Primavera, moldura floral e fundo Primavera encantada desbloqueados' : 'Título Guardião dos Prismas e moldura Arco-Íris desbloqueados');
   }
   renderLevelWidget(); renderInventory(); renderFertilizerInventory(); renderWateringCapacity(); updatePts();
   return received;

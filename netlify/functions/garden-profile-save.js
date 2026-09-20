@@ -9,7 +9,8 @@ const headers = {
   'Cache-Control': 'no-store',
 };
 
-const VALID_BACKGROUNDS = new Set(['spring','sunny','rain','night','autumn','winter','rainbow','forest']);
+const VALID_BACKGROUNDS = new Set(['spring','sunny','rain','night','autumn','winter','rainbow','forest','enchanted_spring']);
+const SPRING_CARDS = ['Brotinho de Esperança','Juju entre Margaridas','Alfredo do Orvalho','Ovelhinha Algodão','Cogumelo do Pomar','Abelhinha Bilhetinho','Tulipinha Nuvem','Moranguinho Estrelar','Borboleta Açucarada','Solária da Primavera'];
 const VALID_TITLES = new Set(['','Primeira Colheita','Mãos na Terra','Jardineiro Dedicado','Mestre da Colheita','Lenda do Jardim','Imperador da Colheita','Eterno do Jardim','Colecionador da Primavera','Guardião dos Prismas']);
 VALID_TITLES.add('Pote de Arco-Íris');
 
@@ -28,6 +29,7 @@ exports.handler = async (event) => {
     const next = { ...current.data };
     if (profileBackground !== undefined) {
       if (!VALID_BACKGROUNDS.has(profileBackground)) return { statusCode:400, headers, body:JSON.stringify({ error:'Plano de fundo inválido' }) };
+      if (profileBackground === 'enchanted_spring' && current.data.albumFrameUnlocks?.spring !== true && !SPRING_CARDS.every(name => Number(current.data.albumCards?.[name] || 0) > 0)) return { statusCode:403, headers, body:JSON.stringify({ error:'Complete o primeiro álbum Primavera Encantada para liberar este fundo' }) };
       next.profileBackground = profileBackground;
     }
     if (selectedHarvestTitle !== undefined) {

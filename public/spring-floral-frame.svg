@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+<defs><g id="flower"><path d="M0-3C-13-19-21-3-8 2C-23 11-7 23 0 10C8 23 23 10 9 2C23-5 10-20 0-3Z" fill="#f4b8c9" stroke="#b57c92" stroke-width="1.2"/><circle cy="4" r="4" fill="#ffe6a0"/></g><g id="leaf"><path d="M0 0Q-21-1-14-17Q2-16 0 0Z" fill="#a7c690" stroke="#718d65"/><path d="M0 0-11-12" stroke="#718d65"/></g></defs>
+<rect x="10" y="10" width="100" height="100" rx="32" stroke="#fff2d5" stroke-width="9"/><rect x="10" y="10" width="100" height="100" rx="32" stroke="#819c70" stroke-width="3"/>
+<path d="M15 75Q0 25 44 10M75 110Q115 112 109 46" stroke="#789368" stroke-width="3"/>
+<use href="#leaf" transform="translate(15 49) rotate(30)"/><use href="#leaf" transform="translate(33 16) rotate(100)"/><use href="#leaf" transform="translate(105 72) rotate(210)"/><use href="#leaf" transform="translate(85 107) rotate(270)"/>
+<use href="#flower" transform="translate(19 23) scale(.85)"/><use href="#flower" transform="translate(8 64) scale(.53)"/><use href="#flower" transform="translate(101 97) scale(.9)"/><use href="#flower" transform="translate(66 110) scale(.55)"/>
+<g fill="#fff1bb" stroke="#c8ae79" stroke-width=".6"><path d="m87 7 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z"/><path d="m28 96 1 4 4 1-4 1-1 4-1-4-4-1 4-1Z"/></g>
+</svg>

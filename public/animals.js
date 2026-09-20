@@ -111,7 +111,7 @@ function settleAnimalState(next, options = {}) {
 function animalState(at=Date.now(),options={}) { return settleAnimalState(FarmAnimals.advance(G.livestock,at,effectiveAnimalSkills()),options); }
 function advanceAnimalGameDay(at=Date.now(),options={}) {
   animalState(at,{...options,persist:false});
-  const next=settleAnimalState(FarmAnimals.advanceGameDay(G.livestock),{...options,persist:false});
+  const next=settleAnimalState(FarmAnimals.advanceGameDay(G.livestock,effectiveAnimalSkills()),{...options,persist:false});
   if(options.persist!==false)saveGardenToSE().catch(error=>console.warn('Idade dos animais aguardando sincronização:',error));
   return next;
 }
@@ -146,8 +146,25 @@ function renderAnimalShop() {
   const state = animalState();
   root.innerHTML = `<p class="animal-note">Cada compra inclui o animal e seu cercadinho. Um de cada espécie por fazenda. A produção cresce com a idade: 2, 5, 7 e 12 itens por ciclo, conforme os dias do jogo. Compre comida na aba Rações; os produtos recolhidos ficam no Mercado.</p><div class="animal-shop-grid">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const owned = !!state.pets[id], locked = currentLevel() < a.level, p = FarmAnimals.products[a.product];
-    return `<article class="animal-shop-card"><div class="animal-scene">${animalArt(id)}</div><h4>${a.name}</h4><span class="animal-home">${a.home} incluído</span><div>${animalProductArt(a.product)}</div><div class="animal-shop-details">Produção por ciclo: 2 / 5 / 7 / 12 itens conforme a idade · ${a.minutes} min<br>Ração recupera a saúde do animal<br>Venda base: ${p.sell} pts cada · Nível ${a.level}</div><button class="animal-action" onclick="animalAction('buy','${id}')" ${owned||locked||animalActionInFlight?'disabled':''}>${owned?'Já mora na fazenda':locked?`Libera no nível ${a.level}`:`Comprar · ${a.cost.toLocaleString('pt-BR')} pts`}</button></article>`;
+    const habitatOwned=G.animalPremiumHabitats?.[id]===true, habitatLocked=currentLevel()<a.premiumHabitatLevel;
+    const habitatLabel=habitatOwned?'Habitat Premium habilitado':habitatLocked?`Libera no nível ${a.premiumHabitatLevel}`:`Comprar · ${a.premiumHabitatCost.toLocaleString('pt-BR')} pts`;
+    return `<article class="animal-shop-card"><div class="animal-scene">${animalArt(id)}</div><h4>${a.name}</h4><span class="animal-home">${a.home} incluído</span><div>${animalProductArt(a.product)}</div><div class="animal-shop-details">Produção por ciclo: 2 / 5 / 7 / 12 itens conforme a idade · ${a.minutes} min<br>Ração recupera a saúde do animal<br>Venda base: ${p.sell} pts cada · Nível ${a.level}</div><button class="animal-action" onclick="animalAction('buy','${id}')" ${owned||locked||animalActionInFlight?'disabled':''}>${owned?'Já mora na fazenda':locked?`Libera no nível ${a.level}`:`Comprar · ${a.cost.toLocaleString('pt-BR')} pts`}</button><div class="animal-habitat-premium"><strong>🏡 Habitat Premium</strong><small>Compra única · impede a morte por saúde ou idade.</small><button class="animal-action animal-habitat-action" onclick="buyPremiumAnimalHabitat('${id}')" ${habitatOwned||habitatLocked||animalActionInFlight?'disabled':''}>${habitatLabel}</button></div></article>`;
   }).join('')}</div>`;
+}
+async function buyPremiumAnimalHabitat(id) {
+  if (animalActionInFlight || !gardenHydrated) return;
+  const a=FarmAnimals.catalog[id];
+  if (!a || G.animalPremiumHabitats?.[id]===true) return;
+  if (currentLevel()<a.premiumHabitatLevel) { toast(`🔒 O Habitat Premium da ${a.name} libera no nível ${a.premiumHabitatLevel}.`,3500); return; }
+  animalActionInFlight=true;
+  try {
+    if (!await chargeGamePoints(a.premiumHabitatCost, `Habitat Premium: ${a.name}`)) return;
+    G.animalPremiumHabitats={...(G.animalPremiumHabitats||{}),[id]:true};
+    renderAnimalShop(); renderAnimalYard();
+    try { await saveGardenToSE(); } catch (error) { delete G.animalPremiumHabitats[id]; throw error; }
+    toast(`🏡 Habitat Premium da ${a.name} habilitado permanentemente!`,4000);
+  } catch (error) { toast(`⚠️ Não foi possível habilitar o habitat: ${error.message}`,5000); }
+  finally { animalActionInFlight=false; renderAnimalShop(); renderAnimalYard(); }
 }
 async function animalAction(action, id, ration = 'normal', quantity = 1) {
   if (animalActionInFlight || !gardenHydrated) return;

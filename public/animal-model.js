@@ -1,11 +1,11 @@
 (function (root) {
   'use strict';
   const catalog = {
-    chicken: { name:'Galinha', home:'Galinheiro', product:'farm_egg', cost:2250, level:1, feed:1, minutes:4, color:'#e9d5a5' },
-    cow: { name:'Vaca', home:'Estábulo', product:'farm_milk', cost:9000, level:5, feed:4, minutes:9, color:'#c4d5bd' },
-    pig: { name:'Porco', home:'Chiqueirinho', product:'farm_bacon', cost:6000, level:4, feed:3, minutes:7, color:'#e2b9b8' },
-    sheep: { name:'Ovelha', home:'Aprisco', product:'farm_wool', cost:8000, level:5, feed:3, minutes:8, color:'#d4c9e4' },
-    duck: { name:'Pato', home:'Laguinho', product:'farm_duck_egg', cost:4000, level:3, feed:1, minutes:5, color:'#b8d4d2' },
+    chicken: { name:'Galinha', home:'Galinheiro', product:'farm_egg', cost:2250, level:1, feed:1, minutes:4, color:'#e9d5a5', premiumHabitatLevel:5, premiumHabitatCost:5000 },
+    cow: { name:'Vaca', home:'Estábulo', product:'farm_milk', cost:9000, level:5, feed:4, minutes:9, color:'#c4d5bd', premiumHabitatLevel:12, premiumHabitatCost:18000 },
+    pig: { name:'Porco', home:'Chiqueirinho', product:'farm_bacon', cost:6000, level:4, feed:3, minutes:7, color:'#e2b9b8', premiumHabitatLevel:10, premiumHabitatCost:12000 },
+    sheep: { name:'Ovelha', home:'Aprisco', product:'farm_wool', cost:8000, level:5, feed:3, minutes:8, color:'#d4c9e4', premiumHabitatLevel:14, premiumHabitatCost:16000 },
+    duck: { name:'Pato', home:'Laguinho', product:'farm_duck_egg', cost:4000, level:3, feed:1, minutes:5, color:'#b8d4d2', premiumHabitatLevel:8, premiumHabitatCost:8000 },
   };
   const products = {
     farm_egg: { name:'Ovo', emoji:'🥚', sell:65 },
@@ -106,15 +106,17 @@
       pet.booster=pet.boosterUntil>end;
       if(!pet.booster)pet.boosterUntil=0;
       if(pet.health<15)pet.readyAt=0;
-      if(pet.health<=0){state.deaths.push({id,name:pet.name,reason:'health',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
+      const protectedByHabitat=skills.__premiumHabitats?.[id]===true;
+      if(protectedByHabitat) pet.health=Math.max(1,pet.health);
+      if(pet.health<=0&&!protectedByHabitat){state.deaths.push({id,name:pet.name,reason:'health',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
     }
     return state;
   }
-  function advanceGameDay(raw) {
+  function advanceGameDay(raw, skills={}) {
     const state=normalize(raw);
     for(const [id,pet] of Object.entries(state.pets)){
       pet.ageDays=Math.min(MAX_AGE_DAYS,pet.ageDays+1);
-      if(pet.ageDays>=MAX_AGE_DAYS){state.deaths.push({id,name:pet.name,reason:'old-age',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
+      if(pet.ageDays>=MAX_AGE_DAYS&&!skills.__premiumHabitats?.[id]){state.deaths.push({id,name:pet.name,reason:'old-age',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
     }
     return state;
   }

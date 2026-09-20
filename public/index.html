@@ -4528,6 +4528,7 @@ const G = {
   plots: Array(6).fill(null),
   unlockedPlots: 2,
   harvested: {},
+  animalPremiumHabitats: {},
   pestHarvested: {},
   crystalHarvested: {},
   goldenHarvested: {},
@@ -4842,7 +4843,7 @@ function announceGardenEvent() {
   const type = Math.random() < mutationChance
     ? 'mutation'
     : weightedPool[Math.floor(Math.random() * weightedPool.length)];
-  const secondaryChance = { crazyshop:0.035, tax:0.22, pests:0.22 };
+  const secondaryChance = { crazyshop:0.035, tax:0.10, pests:0.22 };
   const secondaryTypes = supportTypes.filter(key => Math.random() < secondaryChance[key]).slice(0, 2);
   gardenEvent = { type, secondaryTypes, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
   const names = [type, ...secondaryTypes].map(key => `${GARDEN_EVENTS[key].icon} ${GARDEN_EVENTS[key].name}`).join(' + ');
@@ -10378,6 +10379,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
   if (!seUser || !gardenHydrated) return;
   const saveData = {
     livestock:        FarmAnimals.normalize(G.livestock),
+    animalPremiumHabitats: G.animalPremiumHabitats || {},
     xp:               G.xp,
     farmerXP:         G.farmerXP || 0,
     farmName:         document.getElementById('garden-name')?.textContent || '',
@@ -10565,7 +10567,7 @@ async function confirmGardenSaved(saved) {
   });
   if (!response.ok) throw new Error('Não foi possível confirmar o jardim no banco. Tente novamente.');
   const confirmed = await response.json();
-  const fields = ['xp', 'farmerXP', 'inventory', 'fertilizerInventory', 'plots', 'harvested', 'livestock', 'skillNodes', 'achievements', 'missions', 'mail', 'packInventory', 'albumCards'];
+  const fields = ['xp', 'farmerXP', 'inventory', 'fertilizerInventory', 'plots', 'harvested', 'livestock', 'animalPremiumHabitats', 'skillNodes', 'achievements', 'missions', 'mail', 'packInventory', 'albumCards'];
   if (!confirmed.data || fields.some(key => !sameGardenValue(saved.data[key], confirmed.data[key]))) {
     throw new Error('O banco ainda não confirmou todo o progresso. Tente novamente.');
   }
@@ -10700,6 +10702,7 @@ async function loadGardenFromSE(username) {
     G.crazyShopChosen = Number(save.crazyShopChosen || 0);
     G.crazyShopEndsAt = Number(save.crazyShopEndsAt || 0);
     G.livestock       = FarmAnimals.normalize(save.livestock);
+    G.animalPremiumHabitats = save.animalPremiumHabitats || {};
     G.crystalHarvested = save.crystalHarvested || {};
   G.upgrades        = new Set(save.upgrades || []);
   G.goldenHarvested = save.goldenHarvested || {};
@@ -11611,7 +11614,7 @@ function skillBranchComplete(branchId) {
 }
 function skillBranchBonusActive(branchId) { return skillBranchComplete(branchId); }
 function effectiveAnimalSkills() {
-  return { ...(G.skillNodes || {}), __animalBranchComplete:skillBranchBonusActive('animais') };
+  return { ...(G.skillNodes || {}), __animalBranchComplete:skillBranchBonusActive('animais'), __premiumHabitats:G.animalPremiumHabitats || {} };
 }
 function refreshSkillBranchBonusEffects() {
   if (typeof startGrowthClock === 'function') startGrowthClock();

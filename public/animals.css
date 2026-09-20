@@ -92,6 +92,13 @@ body.dark-mode .animal-feed-tooltip::after { border-color:#65725b; background:#3
 .animal-product-art { display:inline-flex; width:60px; height:60px; align-items:center; justify-content:center; }
 .animal-product-art svg { width:100%; height:100%; }
 .animal-shop-details { font-size:12px; line-height:1.65; min-height:76px; margin-bottom:10px; }
+.animal-habitat-premium { margin-top:12px; padding:10px; border:1px solid #c6aa62; border-radius:15px; background:linear-gradient(135deg,#fff4c9,#e5ecd9); text-align:left; }
+.animal-habitat-premium strong { display:block; color:#705526; font-size:12px; }
+.animal-habitat-premium small { display:block; margin:4px 0 8px; color:#6d755f; font-size:10px; line-height:1.35; }
+.animal-habitat-action { padding:8px 6px; font-size:11px; background:#a8833f; box-shadow:0 3px 0 #80652e; }
+body.dark-mode .animal-habitat-premium { background:linear-gradient(135deg,#4a432d,#344632); border-color:#b79b59; }
+body.dark-mode .animal-habitat-premium strong { color:#ffe8a7; }
+body.dark-mode .animal-habitat-premium small { color:#d5ddc8; }
 .animal-feed-shop { display:flex; align-items:center; gap:14px; background:var(--cream2); padding:16px; border-radius:18px; margin:0 0 16px; }
 .animal-feed-shop>div { flex:1; }.animal-feed-shop button { width:auto; padding:10px 16px; }
 .animal-shop-card .animal-scene svg { height:120px; }

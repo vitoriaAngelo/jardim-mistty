@@ -28,6 +28,10 @@ exports.handler=async event=>{
     }
     const album=gardens[0].data?.albumCards||{};
     const cards=[];
+    for(let i=0;i<10;i++){
+      const card_id='rainbow_'+i,quantity=Math.max(0,Number(album[card_id]||0)),available_quantity=quantity-(reserved[card_id]||0);
+      if(available_quantity>1)cards.push({card_id,quantity,available_quantity});
+    }
     for(let i=0;i<COMMON.length;i++){
       const quantity=Math.max(0,Number(album[COMMON[i]]??album[LEGACY[i]]??0)||0),card_id=String(i),available_quantity=quantity-(reserved[card_id]||0);
       if(available_quantity>1)cards.push({card_id,quantity,available_quantity});

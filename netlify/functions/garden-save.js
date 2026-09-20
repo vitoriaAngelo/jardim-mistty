@@ -172,7 +172,7 @@ exports.handler = async (event) => {
     
     // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
     // Crescimento normal, Adubo Rápido e Chuva Mágica podem somar avanços.
-    const GROW_INTERVAL_MS = 15000;
+    const BASE_GROW_INTERVAL_MS = 15000;
     const RAIN_TICK_MS     = 3500;   // Chuva Mágica dispara applyMagicRain() a cada 3.5s
     const RAIN_DURATION_MS = 45000;  // Duração máxima do evento de chuva (45s)
     const validationRes = await fetch(
@@ -188,7 +188,9 @@ exports.handler = async (event) => {
         const oldData = rows[0].data || {};
         const lastSaveTime = new Date(rows[0].updated_at).getTime();
         const elapsedMs = Math.max(0, Date.now() - lastSaveTime);
-        const maxPossibleTicks = Math.ceil(elapsedMs / GROW_INTERVAL_MS);
+        const soloLivingLevel = Math.min(4, Math.max(0, Number(oldData.skillNodes?.solo_vivo) || 0));
+        const effectiveGrowIntervalMs = Math.max(1000, Math.round(BASE_GROW_INTERVAL_MS * (1 - soloLivingLevel * .03)));
+        const maxPossibleTicks = Math.ceil(elapsedMs / effectiveGrowIntervalMs);
 
         // Crescimento extra que a Chuva Mágica pode ter dado no período.
         // A chuva aplica +1 growCount por planta a cada RAIN_TICK_MS ms,
@@ -243,18 +245,64 @@ exports.handler = async (event) => {
     if (existingRes.ok) {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
-      safeData.extraMascotSlotPurchased = safeData.extraMascotSlotPurchased === true || existingData.extraMascotSlotPurchased === true;
-      if (!Object.prototype.hasOwnProperty.call(safeData, 'secondaryMascot')) {
-        safeData.secondaryMascot = safeData.selectedMascot === 'premium' ? (existingData.secondaryMascot || null) : null;
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'ownedMascots') && existingData.ownedMascots) {
+        safeData.ownedMascots = existingData.ownedMascots;
       }
-      if (safeData.secondaryMascot && (safeData.secondaryMascot !== 'prismatic'
-        || safeData.selectedMascot !== 'premium'
-        || safeData.extraMascotSlotPurchased !== true
-        || safeData.ownedMascots?.prismatic !== true)) {
+      safeData.extraMascotSlotPurchased = safeData.extraMascotSlotPurchased === true || existingData.extraMascotSlotPurchased === true;
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'selectedMascot')) safeData.selectedMascot = existingData.selectedMascot || null;
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'secondaryMascot')) {
+        safeData.secondaryMascot = safeData.selectedMascot === 'premium'
+          ? (existingData.secondaryMascot || existingData.tertiaryMascot || null)
+          : null;
+      }
+      const validCompanion = mascot => mascot === null || mascot === 'prismatic' || mascot === 'rainbow';
+      safeData.tertiaryMascot = null;
+      const validPrimary = mascot => mascot === null || ['orange','apple','strawberry','premium','twitchzinho'].includes(mascot);
+      if (!validPrimary(safeData.selectedMascot) || !validCompanion(safeData.secondaryMascot)
+        || (safeData.secondaryMascot && (safeData.selectedMascot !== 'premium'
+          || safeData.ownedMascots?.[safeData.secondaryMascot] !== true))) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Combinação de mascotes inválida' }) };
       }
+      const seasonKey = `${Math.max(0, Number(safeData.seasonCycle) || 0)}:${Math.max(0, Number(safeData.seasonIdx) || 0)}`;
+      let previousPrimary = existingData.selectedMascot || null;
+      let previousCompanion = existingData.secondaryMascot || existingData.tertiaryMascot || null;
+      if (['prismatic','rainbow'].includes(previousPrimary)) {
+        previousCompanion = existingData.ownedMascots?.premium === true ? previousPrimary : null;
+        previousPrimary = existingData.ownedMascots?.premium === true ? 'premium' : null;
+      }
+      if (previousPrimary !== 'premium' || !validCompanion(previousCompanion)
+        || existingData.ownedMascots?.[previousCompanion] !== true) previousCompanion = null;
+      const loadoutChanged = previousPrimary !== safeData.selectedMascot || previousCompanion !== safeData.secondaryMascot;
+      const storedSeasonKey = String(existingData.mascotSwitchSeasonKey || `${Math.max(0, Number(existingData.seasonCycle) || 0)}:${Math.max(0, Number(existingData.seasonIdx) || 0)}`);
+      const switchedThisSeason = storedSeasonKey === seasonKey && existingData.mascotSwitchUsed === true;
+      if (loadoutChanged && switchedThisSeason) {
+        return { statusCode: 409, headers, body: JSON.stringify({ error: 'A troca de mascote desta estação já foi usada.', code: 'MASCOT_SWITCH_LIMIT' }) };
+      }
+      safeData.mascotSwitchSeasonKey = seasonKey;
+      safeData.mascotSwitchUsed = switchedThisSeason || loadoutChanged;
+
       const storedXP = Number(existingData.xp || 0);
       const incomingXP = Number(safeData.xp || 0);
+      const oldGlobalMessage = existingData.lastGlobalMessage;
+      const nextGlobalMessage = safeData.lastGlobalMessage;
+      const oldGlobalMessageText = typeof oldGlobalMessage?.text === 'string' ? oldGlobalMessage.text.trim() : '';
+      const oldGlobalMessageAt = Number(oldGlobalMessage?.at) || 0;
+      const nextGlobalMessageText = typeof nextGlobalMessage?.text === 'string' ? nextGlobalMessage.text.trim() : '';
+      const nextGlobalMessageAt = Number(nextGlobalMessage?.at);
+      const changedGlobalMessage = Boolean(nextGlobalMessage)
+        && (nextGlobalMessageText !== oldGlobalMessageText || nextGlobalMessageAt !== oldGlobalMessageAt);
+      if (changedGlobalMessage) {
+        const text = nextGlobalMessageText;
+        const at = nextGlobalMessageAt;
+        if (!text || text.length > 120 || !Number.isFinite(at) || Math.abs(Date.now() - at) > 120000 || (oldGlobalMessageAt + 120000 > Date.now())) {
+          return { statusCode: 429, headers, body: JSON.stringify({ error: 'Aguarde 2 minutos entre mensagens globais.' }) };
+        }
+        safeData.lastGlobalMessage = { text, at };
+      } else if (oldGlobalMessage && nextGlobalMessage) {
+        // Mantém a última mensagem salva nos autosaves. Comparar os objetos
+        // inteiros não é seguro, pois o banco pode mudar a ordem das chaves.
+        safeData.lastGlobalMessage = { text:oldGlobalMessageText, at:oldGlobalMessageAt };
+      }
       if (Number.isFinite(storedXP) && storedXP > 0 && (!Number.isFinite(incomingXP) || incomingXP < storedXP)) {
         return { statusCode: 409, headers, body: JSON.stringify({ error: 'O banco possui mais XP que esta tela. Atualize o jardim antes de salvar.', code: 'PROGRESS_REGRESSION' }) };
       }

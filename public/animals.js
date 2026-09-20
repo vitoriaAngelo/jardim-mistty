@@ -1,4 +1,5 @@
 /* Desenhos vetoriais próprios, compartilhados entre loja e cercadinhos. */
+const lowHealthAnimalWarnings = new Set();
 function animalArt(id) {
   const eye = (x,y) => `<ellipse cx="${x}" cy="${y}" rx="2.4" ry="3.3" fill="#535442"/><circle cx="${x+.6}" cy="${y-1}" r=".7" fill="#fff"/>`;
   const shapes = {
@@ -56,9 +57,20 @@ function switchFarmTab(tab) {
 function openAnimalShop() { openShop(); switchShopTab('animais'); }
 function settleAnimalState(next, options = {}) {
   G.livestock=next;
+  const notify=options.notify!==false;
+  const livingPets=G.livestock.pets||{};
+  for(const id of [...lowHealthAnimalWarnings])if(!livingPets[id]||Number(livingPets[id].health)>15)lowHealthAnimalWarnings.delete(id);
+  const lowHealthNames=[];
+  if(notify)for(const [id,pet] of Object.entries(livingPets)){
+    if(Number(pet.health)<=15&&!lowHealthAnimalWarnings.has(id)){
+      lowHealthAnimalWarnings.add(id);
+      const name=pet.name||FarmAnimals.catalog[id]?.name||'Seu animal';
+      lowHealthNames.push(`${name} (${Math.floor(Math.max(0,Number(pet.health)||0))}%)`);
+    }
+  }
+  if(lowHealthNames.length)toast(`⚠️ Vida baixa: ${lowHealthNames.join(', ')}. Dê ração para evitar mortes.`,5000);
   let delivered=false;
   const deaths=G.livestock.deaths||[];
-  const notify=options.notify!==false;
   deaths.forEach(death => {
     const animal=FarmAnimals.catalog[death.id], name=death.name||animal?.name||'Seu animal';
     const reason=death.reason==='old-age'?'chegou ao fim da vida e faleceu de idade avançada':'faleceu: a vida chegou a 0%';

@@ -22,8 +22,11 @@ exports.handler = async () => {
           const animalName = customName || (pet ? (animalId === 'duck' ? 'Pato' : 'Galinha') : item.animalName.trim());
           return { ...base, animalName:animalName.slice(0,40), item:item.eggType === 'duck_egg' ? 'ovo de pato dourado' : 'ovo dourado', quantity:Number(item.quantity), at:item.at, activityType:'golden-egg' };
         });
-      return [row.data?.lastSale ? { ...base, ...row.data.lastSale, activityType:'sale' } : null, row.data?.lastOrder ? { ...base, ...row.data.lastOrder, activityType:'order' } : null, row.data?.lastEvent ? { ...base, ...row.data.lastEvent, activityType:'event' } : null, ...cardFinds, ...goldenEggFinds];
-    }).filter(item => item?.at && Date.now()-Number(item.at) < 24*60*60*1000).sort((a,b)=>Number(b.at)-Number(a.at)).slice(0,8);
+      const globalMessage = row.data?.lastGlobalMessage;
+      const messageActivity = globalMessage && typeof globalMessage.text === 'string' && globalMessage.text.trim().length > 0 && globalMessage.text.length <= 120 && Number(globalMessage.at) + 13000 > Date.now()
+        ? { ...base, text:globalMessage.text.trim(), at:globalMessage.at, activityType:'global-message' } : null;
+      return [row.data?.lastSale ? { ...base, ...row.data.lastSale, activityType:'sale' } : null, messageActivity, row.data?.lastOrder ? { ...base, ...row.data.lastOrder, activityType:'order' } : null, row.data?.lastEvent ? { ...base, ...row.data.lastEvent, activityType:'event' } : null, ...cardFinds, ...goldenEggFinds];
+    }).filter(item => item?.at && (item.activityType === 'global-message' ? Number(item.at) + 13000 > Date.now() : Date.now()-Number(item.at) < 24*60*60*1000)).sort((a,b)=>Number(b.at)-Number(a.at)).slice(0,8);
     return { statusCode:200, headers, body:JSON.stringify({ sales: activities }) };
   } catch (e) { return { statusCode:200, headers, body:JSON.stringify({ sales:[], error:e.message }) }; }
 };

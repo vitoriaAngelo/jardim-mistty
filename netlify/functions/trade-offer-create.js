@@ -14,7 +14,7 @@ exports.handler=async event=>{
     const recipient=String(body.recipient_username||'').replace(/^@+/,'').toLowerCase();
     const offered=String(body.offered_card_id??'');
     const requested=String(body.requested_card_id??'');
-    const validCard=id=>/^(?:[0-9]|prismatic_[0-9])$/.test(id);
+    const validCard=id=>/^(?:[0-9]|prismatic_[0-9]|rainbow_[0-9])$/.test(id);
     if(!recipient||!validCard(offered)||!validCard(requested))return{statusCode:400,headers,body:JSON.stringify({error:'Selecione o usuário e as duas cartas da oferta.'})};
     if(recipient===auth.username)return{statusCode:400,headers,body:JSON.stringify({error:'Não é permitido criar uma oferta para sua própria conta.'})};
     const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/create_trade_offer',{method:'POST',headers:supabaseServiceHeaders(KEY,{'Content-Type':'application/json'}),body:JSON.stringify({p_sender_username:auth.username,p_recipient_username:recipient,p_offered_card_id:offered,p_requested_card_id:requested})});

@@ -8,6 +8,7 @@
   const cards=()=>window.parent!==window?(window.parent.__farmAlbumCards||{}):{};
   const idOf=offer=>String(offer.offered_card_id||'');
   function cardInfo(id){
+    if(/^rainbow_[0-9]$/.test(String(id))){const c=RainbowAlbum.cards[Number(String(id).split("_")[1])];return {...c,id:String(id),rarity:c.rarity+" Arco-Íris",visual:RainbowAlbum.render(c)};}
     if(/^prismatic_[0-9]$/.test(String(id))){const index=Number(String(id).split('_')[1]),entry=PRISMATIC[index];return entry?{id:String(id),name:entry[0],rarity:'Prismática',visual:'<div class="trade-prismatic-art">'+entry[1]+'</div>'}:null;}
     const card=collection[Number(id)];return card?{id:String(card.id),name:card.name,rarity:card.rarity,visual:art(card)}:null;
   }
@@ -15,12 +16,14 @@
     const inventory=cards(),items=[];
     collection.forEach(card=>{const qty=Math.max(0,Number(inventory[card.name]??card.qty)||0);if(qty>1)items.push({id:String(card.id),name:card.name,rarity:card.rarity,qty,visual:art(card)});});
     PRISMATIC.forEach(([name,icon],index)=>{const id='prismatic_'+index,qty=Math.max(0,Number(inventory[id]??inventory[name]??0)||0);if(qty>1)items.push({id,name,rarity:'Prismática',qty,visual:'<div class="trade-prismatic-art">'+icon+'</div>'});});
+    RainbowAlbum.cards.forEach(c=>{const qty=Number(inventory[c.id])||0;if(qty>1)items.push({...c,qty,visual:RainbowAlbum.render(c)});});
     return items;
   }
   function ownedCardIds(){
     const inventory=cards(),ids=new Set();
     collection.forEach(card=>{if((Number(inventory[card.name]??card.qty)||0)>0)ids.add(String(card.id));});
     PRISMATIC.forEach((entry,index)=>{const id='prismatic_'+index;if(Number(inventory[id]??inventory[entry[0]]??0)>0)ids.add(id);});
+    RainbowAlbum.cards.forEach(c=>{if(Number(inventory[c.id])>0)ids.add(c.id);});
     return ids;
   }
   function syncAlbum(cardsMap){
@@ -116,4 +119,5 @@
   };
   document.querySelector('#trade').onclick=()=>trades('received');
   window.addEventListener('message',event=>{if(event.source===window.parent&&event.data?.type==='album-state'&&event.data.cards)syncAlbum(event.data.cards);});
+  if(location.hash==='#trades')trades('received');
 })();

@@ -34,11 +34,11 @@
       const data = await response.json();
       const rows = Array.isArray(data.ranking) ? data.ranking : [];
       if (!view.isConnected) return;
-      view.innerHTML = heading + '<div class="ranking-summary"><span><b>'+rows.length+'</b> fazendas</span><span>20 cartas para descobrir</span></div>' + (rows.length
+      view.innerHTML = heading + '<div class="ranking-summary"><span><b>'+rows.length+'</b> fazendas</span><span>30 cartas para descobrir</span></div>' + (rows.length
         ? '<ol class="ranking-list" aria-label="Classificação das fazendas">' + rows.map((player, index) => {
-          const normal = quantity(player.normalCount), prism = quantity(player.prismaticCount), total = normal + prism;
+          const normal = quantity(player.normalCount), prism = quantity(player.prismaticCount), rainbow = quantity(player.rainbowCount), total = normal + prism + rainbow;
           const name = String(player.farmName || player.username || 'Fazenda');
-          return '<li class="ranking-row '+(index<3?'ranking-top ranking-top-'+(index+1):'')+'"><span class="ranking-position" aria-label="Posição '+(index+1)+'">'+String(index+1).padStart(2,'0')+'</span><span class="ranking-avatar" aria-hidden="true">'+escape(Array.from(name.trim())[0] || '❀')+'</span><div class="ranking-farm"><strong title="'+escape(name)+'">'+escape(name)+'</strong><small>@'+escape(String(player.username).replace(/^@+/,''))+'</small></div><div class="ranking-total"><b>'+total+'</b><span>/20</span><small>descobertas</small></div><div class="ranking-albums">'+albumCount('Comum',normal,'normal')+albumCount('Prismático',prism,'prismatic')+'</div></li>';
+          return '<li class="ranking-row '+(index<3?'ranking-top ranking-top-'+(index+1):'')+'"><span class="ranking-position" aria-label="Posição '+(index+1)+'">'+String(index+1).padStart(2,'0')+'</span><span class="ranking-avatar" aria-hidden="true">'+escape(Array.from(name.trim())[0] || '❀')+'</span><div class="ranking-farm"><strong title="'+escape(name)+'">'+escape(name)+'</strong><small>@'+escape(String(player.username).replace(/^@+/,''))+'</small></div><div class="ranking-total"><b>'+total+'</b><span>/30</span><small>descobertas</small></div><div class="ranking-albums">'+albumCount('Comum',normal,'normal')+albumCount('Prismático',prism,'prismatic')+albumCount('Arco-Íris',rainbow,'rainbow')+'</div></li>';
         }).join('') + '</ol><p class="ranking-footnote">Uma carta, uma descoberta. Cópias repetidas não somam pontos.</p>'
         : '<div class="ranking-loading">Ainda não há fazendas no ranking.</div>');
     } catch (error) {

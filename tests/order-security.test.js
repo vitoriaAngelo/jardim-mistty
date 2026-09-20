@@ -37,6 +37,12 @@ test('abrir o popup não consome uma atualização de pedidos', () => {
   assert.match(body, /renderOrders\s*\(/);
 });
 
+test('entrega restaura o estoque local quando a confirmação do servidor falha', () => {
+  const html = pageSource;
+  assert.match(html, /const deliverySnapshot = JSON\.parse\(JSON\.stringify/);
+  assert.match(html, /catch \(error\) \{\s*Object\.assign\(G, deliverySnapshot\)/);
+});
+
 test('venda ignora pedidos locais atrasados sem apagar a venda', async () => {
   const originalFetch = global.fetch;
   const revision = '2026-09-18T10:00:00.000Z';

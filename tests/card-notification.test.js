@@ -15,10 +15,20 @@ test('feed valida cartas prismáticas pelo ID prismático, não pelo álbum norm
   assert.equal(cardIsInAlbum({'Brotinho de Esperança':1},card),false);
 });
 
-test('feed de novidades não gira as mensagens em ritmo acelerado', () => {
+test('feed de novidades atualiza rápido o suficiente para mostrar mensagens por 13 segundos', () => {
   const html=fs.readFileSync('public/index.html','utf8');
   assert.match(html,/\}, 8000\);/);
-  assert.match(html,/updateLatestSales\(\);\s*setInterval\(\(\) => \{ if \(!document\.hidden\) updateLatestSales\(\); \}, 120000\);/);
+  assert.match(html,/updateLatestSales\(\);\s*setInterval\(\(\) => \{ if \(!document\.hidden\) updateLatestSales\(\); \}, 10000\);/);
+  assert.match(html,/Date\.now\(\) - Number\(G\.lastGlobalMessage\?\.at \|\| 0\) < 120000/);
+});
+
+test('mensagem global expira do servidor depois de 13 segundos', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => new Response(JSON.stringify([{ username:'teste', data:{ farmName:'Jardim', lastGlobalMessage:{ text:'olá', at:Date.now()-14000 } } }]), { status:200 });
+  try {
+    const result = await latestSales.handler();
+    assert.equal(JSON.parse(result.body).sales.some(item => item.activityType === 'global-message'), false);
+  } finally { global.fetch = originalFetch; }
 });
 
 test('feed global publica ovo dourado com espécie do animal e quantidade', async () => {

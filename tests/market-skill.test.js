@@ -15,7 +15,11 @@ function marketHarness(skillLevel, selection) {
   const context = vm.createContext({
     G: { skillNodes: { feira_local: skillLevel } },
     SELL: selection,
+    SELL_PEST: {},
+    window: { _epicSaleTypes: [] },
+    ensureSaleTypes() {},
     effectiveSellValue: () => 10,
+    sellValueForSelection: (type,good,pest) => (good + pest * .5) * 10,
   });
   vm.runInContext(`${helpers}\n${sellTotal}`, context);
   return context;

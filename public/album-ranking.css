@@ -19,7 +19,8 @@ dialog:has(.ranking-view){width:min(700px,calc(100% - 24px));max-height:92dvh;pa
 .ranking-total>b{font:normal 27px Georgia,serif;color:var(--rank-ink)}
 .ranking-total>span{font-size:11px;color:var(--rank-muted);margin-left:2px}
 .ranking-total>small{display:block;font-size:8px;color:var(--rank-muted);margin-top:4px}
-.ranking-albums{grid-column:3 / -1;display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:13px}
+.ranking-albums{grid-column:3 / -1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:13px}
+.ranking-album.rainbow .ranking-meter i{background:linear-gradient(90deg,#e7a1ba,#ebd28a,#abd0b5,#a8bfdc,#c3a7dc)}
 .ranking-album>span{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--rank-muted)}
 .ranking-album b{font-size:11px;color:var(--rank-ink)}
 .ranking-album b small{font-size:9px;font-weight:400;color:var(--rank-muted)}

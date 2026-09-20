@@ -18,7 +18,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
   --sky:    #d4ecd4;
   --grass:  #6aaa3a;
@@ -143,7 +142,8 @@ body.dark-mode .season-showcase-card.winter::before { background:linear-gradient
 .season-widget.day-changed { animation: season-day-pop .8s ease-out; }
 
 /* RIGHT */
-.header-right { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.header-right { display: flex; align-items: center; gap: 8px; justify-content: flex-end; position: relative; z-index: 10; }
+.header-right:has(#user-menu:not(.hidden)) { z-index: 1000; }
 
 .pts-block { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .pts-badge { 
@@ -179,6 +179,8 @@ header .header-icon-wrap:has(.points-refresh:hover) > .header-btn-tip { display:
 .pts-feedback.gain { color: #9ad477; }
 .pts-feedback.loss { color: #e59a9a; }
 .market-points-badge { margin-left:auto; display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; background:var(--cream2); color:var(--text2); border:1px solid var(--cozy-line); font-size:11px; font-weight:800; white-space:nowrap; }
+.market-stock-total { display:inline-flex; align-items:center; padding:4px 9px; border:1px solid var(--cozy-line,#d8c9ac); border-radius:999px; background:var(--cream2); color:var(--text2); font:800 10px 'Nunito',sans-serif; white-space:nowrap; }
+body.dark-mode .market-stock-total { border-color:#53604f; background:#30392d; color:#e3e8d7; }
 .shop-points-badge { display:inline-flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:#fff3c7; color:#6f5730; border:1px solid #d3b765; font-size:12px; font-weight:900; white-space:nowrap; }
 .shop-points-badge .points-token { width:20px; height:20px; }
 body.dark-mode .shop-points-badge { background:#4b4228; color:#ffe7a1; border-color:#b99b4f; }
@@ -245,6 +247,11 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .latest-sales-coin { width:15px; height:15px; margin:0 2px 0 3px; vertical-align:-3px; filter:drop-shadow(0 1px 1px rgba(89,66,34,.2)); }
 .latest-sales-strip { width:100%; min-height:30px; margin:0 0 -12px; display:flex; align-items:center; justify-content:center; text-align:center; }
 .latest-sales-feed strong { color:#5f744e; font-size:11px; }
+.latest-sales-feed.global-message-active { min-height:42px; padding:8px 14px; border-color:#d8b76e; background:linear-gradient(120deg,#fff9e8,#f7e9bd,#fff8e5); color:#604b2d; box-shadow:0 2px 0 #d7bb7b,0 5px 16px #b58a3530; }
+.latest-sales-feed.global-message-active .latest-sales-content { display:block; max-width:100%; line-height:1.4; overflow-wrap:anywhere; }
+.latest-sales-feed.global-message-active strong { color:#795526; }
+body.dark-mode .latest-sales-feed.global-message-active { border-color:#c3a65e; background:linear-gradient(120deg,#3a3527,#49402b,#393427); color:#f5e9c7; box-shadow:0 2px 0 #745f34,0 5px 16px #090d09aa; }
+body.dark-mode .latest-sales-feed.global-message-active strong { color:#ffdfa0; }
 .latest-sales-card-name { font-weight:900; }
 .latest-sales-card-name.rare { color:#8960a6; }
 .latest-sales-card-name.legendary { color:#b18422; }
@@ -254,6 +261,13 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .watering-refill-offer::before { content:''; position:absolute; right:100%; top:50%; border:6px solid transparent; border-right-color:#e3c98f; transform:translateY(-50%); }
 .watering-refill-offer.visible { display:block; }
 .watering-refill-offer img { width:13px; height:13px; vertical-align:-3px; }
+.watering-tax-notice { display:none; margin-top:5px; padding:5px 7px; border:1px solid #b7794c; border-radius:9px; background:#fff0e8; color:#8f3028; font:900 9px/1.2 'Nunito',sans-serif; text-align:center; cursor:pointer; }
+.watering-tax-notice.visible { display:block; }
+.tool-card.tax-blocked { opacity:1; cursor:not-allowed; }
+.tool-card.tax-blocked>.cozy-tool-art,.tool-card.tax-blocked>.tool-label,.tool-card.tax-blocked>.watering-reservoir,.tool-card.tax-blocked>.watering-caption,.tool-card.tax-blocked>.watering-season-refills { opacity:.38; filter:grayscale(.65); }
+.tool-card.tax-blocked .watering-tax-notice.visible { position:relative; z-index:2; min-height:26px; padding:7px 6px; border-width:1.5px; background:#ffe2cb; color:#78251f; font-size:10px; opacity:1; filter:none; box-shadow:0 2px 0 #d5ad90; }
+body.dark-mode .watering-tax-notice { background:#4a2929; border-color:#d87575; color:#ffe1d8; }
+body.dark-mode .tool-card.tax-blocked .watering-tax-notice.visible { background:#673b32; color:#fff0d9; border-color:#f0a27b; }
 .latest-sales-feed .latest-sales-content.sales-slide-in { animation:sales-slide-in .35s ease both; }
 .garden-event-banner { display:none; position:relative; overflow:hidden; margin:0 0 10px; padding:12px 16px; border:1px solid #c9b98f; border-radius:16px; background:linear-gradient(135deg,#fff9e9,#eef5dc); box-shadow:0 3px 0 #d7c8a7,0 8px 20px rgba(71,84,53,.12); color:#526342; }
 .garden-event-banner.visible { display:flex; align-items:center; gap:12px; animation:event-pop .35s ease both; }
@@ -273,7 +287,16 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .event-pest.golden { font-size:34px; border-color:#d7a62e; box-shadow:0 0 14px #f5d56a,0 3px 0 #b98122; }
 .event-pest.hit { animation:pest-hit .2s ease both; }
 .pest-danger { display:inline-block; margin-left:8px; color:#a85a43; font-weight:900; }
-.plot-pest-badge { position:absolute;right:5px;bottom:20px;z-index:5;padding:2px 5px;border:1px solid #a63b32;border-radius:99px;background:#fff0e8;color:#a32626;font-size:12px;font-weight:900;box-shadow:0 2px 4px #0003;pointer-events:auto;cursor:help; }
+.plot-pest-badge { position:absolute;left:50%;bottom:3px;transform:translateX(-50%);z-index:5;padding:2px 5px;border:1px solid #a63b32;border-radius:99px;background:#fff0e8;color:#a32626;font-size:10px;font-weight:900;box-shadow:0 2px 4px #0003;pointer-events:auto;cursor:help;white-space:nowrap; }
+.plot-status-symbol { position:absolute; left:5px; z-index:6; display:grid; place-items:center; width:22px; height:22px; border:1px solid #53624d; border-radius:8px; background:#303a30; color:#fff; font-size:13px; line-height:1; cursor:help; }
+.plot:has(.plot-status-symbol:hover), .plot:has(.plot-status-symbol:focus-visible) { z-index:1000; }
+.plot-status-symbol::after { content:attr(data-tooltip); display:none; position:absolute; left:calc(100% + 8px); top:0; width:220px; max-width:calc(100vw - 24px); padding:8px 13px; border:1px solid #53624d; border-radius:12px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.plot-status-symbol:hover::after, .plot-status-symbol:focus-visible::after { display:block; }
+.plot-pest-badge::after { content:attr(data-tooltip); display:none; position:absolute; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); z-index:120; width:220px; padding:8px 13px; border:1px solid #53624d; border-radius:12px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.plot-pest-badge::before { content:''; display:none; position:absolute; left:50%; bottom:calc(100% + 2px); transform:translateX(-50%); border:6px solid transparent; border-top-color:#303a30; z-index:121; }
+.plot-pest-badge:hover::after, .plot-pest-badge:focus-visible::after { display:block; }
+.plot-pest-badge:hover::before, .plot-pest-badge:focus-visible::before { display:block; }
+body.dark-mode .plot-pest-badge { background:#4a2929; border-color:#d87575; color:#ffe1d8; }
 .market-pest-tag { display:inline-block;margin:2px 0;padding:2px 6px;border-radius:8px;background:#fff0e8;color:#a32626;font-size:9px;font-weight:900;line-height:1.25; }
 .market-slot.pest-stock { border-color:#c75b4f;background:linear-gradient(145deg,#fff6ed,#fbe4dc); }
 .shop-cart-row.pest-stock { border-left:3px solid #b53636;padding-left:6px;color:#9b302c; }
@@ -496,7 +519,7 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
   position: absolute; top: calc(100% + 6px); right: 0;
   background: var(--cream); border: 2px solid #e0cfb0;
   border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.15);
-  min-width: 130px; z-index: 300; overflow: hidden;
+  min-width: 130px; z-index: 2000; overflow: hidden;
 }
 .user-menu.hidden { display: none; }
 .user-menu-item {
@@ -1298,6 +1321,8 @@ body.dark-mode .season-warning-icon { background:#30392d; border-color:#52624d; 
 body.dark-mode .inventory-group-title { color:#edf2e6; border-color:#53604f; }
 .market-crystal-tag { display:inline-flex; align-items:center; gap:3px; margin-top:1px; padding:2px 6px; border:1px solid #a779da; border-radius:999px; background:#eadcff; color:#68458d; font-size:9px; font-weight:900; }
 body.dark-mode .market-crystal-tag { border-color:#b995e5; background:#49365d; color:#f0ddff; }
+.market-crazy-tag { display:inline-flex; align-items:center; gap:3px; margin-top:1px; padding:2px 6px; border:1px solid #d87575; border-radius:999px; background:#fff0e8; color:#9b302c; font-size:9px; font-weight:900; text-align:center; }
+body.dark-mode .market-crazy-tag { border-color:#d87575; background:#4a2929; color:#ffe1d8; }
 .market-slot-stock {
   position: absolute;
   top: -6px; right: -6px;
@@ -2494,6 +2519,26 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
 .shop-cart-total { display:flex; align-items:center; gap:4px; color:var(--text2); margin-top:2px; }
 .shop-cart-total .points-token { width:20px; height:20px; }
 .shop-cart-buy { border:0; border-radius:10px; padding:8px 13px; background:var(--grass); color:#fff; font:800 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
+.global-message-shop { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 14px; padding:13px 15px; border:1px solid #d8c59d; border-radius:16px; background:linear-gradient(135deg,#fff8e8,#f4ead4); color:var(--text); }
+.global-message-shop p { margin:3px 0 0; color:var(--text2); font-size:11px; line-height:1.4; }
+.global-message-shop button { flex:none; border:0; border-radius:10px; padding:9px 12px; background:#8b6a3f; color:#fff; font:800 11px 'Nunito',sans-serif; cursor:pointer; }
+.global-message-shop button:disabled { opacity:.55; cursor:not-allowed; }
+.global-message-composer { position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:18px; background:#17221999; }
+.global-message-composer[hidden] { display:none; }
+.global-message-composer .composer-card { width:min(420px,100%); padding:20px; border:1px solid #d8c59d; border-radius:18px; background:var(--cream); color:var(--text); box-shadow:0 12px 35px #17221955; }
+.global-message-composer h3 { margin:0 0 6px; font:normal 22px Georgia,serif; }
+.global-message-composer p { margin:0 0 12px; color:var(--text2); font-size:11px; }
+.global-message-composer textarea { width:100%; min-height:72px; resize:none; box-sizing:border-box; border:1px solid #cbbd9a; border-radius:10px; padding:10px; background:#fffdf2; color:var(--text); font:700 13px Nunito,sans-serif; }
+.global-message-composer .composer-count { display:block; margin-top:4px; text-align:right; color:var(--text2); font-size:10px; }
+.global-message-composer .composer-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+.global-message-composer .composer-actions button { padding:9px 13px; }
+body.dark-mode .global-message-composer .composer-card { background:#2a322b; border-color:#857344; }
+body.dark-mode .global-message-composer textarea { background:#202720; color:#f4edcf; border-color:#697453; }
+body.dark-mode .global-message-shop { border-color:#8b7440; background:linear-gradient(135deg,#403a2b,#35352b); color:#f4edcf; box-shadow:0 4px 16px #11181155; }
+body.dark-mode .global-message-shop strong { color:#f4e3a4; }
+body.dark-mode .global-message-shop p { color:#d5d7c5; }
+body.dark-mode .global-message-shop button { background:#a9844a; color:#fff9e7; box-shadow:0 2px 0 #765b31; }
+body.dark-mode .global-message-shop button:disabled { opacity:.82; color:#f2ead1; }
 .shop-cart-buy:hover { filter:brightness(1.08); }
 .shop-cart-toggle { border:0; background:transparent; color:var(--text); font:800 12px 'Nunito',sans-serif; cursor:pointer; padding:0; text-align:left; }
 .shop-cart-items { display:flex; flex-direction:column; gap:5px; max-height:0; overflow:hidden; margin:0; border-top:1px solid transparent; padding-top:0; opacity:0; transition:max-height .25s ease, margin .25s ease, padding .25s ease, opacity .2s ease, border-color .25s ease; }
@@ -2554,6 +2599,14 @@ body.dark-mode .shop-cart.side-cart { box-shadow:0 10px 30px #111811aa; }
 #sell-all-confirm-overlay { z-index:1200; }
 #sell-all-confirm-overlay .modal-actions button { position:relative; z-index:1; pointer-events:auto; }
 #sell-all-confirm-overlay .modal-actions { justify-content:center; }
+#epic-sale-result-overlay { z-index:1300; }
+.epic-sale-result-modal { width:min(460px,calc(100vw - 32px)); text-align:center; }
+.epic-sale-result-modal .epic-sale-sparkle { font-size:38px; margin-bottom:6px; }
+.epic-sale-result-modal h2 { color:#9a6c25; }
+body.dark-mode .epic-sale-result-modal h2 { color:#f3cf78; }
+.epic-sale-result-list { display:grid; gap:8px; margin:16px 0; text-align:left; }
+.epic-sale-result-item { display:flex; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid #ddc98e; border-radius:12px; background:#fff6d9; color:var(--text); font:800 13px/1.35 'Nunito',sans-serif; }
+body.dark-mode .epic-sale-result-item { border-color:#79653c; background:#3c3729; color:#f5edda; }
 #first-login-bonus-overlay { z-index:1200; }
 #first-login-bonus-overlay .modal, #first-login-bonus-start { position:relative; z-index:1; pointer-events:auto; }
 body.dark-mode .sell-confirm-items { background:#30392d; border-color:#53604f; }
@@ -3293,11 +3346,31 @@ body.dark-mode .support-dev-link { background:linear-gradient(135deg,#e4c76b99,#
 body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc,#202a21cc); border-color:#687d5f; color:#dce8d4; box-shadow:0 5px 20px #11181166, inset 0 1px 0 #dce8d41c; backdrop-filter:blur(10px); }
 @media (max-width:650px) { .site-footer { padding-top:10px; } .site-footer-actions { width:100%; } .support-dev-link, .live-status-link { flex:1 1 145px; justify-content:center; } .site-footer-credit { width:calc(100% - 18px); box-sizing:border-box; } }
 
+/* Molduras cozy: detalhes externos deixam o rosto livre. */
+:is(.subscriber-frame,.ranking-frame)[data-frame="purple"] { background:linear-gradient(145deg,#edddfa,#bc9cd9 55%,#a783c1); border-color:#b399cf; box-shadow:0 3px 0 #775b8f,0 0 0 2px #f4e8ff; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="pink"] { background:linear-gradient(145deg,#ffe5e9,#edbdd0 55%,#d894af); border-color:#dda4bb; box-shadow:0 3px 0 #aa758d,0 0 0 2px #fff0e7; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="purple"]::before,:is(.subscriber-frame,.ranking-frame)[data-frame="pink"]::before { content:''; inset:-13%; width:auto; height:auto; background:center/100% 100% no-repeat; z-index:2; pointer-events:none; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="purple"]::before { background-image:url('purple-cozy-frame.svg'); }
+:is(.subscriber-frame,.ranking-frame)[data-frame="pink"]::before { background-image:url('pink-cozy-frame.svg'); }
+:is(.subscriber-frame,.ranking-frame)[data-frame="purple"]::after,:is(.subscriber-frame,.ranking-frame)[data-frame="pink"]::after { content:none; }
+body .frame-picker-btn[data-frame="purple"],body.dark-mode .frame-picker-btn[data-frame="purple"] { background:url('purple-cozy-frame.svg') center/contain no-repeat,#e6d7f5; border-color:#f8edff; }
+body .frame-picker-btn[data-frame="pink"],body.dark-mode .frame-picker-btn[data-frame="pink"] { background:url('pink-cozy-frame.svg') center/contain no-repeat,#f8dbe5; border-color:#fff1e9; }
+/* Recompensas do primeiro álbum: guirlanda ilustrada e jardim de primavera. */
+:is(.subscriber-frame,.ranking-frame)[data-frame="spring_album"] { background:linear-gradient(145deg,#fff5df,#d8e5bd 55%,#efcad8); border-color:#a9bc8d; box-shadow:0 3px 0 #82966c,0 0 0 2px #fff0db; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="spring_album"]::before { content:''; inset:-13%; width:auto; height:auto; background:url('spring-floral-frame.svg') center/100% 100% no-repeat; z-index:2; pointer-events:none; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="spring_album"]::after { content:none; }
+body .frame-picker-btn[data-frame="spring_album"] { background:url('spring-floral-frame.svg') center/contain no-repeat,#edf0d8; border-color:#fff0db; }
+.profile-background-option.enchanted_spring { background:url('enchanted-spring.svg') center/cover,linear-gradient(135deg,#fff5df,#e8f0d9,#f4dce6); }
+.profile-background-option.enchanted_spring::before { content:'✿'; color:#8f5f77; background:#f5d9e3; }
+:is(#profile-overlay .profile-modal,.ranking-profile-modal,#plots-card)[data-profile-background="enchanted_spring"],#ranking-overlay .ranking-item.ranking-bg-enchanted_spring { background:url('enchanted-spring.svg') center bottom/100% auto no-repeat,linear-gradient(145deg,#fff9eb,#edf2df 55%,#f6e1e9) !important; border-color:#c6cfae; }
+body.dark-mode :is(#profile-overlay .profile-modal,.ranking-profile-modal,#plots-card)[data-profile-background="enchanted_spring"],body.dark-mode #ranking-overlay .ranking-item.ranking-bg-enchanted_spring { background:url('enchanted-spring.svg') center bottom/100% auto no-repeat,linear-gradient(145deg,#25352d,#354331 55%,#503b48) !important; border-color:#849475; }
 </style>
 <link rel="stylesheet" href="cozy-garden.css">
 <link rel="stylesheet" href="cozy-cursors.css">
 <script src="mature-plants.js"></script>
 <script defer src="cozy-tooltips.js"></script>
+<script src="rainbow-rewards.js"></script>
+<link rel="stylesheet" href="rainbow-rewards.css">
 </head>
 <body>
 
@@ -3534,6 +3607,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <path d="M5 2 Q8 0 11 2" stroke="#5c3820" stroke-width="1.2" fill="none" stroke-linecap="round"/>
         </svg>
         Mercado
+        <span id="market-stock-total" class="market-stock-total" aria-live="polite">0 itens para vender</span>
         <span class="market-points-badge" aria-label="Seus pontos no Mercado">Seus pontos: <img class="points-token" src="points-sprout.svg" width="26" height="26" alt="" aria-hidden="true"> <span id="market-pts-num">0</span> pts</span>
       </div>
       <div id="harvest-bag"></div>
@@ -3566,6 +3640,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <span class="watering-caption" id="water-caption">cheinho de água</span>
       <span class="watering-season-refills" id="watering-season-refills" aria-live="polite"></span>
       <div class="watering-refill-offer" id="watering-refill-offer" role="button" tabindex="0" onclick="event.stopPropagation();buyWaterRefillFromNotice()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();buyWaterRefillFromNotice()}">Regador quase vazio<br>Clique para gastar <img src="points-sprout.svg" alt="" aria-hidden="true"> 500 pontos e encher</div>
+      <div class="watering-tax-notice" id="watering-tax-notice" role="button" tabindex="0" onclick="event.stopPropagation();payGardenTax()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();payGardenTax()}"></div>
       </div>
       <div class="header-btn-tip" id="water-tool-tip" style="left:50%;transform:translateX(-50%)">Regador<br><span>1 água por rega · recupera 1 a cada 5 minutos</span></div>
     </div>
@@ -3585,9 +3660,9 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
   <path d="M12 46Q6 40 8 36Q15 38 12 46M12 48L13 41" fill="#e5ebd9" stroke="#778b64" stroke-width="1.2" stroke-linecap="round"/>
 </svg>
         <div class="tool-label">Pá</div>
-      <div class="tool-cost"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> <span id="shovel-cost">50 pts</span></div>
+      <div class="tool-cost"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> <span id="shovel-cost">1.000 pts</span></div>
       </div>
-      <div class="header-btn-tip" id="shovel-tool-tip" style="left:50%;transform:translateX(-50%)">Pá<br><span>Retire uma planta do canteiro — 50 pts</span></div>
+      <div class="header-btn-tip" id="shovel-tool-tip" style="left:50%;transform:translateX(-50%)">Pá<br><span>Remove pragas antes da colheita — 1.000 pts</span></div>
     </div>
 
     <div class="header-icon-wrap" style="width:100%">
@@ -3726,7 +3801,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <div class="help-section-title">🪵 Canteiros</div>
           <div class="help-tip"><div class="help-tip-icon">🪵</div><div>Começa com <strong>2 canteiros</strong>. Compre os canteiros 3, 4 e 5 na loja conforme seus requisitos. O canteiro 6 é exclusivo para subscribers e vem como canteiro especial ao resgatar o Premium.</div></div>
           <div class="help-tip"><div class="help-tip-icon">🪣</div><div>O <strong>regador</strong> tem capacidade limitada: recupera 1 água a cada 5 minutos e pode chegar a 10 de capacidade. O botão <strong>Encher o reservatório</strong> custa 500 pts e recupera 5 águas imediatamente.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🛠️</div><div>A <strong>pá</strong> retira uma muda do canteiro por 50 pts (25 com Pá Premium). A colheita de plantas prontas é <strong>gratuita</strong>!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🛠️</div><div>A <strong>pá</strong> remove pragas por 1.000 pts (500 com Pá Premium). Ela só funciona antes de a planta ficar pronta para colher.</div></div>
         </div>
       </div>
 
@@ -4075,6 +4150,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <button class="shop-tab cards-tab" id="tab-packs" onclick="switchShopTab('packs')">🃏 Packs</button>
       <button class="shop-tab crazy-shop-tab" id="tab-especial" onclick="switchShopTab('especial')">⭐ Especial</button>
     </div>
+    <div id="global-message-shop" class="global-message-shop"></div>
     <div class="shop-panel visible" id="panel-vegetais"><div class="shop-items" id="shop-items"></div></div>
     <div class="shop-panel" id="panel-flores"><div class="shop-items" id="flower-items"></div></div>
     <div class="shop-panel" id="panel-adubos"><div id="fertilizer-items"></div></div>
@@ -4120,7 +4196,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <p class="premium-copy">Resgate seus presentes exclusivos de subscriber. Cada benefício pode ser resgatado uma única vez.</p>
     <div class="premium-benefits">
       <div>💜 <strong>Regador Premium</strong><span>Regenera água mais rápido.</span><button class="premium-claim" onclick="claimPremium('watering')">Resgatar</button></div>
-      <div>🟣 <strong>Pá Premium</strong><span>Fica roxa e custa só 25 pontos.</span><button class="premium-claim" onclick="claimPremium('shovel')">Resgatar</button></div>
+      <div>🟣 <strong>Pá Premium</strong><span>Fica roxa e custa só 500 pontos.</span><button class="premium-claim" onclick="claimPremium('shovel')">Resgatar</button></div>
       <div>🌱 <strong>4 cultivos exclusivos</strong><span>Desbloqueia as novas flores e vegetais.</span><button class="premium-claim" onclick="claimPremium('plants')">Resgatar</button></div>
       <div>🧪 <strong>Kit de adubos</strong><span>Receba 4 saquinhos de cada adubo.</span><button class="premium-claim" onclick="claimPremium('fertilizers')">Resgatar</button></div>
       <div>✨ <strong>Canteiro 6 Especial</strong><span>Exclusivo para subscribers. Ao resgatar, o último canteiro é desbloqueado e já vem como Canteiro Especial.</span><button class="premium-claim" onclick="claimPremium('plot')">Resgatar</button></div>
@@ -4131,7 +4207,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
 </div>
 
 <div class="mail-overlay hidden" id="mascot-overlay">
-  <div class="mail-modal mascot-modal"><button class="popup-close-x" aria-label="Fechar Mascotes" onclick="closeMascotShop()">×</button><div class="mail-modal-title">🐾 Companheiros do jardim</div><p class="premium-copy">Escolha um mascote para acompanhar suas colheitas.</p><div class="mascot-active-benefit empty" id="mascot-active-benefit"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div><div class="mascot-slot-card"><div><strong>🐾 +1 espaço de mascote</strong><small>Permite usar o Brotinho Premium junto com o Brotinho Prismático. Compra única.</small></div><button type="button" class="mascot-slot-buy" id="mascot-slot-buy" onclick="buyExtraMascotSlot()">Obter · 200.000 pts</button></div><div class="mascot-grid">
+  <div class="mail-modal mascot-modal"><button class="popup-close-x" aria-label="Fechar Mascotes" onclick="closeMascotShop()">×</button><div class="mail-modal-title">🐾 Companheiros do jardim</div><p class="premium-copy">Escolha um mascote para acompanhar suas colheitas.</p><div class="mascot-active-benefit empty" id="mascot-active-benefit"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div><div class="mascot-slot-card"></div><div class="mascot-grid">
     <div class="mascot-option"><div class="mascot-option-art" aria-hidden="true"><svg viewBox="0 0 54 64"><ellipse cx="27" cy="59" rx="14" ry="3" fill="#ba8b55" opacity=".35"/><circle cx="27" cy="35" r="17" fill="#ffab35" stroke="#db792c" stroke-width="2"/><ellipse cx="21" cy="28" rx="6" ry="4" fill="#ffe2a0" opacity=".7" transform="rotate(-30 21 28)"/><path d="M27 18Q26 10 32 7" stroke="#66854c" stroke-width="2.5" stroke-linecap="round"/><path d="M30 12Q38 5 44 10Q38 17 30 15Z" fill="#a8c77b" stroke="#66854c" stroke-width="1.4"/><circle cx="21" cy="36" r="2" fill="#493928"/><circle cx="33" cy="36" r="2" fill="#493928"/><path d="M23 43Q27 47 31 43" fill="none" stroke="#493928" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="41" r="3" fill="#f58d72" opacity=".7"/><circle cx="37" cy="41" r="3" fill="#f58d72" opacity=".7"/></svg></div><div><strong>Laranjinha</strong><small>Aumenta a colheita em +1 · disponível desde o nível 1.</small></div><div class="mascot-actions"><button class="mascot-preview" onclick="previewMascot('orange')">Prévia</button><button class="mascot-buy" data-mascot="orange" onclick="buyMascot('orange')">Comprar · 2.500 pts</button></div></div>
     <div class="mascot-option"><div class="mascot-option-art" aria-hidden="true"><svg viewBox="0 0 54 64"><ellipse cx="27" cy="59" rx="14" ry="3" fill="#ba8b55" opacity=".35"/><path d="M11 33Q11 17 23 17Q27 12 31 17Q43 17 43 33Q43 51 27 53Q11 51 11 33Z" fill="#ee6f78" stroke="#b94a58" stroke-width="2"/><ellipse cx="19" cy="25" rx="6" ry="4" fill="#ffc9c4" opacity=".75" transform="rotate(-30 19 25)"/><path d="M27 17Q27 8 32 6" stroke="#66854c" stroke-width="2.5" stroke-linecap="round"/><path d="M31 11Q38 5 44 10Q40 17 31 14Z" fill="#a8c77b" stroke="#66854c" stroke-width="1.4"/><circle cx="21" cy="34" r="2" fill="#4b3032"/><circle cx="33" cy="34" r="2" fill="#4b3032"/><path d="M23 41Q27 45 31 41" fill="none" stroke="#4b3032" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="39" r="3" fill="#ffabb0"/><circle cx="37" cy="39" r="3" fill="#ffabb0"/></svg></div><div><strong>Maçanzinha</strong><small>Aumenta as vendas em 15% · desbloqueia no nível 10.</small></div><div class="mascot-actions"><button class="mascot-preview" onclick="previewMascot('apple')">Prévia</button><button class="mascot-buy" data-mascot="apple" onclick="buyMascot('apple')">Comprar · 7.500 pts</button></div></div>
     <div class="mascot-option"><div class="mascot-option-art" aria-hidden="true"><svg viewBox="0 0 54 64"><ellipse cx="27" cy="59" rx="14" ry="3" fill="#ba8b55" opacity=".35"/><path d="M11 28Q15 16 27 16Q39 16 43 28L38 47Q27 56 16 47Z" fill="#e63d56" stroke="#961f35" stroke-width="2"/><path d="M27 17Q20 10 18 6Q25 5 28 12Q32 5 39 7Q37 14 28 17Z" fill="#8daf60" stroke="#52703d" stroke-width="1.4"/><circle cx="20" cy="30" r="1.3" fill="#2f2024"/><circle cx="29" cy="27" r="1.3" fill="#2f2024"/><circle cx="35" cy="33" r="1.3" fill="#2f2024"/><circle cx="23" cy="40" r="1.3" fill="#2f2024"/><circle cx="32" cy="43" r="1.3" fill="#2f2024"/><path d="M19 35L23 33" stroke="#2b2022" stroke-width="1.8" stroke-linecap="round"/><path d="M31 33L35 35" stroke="#2b2022" stroke-width="1.8" stroke-linecap="round"/><circle cx="21" cy="37" r="2" fill="#21171b"/><circle cx="33" cy="37" r="2" fill="#21171b"/><path d="M24 44Q27 41 30 44" fill="none" stroke="#21171b" stroke-width="1.8" stroke-linecap="round"/></svg></div><div><strong>Moranguinho</strong><small>Adiciona +2 na recuperação de água a cada 5 minutos · desbloqueia no nível 15.</small></div><div class="mascot-actions"><button class="mascot-preview" onclick="previewMascot('strawberry')">Prévia</button><button type="button" class="mascot-buy" data-mascot="strawberry" onclick="event.stopPropagation();buyMascot('strawberry')">Comprar · 15.000 pts</button></div></div>
@@ -4460,6 +4536,8 @@ const G = {
   wateringRefillsUsed: 0,
   wateringRefillsBonus: 0,
   wateringRefillsSeasonCycle: 0,
+  taxDue: 0,
+  taxPending: false,
   missions: null,
   achievements: null,
   achievStats: null,
@@ -4489,6 +4567,7 @@ const G = {
   skillPoints: 0,
   skillNodes: {},
   skillPointsClaimed: 0,
+  skillHarvestCount: 0,
   upgrades_refunded: false,
   premiumWateringCan: false,
   premiumShovel: false,
@@ -4498,6 +4577,9 @@ const G = {
   isPremium: false,
   selectedMascot: null,
   secondaryMascot: null,
+  tertiaryMascot: null,
+  mascotSwitchSeasonKey: null,
+  mascotSwitchUsed: false,
   extraMascotSlotPurchased: false,
   ownedMascots: {},
   twitchzinhoNextRewardAt: 0,
@@ -4526,6 +4608,7 @@ const GARDEN_EVENTS = {
   rain: { icon:'🌧️', name:'Chuva Mágica', duration:45, color:'#67a9c9', intro:'A chuva vai regar suas plantas automaticamente!' },
   goldenshower: { icon:'🌟', name:'GOLDENSHOWER', duration:5, color:'#e5bd43', intro:'Chuva dourada! Enche o regador e concede +2 recargas nesta estação.' },
   golden: { icon:'☀️', name:'Hora Dourada', duration:60, color:'#d9a82f', intro:'Colheitas feitas durante o evento rendem o dobro!' },
+  tax: { icon:'🧾', name:'HORA DO IMPOSTO', duration:45, color:'#b7794c', intro:'Pague 10% dos seus pontos para desbloquear o Regador.' },
   butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
   moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
   mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode mudar de cor!' },
@@ -4536,6 +4619,7 @@ let gardenEvent = null;
 let gardenEventTimer = null;
 let gardenEventRainTimer = null;
 let gardenEventButterflyTimer = null;
+let gardenEventPestsTimer = null;
 let eventAudioContext = null;
 let eventAudioVolume = (() => {
   try {
@@ -4630,7 +4714,7 @@ function gardenEventDuration(type) {
   if (type === 'goldenshower' && !eventFastMode()) return GARDEN_EVENTS[type].duration;
   return base + (skillBranchBonusActive('colheita') ? 15 : 0);
 }
-function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
+function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type || (gardenEvent.secondaryTypes || []).includes(type)); }
 function setNextGardenEvent() { G.eventNextAt = Date.now() + nextEventDelay(); saveGardenToSE(); }
 
 function renderGardenEvent() {
@@ -4643,7 +4727,10 @@ function renderGardenEvent() {
   banner.classList.add('visible');
   banner.style.borderColor = def.color;
   document.getElementById('garden-event-icon').textContent = def.icon;
-  document.getElementById('garden-event-title').textContent = gardenEvent.phase === 'countdown' ? `${def.name} chegando!` : def.name;
+  const extras = (gardenEvent.secondaryTypes || []).map(type => GARDEN_EVENTS[type]?.name).filter(Boolean);
+  document.getElementById('garden-event-title').textContent = gardenEvent.phase === 'countdown'
+    ? `${def.name}${extras.length ? ` + ${extras.join(' + ')}` : ''} chegando!`
+    : `${def.name}${extras.length ? ` + ${extras.join(' + ')}` : ''}`;
   document.getElementById('garden-event-subtitle').textContent = gardenEvent.phase === 'countdown' ? def.intro : eventLiveSubtitle();
   document.getElementById('garden-event-timer').textContent = `${left}s`;
   const progress = document.getElementById('garden-event-progress');
@@ -4724,6 +4811,7 @@ function eventLiveSubtitle() {
   const n = gardenEvent.actions || 0;
   if (gardenEvent.type === 'rain') return `${n} planta${n===1?'':'s'} recebeu${n===1?'':'ram'} água mágica`;
   if (gardenEvent.type === 'goldenshower') return 'Regador cheio · +2 recargas nesta estação';
+  if (gardenEvent.type === 'tax') return G.taxPending ? `Imposto devido: ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts · Regador bloqueado` : 'Imposto pago · Regador liberado';
   if (gardenEvent.type === 'crazyshop') return `⭐ ${G.crazyShopOffers.filter(offer => offer.chosen).length}/3 ofertas escolhidas`;
   if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
   if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
@@ -4734,7 +4822,8 @@ function eventLiveSubtitle() {
 
 function announceGardenEvent() {
   if (!gardenHydrated || gardenEvent || Date.now() < Number(G.eventNextAt || 0)) return;
-  const keys = Object.keys(GARDEN_EVENTS).filter(key => key !== G.eventLastType);
+  const supportTypes = ['crazyshop', 'tax', 'pests'];
+  const keys = Object.keys(GARDEN_EVENTS).filter(key => !supportTypes.includes(key) && key !== G.eventLastType);
   // Mutação é especial e deve continuar surpreendente: 8% dos eventos.
   const mutationChance = keys.includes('mutation') ? 0.08 : 0;
   const regularKeys = keys.filter(key => key !== 'mutation');
@@ -4744,8 +4833,11 @@ function announceGardenEvent() {
   const type = Math.random() < mutationChance
     ? 'mutation'
     : weightedPool[Math.floor(Math.random() * weightedPool.length)];
-  gardenEvent = { type, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
-  toast(`${GARDEN_EVENTS[type].icon} ${GARDEN_EVENTS[type].name} começa em 10 segundos!`, 5000);
+  const secondaryChance = { crazyshop:0.035, tax:0.22, pests:0.22 };
+  const secondaryTypes = supportTypes.filter(key => Math.random() < secondaryChance[key]).slice(0, 2);
+  gardenEvent = { type, secondaryTypes, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
+  const names = [type, ...secondaryTypes].map(key => `${GARDEN_EVENTS[key].icon} ${GARDEN_EVENTS[key].name}`).join(' + ');
+  toast(`${names} começa em 10 segundos!`, 5000);
   renderGardenEvent();
 }
 
@@ -4773,6 +4865,22 @@ function startGardenEvent() {
   if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
   if (gardenEvent.type === 'mutation') triggerEventMutation();
   if (gardenEvent.type === 'crazyshop') {
+    generateCrazyShopOffers();
+    openShop();
+    switchShopTab('especial');
+  }
+  if (activeGardenEvent('tax')) {
+    const points = Math.max(0, Math.floor(Number(G.pts) || 0));
+    G.taxDue = points > 0 ? Math.max(1, Math.floor(points * 0.10)) : 0;
+    G.taxPending = G.taxDue > 0;
+    renderWateringCapacity();
+    toast(G.taxPending ? `🧾 HORA DO IMPOSTO! Pague ${G.taxDue.toLocaleString('pt-BR')} pts para desbloquear o Regador.` : '🧾 HORA DO IMPOSTO! Você não tem imposto devido.', 5200);
+  }
+  if (activeGardenEvent('pests')) {
+    spawnEventPest();
+    gardenEventPestsTimer = setInterval(spawnEventPest, 4200);
+  }
+  if (activeGardenEvent('crazyshop') && gardenEvent.type !== 'crazyshop') {
     generateCrazyShopOffers();
     openShop();
     switchShopTab('especial');
@@ -4853,14 +4961,15 @@ function triggerEventMutation() {
 function finishGardenEvent() {
   const finished=gardenEvent, def=GARDEN_EVENTS[finished.type];
   clearInterval(gardenEventRainTimer); clearInterval(gardenEventButterflyTimer);
-  gardenEventRainTimer=null; gardenEventButterflyTimer=null;
+  clearInterval(gardenEventPestsTimer);
+  gardenEventRainTimer=null; gardenEventButterflyTimer=null; gardenEventPestsTimer=null;
   document.body.classList.remove(`event-${finished.type}`);
-  if (finished.type === 'crazyshop') {
+  if (finished.type === 'crazyshop' || (finished.secondaryTypes || []).includes('crazyshop')) {
     const selected = (G.crazyShopOffers || []).filter(offer => offer.chosen).length;
     G.crazyShopEndsAt = 0;
     toast(`⭐ Loja Maluca terminou! Você escolheu ${selected}/3 ofertas.`, 3500);
   }
-  if (finished.type === 'pests') {
+  if (finished.type === 'pests' || (finished.secondaryTypes || []).includes('pests')) {
     const ignored = (finished.pests || []).filter(p => !p.removed);
     const eligiblePlots = G.plots.map((plot,index) => plot?.type && !plot.pestInfested ? index : -1).filter(index => index >= 0);
     const infestedIdx = eligiblePlots.length && Math.random() < .34 ? eligiblePlots[Math.floor(Math.random() * eligiblePlots.length)] : -1;
@@ -4898,15 +5007,37 @@ function tickGardenEvents() {
   if(Date.now()>=gardenEvent.endsAt){ if(gardenEvent.phase==='countdown')startGardenEvent(); else finishGardenEvent(); }
   else renderGardenEvent();
 }
+function resumeGardenEvent() {
+  if (!gardenEvent || gardenEvent.phase !== 'active' || Date.now() >= gardenEvent.endsAt) return;
+  document.body.classList.add(`event-${gardenEvent.type}`);
+  if (gardenEvent.type === 'rain' && !gardenEventRainTimer) {
+    gardenEventRainTimer = setInterval(() => { spawnEventRain(); applyMagicRain(); }, 3500);
+  }
+  if (gardenEvent.type === 'butterflies' && !gardenEventButterflyTimer) gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
+  if (gardenEvent.type === 'pests' && !gardenEventRainTimer) {
+    gardenEventRainTimer = setInterval(spawnEventPest, 4200);
+  }
+  if ((gardenEvent.secondaryTypes || []).includes('pests') && !gardenEventPestsTimer) {
+    gardenEventPestsTimer = setInterval(spawnEventPest, 4200);
+  }
+  if ((gardenEvent.secondaryTypes || []).includes('tax')) renderWateringCapacity();
+  if (gardenEvent.type === 'crazyshop') {
+    renderCrazyShop();
+  }
+  if ((gardenEvent.secondaryTypes || []).includes('crazyshop')) renderCrazyShop();
+  renderGardenEvent();
+}
 function initGardenEvents(){
   if(gardenEventTimer)clearInterval(gardenEventTimer);
   gardenEventTimer=setInterval(tickGardenEvents,500);
+  resumeGardenEvent();
   tickGardenEvents();
 }
 
 // maxWater = regas para encher (habilitar crescimento)
 // maxGrow  = estágios de crescimento por tempo (30min cada)
 const PLANTS = {
+  rainbow_seed:{name:'Fruto Arco-Íris',emoji:'🌈',cost:0,maxWater:6,maxGrow:15,harvests:1,color:'#d4abc9',leafColor:'#9abf9b',minLevel:1,eventOnly:true,rewardOnly:true},
   potato:   { name:'Batata',      emoji:'🥔', cost:30,  maxWater:3,  maxGrow:6,  harvests:3, color:'#c8a060', leafColor:'#4e8a28', minLevel:1  },
   lettuce:  { name:'Alface',      emoji:'🥬', cost:50,  maxWater:4,  maxGrow:8,  color:'#4ab848', leafColor:'#2a8a28', minLevel:1  },
   carrot:   { name:'Cenoura',     emoji:'🥕', cost:45,  maxWater:5,  maxGrow:10, color:'#f07030', leafColor:'#6aaa3a', minLevel:2  },
@@ -5212,7 +5343,7 @@ function previewAccess() {
     && new URLSearchParams(window.location.search).has('preview'));
 }
 
-function effectiveShovelCost() { return G.premiumShovel ? 25 : 50; }
+function effectiveShovelCost() { return G.premiumShovel ? 500 : 1000; }
 function maxWateringCapacity() {
   const levelCapacity = currentLevel() >= 15 ? 10 : currentLevel() >= 10 ? 7 : 5;
   // O bônus dos kits pode ultrapassar o limite base de 10 águas.
@@ -5232,6 +5363,18 @@ function refillWateringCapacity() {
 }
 function renderWateringCapacity() {
   syncWateringRefillSeason();
+  const taxBlocked = G.taxPending === true;
+  const waterTool = document.getElementById('tool-water');
+  if (waterTool) {
+    waterTool.classList.toggle('tax-blocked', taxBlocked);
+    waterTool.setAttribute('aria-disabled', taxBlocked ? 'true' : 'false');
+  }
+  const taxNotice = document.getElementById('watering-tax-notice');
+  if (taxNotice) {
+    taxNotice.classList.toggle('visible', taxBlocked);
+    taxNotice.textContent = taxBlocked ? `🧾 Pagar imposto: ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts` : '';
+    taxNotice.tabIndex = taxBlocked ? 0 : -1;
+  }
   const amount = G.waterCapacity ?? 5;
   const max = maxWateringCapacity();
   const el = document.getElementById('water-capacity');
@@ -5293,6 +5436,7 @@ function effectiveMaxGrow(type) {
   return getPlantable(type).maxGrow * 2;
 }
 function effectiveSellValue(type, epicOverride) {
+  if(type==='rainbow_seed')return epicOverride ? 400 : 200;
   const base = FarmAnimals.products[type]?.sell ?? SELL_VALUE[type];
   const mascotBonus = hasActiveMascot('apple') || hasActiveMascot('premium') ? 1.15 : 1;
   let val = Math.round(base * mascotBonus);
@@ -5302,7 +5446,11 @@ function effectiveSellValue(type, epicOverride) {
   if (epicOverride) val *= 2;
   return val;
 }
-function activeMascots() { return [G.selectedMascot, G.secondaryMascot].filter(Boolean); }
+function activeMascots() {
+  const primary=['prismatic','rainbow'].includes(G.selectedMascot)?null:G.selectedMascot;
+  const companion=primary==='premium'&&['prismatic','rainbow'].includes(G.secondaryMascot)?G.secondaryMascot:null;
+  return [primary,companion].filter(Boolean);
+}
 function hasActiveMascot(id) { return activeMascots().includes(id); }
 function effectiveHarvestBonus() { return hasActiveMascot('orange') || hasActiveMascot('premium') ? 1 : 0; }
 function effectiveWaterRefillAmount() {
@@ -5312,12 +5460,11 @@ function effectiveWaterRefillAmount() {
 }
 // 15 seg reais = 1 grow tick. Solo Vivo reduz até -12%.
 function effectiveGrowInterval() {
-  return Math.round(15000 * (1 - skillGrowReduction()));
+  return Math.max(1000, Math.round(GROW_INTERVAL_MS * (1 - skillGrowReduction())));
 }
-// Solo Vivo: reduz o maxGrow efetivo (menos ticks necessários = cresce mais rápido)
+// A quantidade de etapas fica fixa; Solo Vivo reduz o intervalo entre elas.
 function effectiveMaxGrowWithSkill(type) {
-  const base = effectiveMaxGrow(type);
-  return Math.max(1, Math.round(base * (1 - skillGrowReduction())));
+  return effectiveMaxGrow(type);
 }
 const GROW_INTERVAL_MS = 15000;
 let growAwaySince = null;
@@ -5460,6 +5607,11 @@ function localFairSaleBonus(itemCount) {
 
 // ─── TOOLS ───────────────────────────────────────────────
 function selectTool(t) {
+  if (t === 'water' && G.taxPending) {
+    toast(`🧾 Regador bloqueado: pague ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts de imposto.`, 3200);
+    renderWateringCapacity();
+    return;
+  }
   if (t === 'shovel' && !G.plots.some(Boolean)) return;
   G.selectedTool = t;
   document.getElementById('tool-water').classList.toggle('active', t === 'water');
@@ -5616,15 +5768,17 @@ function showOutOfSeasonModal(type) {
 function confirmRemovePlant(idx) {
   const plot = G.plots[idx];
   if (!plot) return;
+  if (!plot.pestInfested) { toast('🛠️ A pá só pode ser usada para remover pragas.'); return; }
+  if (isReady(plot)) { toast('🌾 A planta já está pronta para colher; a praga não pode mais ser removida.'); return; }
   const plant = getPlantable(plot.type);
   const modal = document.getElementById('modal');
   modal.querySelector('.modal').innerHTML = `
     <button class="popup-close-x" aria-label="Fechar confirmação" onclick="closeModal()">×</button>
-    <h2>🪴 Retirar planta?</h2>
-    <p>Deseja realmente limpar este canteiro? ${plant.emoji} ${plant.name} será descartada${plot.pestInfested ? ' e a infestação de pragas será removida por completo' : ''}. A pá custará ${effectiveShovelCost()} pontos.</p>
+    <h2>🛠️ Remover praga?</h2>
+    <p>A pá vai remover a infestação de ${plant.emoji} ${plant.name} e devolver a planta ao estado normal. A pá custará ${effectiveShovelCost()} pontos.</p>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-primary" onclick="removePlantFromPlot(${idx})">Retirar planta</button>
+      <button class="btn-primary" onclick="removePlantFromPlot(${idx})">Remover praga</button>
     </div>`;
   openModal();
 }
@@ -5632,16 +5786,14 @@ function confirmRemovePlant(idx) {
 async function removePlantFromPlot(idx) {
   closeModal();
   const plot = G.plots[idx];
-  if (!plot) return;
+  if (!plot?.pestInfested || isReady(plot)) return;
   const sCost = effectiveShovelCost();
   if (G.pts < sCost) { toast(`🌟 Você precisa de ${sCost} pts para retirar a planta!`); return; }
   if (!(await chargeGamePoints(sCost))) return;
-  G.plots[idx] = null;
+  plot.pestInfested = false;
   spawnSparkles(idx);
   saveGardenToSE();
-  toast(plot.pestInfested
-    ? `🧹 Canteiro limpo! ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} e a infestação de pragas foram removidas.`
-    : `🪴 ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} retirada do canteiro!`);
+  toast(`🧹 Praga removida! ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} voltou ao estado normal.`);
   setTimeout(() => { renderPlots(); }, 300);
 }
 
@@ -5661,7 +5813,7 @@ function renderInventory() {
   if (inventorySeasonFilter !== 'all') {
     const season = SEASONS.find(item => item.id === inventorySeasonFilter);
     const seasonTypes = season ? [...season.vegetables, ...season.flowers] : [];
-    entries = allEntries.filter(([type]) => seasonTypes.includes(type) || (G.crazySeedModifiers?.[type] || []).length > 0);
+    entries = allEntries.filter(([type]) => type==='rainbow_seed' || seasonTypes.includes(type) || (G.crazySeedModifiers?.[type] || []).length > 0);
   }
 
   if (!allEntries.length) {
@@ -5693,6 +5845,7 @@ function renderInventory() {
           <div class="inv-slot-name">${p.name}</div>
           ${(G.crazySeedModifiers?.[type] || []).length ? `<div style="color:#b53636;font-size:10px;font-weight:900">★ MALUCO ×${G.crazySeedModifiers[type].length}</div>` : ''}
           <div class="inv-slot-count">×${count}</div>
+          ${type==='rainbow_seed'?'<div class="inv-slot-name">Permanente · 1–100 frutos</div>':''}
           <div class="inv-tip">
             <strong>${p.name}</strong><br>
             💧 ${p.maxWater} regas · 🌱 ${effectiveMaxGrow(type)} crescimentos<br>
@@ -5735,6 +5888,7 @@ function crazySeedBonusLines(type) {
 // Venda base já cobre: semente (rega e colheita são gratuitas)
 // mantendo uma margem cozy de lucro para cada cultivo. (rega não tem custo)
 const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce: 76, cassava: 140,
+                     rainbow_seed:200,
                      corn: 84, pumpkin: 108, eggplant: 94, pepper: 103, broccoli: 117,
                      rose: 85, sunflower: 99, lavender: 113, daisy: 43, tulip: 76,
                      orchid: 127, hibiscus: 118, bluebell: 95, cherry: 136, poppy: 81, jasmine: 104,
@@ -5743,17 +5897,95 @@ const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce:
                      ruby_kale: 335, star_radish: 338, moon_lily: 1000, royal_dahlia: 383 };
 
 function cultivationCost(type) {
-  return seasonPrice(type) + 10;
+  return cartUnitCost(type) + 10;
 }
 const SHOP_QTY = {};
 const SHOP_CART = {};
 let SHOP_CART_OPEN = false;
 let shopPurchaseInFlight = false;
+const GLOBAL_MESSAGE_COST = 500;
+let globalMessagePurchaseInFlight = false;
+async function buyGlobalMessage() {
+  if (globalMessagePurchaseInFlight) return;
+  if (Number(G.pts) < GLOBAL_MESSAGE_COST) {
+    toast(`✨ Faltam ${GLOBAL_MESSAGE_COST - Number(G.pts || 0)} pts para concluir.`, 2400);
+    return;
+  }
+  if (Date.now() - Number(G.lastGlobalMessage?.at || 0) < 120000) {
+    toast('⏳ Aguarde o limite de 2 minutos para enviar outra mensagem.', 2600);
+    renderGlobalMessageShop();
+    return;
+  }
+  const existing = document.getElementById('global-message-composer');
+  if (existing) { existing.hidden = false; existing.querySelector('textarea')?.focus(); return; }
+  const composer = document.createElement('div');
+  composer.id = 'global-message-composer'; composer.className = 'global-message-composer'; composer.setAttribute('role','dialog'); composer.setAttribute('aria-modal','true');
+  composer.innerHTML = `<div class="composer-card"><h3>📣 Mensagem Global</h3><p>Escreva uma mensagem curta para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pontos.</p><textarea maxlength="120" aria-label="Mensagem para o global" placeholder="Oi, jardim! 🌱"></textarea><span class="composer-count">0/120</span><div class="composer-actions"><button type="button" class="btn-cancel">Cancelar</button><button type="button" class="btn-ok">Comprar e enviar</button></div></div>`;
+  document.body.append(composer);
+  const input=composer.querySelector('textarea'), count=composer.querySelector('.composer-count');
+  const close=()=>composer.remove();
+  input.addEventListener('input',()=>{count.textContent=input.value.length+'/120';});
+  composer.querySelector('.btn-cancel').onclick=close;
+  composer.querySelector('.btn-ok').onclick=async()=>{
+    const message=String(input.value||'').trim().replace(/[\\u0000-\\u001F\\u007F]/g,'').slice(0,120);
+    if(!message){input.focus();return;}
+    globalMessagePurchaseInFlight=true;
+    const sendButton=composer.querySelector('.btn-ok');
+    sendButton.disabled=true;
+    sendButton.textContent='Enviando…';
+    renderGlobalMessageShop();
+    try {
+      if (!(await chargeGamePoints(GLOBAL_MESSAGE_COST, 'Mensagem Global'))) return;
+      G.lastGlobalMessage={text:message,at:Date.now()};
+      await saveGardenToSE();
+      toast('📣 Mensagem enviada para o global!',3200);
+      close();
+    } catch(error) {
+      console.error('Falha ao enviar Mensagem Global:', error);
+      toast('❌ Não foi possível enviar a mensagem. Tente novamente.', 3200);
+    } finally {
+      globalMessagePurchaseInFlight=false;
+      renderGlobalMessageShop();
+    }
+  };
+  composer.addEventListener('click',event=>{if(event.target===composer)close();});
+  input.focus();
+}
+function renderGlobalMessageShop() {
+  const host = document.getElementById('global-message-shop');
+  if (!host) return;
+  let button = host.querySelector('[data-global-message-buy]');
+  if (!button) {
+    host.innerHTML = `<div><strong>📣 Mensagem Global</strong><p>Compre o destaque e envie uma mensagem para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pts. Limite: 1 a cada 2 minutos.</p></div><button type="button" data-global-message-buy>Comprar e enviar</button>`;
+    button = host.querySelector('[data-global-message-buy]');
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      buyGlobalMessage();
+    });
+  }
+  const remaining = Math.max(0, 120000 - (Date.now() - Number(G.lastGlobalMessage?.at || 0)));
+  const cooldown = remaining > 0;
+  const label = cooldown ? `Aguarde ${Math.ceil(remaining / 1000)}s` : (globalMessagePurchaseInFlight ? 'Confirmando…' : 'Comprar e enviar');
+  button.textContent = label;
+  button.disabled = globalMessagePurchaseInFlight || cooldown || Number(G.pts) < GLOBAL_MESSAGE_COST;
+}
+async function payGardenTax() {
+  const due = Math.max(0, Math.floor(Number(G.taxDue) || 0));
+  if (!G.taxPending || !due) return;
+  if (!(await chargeGamePoints(due, 'Hora do Imposto'))) return;
+  G.taxDue = 0;
+  G.taxPending = false;
+  renderWateringCapacity();
+  await saveGardenToSE();
+  toast('✅ Imposto pago! O Regador foi desbloqueado.', 3200);
+}
 function cartProduct(type) { return getPlantable(type) || (typeof FERTILIZERS !== 'undefined' ? FERTILIZERS[type] : null); }
 function cartUnitCost(type) {
   const p = cartProduct(type); if (!p) return 0;
   if (typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type]) return p.cost + (type === 'golden_soil' ? upgradeLevel('golden_soil_plus') * 100 : type === 'quick_grow' ? upgradeLevel('quick_grow_plus') * 100 : 0);
-  return seasonPrice(type);
+  const basePrice=seasonPrice(type);
+  const discount=isOutOfSeason(type)?0:skillBuyDiscount();
+  return Math.max(1,Math.round(basePrice*(1-discount)));
 }
 function addToShopCart(type, sourceEvent) {
   const product = cartProduct(type);
@@ -5815,7 +6047,7 @@ async function buyShopCart() {
   for (const [type, qty] of entries) {
     const p = cartProduct(type);
     const fertilizer = typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type];
-    if (!p || (p.subscriberOnly && !hasSubscriberBadge()) || (!previewAccess() && currentLevel() < p.minLevel)) { toast('🌱 Remova da sacola os itens indisponíveis para sua conta ou nível.'); return; }
+    if (!p || p.rewardOnly || (p.subscriberOnly && !hasSubscriberBadge()) || (!previewAccess() && currentLevel() < p.minLevel)) { toast('🌱 Remova da sacola os itens indisponíveis para sua conta ou nível.'); return; }
     total += cartUnitCost(type) * qty;
   }
   if (G.pts < total) { toast('✨ Pontos insuficientes para concluir a compra!'); return; }
@@ -5869,7 +6101,7 @@ function setShopQtyFromInput(type, value, input) {
   }else total.innerHTML=seasonPriceLabel(type,qty);
   const addButton=card.querySelector('.fertilizer-buy-btn');
   if(addButton)addButton.disabled=G.pts<cartUnitCost(type)*qty;
-  card.classList.toggle('cant-afford',G.pts<(card.classList.contains('fertilizer-item')?cartUnitCost(type):seasonPrice(type))*qty);
+  card.classList.toggle('cant-afford',G.pts<cartUnitCost(type)*qty);
 }
 function shopQtyControls(type) {
   const qty = SHOP_QTY[type] || 1;
@@ -5917,7 +6149,7 @@ function renderFlowerShop() {
     const fs = SEASONS.find(s => s.id === shopSeasonFilter);
     if (fs) entries = entries.filter(([type]) => fs.flowers.includes(type));
   }
-  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => seasonPrice(a) - seasonPrice(b));
+  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => cartUnitCost(a) - cartUnitCost(b));
   if (shopSort === 'grow_asc')   entries.sort(([,a],[,b]) => a.maxGrow - b.maxGrow);
   if (shopSort === 'water_asc')  entries.sort(([,a],[,b]) => a.maxWater - b.maxWater);
   if (shopSort === 'sell_desc')  entries.sort(([a],[b]) => SELL_VALUE[b] - SELL_VALUE[a]);
@@ -5938,7 +6170,7 @@ function renderFlowerShop() {
     const subscriberLocked = p.subscriberOnly && !hasSubscriberBadge();
     const locked = subscriberLocked || (!previewAccess() && lv < p.minLevel);
     const outOfSeason = !isInSeason(type);
-    const canAfford = G.pts >= seasonPrice(type) * (SHOP_QTY[type] || 1);
+    const canAfford = G.pts >= cartUnitCost(type) * (SHOP_QTY[type] || 1);
     const sellVal = SELL_VALUE[type];
     const profit = sellVal - cultivationCost(type);
     const profitLabel = profit >= 0
@@ -5973,10 +6205,7 @@ function renderFlowerShop() {
 async function buyFlower(type, el) {
   const p = FLOWERS[type];
   const qty = SHOP_QTY[type] || 1;
-  // Skill: Negociador (-3% por nível, não se aplica a itens em promoção)
-  const basePrice = seasonPrice(type);
-  const discount = isOutOfSeason(type) ? 0 : skillBuyDiscount();
-  const total = Math.round(basePrice * (1 - discount)) * qty;
+  const total = cartUnitCost(type) * qty;
   if (!p) return;
   if (p.subscriberOnly && !hasSubscriberBadge()) { toast('✦ Esta flor é exclusiva para subscribers.'); return; }
   if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para esta flor!`); return; }
@@ -5993,8 +6222,38 @@ async function buyFlower(type, el) {
 
 function sellTotal() {
   ensureSaleTypes();
-  const baseTotal = Object.keys(SELL).reduce((sum, type) => sum + sellValueForSelection(type, SELL[type] || 0, SELL_PEST[type] || 0, window._epicSaleType === type), 0);
+  const epicTypes = new Set(window._epicSaleTypes || []);
+  const baseTotal = Object.keys(SELL).reduce((sum, type) => sum + sellValueForSelection(type, SELL[type] || 0, SELL_PEST[type] || 0, epicTypes.has(type)), 0);
   return Math.round(baseTotal * (1 + localFairSaleBonus(selectedSellQuantity())));
+}
+
+function rollEpicSaleTypes() {
+  const chance = Math.max(0, Math.min(1, skillEpicSaleChance()));
+  const selectedTypes = Object.keys(SELL).filter(type => (Number(SELL[type]) || 0) + (Number(SELL_PEST[type]) || 0) > 0);
+  window._epicSaleTypes = chance > 0 ? selectedTypes.filter(() => Math.random() < chance) : [];
+  return window._epicSaleTypes;
+}
+
+function epicSaleDetails() {
+  return (window._epicSaleTypes || []).map(type => {
+    const goodQty = Number(SELL[type]) || 0;
+    const pestQty = Number(SELL_PEST[type]) || 0;
+    if (goodQty + pestQty <= 0) return null;
+    const item = getPlantable(type);
+    return { type, name:item?.name || type, emoji:item?.emoji || '✨', quantity:goodQty + pestQty };
+  }).filter(Boolean);
+}
+
+function showEpicSalePopup(details) {
+  if (!details?.length) return;
+  document.getElementById('epic-sale-result-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'epic-sale-result-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.onclick = event => { if (event.target === overlay) overlay.remove(); };
+  const rows = details.map(item => `<div class="epic-sale-result-item"><span>${item.emoji} ${item.name} · pacote ×${item.quantity}</span><b>dobro</b></div>`).join('');
+  overlay.innerHTML = `<div class="modal epic-sale-result-modal" role="dialog" aria-modal="true" aria-labelledby="epic-sale-result-title"><button class="popup-close-x" type="button" aria-label="Fechar" onclick="document.getElementById('epic-sale-result-overlay')?.remove()">×</button><div class="epic-sale-sparkle">💎✨</div><h2 id="epic-sale-result-title">VOCÊ FEZ UMA VENDA ÉPICA!</h2><p>Todos os itens destes pacotes foram vendidos pelo dobro:</p><div class="epic-sale-result-list">${rows}</div><div class="modal-actions" style="justify-content:center"><button type="button" class="btn-ok" onclick="document.getElementById('epic-sale-result-overlay')?.remove()">Que incrível!</button></div></div>`;
+  document.body.appendChild(overlay);
 }
 
 function changeSellQty(type, delta) {
@@ -6004,7 +6263,7 @@ function changeSellQty(type, delta) {
 }
 
 let saleInFlight = false;
-async function sellSelected() {
+async function sellSelected(epicAlreadyRolled = false) {
   if (saleInFlight) return;
   ensureSaleTypes();
   // Nunca venda mais do que o estoque confirmado na tela.
@@ -6016,6 +6275,8 @@ async function sellSelected() {
       return;
     }
   }
+  if (!epicAlreadyRolled) rollEpicSaleTypes();
+  const epicDetails = epicSaleDetails();
   const total = sellTotal();
   if (total === 0) {
     toast('🧺 Escolha pelo menos um item para vender.', 2400);
@@ -6117,7 +6378,9 @@ async function sellSelected() {
   // coin burst from the card
   const card = document.getElementById('harvest-card');
   if (card) spawnCoinBurst(card, total);
-  if (window._epicSaleType) { const ep = getPlantable(window._epicSaleType); toast(`💎 VENDA ÉPICA! ${ep?.emoji || ''} ${ep?.name || ''} valeu o dobro! +${total} pts`, 3500); window._epicSaleType = null; } else { toast(`💰 Vendido! +${total} pts`, 2500); }
+  window._epicSaleTypes = [];
+  if (epicDetails.length) showEpicSalePopup(epicDetails);
+  else toast(`💰 Vendido! +${total} pts`, 2500);
 }
 
 function spawnCoinBurst(el, pts) {
@@ -6144,6 +6407,7 @@ function spawnCoinBurst(el, pts) {
 }
 
 function harvestedProduceArt(type) {
+  if(type==='rainbow_seed')return RainbowRewards.art('seed');
   if (FarmAnimals.products[type]) return animalProductArt(type);
   const item = getPlantable(type);
   const isFlower = Boolean(FLOWERS[type]);
@@ -6211,7 +6475,6 @@ function mascotOpeningAnimation(kind) {
   });
 }
 function closeShop() {
-  if (activeGardenEvent('crazyshop')) finishGardenEvent();
   document.getElementById('shop-overlay')?.classList.add('hidden');
   document.getElementById('shop-cart')?.classList.remove('side-cart');
   document.getElementById('shop-cart')?.classList.add('shop-cart-closed');
@@ -6375,31 +6638,56 @@ function maybeShowUpdateNews(hadSave) {
 if (window.location.hostname === 'localhost' && new URLSearchParams(window.location.search).has('preview')) {
   setTimeout(() => document.getElementById('update-news-overlay')?.classList.remove('hidden'), 500);
 }
+function currentMascotSeasonKey() { return `${Math.max(0,Number(G.seasonCycle)||0)}:${Math.max(0,Number(G.seasonIdx)||0)}`; }
+function mascotSwitchUsed() { return G.mascotSwitchSeasonKey===currentMascotSeasonKey() && G.mascotSwitchUsed===true; }
+function markMascotSwitchUsed() { G.mascotSwitchSeasonKey=currentMascotSeasonKey(); G.mascotSwitchUsed=true; }
 function renderMascotShop() {
-  const labels = { orange:'Comprar · 2.500 pts', apple:'Comprar · 7.500 pts', strawberry:'Comprar · 15.000 pts', premium:'Comprar · 75.000 pts', twitchzinho:'✦ Resgate no Premium', prismatic:'Complete o álbum' };
+  RainbowRewards.grant(G);
+  if(!document.getElementById('rainbow-mascot-option')){
+    const option=document.createElement('div');
+    option.id='rainbow-mascot-option';
+    option.className='mascot-option mascot-rainbow-option';
+    option.innerHTML='<div class="mascot-option-art rainbow-mascot-art" aria-hidden="true">'+RainbowRewards.art('mascot')+'</div><div><strong>Brotinho Arco-Íris</strong><small>+1 rega aleatória a cada 5 segundos, sem gastar água · 0,01% para regar todas as plantas sedentas.</small></div><div class="mascot-actions"><button type="button" class="mascot-preview" onclick="previewMascot(\'rainbow\')">Prévia</button><button type="button" class="mascot-buy" data-mascot="rainbow" onclick="buyMascot(\'rainbow\')">Complete o álbum Arco-Íris</button></div>';
+    document.querySelector('.mascot-grid')?.append(option);
+  }
+  const labels = { orange:'Comprar · 2.500 pts', apple:'Comprar · 7.500 pts', strawberry:'Comprar · 15.000 pts', premium:'Comprar · 75.000 pts', twitchzinho:'✦ Resgate no Premium', prismatic:'Complete o álbum', rainbow:'Complete o álbum Arco-Íris' };
   const levels = { orange:1, apple:10, strawberry:15, premium:25 };
   const albumComplete = hasCompletePrismaticAlbum();
   if (albumComplete && G.ownedMascots?.prismatic !== true) G.ownedMascots.prismatic = true;
-  const slotButton=document.getElementById('mascot-slot-buy');
-  if(slotButton){slotButton.textContent=G.extraMascotSlotPurchased?'✓ Espaço adquirido':'Obter · 200.000 pts';slotButton.disabled=G.extraMascotSlotPurchased;}
+  const slotCard=document.querySelector('.mascot-slot-card');
+  const unlockedCompanions=['prismatic','rainbow'].filter(id=>G.ownedMascots?.[id]===true);
+  const defaultCompanion=unlockedCompanions.includes('prismatic')?'prismatic':unlockedCompanions[0]||'';
+  if(mascotCompanionChoice===null||!unlockedCompanions.includes(mascotCompanionChoice)&&mascotCompanionChoice!=='')mascotCompanionChoice=defaultCompanion;
+  if(slotCard){
+    const status=mascotSwitchUsed()?'Sua troca de mascote desta estação já foi usada.': 'Uma troca de mascote por estação.';
+    const chooser=G.selectedMascot!=='premium'&&!mascotSwitchUsed()&&unlockedCompanions.length
+      ? `<label class="mascot-companion-choice">Ao escolher Premium: <select class="shop-season-select" onchange="mascotCompanionChoice=this.value"><option value="" ${mascotCompanionChoice===''?'selected':''}>Sem companheiro</option>${unlockedCompanions.map(id=>`<option value="${id}" ${mascotCompanionChoice===id?'selected':''}>${id==='prismatic'?'Brotinho Prismático':'Brotinho Arco-Íris'}</option>`).join('')}</select></label>`
+      : '';
+    slotCard.innerHTML=`<div><strong>🌱 Companheiros do Premium</strong><small>Prismático ou Arco-Íris só equipam junto com o Premium. ${status}</small>${chooser}</div>`;
+  }
   document.querySelectorAll('.mascot-buy[data-mascot]').forEach(btn => {
     const id=btn.dataset.mascot, owned=G.ownedMascots?.[id]===true, selected=G.selectedMascot===id, selectedExtra=G.secondaryMascot===id;
+    const isCompanion=id==='prismatic'||id==='rainbow';
+    const currentlyEquipped=selected||selectedExtra;
     const required=levels[id], locked=required!==undefined && currentLevel()<required && !owned;
-    const prismaticLocked=id==='prismatic'&&!albumComplete;
+    const prismaticLocked=(id==='prismatic'&&!albumComplete)||(id==='rainbow'&&!owned);
     const premiumOnly=id==='twitchzinho';
-    btn.classList.toggle('selected',selected||selectedExtra); btn.classList.toggle('locked',locked||prismaticLocked);
-    btn.textContent=selected?'Selecionado':selectedExtra?'Desequipar extra':premiumOnly&&!owned?'✦ Resgate no Premium':locked?`🔒 Nível ${required}`:prismaticLocked?'🔒 Complete o álbum':owned?'Selecionar':labels[id];
-    btn.disabled=(selected&&!selectedExtra)||(premiumOnly&&!owned)||locked||prismaticLocked;
+    const premiumRequired=isCompanion&&G.selectedMascot!=='premium';
+    const switchBlocked=mascotSwitchUsed();
+    btn.classList.toggle('selected',currentlyEquipped); btn.classList.toggle('locked',locked||prismaticLocked||premiumRequired||switchBlocked);
+    btn.textContent=selected?'Selecionado':selectedExtra&&switchBlocked?'Companheiro ativo · troca usada':premiumOnly&&!owned?'✦ Resgate no Premium':locked?`🔒 Nível ${required}`:prismaticLocked?'🔒 Complete o álbum':switchBlocked?'Troca usada nesta estação':premiumRequired?'🔒 Use com o Premium':selectedExtra?'Retirar companheiro':owned?'Selecionar':labels[id];
+    btn.disabled=selected||premiumRequired||switchBlocked||(premiumOnly&&!owned)||locked||prismaticLocked;
     // O botão começa desabilitado no HTML; atribuir a ação durante a renderização
     // garante que ele continue clicável depois de o Twitchzinho ser resgatado.
     if (id === 'twitchzinho') btn.onclick = () => buyMascot('twitchzinho');
   });
   const info = { orange:['🍊','Laranjinha','+1 item na colheita.'], apple:['🍎','Maçanzinha','+15% no valor das vendas.'], strawberry:['🍓','Moranguinho','Adiciona +2 na recuperação de água a cada 5 minutos.'], premium:['🌱','Brotinho Premium','+1 colheita · +15% nas vendas · +2 na recuperação de água a cada 5 minutos.'], twitchzinho:['💜','Twitchzinho','Quantidade aleatória de moedas a cada 5 minutos.'], prismatic:['🌈','Brotinho Prismático','Aumenta a chance de Chuva Mágica nos eventos.'] };
+  info.rainbow=['🌈','Brotinho Arco-Íris','+1 rega aleatória a cada 5 segundos sem gastar água · 0,01% por ciclo de regar todas as plantas sedentas · 1% de colher uma pronta para o Mercado.'];
   const panel=document.getElementById('mascot-active-benefit'); const active=activeMascots().map(id=>info[id]).filter(Boolean);
   if (panel) { panel.classList.toggle('empty', !active.length); panel.innerHTML=active.length ? active.map(data=>`<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">${data[0]}</span><div><strong>${data[1]} ativo</strong><small>${data[2]}</small></div></div>`).join('') : '<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div>'; }
 }
 function previewMascot(id) {
-  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(id, true);
+  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(id, true, null, null);
   if (id === 'twitchzinho' || id === 'premium') {
     updateTwitchzinhoPouch(id);
   } else {
@@ -6407,21 +6695,23 @@ function previewMascot(id) {
     if (pouch) pouch.dataset.preview = 'false';
     updateTwitchzinhoPouch();
   }
-  toast(`👀 Prévia de ${id === 'orange' ? 'Laranjinha' : id === 'apple' ? 'Maçanzinha' : id === 'strawberry' ? 'Moranguinho' : id === 'twitchzinho' ? 'Twitchzinho' : id === 'prismatic' ? 'Brotinho Prismático' : 'Brotinho Premium'} — escolha quando quiser!`, 2200);
+  toast(`👀 Prévia de ${id === 'orange' ? 'Laranjinha' : id === 'apple' ? 'Maçanzinha' : id === 'strawberry' ? 'Moranguinho' : id === 'twitchzinho' ? 'Twitchzinho' : id === 'prismatic' ? 'Brotinho Prismático' : id === 'rainbow' ? 'Brotinho Arco-Íris' : 'Brotinho Premium'} — escolha quando quiser!`, 2200);
 }
 function applySelectedMascotAppearance(animate=false) {
-  const premium = G.selectedMascot === 'premium';
+  const [primary,companion]=activeMascots();
+  const premium = primary === 'premium';
   document.body.classList.toggle('mascot-premium-active', premium);
   document.body.classList.toggle('mascot-prismatic-active', hasActiveMascot('prismatic'));
-  document.body.classList.toggle('mascot-orange-active', G.selectedMascot === 'orange');
-  document.body.classList.toggle('mascot-twitchzinho-active', G.selectedMascot === 'twitchzinho');
-  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(G.selectedMascot, animate, G.secondaryMascot);
+  document.body.classList.toggle('mascot-orange-active', primary === 'orange');
+  document.body.classList.toggle('mascot-twitchzinho-active', primary === 'twitchzinho');
+  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(primary, animate, companion, null);
   else if (typeof window.setMascotPremium === 'function') window.setMascotPremium(premium, animate);
   const pouch = document.getElementById('twitchzinho-pouch');
   if (pouch) pouch.dataset.preview = 'false';
   updateTwitchzinhoPouch();
 }
-const MASCOT_COSTS = { orange:2500, apple:7500, strawberry:15000, premium:75000, extraSlot:200000 };
+const MASCOT_COSTS = { orange:2500, apple:7500, strawberry:15000, premium:75000 };
+let mascotCompanionChoice=null;
 const SPRING_ALBUM_NAMES = ['Brotinho de Esperança','Juju entre Margaridas','Alfredo do Orvalho','Ovelhinha Algodão','Cogumelo do Pomar','Abelhinha Bilhetinho','Tulipinha Nuvem','Moranguinho Estrelar','Borboleta Açucarada','Solária da Primavera'];
 const PRISMATIC_ALBUM_NAMES = ['Prisma de Orvalho','Prisma de Pétala','Prisma do Galinheiro','Prisma do Lago','Prisma de Cristal','Prisma Borboleta','Prisma Lunar','Prisma Aurora','Prisma Estelar','Arco-Íris Primaveril'];
 function hasCompleteSpringAlbum(cards=G.albumCards||{}) { return SPRING_ALBUM_NAMES.every(name=>Number(cards[name]||0)>0); }
@@ -6475,44 +6765,58 @@ function syncPrismaticMascotUnlock() {
 }
 async function buyMascot(id) {
   if (!G.ownedMascots) G.ownedMascots = {};
-  const alreadyOwned = G.ownedMascots[id] === true;
+  if(id==='prismatic'&&hasCompletePrismaticAlbum())G.ownedMascots.prismatic=true;
+  if(id==='rainbow')RainbowRewards.grant(G);
+  const isCompanion=id==='prismatic'||id==='rainbow';
+  const alreadyOwned=G.ownedMascots[id]===true;
+  if(isCompanion&&G.selectedMascot!=='premium'){
+    toast('🌱 O Brotinho Premium precisa ser o mascote principal para usar esse companheiro.',3500);
+    return;
+  }
   const requiredLevel={orange:1,apple:10,strawberry:15,premium:25}[id];
-  if (requiredLevel && currentLevel()<requiredLevel && !alreadyOwned) {
+  if(requiredLevel&&currentLevel()<requiredLevel&&!alreadyOwned){
     toast(`🔒 Este mascote será liberado no nível ${requiredLevel}.`,3200);
     return;
   }
-  if (id==='prismatic'&&!hasCompletePrismaticAlbum()) { toast('🌈 Complete as 10 cartas do álbum prismático para desbloquear este mascote.',3500); renderMascotShop(); return; }
-  if (id === 'twitchzinho' && !alreadyOwned) { toast('💜 Resgate o Twitchzinho no benefício Premium.'); return; }
+  if(id==='twitchzinho'&&!alreadyOwned){toast('💜 Resgate o Twitchzinho no benefício Premium.');return;}
+  if(G.selectedMascot===id){toast('🐾 Este mascote já está selecionado!');return;}
+  if(mascotSwitchUsed()){
+    toast('⏳ Você já trocou de mascote nesta estação. A próxima troca será na estação seguinte.',4200);
+    renderMascotShop();
+    return;
+  }
   const cost=MASCOT_COSTS[id]||0;
-  if (G.secondaryMascot === id) { G.secondaryMascot=null; applySelectedMascotAppearance(); renderMascotShop(); saveGardenToSE(); toast('🐾 Brotinho Prismático retirado do espaço extra.'); return; }
-  if (G.selectedMascot === id) { toast('🐾 Este mascote já está selecionado!'); return; }
-  if (!alreadyOwned) {
-    if (id==='prismatic') { toast('🌈 Este mascote é uma recompensa do álbum, não pode ser comprado.'); return; }
-    if (G.pts < cost) { toast(`✨ Faltam ${cost - G.pts} pontos para este mascote.`); return; }
-    if (!(await chargeGamePoints(cost))) return;
-    G.ownedMascots[id] = true;
+  if(!alreadyOwned){
+    if(G.pts<cost){toast(`✨ Faltam ${cost-G.pts} pontos para este mascote.`);return;}
+    if(!(await chargeGamePoints(cost)))return;
+    G.ownedMascots[id]=true;
   }
-  if ((id==='prismatic' && G.selectedMascot==='premium') || (id==='premium' && G.selectedMascot==='prismatic')) {
-    if (G.extraMascotSlotPurchased) {
-      G.selectedMascot='premium'; G.secondaryMascot='prismatic';
-    } else {
-      G.selectedMascot=id; G.secondaryMascot=null;
-    }
-  } else {
-    G.selectedMascot=id; G.secondaryMascot=null;
+  if(isCompanion){
+    G.secondaryMascot=G.secondaryMascot===id?null:id;
+  }else{
+    G.selectedMascot=id;
+    if(id==='premium'){
+      const available=['prismatic','rainbow'].filter(companion=>G.ownedMascots[companion]===true);
+      const preferred=available.includes(mascotCompanionChoice)?mascotCompanionChoice:available.includes('prismatic')?'prismatic':available[0]||null;
+      G.secondaryMascot=preferred;
+      mascotCompanionChoice=null;
+    }else G.secondaryMascot=null;
   }
-  applySelectedMascotAppearance(true); updatePts(); renderMascotShop(); renderWateringCapacity(); saveGardenToSE(); toast(G.secondaryMascot ? '✨ Brotinho Premium e Brotinho Prismático estão ativos juntos!' : id === 'premium' ? '✨ O Brotinho se transformou! Todos os benefícios Premium estão ativos.' : id==='prismatic' ? '🌈 Brotinho Prismático selecionado! A chance de Chuva Mágica aumentou.' : '🐾 Mascote selecionado! Seus benefícios já estão ativos.', 3500);
+  G.tertiaryMascot=null;
+  markMascotSwitchUsed();
+  applySelectedMascotAppearance(true);
+  updatePts();
+  renderMascotShop();
+  renderWateringCapacity();
+  saveGardenToSE();
+  toast(isCompanion
+    ? G.secondaryMascot===id?'✨ Companheiro equipado junto com o Brotinho Premium!':'🐾 Companheiro retirado. O Premium continua ativo.'
+    : id==='premium'&&G.secondaryMascot
+      ? `✨ Brotinho Premium e ${G.secondaryMascot==='prismatic'?'Brotinho Prismático':'Brotinho Arco-Íris'} equipados juntos!`
+      : id==='premium'?'✨ Brotinho Premium selecionado!':'🐾 Mascote selecionado!',3500);
 }
 window.buyMascot = buyMascot;
-async function buyExtraMascotSlot() {
-  if(G.extraMascotSlotPurchased){toast('🐾 O espaço extra já foi adquirido.');return;}
-  if(!(await chargeGamePoints(MASCOT_COSTS.extraSlot,'Espaço extra de mascote')))return;
-  G.extraMascotSlotPurchased=true;
-  if(G.selectedMascot==='premium'&&G.ownedMascots?.prismatic&&hasCompletePrismaticAlbum())G.secondaryMascot='prismatic';
-  applySelectedMascotAppearance();renderMascotShop();updatePts();await saveGardenToSE();
-  toast('🐾 Espaço extra adquirido! Agora você pode usar o Brotinho Premium junto com o Prismático.');
-}
-window.buyExtraMascotSlot=buyExtraMascotSlot;
+
 function renderPremiumBenefits() {
   const states = { watering:G.premiumWateringCan, shovel:G.premiumShovel, plants:G.premiumPlantsUnlocked, fertilizers:G.premiumFertilizersClaimed, plot:G.premiumSpecialPlotClaimed, mascot:G.ownedMascots?.twitchzinho === true };
   document.querySelectorAll('#premium-overlay .premium-claim').forEach(btn => {
@@ -6533,7 +6837,7 @@ function renderPremiumBenefits() {
   document.getElementById('tool-shovel')?.classList.toggle('premium-tool-active', G.premiumShovel);
   const cost = document.getElementById('shovel-cost'); if (cost) cost.textContent = `${effectiveShovelCost()} pts`;
   const waterTip = document.querySelector('#water-tool-tip span'); if (waterTip) waterTip.textContent = G.premiumWateringCan ? '1 água por rega · recupera 1 a cada 2 minutos' : '1 água por rega · recupera 1 a cada 5 minutos';
-  const shovelTip = document.querySelector('#shovel-tool-tip span'); if (shovelTip) shovelTip.textContent = `Retire uma planta do canteiro — ${effectiveShovelCost()} pts${G.premiumShovel ? ' · Pá Premium' : ''}`;
+  const shovelTip = document.querySelector('#shovel-tool-tip span'); if (shovelTip) shovelTip.textContent = `Remove pragas antes da colheita — ${effectiveShovelCost()} pts${G.premiumShovel ? ' · Pá Premium' : ''}`;
   const recolor = (id, active, map) => document.querySelectorAll(`#${id} svg [fill], #${id} svg [stroke]`).forEach(el => { ['fill','stroke'].forEach(attr => { const value = el.getAttribute(attr); if (!value) return; if (active && map[value]?.premium) el.setAttribute(attr, map[value].premium); else if (!active && map[value]?.normal) el.setAttribute(attr, map[value].normal); }); });
   recolor('tool-water', G.premiumWateringCan, {'#778b64':{normal:'#778b64',premium:'#80629c'},'#586e47':{normal:'#586e47',premium:'#64497e'},'#80629c':{normal:'#778b64'},'#64497e':{normal:'#586e47'}});
   recolor('tool-shovel', G.premiumShovel, {'#778b64':{normal:'#778b64',premium:'#80629c'},'#586e47':{normal:'#586e47',premium:'#64497e'},'#e5ebd9':{normal:'#e5ebd9',premium:'#eadcf5'},'#80629c':{normal:'#80629c'},'#64497e':{normal:'#64497e'},'#eadcf5':{normal:'#e5ebd9'}});
@@ -6562,7 +6866,7 @@ function claimPremium(kind) {
     renderPlots();
     renderPlotShop();
   }
-  if (kind === 'mascot') { G.ownedMascots = G.ownedMascots || {}; G.ownedMascots.twitchzinho = true; G.selectedMascot = 'twitchzinho'; G.secondaryMascot = null; applySelectedMascotAppearance(true); renderMascotShop(); }
+  if (kind === 'mascot') { G.ownedMascots = G.ownedMascots || {}; G.ownedMascots.twitchzinho = true; renderMascotShop(); }
   updatePts(); renderPremiumBenefits(); renderWateringCapacity(); refreshShovelTool(); saveGardenToSE(); toast('✦ Presente Premium resgatado! Aproveite seu mimo do jardim 💜', 3200);
 }
 function claimAllPremium() {
@@ -6731,6 +7035,14 @@ async function deliverOrder(id) {
   if (!order || (G.orderDeliveries || 0) >= 4) { toast('🌿 Você já entregou 4 pedidos nesta estação.', 2800); return; }
   const availableClean = Math.max(0, (G.harvested[order.type] || 0) - (G.pestHarvested?.[order.type] || 0));
   if (availableClean < order.qty) return;
+  const deliverySnapshot = JSON.parse(JSON.stringify({
+    harvested:G.harvested, pestHarvested:G.pestHarvested, crazyDoubleHarvested:G.crazyDoubleHarvested,
+    crazyDoublePestHarvested:G.crazyDoublePestHarvested, pts:G.pts, xp:G.xp, farmerXP:G.farmerXP,
+    pointsHistory:G.pointsHistory, lastOrder:G.lastOrder, orderDeliveries:G.orderDeliveries,
+    totalOrderDeliveries:G.totalOrderDeliveries, orders:G.orders, achievements:[...(G.achievements || [])],
+    achievStats:G.achievStats, missions:G.missions
+  }));
+  const ordersSnapshot = gardenOrders.slice();
   const pestStock = Math.min(G.harvested[order.type] || 0, G.pestHarvested?.[order.type] || 0);
   const cleanStock = (G.harvested[order.type] || 0) - pestStock;
   const pestUsed = Math.max(0, order.qty - cleanStock);
@@ -6752,7 +7064,17 @@ async function deliverOrder(id) {
   checkProfileBackgroundUnlocks();
   if (G.orderDeliveries < 4) gardenOrders.push(createOrder(gardenOrders.length));
   G.orders = gardenOrders;
-  updatePts(); renderHarvested(); renderOrders(); await saveGardenToSE(true);
+  updatePts(); renderHarvested(); renderOrders();
+  try { await saveGardenToSE(true); }
+  catch (error) {
+    Object.assign(G, deliverySnapshot);
+    G.achievements = new Set(deliverySnapshot.achievements || []);
+    gardenOrders = ordersSnapshot;
+    G.orders = gardenOrders;
+    updatePts(); renderHarvested(); renderOrders();
+    toast(`❌ Entrega não confirmada: ${error.message || 'estoque atualizado em outra tela.'}`, 4200);
+    return;
+  }
   toast(`📦 Pedido de ${order.name} entregue! +${order.reward} pts`, 2800);
 }
 async function openOrders(event) {
@@ -6761,7 +7083,13 @@ async function openOrders(event) {
     toast('🔒 Os Pedidos do jardim serão liberados no nível 5.', 3000);
     return;
   }
-  // Pedidos de estações anteriores permanecem válidos até serem entregues.
+  // Migra saves antigos que ficaram presos no contador da estação anterior.
+  // O painel é um ponto seguro para corrigir o estado sem apagar o restante do progresso.
+  if (G.ordersSeasonKey !== orderSeasonKey()) {
+    resetOrdersForSeason(false);
+    try { await saveGardenToSE(true); } catch (error) { toast('❌ Não foi possível corrigir os pedidos desta estação.', 3200); }
+  }
+  // Repara também listas incompletas sem alterar pedidos já existentes.
   if (gardenOrders.length < 3 && (G.orderDeliveries || 0) < 4) {
     while (gardenOrders.length < 3) gardenOrders.push(createOrder(gardenOrders.length));
     G.orders = gardenOrders;
@@ -6777,7 +7105,10 @@ function renderHarvested() {
   updateOrdersReadyBadge();
   const bag = document.getElementById('harvest-bag');
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
-  const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
+  const totalMarketStock = allTypes.reduce((sum, type) => sum + Math.max(0, Number(G.harvested[type]) || 0), 0);
+  const stockBadge = document.getElementById('market-stock-total');
+  if (stockBadge) stockBadge.textContent = `${totalMarketStock.toLocaleString('pt-BR')} ${totalMarketStock === 1 ? 'item' : 'itens'} para vender`;
+  const hasAny = totalMarketStock > 0;
 
   if (!hasAny) {
     bag.innerHTML = `<div class="market-empty">
@@ -6800,23 +7131,27 @@ function renderHarvested() {
     const totalCount = G.harvested[type] || 0;
     const pestCount = Math.min(totalCount, G.pestHarvested?.[type] || 0);
     const goodCount = Math.max(0, totalCount - pestCount);
+    const crazyTotal = Math.min(totalCount, Math.max(0, Number(G.crazyDoubleHarvested?.[type]) || 0));
+    const crazyPestCount = Math.min(pestCount, Math.max(0, Number(G.crazyDoublePestHarvested?.[type]) || 0));
+    const crazyGoodCount = Math.min(goodCount, Math.max(0, crazyTotal - crazyPestCount));
     const crystalCount = G.crystalHarvested?.[type] || 0;
     return [
-      { infested:false, count:goodCount, qty:SELL[type] || 0 },
-      { infested:true, count:pestCount, qty:SELL_PEST[type] || 0 },
-    ].filter(row => row.count > 0).map(({ infested, count, qty }) => {
+      { infested:false, count:goodCount, crazyCount:crazyGoodCount, qty:SELL[type] || 0 },
+      { infested:true, count:pestCount, crazyCount:crazyPestCount, qty:SELL_PEST[type] || 0 },
+    ].filter(row => row.count > 0).map(({ infested, count, crazyCount, qty }) => {
       const selected = qty > 0;
-      const saleValue = sellValueForSelection(type, infested ? 0 : qty, infested ? qty : 0);
+      const saleValue = sellValueForSelection(type, infested ? 0 : qty, infested ? qty : 0, (window._epicSaleTypes || []).includes(type));
       const sellQty = selected ? `
         <div class="market-slot-sell-qty" style="display:flex;align-items:center;gap:3px;padding:0 4px">
           ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',-1,${infested})" ${qty <= 1 ? 'disabled' : ''}>−</button>` : ''}
           <span><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${saleValue}</span>
           ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',1,${infested})" ${qty >= count ? 'disabled' : ''}>+</button>` : ''}
         </div>` : '';
-      return `<div class="market-slot ${selected ? 'selected' : ''} ${infested ? 'pest-stock' : ''}" onclick="toggleSellSlot('${type}',${infested})">
+      return `<div class="market-slot ${selected ? 'selected' : ''} ${infested ? 'pest-stock' : ''} ${crazyCount > 0 ? 'crazy-stock' : ''}" onclick="toggleSellSlot('${type}',${infested})">
         <div class="market-slot-svg">${harvestedProduceArt(type)}</div>
         <div class="market-slot-name">${getPlantable(type).name}</div>
         ${infested ? '<span class="market-pest-tag">🐛 COM PRAGAS · VENDA POR METADE</span>' : ''}
+        ${crazyCount > 0 ? `<span class="market-crazy-tag">🤪 LOJA MALUCA · ${crazyCount}x vale 2×</span>` : ''}
         ${crystalCount > 0 && !infested ? `<div class="market-crystal-tag">💎 Cristalina${crystalCount > 1 ? ` · ${crystalCount}x` : ''}</div>` : ''}
         <div class="market-slot-stock">×${count}</div>
         ${sellQty}
@@ -6864,7 +7199,7 @@ function normalizeBadgeId(value) {
     .toLowerCase();
 }
 
-const VALID_BADGE_IDS = new Set(['beginner', 'dedicated', 'master', 'subscriber']);
+const VALID_BADGE_IDS = new Set(['beginner', 'dedicated', 'master', 'subscriber', 'rainbow']);
 
 function validBadgeIds(values) {
   if (!Array.isArray(values)) return [];
@@ -6909,7 +7244,7 @@ function renderRankingPage() {
       : `<span style="font-size:20px;font-weight:800;color:var(--text2)">${pos}</span>`;
     return `<div class="ranking-item ${topClass} ${isMe ? 'me' : ''} ${bgClass}" role="button" tabindex="0" aria-label="Abrir perfil de ${farmName}" onclick="openRankingProfile(${rankingPage * pageSize + i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRankingProfile(${rankingPage * pageSize + i})}">
       <div class="ranking-pos">${medal}</div><div class="ranking-frame" data-frame="${frame}" aria-label="Nível ${userLevel}" title="Nível ${userLevel}" aria-hidden="false">${levelIcon}</div>
-      <div class="ranking-name"><div class="ranking-farm-title"><div class="ranking-farm-name">${farmName}</div></div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${selectedTitle ? `<div class="ranking-custom-title">🏅 ${selectedTitle}</div>` : ''}${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
+      <div class="ranking-name"><div class="ranking-farm-title"><div class="ranking-farm-name">${farmName}</div></div><div class="ranking-twitch-name">@${username}${isMe ? ' · você' : ''} · Nível ${userLevel}</div>${selectedTitle ? `<div class="ranking-custom-title ${selectedTitle==='Pote de Arco-Íris'?'rainbow-title':''}">🏅 ${selectedTitle}</div>` : ''}${dailyPhrase ? `<div class="ranking-daily-phrase">“${dailyPhrase}”</div>` : ''}<div class="ranking-badges">${badges}</div></div>
       <div class="ranking-pts">${rankingMode === 'level' ? `⭐ Nível ${userLevel}` : `<img class="points-token" src="points-sprout.svg" width="20" height="20" alt="" aria-hidden="true"> ${pts.toLocaleString()}`}</div>
     </div>`;
   }).join('');
@@ -7025,6 +7360,12 @@ function closeRanking() {
   document.getElementById('ranking-overlay').classList.add('hidden');
 }
 const ACHIEV_GROUPS = [
+  { id:'rainbow', name:'Além do Arco-Íris', badge:'🌈', color:'#bd8cab', achievements:[
+    {id:'rainbow_first',icon:'🌦️',name:'Primeiro Raio',desc:'Descubra uma figurinha Arco-Íris'},
+    {id:'rainbow_common',icon:'🎨',name:'Paleta de Carinho',desc:'Colecione as 3 comuns Arco-Íris'},
+    {id:'rainbow_rare',icon:'✨',name:'Raridades do Céu',desc:'Colecione as 4 raras Arco-Íris'},
+    {id:'rainbow_complete',icon:'🌈',name:'Um Céu Inteiro',desc:'Complete as 10 figurinhas Arco-Íris'}
+  ]},
   {
     id: 'beginner',
     badge: '🌱',
@@ -7089,6 +7430,12 @@ function unlockAchievement(id) {
 
 function checkAchievements() {
   initAchievements();
+  RainbowRewards.grant(G);
+  const rainbowCount=(start,end)=>Array.from({length:end-start},(_,i)=>Number(G.albumCards?.['rainbow_'+(start+i)])>0).filter(Boolean).length;
+  if(rainbowCount(0,10)>=1)unlockAchievement('rainbow_first');
+  if(rainbowCount(0,3)===3)unlockAchievement('rainbow_common');
+  if(rainbowCount(3,7)===4)unlockAchievement('rainbow_rare');
+  if(rainbowCount(0,10)===10)unlockAchievement('rainbow_complete');
   const s  = G.achievStats;
   const lv = currentLevel();
   if ((s.totalPlant || 0) >= 5)     unlockAchievement('first_plant');
@@ -7143,7 +7490,12 @@ function achievementProgress(id) {
   const claimedMissions = G.missions
     ? MISSION_DEFS.filter(mission => G.missions.claimed?.[mission.id]).length
     : 0;
+  const rainbowCount=(start,end)=>Array.from({length:end-start},(_,i)=>Number(G.albumCards?.['rainbow_'+(start+i)])>0).filter(Boolean).length;
   const definitions = {
+    rainbow_first:[rainbowCount(0,10),1,'figurinha'],
+    rainbow_common:[rainbowCount(0,3),3,'comuns'],
+    rainbow_rare:[rainbowCount(3,7),4,'raras'],
+    rainbow_complete:[rainbowCount(0,10),10,'figurinhas'],
     first_plant:   [stats.totalPlant || 0, 5, 'plantios'],
     first_harvest: [stats.totalHarvest || 0, 5, 'colheitas'],
     buy5:          [stats.totalBuy || 0, 15, 'compras'],
@@ -7434,6 +7786,7 @@ let seasonDayTimer = null;
 function currentSeason() { return SEASONS[G.seasonIdx]; }
 
 function isInSeason(type) {
+  if(type==='rainbow_seed')return true;
   const s = currentSeason();
   return s.vegetables.includes(type) || s.flowers.includes(type);
 }
@@ -7523,7 +7876,7 @@ function openRankingProfile(index) {
   overlay.id = 'ranking-profile-overlay';
   overlay.innerHTML = `<div class="mail-modal ranking-profile-modal" data-profile-background="${profileBackground}"><button class="popup-close-x" aria-label="Fechar perfil" onclick="this.closest('#ranking-profile-overlay').remove()">×</button>
     <div class="mail-modal-title">🌱 Perfil do fazendeiro</div>
-    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-label="Nível ${level}" title="Nível ${level}">${levelIcon}</div><div class="ranking-profile-main"><div class="ranking-farm-title"><strong>${farmName}</strong></div><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${selectedTitle ? `<small class="ranking-custom-title">🏅 ${selectedTitle}</small>` : ''}${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
+    <div class="ranking-profile-info"><div class="ranking-frame ranking-profile-frame" data-frame="${frame}" aria-label="Nível ${level}" title="Nível ${level}">${levelIcon}</div><div class="ranking-profile-main"><div class="ranking-farm-title"><strong>${farmName}</strong></div><div class="ranking-profile-user-row"><small>@${username}</small><small class="ranking-profile-points"><img src="points-sprout.svg" alt="" aria-hidden="true">${Number(u.points || 0).toLocaleString('pt-BR')} pts</small></div><small>Nível ${level}</small>${selectedTitle ? `<small class="ranking-custom-title ${selectedTitle==='Pote de Arco-Íris'?'rainbow-title':''}">🏅 ${selectedTitle}</small>` : ''}${profilePhrase ? `<small class="profile-daily-phrase visible">“${profilePhrase}”</small>` : ''}</div></div>
     <div class="profile-label">Estatísticas da fazenda</div><div class="ranking-profile-stats">${statsHtml}</div><div class="profile-label">Badges desbloqueados</div><div class="ranking-profile-badges">${badgeHtml}</div><button class="mail-close-btn" onclick="this.closest('#ranking-profile-overlay').remove()">Fechar</button></div>`;
   document.body.appendChild(overlay);
 }
@@ -7548,8 +7901,7 @@ function advanceSeasonDay() {
     G.seasonIdx = (G.seasonIdx + 1) % 4;
     G.seasonCycle = Math.max(0, Number(G.seasonCycle) || 0) + 1;
     syncWateringRefillSeason();
-    // Não apaga pedidos ao virar a estação: a jogadora pode entregar pedidos
-    // de estações anteriores. O reset só ocorre ao clicar em "Atualizar Pedidos".
+    // A virada da estação inicia uma nova cota e uma nova lista de pedidos.
     const s = currentSeason();
     toast(`${s.icon} Nova estação: ${s.name}! ${s.msg}`, 5000);
     // Re-render shop to lock/unlock plants by season
@@ -7558,16 +7910,13 @@ function advanceSeasonDay() {
     renderShopCart();
     // Check planted items that are now out of season
     checkOutOfSeasonPlants();
-    // A cota concluída pertence à estação anterior. Na nova estação,
-    // entregue novos pedidos imediatamente; pedidos ainda pendentes ficam válidos.
-    const ordersCompleted = (G.orderDeliveries || 0) >= 4;
-    if (ordersCompleted) {
-      resetOrdersForSeason(false);
-      renderOrders();
-      updateOrdersButton();
-    }
-    saveGardenToSE(ordersCompleted);
+    // Pedidos pendentes também pertencem à estação anterior e não bloqueiam a nova cota.
+    resetOrdersForSeason(false);
+    renderOrders();
+    updateOrdersButton();
+    saveGardenToSE(true);
   }
+  if(seasonChanged&&typeof renderMascotShop==='function')renderMascotShop();
   if(wasGardenHydrated&&!seasonChanged)saveGardenToSE().catch(error=>console.warn('Dia do jogo aguardando sincronização:',error));
   renderSeasonWidget();
   animateSeasonDay();
@@ -7799,16 +8148,6 @@ function updateFertilizerCursor() {
 
 function sellAll() {
   ensureSaleTypes();
-  // Skill: Venda Épica — escolhe um item aleatório para valer o dobro
-  const epicChance = skillEpicSaleChance();
-  let epicType = null;
-  if (epicChance > 0 && Math.random() < epicChance) {
-    const availableTypes = Object.keys(SELL).filter(t => (SELL[t] || 0) > 0 && (G.harvested[t] || 0) > 0);
-    if (availableTypes.length > 0) {
-      epicType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
-    }
-  }
-  window._epicSaleType = epicType;
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
   if (!hasAny) return;
@@ -7817,6 +8156,7 @@ function sellAll() {
     SELL_PEST[type] = pests;
     SELL[type] = Math.max(0, (G.harvested[type] || 0) - pests);
   });
+  rollEpicSaleTypes();
   renderSellAllConfirm();
 }
 
@@ -7846,7 +8186,7 @@ function applyOfflineProgress(savedAt) {
 
   // Cada planta usa seu próprio maxGrow, então plantas com mais estágios
   // continuam levando mais tempo para ficarem prontas.
-  const growTicks = Math.floor(elapsed / GROW_INTERVAL_MS);
+  const growTicks = Math.floor(elapsed / effectiveGrowInterval());
   if (growTicks <= 0) return;
   G.plots.forEach(plot => {
     if (!plot || plot.waterCount < effectivePlotMaxWater(plot) || plot.growCount >= effectivePlotMaxGrow(plot)) return;
@@ -7865,7 +8205,7 @@ function renderSellAllConfirm() {
   const selectedCount = available.reduce((sum, type) => sum + (SELL[type] || 0) + (SELL_PEST[type] || 0), 0);
   const fairBonus = localFairSaleBonus(selectedCount);
   const baseTotal = available.reduce((sum, type) => {
-    const isEpic = window._epicSaleType === type;
+    const isEpic = (window._epicSaleTypes || []).includes(type);
     return sum + sellValueForSelection(type, SELL[type] || 0, SELL_PEST[type] || 0, isEpic);
   }, 0);
   const total = Math.round(baseTotal * (1 + fairBonus));
@@ -7879,10 +8219,14 @@ function renderSellAllConfirm() {
     const item = getPlantable(type);
     const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
     const goodMax = Math.max(0, (G.harvested[type] || 0) - pestMax);
+    const crazyTotal = Math.min(G.harvested[type] || 0, Math.max(0, Number(G.crazyDoubleHarvested?.[type]) || 0));
+    const crazyPestMax = Math.min(pestMax, Math.max(0, Number(G.crazyDoublePestHarvested?.[type]) || 0));
+    const crazyGoodMax = Math.min(goodMax, Math.max(0, crazyTotal - crazyPestMax));
     return [{ infested:false, max:goodMax, qty:SELL[type] || 0 }, { infested:true, max:pestMax, qty:SELL_PEST[type] || 0 }]
       .filter(row => row.max > 0)
       .map(({ infested,max,qty }) => {
-        const label = `${item.emoji} ${item.name}${infested ? ' · 🐛 COM PRAGAS · 50% DO PREÇO' : ''}`;
+        const crazyCount = infested ? crazyPestMax : crazyGoodMax;
+        const label = `${item.emoji} ${item.name}${infested ? ' · 🐛' : ''}${crazyCount > 0 ? ` · 🤪 ${crazyCount}x · 2×` : ''}`;
         const pestClass = infested ? ' pest-stock' : '';
         return `<div class="shop-cart-row${pestClass}"><span>${label}</span><div class="shop-cart-row-controls"><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',false,${infested})" aria-label="Remover todo ${item.name} ${infested ? 'com pragas' : ''} da venda">⇤</button><button onclick="adjustSellAllQty('${type}',-1,${infested})" aria-label="Diminuir ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1,${infested})" aria-label="Aumentar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',true,${infested})" aria-label="Adicionar todo o estoque de ${item.name} à venda">⇥</button></div></div>`;
       });
@@ -7913,12 +8257,12 @@ function adjustSellAllQty(type, delta, infested = false) {
 
 function closeSellAllConfirm(clearEpicSale = true) {
   document.getElementById('sell-all-confirm-overlay')?.remove();
-  if (clearEpicSale) window._epicSaleType = null;
+  if (clearEpicSale) window._epicSaleTypes = [];
 }
 
 function confirmSellAll() {
   closeSellAllConfirm(false);
-  sellSelected();
+  sellSelected(true);
 }
 
 function toggleSellSlot(type, infested = false) {
@@ -8014,7 +8358,8 @@ document.addEventListener('contextmenu', event => {
 
 // XP is earned on harvest, with a distinct value for each crop.
 function harvestXP(type) {
-  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)];
+  if(type==='rainbow_seed')return 50;
+  const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS)].filter(id=>!getPlantable(id)?.rewardOnly);
   const index = Math.max(0, allTypes.indexOf(type));
   return 20 + index * 3;
 }
@@ -8041,14 +8386,16 @@ function seasonPrice(type) {
 }
 function seasonPriceLabel(type, qty = 1) {
   const p = getPlantable(type);
-  const price = seasonPrice(type) * qty;
+  const price = cartUnitCost(type) * qty;
   if (!p) return `<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
   const marketRate=seasonMarketRate(type),marketPrice=Math.max(1,Math.round(p.cost*marketRate));
-  const changed=marketPrice!==p.cost||isOutOfSeason(type);
+  const skillDiscount=isOutOfSeason(type)?0:skillBuyDiscount();
+  const changed=marketPrice!==p.cost||isOutOfSeason(type)||skillDiscount>0;
   const priceMarkup=changed?`<s style="opacity:.55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${p.cost*qty}</s> <strong style="color:#6f8e55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}</strong>`:`<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
   const trend=marketRate===1?'':` <span class="cozy-promo-chip" title="Preço sazonal da feira">🏪 ${marketRate>1?'+':''}${Math.round((marketRate-1)*100)}%</span>`;
   const promo=isOutOfSeason(type)?` <span class="cozy-promo-chip" title="Desconto de fora de estação">-${Math.round(seasonDiscountRate(type)*100)}%</span>`:'';
-  return priceMarkup+trend+promo;
+  const negotiator=skillDiscount>0?` <span class="cozy-promo-chip" title="Desconto da habilidade Negociador">🤝 -${Math.round(skillDiscount*100)}%</span>`:'';
+  return priceMarkup+trend+promo+negotiator;
 }
 
 // ─── SEED BAG SVG ────────────────────────────────────────
@@ -8087,6 +8434,7 @@ function seedProductIcon(type, primary, secondary) {
 }
 
 function seedBagSVG(type, locked = false) {
+  if(type==='rainbow_seed')return RainbowRewards.art('seed',.35);
   const p = getPlantable(type);
   const seasons = p && typeof SEASONS !== 'undefined'
     ? SEASONS.filter(s => s.vegetables.includes(type) || s.flowers.includes(type))
@@ -8115,9 +8463,10 @@ function seedBagSVG(type, locked = false) {
 
 function renderShop() {
   const container = document.getElementById('shop-items');
+  renderGlobalMessageShop();
 
   // season filter
-  let entries = Object.entries(PLANTS);
+  let entries = Object.entries(PLANTS).filter(([,plant])=>!plant.rewardOnly);
   if (shopSeasonFilter === 'promo') {
     entries = entries.filter(([type]) => isOutOfSeason(type));
   } else if (shopSeasonFilter !== 'all') {
@@ -8126,7 +8475,7 @@ function renderShop() {
   }
 
   // sort order
-  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => seasonPrice(a) - seasonPrice(b));
+  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => cartUnitCost(a) - cartUnitCost(b));
   if (shopSort === 'grow_asc')   entries.sort(([,a],[,b]) => a.maxGrow - b.maxGrow);
   if (shopSort === 'water_asc')  entries.sort(([,a],[,b]) => a.maxWater - b.maxWater);
   if (shopSort === 'sell_desc')  entries.sort(([a],[b]) => SELL_VALUE[b] - SELL_VALUE[a]);
@@ -8154,7 +8503,7 @@ function renderShop() {
     const subscriberLocked = p.subscriberOnly && !hasSubscriberBadge();
     const locked = subscriberLocked || (!previewAccess() && lv < p.minLevel);
     const outOfSeason = !isInSeason(type);
-    const canAfford = G.pts >= seasonPrice(type) * (SHOP_QTY[type] || 1);
+    const canAfford = G.pts >= cartUnitCost(type) * (SHOP_QTY[type] || 1);
     const sellVal = effectiveSellValue(type);
     const profit = sellVal - cultivationCost(type);
     const profitLabel = profit >= 0
@@ -8189,10 +8538,7 @@ async function buyPlant(type, el) {
   const p = getPlantable(type);
   const qty = SHOP_QTY[type] || 1;
   if (p?.eventOnly) { toast('🌙 O Lírio Lunar só pode ser encontrado durante a Lua Cheia.', 3000); return; }
-  // Skill: Negociador (-3% por nível, não se aplica a itens em promoção)
-  const basePrice = seasonPrice(type);
-  const discount = isOutOfSeason(type) ? 0 : skillBuyDiscount();
-  const total = Math.round(basePrice * (1 - discount)) * qty;
+  const total = cartUnitCost(type) * qty;
   if (p.subscriberOnly && !hasSubscriberBadge()) { toast('✦ Este cultivo é exclusivo para subscribers.'); return; }
   if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para comprar!`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
@@ -8340,17 +8686,21 @@ function buildPlotEl(plot, idx) {
     }
     if (plot.crazySeasonProtected) {
       const crazyBadge = document.createElement('div');
-      crazyBadge.title = 'Semente da Loja Maluca';
-      crazyBadge.style.cssText = 'position:absolute;left:5px;bottom:22px;z-index:4;border-radius:99px;background:#b53636;color:#fff;padding:2px 5px;font-size:10px;font-weight:900;pointer-events:none;';
-      crazyBadge.textContent = '★ MALUCO';
+      crazyBadge.className = 'plot-status-symbol';
+      crazyBadge.tabIndex = 0;
+      crazyBadge.dataset.tooltip = 'Semente especial da Loja Maluca: mantém efeitos extras até o fim das colheitas.';
+      crazyBadge.style.top = '29px';
+      crazyBadge.textContent = '🤪';
       div.appendChild(crazyBadge);
     }
     if (plot.pestInfested) {
       const pestBadge = document.createElement('div');
-      pestBadge.className = 'plot-pest-badge';
-      pestBadge.title = 'Praga permanente: todas as colheitas desta planta serão vendidas por 50% do preço.';
+      pestBadge.className = 'plot-status-symbol';
+      pestBadge.tabIndex = 0;
+      pestBadge.dataset.tooltip = 'Praga permanente: todas as colheitas desta planta serão vendidas por 50% do preço.';
       pestBadge.setAttribute('aria-label', 'Planta infestada por pragas; suas colheitas valem metade do preço');
-      pestBadge.textContent = '🐛 PRAGA';
+      pestBadge.style.top = plot.crazySeasonProtected ? '53px' : '29px';
+      pestBadge.textContent = '🐛';
       div.appendChild(pestBadge);
     }
     if (plot.goldenPlot || isSpecialPlotActive(idx)) {
@@ -8402,7 +8752,7 @@ function buildPlotEl(plot, idx) {
     const growReady = plot.growCount >= maxG;
     const harvestTotal = Number(plot.harvestsTotal) || (legacyHarvestCyclesFor(plot.type) + Math.max(0, Number(plot.crazyExtraHarvests) || 0));
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestTotal);
-    const harvestInfo = harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
+    const harvestInfo = plot.type==='rainbow_seed' ? '<div class="plot-harvest-count">🌈 Permanente · 1–100 frutos</div>' : harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
     const mutationInfo = plot.mutated ? '<div class="plot-mutation-label">🧬 mutação cristalina ativa</div>' : '';
     const specialDays = G.specialPlotExpiresAt ? Math.max(1, Math.ceil((G.specialPlotExpiresAt - Date.now()) / SEASON_DAY_MS)) : 1;
     const specialLabel = `${specialDays.toLocaleString('pt-BR')} dia${specialDays > 1 ? 's' : ''}`;
@@ -8433,15 +8783,21 @@ function buildPlotEl(plot, idx) {
   return div;
 }
 
-async function onPlotClick(idx) {
+async function onPlotClick(idx, rainbowAutoHarvest = false) {
   if (idx >= G.unlockedPlots && !(idx === 5 && premiumSpecialPlotAccess())) return;
   const plot = G.plots[idx];
+  if(rainbowAutoHarvest&&(!hasActiveMascot('rainbow')||!G.ownedMascots?.rainbow||!plot||!isReady(plot)))return;
   const tool = G.selectedTool;
+  if (!rainbowAutoHarvest && tool === 'water' && G.taxPending) {
+    toast(`🧾 Regador bloqueado: pague ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts de imposto.`, 3200);
+    renderWateringCapacity();
+    return;
+  }
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);
   if (plot && plot.outOfSeason && isInSeason(plot.type)) plot.outOfSeason = false;
   const outOfSeason = plot ? (!plot.crazySeasonProtected && (plot.outOfSeason || !isInSeason(plot.type))) : false;
 
-  if (G.specialPlotPending) {
+  if (G.specialPlotPending && !rainbowAutoHarvest) {
     if (plot) { toast('Escolha um canteiro vazio para o upgrade.'); return; }
     G.specialPlot = idx;
     G.specialPlotPending = false;
@@ -8453,23 +8809,23 @@ async function onPlotClick(idx) {
   }
 
   // Se adubo selecionado mas canteiro TEM planta → avisar
-  if (G.selectedFertilizer && plot) {
+  if (G.selectedFertilizer && plot && !rainbowAutoHarvest) {
     toast(`⚠️ O ${FERTILIZERS[G.selectedFertilizer].name} precisa ser aplicado num canteiro VAZIO antes de plantar!`, 3000);
     return;
   }
 
   // AUTO-COLHEITA: se pronto, colhe direto ao clicar (sem custo de pts)
-  if (plot && isReady(plot) && G.selectedTool !== 'shovel') {
+  if (plot && isReady(plot) && (rainbowAutoHarvest || G.selectedTool !== 'shovel')) {
     const type = plot.type;
     const plant = getPlantable(type);
     const harvestsTotal = Number(plot.harvestsTotal) || legacyHarvestCyclesFor(type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);
     const mutationProtectsSeason = outOfSeason && plot.mutated === true;
     const lostToSeason = outOfSeason && !mutationProtectsSeason;
-    const regrows = !lostToSeason && harvestsRemaining > 1;
+    const regrows = type==='rainbow_seed' || (!lostToSeason && harvestsRemaining > 1);
     const hasGolden = plot.goldenSoil;
     if (regrows) {
-      plot.harvestsRemaining = harvestsRemaining - 1;
+      plot.harvestsRemaining = type==='rainbow_seed' ? 1 : harvestsRemaining - 1;
       plot.waterCount = 0;
       plot.growCount = 0;
     } else {
@@ -8506,6 +8862,7 @@ async function onPlotClick(idx) {
           ? `💎 Planta cristalina protegida da estação! +1 ${getPlantable(type).name}`
           : `🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
       }
+      if(type==='rainbow_seed')finalQty=RainbowRewards.harvestQuantity();
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
       if (plot.pestInfested) G.pestHarvested[type] = (G.pestHarvested[type] || 0) + finalQty;
       if (plot.crazyDoubleSale) G.crazyDoubleHarvested[type] = (G.crazyDoubleHarvested[type] || 0) + finalQty;
@@ -8517,7 +8874,7 @@ async function onPlotClick(idx) {
 
       // Skill: Recuperar Semente (Sementes Fortes)
       const seedRecoverChance = skillSeedRecoverChance();
-      if (seedRecoverChance > 0 && Math.random() < seedRecoverChance) {
+      if (type!=='rainbow_seed' && seedRecoverChance > 0 && Math.random() < seedRecoverChance) {
         G.inventory[type] = (G.inventory[type] || 0) + 1;
         spawnSkillEffect(idx, '🌾', '+1 Semente recuperada', '#a87828');
         setTimeout(() => toast(`🌾 Semente de ${getPlantable(type).name} recuperada!`), 400);
@@ -8550,7 +8907,8 @@ async function onPlotClick(idx) {
       updatePts();
       missionProgress('harvest2');
       initAchievements();
-      G.achievStats.totalHarvest = (G.achievStats.totalHarvest||0) + qty;
+      G.achievStats.totalHarvest = (G.achievStats.totalHarvest||0) + (type==='rainbow_seed'?finalQty:qty);
+      grantCompostHarvestReward();
       checkHarvestTitles();
       if (FLOWERS[type]) G.achievStats.totalFlowerSell = (G.achievStats.totalFlowerSell||0); // tracked at sell
       checkAchievements();
@@ -8562,7 +8920,7 @@ async function onPlotClick(idx) {
       renderFertilizerInventory();
       const toastMsg = gotDouble ? `🧺🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} COLHEITA DUPLA!` :
         `🧺 ${getPlantable(type).emoji} ${getPlantable(type).name} colhida!${plot.goldenPlot ? ' ✨ Canteiro Especial: planta dourada vale 3x!' : hasGolden ? ' ✨ Terra Dourada: +1 unidade extra!' : ''}`;
-      toast(regrows ? `${toastMsg} 🌱 Ela continuará plantada — regue novamente! (${plot.harvestsRemaining} colheita${plot.harvestsRemaining > 1 ? 's' : ''} restante${plot.harvestsRemaining > 1 ? 's' : ''})` : toastMsg);
+      toast(type==='rainbow_seed' ? `🌈 +${finalQty} frutos no Mercado! A planta continua no canteiro para a próxima colheita.` : regrows ? `${toastMsg} 🌱 Ela continuará plantada — regue novamente! (${plot.harvestsRemaining} colheita${plot.harvestsRemaining > 1 ? 's' : ''} restante${plot.harvestsRemaining > 1 ? 's' : ''})` : toastMsg);
       setTimeout(() => { renderPlots(); renderHarvested(); }, 300);
 
       // Save em background — não bloqueia a interface
@@ -8747,6 +9105,7 @@ function cozyPlantPalette(svg) {
 }
 
 function plantSVG(type, progress) {
+  if(type==='rainbow_seed')return RainbowRewards.art('seed',Math.max(0,Math.min(1,progress)));
   const plant = getPlantable(type);
   const t = clamp(progress, 0, 1);
   if (t >= 1) return cozyPlantPalette(bloomSVG(type, plant.leafColor, plant.color));
@@ -9136,18 +9495,22 @@ const HARVEST_TITLES = [
   { icon:'💎', name:'Lenda Agronômica', target:7500 },
   { icon:'🌸', name:'Colecionador da Primavera', target:0, albumKey:'spring' },
   { icon:'🌈', name:'Guardião dos Prismas', target:0, albumKey:'prismatic' },
+  { icon:'🌈', name:'Pote de Arco-Íris', target:0, albumKey:'rainbow_title' },
 ];
 function titleForName(name) { return HARVEST_TITLES.find(t => t.name === name) || null; }
 function harvestTitleUnlocked(title) { return Boolean(title && (title.albumKey ? G.albumRewardsClaimed?.[title.albumKey] === true : Number(G.achievStats?.totalHarvest || 0) >= title.target)); }
 const PROFILE_BACKGROUNDS = [
+  ['enchanted_spring','🌸 Primavera encantada'],
   ['spring','🌱 Jardim de primavera'], ['sunny','🌻 Campo ensolarado'], ['rain','🌧️ Dia chuvoso'], ['night','🌙 Noite estrelada'],
   ['autumn','🍂 Outono dourado'], ['winter','❄️ Inverno mágico'], ['rainbow','🌈 Arco-íris'], ['forest','🔮 Floresta encantada'],
 ];
 const PROFILE_BACKGROUND_RULES = {
+  enchanted_spring:'Complete o primeiro álbum Primavera Encantada.',
   spring:'Já vem desbloqueado.', sunny:'Já vem desbloqueado.', rain:'Já vem desbloqueado.', night:'Participe 5 vezes de qualquer evento.',
   autumn:'Tenha 5 dias consecutivos de presença.', winter:'Entregue 35 pedidos no total.', rainbow:'Alcance 3.000.000 de pontos.', forest:'Apoie a desenvolvedora com qualquer valor.',
 };
 function profileBackgroundUnlocked(id) {
+  if (id === 'enchanted_spring') return G.albumFrameUnlocks?.spring === true || hasCompleteSpringAlbum();
   if (['spring','sunny','rain'].includes(id)) return true;
   if (id === 'night') return Number(G.eventParticipations || 0) >= 5;
   if (id === 'autumn') return Number(G.presenceStreak || 0) >= 5;
@@ -9240,13 +9603,14 @@ async function selectHarvestTitle(name) {
   }
 }
 function renderProfileTitles() {
+  document.getElementById('profile-selected-title')?.classList.toggle('rainbow-title',G.selectedHarvestTitle==='Pote de Arco-Íris');
   const container = document.getElementById('profile-titles');
   if (!container) return;
   const harvested = Number(G.achievStats?.totalHarvest || 0);
   container.innerHTML = HARVEST_TITLES.map(title => {
     const unlocked = harvestTitleUnlocked(title);
     const progress = title.albumKey ? (unlocked ? 100 : 0) : Math.min(100, Math.round(harvested / title.target * 100));
-    const requirement = title.albumKey ? (unlocked ? 'Desbloqueado ao completar o álbum' : `Complete o álbum ${title.albumKey === 'spring' ? 'Primavera Encantada' : 'Prismático'}`) : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`;
+    const requirement = title.albumKey==='rainbow_title' ? 'Descubra sua primeira figurinha Arco-Íris' : title.albumKey ? (unlocked ? 'Desbloqueado ao completar o álbum' : `Complete o álbum ${title.albumKey === 'spring' ? 'Primavera Encantada' : 'Prismático'}`) : `Colha ${title.target.toLocaleString('pt-BR')} itens (${Math.min(harvested, title.target).toLocaleString('pt-BR')}/${title.target.toLocaleString('pt-BR')})`;
     return `<button type="button" class="profile-title-card ${unlocked ? 'unlocked' : 'locked'} ${G.selectedHarvestTitle === title.name ? 'selected' : ''}" ${unlocked ? `onclick="selectHarvestTitle('${title.name}')"` : 'disabled'}><div class="profile-title-icon">${title.icon}</div><div><div class="profile-title-name">${title.name} ${G.selectedHarvestTitle === title.name ? '⭐' : (unlocked ? '✓' : '🔒')}</div><div class="profile-title-requirement">${G.selectedHarvestTitle === title.name ? 'Título equipado' : (unlocked ? 'Clique para escolher' : requirement)}</div><div class="profile-title-progress"><span style="width:${progress}%"></span></div></div></button>`;
   }).join('');
 }
@@ -9273,7 +9637,7 @@ function openProfile() {
   initAchievements();
   document.querySelectorAll('.album-frame-option').forEach(option => {
     const frame = option.querySelector('[data-frame]')?.dataset.frame;
-    const unlocked = frame === 'spring_album' ? G.albumFrameUnlocks?.spring === true : frame === 'prism_album' ? G.albumFrameUnlocks?.prismatic === true : false;
+    const unlocked = frame === 'spring_album' ? G.albumFrameUnlocks?.spring === true : frame === 'prism_album' ? (G.albumFrameUnlocks?.prismatic === true || G.albumFrameUnlocks?.rainbow === true) : false;
     option.style.display = unlocked ? '' : 'none';
   });
   const stats = G.achievStats;
@@ -9349,7 +9713,7 @@ function selectProfileFrame(frame) {
   const subscriber = Boolean(seUser?.isSubscriber || seUser?.subscriber || seUser?.subscription || sessionStorage.getItem('twitch_is_subscriber') === 'true');
   if (!['purple', 'pink', 'blue', 'red', 'yellow', 'vip', 'spring_album', 'prism_album'].includes(frame)) return;
   if (frame === 'spring_album' && G.albumFrameUnlocks?.spring !== true) { toast('🔒 Complete o álbum Primavera Encantada para liberar esta moldura.', 2600); return; }
-  if (frame === 'prism_album' && G.albumFrameUnlocks?.prismatic !== true) { toast('🔒 Complete o álbum Prismático para liberar esta moldura.', 2600); return; }
+  if (frame === 'prism_album' && G.albumFrameUnlocks?.prismatic !== true && G.albumFrameUnlocks?.rainbow !== true) { toast('🔒 Colecione as 3 comuns Arco-Íris ou complete o álbum Prismático para liberar esta moldura.', 2600); return; }
   if (frame === 'yellow' && !G.supporterFrameUnlocked) {
     toast('🔒 A moldura amarela é desbloqueada ao comprar um kit de bônus.', 2600);
     return;
@@ -9540,7 +9904,7 @@ function applySpecialLevelReward(reward) {
   if (reward.waterCapacity) { G.bonusWateringCapacity = Number(G.bonusWateringCapacity || 0) + reward.waterCapacity; received.push('+2 de capacidade no Regador'); }
   if (reward.crystalFruits) { G.crystalFruits = Number(G.crystalFruits || 0) + reward.crystalFruits; received.push(`${reward.crystalFruits}x Frutas Cristalinas`); }
   if (reward.allSeeds) {
-    [...Object.keys(PLANTS), ...Object.keys(FLOWERS)].forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + 1; });
+    [...Object.keys(PLANTS), ...Object.keys(FLOWERS)].filter(id=>!getPlantable(id)?.rewardOnly).forEach(id => { G.inventory[id] = (G.inventory[id] || 0) + 1; });
     received.push('1x semente de cada cultivo');
   }
   if (reward.packs) {
@@ -9559,7 +9923,7 @@ function applySpecialLevelReward(reward) {
       const key = `prismatic_${Number(reward.prismaticCard)}`;
       G.albumCards[key] = Number(G.albumCards[key] || 0) + 1;
     }
-    received.push(album === 'spring' ? 'Título Colecionador da Primavera e moldura floral desbloqueados' : 'Título Guardião dos Prismas e moldura Arco-Íris desbloqueados');
+    received.push(album === 'spring' ? 'Título Colecionador da Primavera, moldura floral e fundo Primavera encantada desbloqueados' : 'Título Guardião dos Prismas e moldura Arco-Íris desbloqueados');
   }
   renderLevelWidget(); renderInventory(); renderFertilizerInventory(); renderWateringCapacity(); updatePts();
   return received;
@@ -9896,6 +10260,7 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
       document.getElementById('garden-name').textContent = `Jardim de ${displayName}`;
     }
     gardenHydrated = true;
+    RainbowRewards.grant(G);
     if (hasCompletePrismaticAlbum() && G.ownedMascots?.prismatic) saveGardenToSE();
     initGardenEvents();
     document.getElementById('twitch-btn').innerHTML =
@@ -10002,6 +10367,8 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     wateringRefillsUsed: Number(G.wateringRefillsUsed) || 0,
     wateringRefillsBonus: Number(G.wateringRefillsBonus) || 0,
     wateringRefillsSeasonCycle: Number(G.wateringRefillsSeasonCycle) || 0,
+    taxDue: Math.max(0, Math.floor(Number(G.taxDue) || 0)),
+    taxPending: G.taxPending === true,
     albumPacks:       Number(G.albumPacks || 0),
     packInventory:   G.packInventory || { normal:0, prismatic:0 },
     albumCards:       G.albumCards || {},
@@ -10020,6 +10387,10 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     recentGoldenEggFinds: Array.isArray(G.recentGoldenEggFinds) ? G.recentGoldenEggFinds.slice(0, 20) : [],
     eventNextAt:      Number(G.eventNextAt || 0),
     eventLastType:    G.eventLastType || '',
+    activeGardenEvent: gardenEvent ? {
+      ...gardenEvent,
+      touched: [...(gardenEvent.touched || [])],
+    } : null,
     discoveredMutations: G.discoveredMutations || [],
     crazyShopOffers: Array.isArray(G.crazyShopOffers) ? G.crazyShopOffers : [],
     crazyShopChosen: Number(G.crazyShopChosen || 0),
@@ -10055,19 +10426,25 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     isPremium: G.isPremium === true,
     selectedMascot: G.selectedMascot || null,
     secondaryMascot: G.secondaryMascot || null,
+    tertiaryMascot: null,
+    mascotSwitchSeasonKey: G.mascotSwitchSeasonKey || currentMascotSeasonKey(),
+    mascotSwitchUsed: mascotSwitchUsed(),
     extraMascotSlotPurchased: G.extraMascotSlotPurchased === true,
     ownedMascots: G.ownedMascots || {},
+    rainbowMascotPulseAt:Number(G.rainbowMascotPulseAt||0),
     twitchzinhoNextRewardAt: Number(G.twitchzinhoNextRewardAt || 0),
     twitchzinhoPendingCoins: Number(G.twitchzinhoPendingCoins || 0),
     profileFrame:      G.profileFrame || 'red',
     supporterFrameUnlocked: G.supporterFrameUnlocked === true,
     dailyPhrase:       G.dailyPhrase || '',
     lastSale:          G.lastSale || null,
+    lastGlobalMessage: G.lastGlobalMessage || null,
     isSubscriber:      hasSubscriberBadge(),
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
     skillPoints: G.skillPoints || 0,
     skillNodes:  G.skillNodes  || {},
     skillPointsClaimed: G.skillPointsClaimed || 0,
+    skillHarvestCount: G.skillHarvestCount || 0,
     pointsHistory:     (G.pointsHistory || []).slice(0, 100),
     upgrades_refunded: G.upgrades_refunded || false,
     stats: {
@@ -10304,6 +10681,8 @@ async function loadGardenFromSE(username) {
     G.wateringRefillsSeasonCycle = Number.isFinite(Number(save.wateringRefillsSeasonCycle))
       ? Number(save.wateringRefillsSeasonCycle)
       : G.seasonCycle;
+    G.taxDue = Math.max(0, Math.floor(Number(save.taxDue) || 0));
+    G.taxPending = save.taxPending === true && G.taxDue > 0;
     syncWateringRefillSeason();
     G.albumPacks      = Number(save.albumPacks || 0);
     G.packInventory   = { normal:Number(save.packInventory?.normal || 0), prismatic:Number(save.packInventory?.prismatic || 0) };
@@ -10331,7 +10710,14 @@ async function loadGardenFromSE(username) {
     G.recentGoldenEggFinds = Array.isArray(save.recentGoldenEggFinds) ? save.recentGoldenEggFinds.slice(0, 20) : [];
     G.eventNextAt      = Number(save.eventNextAt || 0);
     G.eventLastType    = save.eventLastType || '';
-    if (G.crazyShopEndsAt > Date.now() && G.crazyShopOffers.length) {
+    const savedEvent = save.activeGardenEvent;
+    if (savedEvent && GARDEN_EVENTS[savedEvent.type] && Number(savedEvent.endsAt) > 0) {
+      gardenEvent = {
+        ...savedEvent,
+        touched: new Set(Array.isArray(savedEvent.touched) ? savedEvent.touched : []),
+        pests: Array.isArray(savedEvent.pests) ? savedEvent.pests : [],
+      };
+    } else if (G.crazyShopEndsAt > Date.now() && G.crazyShopOffers.length) {
       gardenEvent = { type:'crazyshop', phase:'active', endsAt:G.crazyShopEndsAt, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
     } else G.crazyShopEndsAt = 0;
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
@@ -10376,10 +10762,21 @@ async function loadGardenFromSE(username) {
     G.isPremium = save.isPremium === true || G.premiumWateringCan || G.premiumShovel || G.premiumPlantsUnlocked || G.premiumFertilizersClaimed || G.premiumSpecialPlotClaimed;
     restorePremiumClaimsCache(username);
     G.selectedMascot = save.selectedMascot || null;
-    G.secondaryMascot = save.secondaryMascot === 'prismatic' ? 'prismatic' : null;
+    G.secondaryMascot = ['prismatic','rainbow'].includes(save.secondaryMascot) ? save.secondaryMascot : null;
+    if(!G.secondaryMascot&&['prismatic','rainbow'].includes(save.tertiaryMascot))G.secondaryMascot=save.tertiaryMascot;
+    G.tertiaryMascot = null;
     G.extraMascotSlotPurchased = save.extraMascotSlotPurchased === true;
     G.ownedMascots = save.ownedMascots || (G.selectedMascot ? {[G.selectedMascot]: true} : {});
-    if (!G.extraMascotSlotPurchased || G.selectedMascot !== 'premium' || G.ownedMascots.prismatic !== true) G.secondaryMascot = null;
+    G.rainbowMascotPulseAt=Number(save.rainbowMascotPulseAt)||Date.now();
+    const mascotSeasonKey=currentMascotSeasonKey();
+    G.mascotSwitchSeasonKey=String(save.mascotSwitchSeasonKey||mascotSeasonKey);
+    G.mascotSwitchUsed=G.mascotSwitchSeasonKey===mascotSeasonKey&&save.mascotSwitchUsed===true;
+    if(['prismatic','rainbow'].includes(G.selectedMascot)){
+      const oldCompanion=G.selectedMascot;
+      G.selectedMascot=G.ownedMascots.premium===true?'premium':null;
+      if(G.selectedMascot==='premium'&&G.ownedMascots[oldCompanion]===true&&!G.secondaryMascot)G.secondaryMascot=oldCompanion;
+    }
+    if(G.selectedMascot!=='premium'||!['prismatic','rainbow'].includes(G.secondaryMascot)||G.ownedMascots[G.secondaryMascot]!==true)G.secondaryMascot=null;
     syncPrismaticMascotUnlock();
     G.twitchzinhoNextRewardAt = Number(save.twitchzinhoNextRewardAt || 0);
     G.twitchzinhoPendingCoins = Number(save.twitchzinhoPendingCoins || 0);
@@ -10391,6 +10788,7 @@ async function loadGardenFromSE(username) {
     G.supporterFrameUnlocked = save.supporterFrameUnlocked === true;
     G.dailyPhrase = save.dailyPhrase || '';
     G.lastSale = save.lastSale || null;
+    G.lastGlobalMessage = save.lastGlobalMessage || null;
     G.isSubscriber = save.isSubscriber === true;
     if (seUser && !seUser.subscriptionChecked && G.isSubscriber) {
       seUser.isSubscriber = true;
@@ -10400,6 +10798,7 @@ async function loadGardenFromSE(username) {
     G.skillPoints = save.skillPoints ?? 0;
     G.skillNodes  = save.skillNodes  || {};
     G.skillPointsClaimed = save.skillPointsClaimed ?? 0;
+    G.skillHarvestCount = Math.max(0, Math.floor(Number(save.skillHarvestCount ?? save.achievStats?.totalHarvest ?? save.stats?.harvested) || 0));
     G.pointsHistory = Array.isArray(save.pointsHistory) ? save.pointsHistory.slice(0, 100) : [];
     // Retroativo: dar pontos dos níveis ainda não concedidos
     grantRetroactiveSkillPoints();
@@ -10829,6 +11228,9 @@ async function chargeGamePoints(amount, reason = 'Compra no jardim') {
 }
 let latestSalesItems = [];
 let latestSalesIndex = 0;
+let activeGlobalFeedMessage = null;
+let activeGlobalFeedMessageUntil = 0;
+let lastGlobalFeedMessageKey = '';
 window.recordCardFind = function(card) {
   const rarity = String(card?.rarity || '').trim();
   const prismatic = card?.prismatic === true;
@@ -10843,10 +11245,20 @@ function escapeLatestFeedText(value) {
 }
 function renderLatestSale() {
   const feed = document.getElementById('latest-sales-feed');
+  if (feed && activeGlobalFeedMessage && Date.now() < activeGlobalFeedMessageUntil) {
+    const message = activeGlobalFeedMessage;
+    const who = String(message.farmName || `Jardim de @${message.username || ''}`).trim();
+    feed.classList.add('global-message-active');
+    feed.innerHTML = `<span class="latest-sales-content sales-slide-in">📣 <strong>${escapeLatestFeedText(who)}</strong>: “${escapeLatestFeedText(message.text)}”</span>`;
+    return;
+  }
+  if (feed) feed.classList.remove('global-message-active');
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
   if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma novidade recente</span>'; return; }
   const who = String(sale.farmName || `Jardim de @${sale.username || ''}`).trim();
-  feed.innerHTML = sale.activityType === 'card'
+  feed.innerHTML = sale.activityType === 'global-message'
+    ? `<span class="latest-sales-content sales-slide-in">📣 <strong>${escapeLatestFeedText(who)}</strong>: “${escapeLatestFeedText(sale.text)}”</span>`
+    : sale.activityType === 'card'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${escapeLatestFeedText(who)}</strong> conseguiu a carta <b class="latest-sales-card-name ${sale.card.prismatic ? 'prismatic' : String(sale.card.rarity).toLocaleLowerCase('pt-BR') === 'lendária' ? 'legendary' : 'rare'}">${escapeLatestFeedText(sale.card.name)}</b></span>`
     : sale.activityType === 'event'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> participou do evento <b>${sale.event || 'do jardim'}</b></span>`
@@ -10874,6 +11286,15 @@ async function updateLatestSales() {
     const res = await fetch('/latest-sales', { cache:'no-store' });
     const data = await res.json();
     latestSalesItems = Array.isArray(data.sales) ? data.sales : [];
+    const newestGlobalMessage = latestSalesItems.filter(item => item?.activityType === 'global-message' && Number(item.at) + 13000 > Date.now()).sort((a,b) => Number(b.at) - Number(a.at))[0];
+    if (newestGlobalMessage) {
+      const messageKey = `${newestGlobalMessage.username || ''}:${newestGlobalMessage.at}`;
+      if (messageKey !== lastGlobalFeedMessageKey) {
+        lastGlobalFeedMessageKey = messageKey;
+        activeGlobalFeedMessage = newestGlobalMessage;
+        activeGlobalFeedMessageUntil = Number(newestGlobalMessage.at) + 13000;
+      }
+    }
     latestSalesIndex = latestSalesItems.length ? latestSalesIndex % latestSalesItems.length : 0;
     renderLatestSale();
   } catch(e) { /* mantém o estado inicial */ }
@@ -10883,7 +11304,8 @@ async function updateLatestSales() {
 checkLiveStatus();
 setInterval(() => { if (!document.hidden) checkLiveStatus(); }, 120000);
 updateLatestSales();
-setInterval(() => { if (!document.hidden) updateLatestSales(); }, 120000);
+setInterval(() => { if (!document.hidden) updateLatestSales(); }, 10000);
+setInterval(() => { if (!document.hidden) renderGlobalMessageShop(); }, 1000);
 setInterval(() => {
   if (!document.hidden && latestSalesItems.length > 1) {
     latestSalesIndex = (latestSalesIndex + 1) % latestSalesItems.length;
@@ -10924,6 +11346,7 @@ if (isLocalPreview) {
   G.premiumSpecialPlotClaimed = false;
   G.selectedMascot = null;
   G.secondaryMascot = null;
+  G.tertiaryMascot = null;
   G.extraMascotSlotPurchased = false;
   G.bonusRefillDiscount = false;
   G.bonusWateringCapacity = 0;
@@ -11154,6 +11577,7 @@ function effectiveAnimalSkills() {
   return { ...(G.skillNodes || {}), __animalBranchComplete:skillBranchBonusActive('animais') };
 }
 function refreshSkillBranchBonusEffects() {
+  if (typeof startGrowthClock === 'function') startGrowthClock();
   if (gardenEvent?.phase === 'active') {
     const shouldApply = skillBranchBonusActive('colheita');
     const wasApplied = gardenEvent.skillHarvestBonusApplied === true;
@@ -11208,9 +11632,28 @@ function skillDoubleHarvestChance() {
   const prec = (G.skillNodes['colheita_precisa'] || 0) * 3;
   return (mao + prec) / 100;
 }
+function grantCompostHarvestReward() {
+  const previous = Math.max(0, Math.floor(Number(G.skillHarvestCount) || 0));
+  const current = previous + 1;
+  G.skillHarvestCount = current;
+  const milestones = Math.floor(current / 20) - Math.floor(previous / 20);
+  const level = Math.min(3, Math.max(0, Math.floor(Number(G.skillNodes?.compostagem) || 0)));
+  if (!milestones || !level) return;
+  const fertilizers = Object.keys(FERTILIZERS).filter(id => !FERTILIZERS[id].premium);
+  if (!fertilizers.length) return;
+  const found = {};
+  for (let i = 0; i < milestones * level; i++) {
+    const id = fertilizers[Math.floor(Math.random() * fertilizers.length)];
+    G.fertilizerInventory[id] = (Number(G.fertilizerInventory[id]) || 0) + 1;
+    found[id] = (found[id] || 0) + 1;
+  }
+  const summary = Object.entries(found).map(([id, qty]) => `${FERTILIZERS[id].emoji} ${FERTILIZERS[id].name}${qty > 1 ? ` ×${qty}` : ''}`).join(', ');
+  const quantity = Object.values(found).reduce((sum, qty) => sum + qty, 0);
+  toast(`🪣 Compostagem: ${summary} encontrado${quantity > 1 ? 's' : ''}!`, 4200);
+}
 // Retorna redução de tempo de crescimento (Solo Vivo)
 function skillGrowReduction() {
-  return (G.skillNodes['solo_vivo'] || 0) * 0.03;
+  return Math.min(4, Math.max(0, Number(G.skillNodes?.solo_vivo) || 0)) * 0.03;
 }
 // Retorna redução de água necessária (Irrigação)
 function skillWaterReduction() {
@@ -11436,6 +11879,9 @@ async function upgradeSkillNode(nodeId, branchId) {
   updatePts();
   await saveGardenToSE();
   renderSkillTree();
+  renderShop();
+  renderFlowerShop();
+  renderShopCart();
 
   toast(maxed
     ? `${node.emoji} ${node.name} chegou ao máximo! ✨`
@@ -11444,8 +11890,9 @@ async function upgradeSkillNode(nodeId, branchId) {
 }
 
 function updateGrowthCountdowns() {
-  const seconds = Math.ceil((GROW_INTERVAL_MS - (Date.now() % GROW_INTERVAL_MS)) / 1000);
-  const cycleProgress = (Date.now() % GROW_INTERVAL_MS) / GROW_INTERVAL_MS;
+  const interval = effectiveGrowInterval();
+  const seconds = Math.ceil((interval - (Date.now() % interval)) / 1000);
+  const cycleProgress = (Date.now() % interval) / interval;
   document.querySelectorAll('[data-growth-countdown]').forEach(el => {
     const idx = Number(el.dataset.growthCountdown);
     const plot = G.plots[idx];
@@ -11507,12 +11954,13 @@ function growTick() {
 
 function startGrowthClock() {
   clearTimeout(G.growTimer);
-  const delay = GROW_INTERVAL_MS - (Date.now() % GROW_INTERVAL_MS);
+  const interval = effectiveGrowInterval();
+  const delay = interval - (Date.now() % interval);
   G.growTimer = setTimeout(() => {
     if (!document.hidden) growTick();
     G.growTimer = setInterval(() => {
       if (!document.hidden) growTick();
-    }, GROW_INTERVAL_MS);
+    }, effectiveGrowInterval());
   }, delay);
 }
 startGrowthClock();
@@ -11732,7 +12180,7 @@ const originalPackBuy=buyCardPack;buyCardPack=function(){if(Number(G.pts||0)<1){
 </script>
 <style>.pack-card-front{gap:4px}.pack-card-artwork{display:block;width:100%;border-radius:10px;overflow:hidden;background:#e1e7cb}.pack-card-artwork svg{display:block;width:100%;height:auto}.pack-card-front b{font:normal 16px Georgia,serif;text-align:center}.pack-card-front small{font:800 9px Nunito;color:#778b64}</style>
 <script>
-window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='garden-session-revoked'){closeFarmAlbum();handleRevokedSession();return}if(event.data?.type==='card-found'){if(recordCardFind(event.data.card)){syncPrismaticMascotUnlock();saveGardenToSE()}return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;syncPrismaticMascotUnlock();ensureAlbumCompletionRewards();saveGardenToSE()}});
+window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow)return;if(event.data?.type==='garden-session-revoked'){closeFarmAlbum();handleRevokedSession();return}if(event.data?.type==='card-found'){if(recordCardFind(event.data.card)){syncPrismaticMascotUnlock();saveGardenToSE()}return}if(event.data?.type==='album-state'&&event.data.cards&&typeof event.data.cards==='object'){G.albumCards=event.data.cards;checkAchievements();syncPrismaticMascotUnlock();ensureAlbumCompletionRewards();saveGardenToSE()}});
 const openAlbumWithUserCards=openFarmAlbum;openFarmAlbum=function(e,url){window.__farmAlbumCards={...(G.albumCards||{})};return openAlbumWithUserCards(e,url)};
 window.addEventListener('message',event=>{if(event.source!==document.getElementById('farm-album-frame')?.contentWindow||event.data?.type!=='album-theme-ready')return;event.source.postMessage({type:'album-theme',dark:document.body.classList.contains('dark-mode')},'*')});
 new MutationObserver(()=>{const frame=document.getElementById('farm-album-frame');if(!frame?.contentWindow)return;frame.contentWindow.postMessage({type:'album-theme',dark:document.body.classList.contains('dark-mode')},'*')}).observe(document.body,{attributes:true,attributeFilter:['class']});
@@ -11758,5 +12206,8 @@ buyCardPack=function(){if(Number(G.pts||0)<1){toast('Você precisa de 1 ponto pa
 <link rel="stylesheet" href="card-packs.css?v=10-card-packs">
 <link rel="stylesheet" href="album-trade-badge.css">
 <script src="album-artwork.js"></script>
+<script src="album-rainbow-art.js"></script>
+<link rel="stylesheet" href="album-rainbow.css">
 <script src="card-packs.js?v=10-card-packs"></script>
 <script src="album-trade-badge.js"></script>
+<script src="rainbow-rewards-game.js"></script>

@@ -3716,7 +3716,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         </div>
         <div class="help-section">
           <div class="help-section-title">🐾 Animais</div>
-          <div class="help-tip"><div class="help-tip-icon">🌾</div><div>Na aba <strong>Animais</strong>, ao lado de Canteiros, cada bichinho tem seu cercadinho. Compre o animal e ração em <strong>Loja → Animais</strong>. Cada refeição produz 1 item, mesmo enquanto você está fora. Recolha e venda no Mercado; depois alimente novamente.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🌾</div><div>Na aba <strong>Animais</strong>, ao lado de Canteiros, cada bichinho tem seu cercadinho. Compre o animal e ração em <strong>Loja → Animais</strong>. Cada ciclo produz 5 itens, mesmo enquanto você está fora. Recolha e venda no Mercado; depois alimente novamente.</div></div>
           <div class="help-tip"><div class="help-tip-icon">🧺</div><div>Galinha: ovo · Vaca: leite · Porco: bacon mágico · Ovelha: lã · Pato: ovo de pato. A loja mostra os níveis, preços, tempos e a ração necessária.</div></div>
           <div class="help-section-title">🪵 Canteiros</div>
           <div class="help-tip"><div class="help-tip-icon">🪵</div><div>Começa com <strong>2 canteiros</strong>. Compre os canteiros 3, 4 e 5 na loja conforme seus requisitos. O canteiro 6 é exclusivo para subscribers e vem como canteiro especial ao resgatar o Premium.</div></div>
@@ -4767,7 +4767,11 @@ function startGardenEvent() {
   if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
   if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
   if (gardenEvent.type === 'mutation') triggerEventMutation();
-  if (gardenEvent.type === 'crazyshop') generateCrazyShopOffers();
+  if (gardenEvent.type === 'crazyshop') {
+    generateCrazyShopOffers();
+    openShop();
+    switchShopTab('especial');
+  }
   renderPlots(); renderGardenEvent(); saveGardenToSE();
 }
 

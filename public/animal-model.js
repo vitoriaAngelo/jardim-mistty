@@ -1,11 +1,11 @@
 (function (root) {
   'use strict';
   const catalog = {
-    chicken: { name:'Galinha', home:'Galinheiro', product:'farm_egg', cost:450, level:1, feed:1, minutes:4, color:'#e9d5a5' },
-    cow: { name:'Vaca', home:'Estábulo', product:'farm_milk', cost:1800, level:5, feed:4, minutes:9, color:'#c4d5bd' },
-    pig: { name:'Porco', home:'Chiqueirinho', product:'farm_bacon', cost:1200, level:4, feed:3, minutes:7, color:'#e2b9b8' },
-    sheep: { name:'Ovelha', home:'Aprisco', product:'farm_wool', cost:1600, level:5, feed:3, minutes:8, color:'#d4c9e4' },
-    duck: { name:'Pato', home:'Laguinho', product:'farm_duck_egg', cost:800, level:3, feed:1, minutes:5, color:'#b8d4d2' },
+    chicken: { name:'Galinha', home:'Galinheiro', product:'farm_egg', cost:2250, level:1, feed:1, minutes:4, color:'#e9d5a5' },
+    cow: { name:'Vaca', home:'Estábulo', product:'farm_milk', cost:9000, level:5, feed:4, minutes:9, color:'#c4d5bd' },
+    pig: { name:'Porco', home:'Chiqueirinho', product:'farm_bacon', cost:6000, level:4, feed:3, minutes:7, color:'#e2b9b8' },
+    sheep: { name:'Ovelha', home:'Aprisco', product:'farm_wool', cost:8000, level:5, feed:3, minutes:8, color:'#d4c9e4' },
+    duck: { name:'Pato', home:'Laguinho', product:'farm_duck_egg', cost:4000, level:3, feed:1, minutes:5, color:'#b8d4d2' },
   };
   const products = {
     farm_egg: { name:'Ovo', emoji:'🥚', sell:65 },
@@ -22,6 +22,7 @@
     booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Dura 30 minutos e dá chance de produto dourado, que vale o dobro.'},
   };
   const MIN_HEALTH_TO_PRODUCE = 15;
+  const ITEMS_PER_CYCLE = 5;
   const HEALTH_MS = 60000; // Um ponto por minuto, sem arredondar o estado salvo.
   const level = (skills, key, max) => Math.min(max, Math.max(0, Number(skills[key]) || 0));
   function duration(id, skills = {}) {
@@ -76,7 +77,7 @@
         const time=pet.readyAt;
         const extra=pet.superUntil>time && healthAt(time)>=80 && random()<.34;
         const golden=pet.boosterUntil>time && random()<(.2+level(skills,'criador_dourado',5)*.04);
-        pet[golden?'goldStock':'stock']+=extra?2:1;
+        pet[golden?'goldStock':'stock']+=ITEMS_PER_CYCLE+(extra?1:0);
         pet.readyAt+=ms;pet.cycleDuration=ms;
       }
       pet.health=healthAt(end);pet.healthUpdatedAt=end;
@@ -123,7 +124,7 @@
     const state=advance(raw),pet=state.pets[id];if(!pet)throw new Error('Compre este animal primeiro.');
     pet.name=String(name||'').trim().slice(0,15);return state;
   }
-  const api={catalog,products,rations,normalize,advance,status,feed,boost,collect,rename,duration,feedCost:20};
+  const api={catalog,products,rations,normalize,advance,status,feed,boost,collect,rename,duration,feedCost:20,itemsPerCycle:ITEMS_PER_CYCLE};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.FarmAnimals=api;
 })(globalThis);

@@ -247,6 +247,11 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .latest-sales-coin { width:15px; height:15px; margin:0 2px 0 3px; vertical-align:-3px; filter:drop-shadow(0 1px 1px rgba(89,66,34,.2)); }
 .latest-sales-strip { width:100%; min-height:30px; margin:0 0 -12px; display:flex; align-items:center; justify-content:center; text-align:center; }
 .latest-sales-feed strong { color:#5f744e; font-size:11px; }
+.latest-sales-feed.global-message-active { min-height:42px; padding:8px 14px; border-color:#d8b76e; background:linear-gradient(120deg,#fff9e8,#f7e9bd,#fff8e5); color:#604b2d; box-shadow:0 2px 0 #d7bb7b,0 5px 16px #b58a3530; }
+.latest-sales-feed.global-message-active .latest-sales-content { display:block; max-width:100%; line-height:1.4; overflow-wrap:anywhere; }
+.latest-sales-feed.global-message-active strong { color:#795526; }
+body.dark-mode .latest-sales-feed.global-message-active { border-color:#c3a65e; background:linear-gradient(120deg,#3a3527,#49402b,#393427); color:#f5e9c7; box-shadow:0 2px 0 #745f34,0 5px 16px #090d09aa; }
+body.dark-mode .latest-sales-feed.global-message-active strong { color:#ffdfa0; }
 .latest-sales-card-name { font-weight:900; }
 .latest-sales-card-name.rare { color:#8960a6; }
 .latest-sales-card-name.legendary { color:#b18422; }
@@ -11214,6 +11219,9 @@ async function chargeGamePoints(amount, reason = 'Compra no jardim') {
 }
 let latestSalesItems = [];
 let latestSalesIndex = 0;
+let activeGlobalFeedMessage = null;
+let activeGlobalFeedMessageUntil = 0;
+let lastGlobalFeedMessageKey = '';
 window.recordCardFind = function(card) {
   const rarity = String(card?.rarity || '').trim();
   const prismatic = card?.prismatic === true;
@@ -11228,6 +11236,14 @@ function escapeLatestFeedText(value) {
 }
 function renderLatestSale() {
   const feed = document.getElementById('latest-sales-feed');
+  if (feed && activeGlobalFeedMessage && Date.now() < activeGlobalFeedMessageUntil) {
+    const message = activeGlobalFeedMessage;
+    const who = String(message.farmName || `Jardim de @${message.username || ''}`).trim();
+    feed.classList.add('global-message-active');
+    feed.innerHTML = `<span class="latest-sales-content sales-slide-in">📣 <strong>${escapeLatestFeedText(who)}</strong>: “${escapeLatestFeedText(message.text)}”</span>`;
+    return;
+  }
+  if (feed) feed.classList.remove('global-message-active');
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
   if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma novidade recente</span>'; return; }
   const who = String(sale.farmName || `Jardim de @${sale.username || ''}`).trim();
@@ -11261,6 +11277,15 @@ async function updateLatestSales() {
     const res = await fetch('/latest-sales', { cache:'no-store' });
     const data = await res.json();
     latestSalesItems = Array.isArray(data.sales) ? data.sales : [];
+    const newestGlobalMessage = latestSalesItems.filter(item => item?.activityType === 'global-message' && Number(item.at) + 13000 > Date.now()).sort((a,b) => Number(b.at) - Number(a.at))[0];
+    if (newestGlobalMessage) {
+      const messageKey = `${newestGlobalMessage.username || ''}:${newestGlobalMessage.at}`;
+      if (messageKey !== lastGlobalFeedMessageKey) {
+        lastGlobalFeedMessageKey = messageKey;
+        activeGlobalFeedMessage = newestGlobalMessage;
+        activeGlobalFeedMessageUntil = Number(newestGlobalMessage.at) + 13000;
+      }
+    }
     latestSalesIndex = latestSalesItems.length ? latestSalesIndex % latestSalesItems.length : 0;
     renderLatestSale();
   } catch(e) { /* mantém o estado inicial */ }

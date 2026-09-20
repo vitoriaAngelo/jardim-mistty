@@ -18,7 +18,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
+async function buyGlobalMessage() {
+  if (globalMessagePurchaseInFlight || G.pts < GLOBAL_MESSAGE_COST) return;
+  if (Date.now() - Number(G.lastGlobalMessage?.at || 0) < 120000) { renderGlobalMessageShop(); return; }
+  const existing = document.getElementById('global-message-composer');
+  if (existing) { existing.hidden = false; existing.querySelector('textarea')?.focus(); return; }
+  const composer = document.createElement('div');
+  composer.id = 'global-message-composer'; composer.className = 'global-message-composer'; composer.setAttribute('role','dialog'); composer.setAttribute('aria-modal','true');
+  composer.innerHTML = `<div class="composer-card"><h3>📣 Mensagem Global</h3><p>Escreva uma mensagem curta para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pontos.</p><textarea maxlength="120" aria-label="Mensagem para o global" placeholder="Oi, jardim! 🌱"></textarea><span class="composer-count">0/120</span><div class="composer-actions"><button type="button" class="btn-cancel">Cancelar</button><button type="button" class="btn-ok">Comprar e enviar</button></div></div>`;
+  document.body.append(composer);
+  const input=composer.querySelector('textarea'), count=composer.querySelector('.composer-count');
+  const close=()=>composer.remove();
+  input.addEventListener('input',()=>{count.textContent=input.value.length+'/120';});
+  composer.querySelector('.btn-cancel').onclick=close;
+  composer.addEventListener('click',event=>{if(event.target===composer)close();});
+  composer.querySelector('.btn-ok').onclick=async()=>{
+    const message=String(input.value||'').trim().replace(/[\\u0000-\\u001F\\u007F]/g,'').slice(0,120);
+    if(!message){input.focus();return;}
+    close(); globalMessagePurchaseInFlight=true; renderGlobalMessageShop();
+    try { if (!(await chargeGamePoints(GLOBAL_MESSAGE_COST, 'Mensagem Global'))) return; G.lastGlobalMessage={text:message,at:Date.now()}; await saveGardenToSE(); toast('📣 Mensagem enviada para o global!',3200); }
+    finally { globalMessagePurchaseInFlight=false; renderGlobalMessageShop(); }
+  };
+  input.focus();
+}
 :root {
   --sky:    #d4ecd4;
   --grass:  #6aaa3a;
@@ -2513,6 +2535,17 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
 .global-message-shop p { margin:3px 0 0; color:var(--text2); font-size:11px; line-height:1.4; }
 .global-message-shop button { flex:none; border:0; border-radius:10px; padding:9px 12px; background:#8b6a3f; color:#fff; font:800 11px 'Nunito',sans-serif; cursor:pointer; }
 .global-message-shop button:disabled { opacity:.55; cursor:not-allowed; }
+.global-message-composer { position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:18px; background:#17221999; }
+.global-message-composer[hidden] { display:none; }
+.global-message-composer .composer-card { width:min(420px,100%); padding:20px; border:1px solid #d8c59d; border-radius:18px; background:var(--cream); color:var(--text); box-shadow:0 12px 35px #17221955; }
+.global-message-composer h3 { margin:0 0 6px; font:normal 22px Georgia,serif; }
+.global-message-composer p { margin:0 0 12px; color:var(--text2); font-size:11px; }
+.global-message-composer textarea { width:100%; min-height:72px; resize:none; box-sizing:border-box; border:1px solid #cbbd9a; border-radius:10px; padding:10px; background:#fffdf2; color:var(--text); font:700 13px Nunito,sans-serif; }
+.global-message-composer .composer-count { display:block; margin-top:4px; text-align:right; color:var(--text2); font-size:10px; }
+.global-message-composer .composer-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+.global-message-composer .composer-actions button { padding:9px 13px; }
+body.dark-mode .global-message-composer .composer-card { background:#2a322b; border-color:#857344; }
+body.dark-mode .global-message-composer textarea { background:#202720; color:#f4edcf; border-color:#697453; }
 body.dark-mode .global-message-shop { border-color:#8b7440; background:linear-gradient(135deg,#403a2b,#35352b); color:#f4edcf; box-shadow:0 4px 16px #11181155; }
 body.dark-mode .global-message-shop strong { color:#f4e3a4; }
 body.dark-mode .global-message-shop p { color:#d5d7c5; }

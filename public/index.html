@@ -4565,6 +4565,7 @@ let gardenEvent = null;
 let gardenEventTimer = null;
 let gardenEventRainTimer = null;
 let gardenEventButterflyTimer = null;
+let gardenEventPestsTimer = null;
 let eventAudioContext = null;
 let eventAudioVolume = (() => {
   try {
@@ -4659,7 +4660,7 @@ function gardenEventDuration(type) {
   if (type === 'goldenshower' && !eventFastMode()) return GARDEN_EVENTS[type].duration;
   return base + (skillBranchBonusActive('colheita') ? 15 : 0);
 }
-function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type); }
+function activeGardenEvent(type) { return gardenEvent?.phase === 'active' && (!type || gardenEvent.type === type || (gardenEvent.secondaryTypes || []).includes(type)); }
 function setNextGardenEvent() { G.eventNextAt = Date.now() + nextEventDelay(); saveGardenToSE(); }
 
 function renderGardenEvent() {
@@ -4672,7 +4673,10 @@ function renderGardenEvent() {
   banner.classList.add('visible');
   banner.style.borderColor = def.color;
   document.getElementById('garden-event-icon').textContent = def.icon;
-  document.getElementById('garden-event-title').textContent = gardenEvent.phase === 'countdown' ? `${def.name} chegando!` : def.name;
+  const extras = (gardenEvent.secondaryTypes || []).map(type => GARDEN_EVENTS[type]?.name).filter(Boolean);
+  document.getElementById('garden-event-title').textContent = gardenEvent.phase === 'countdown'
+    ? `${def.name}${extras.length ? ` + ${extras.join(' + ')}` : ''} chegando!`
+    : `${def.name}${extras.length ? ` + ${extras.join(' + ')}` : ''}`;
   document.getElementById('garden-event-subtitle').textContent = gardenEvent.phase === 'countdown' ? def.intro : eventLiveSubtitle();
   document.getElementById('garden-event-timer').textContent = `${left}s`;
   const progress = document.getElementById('garden-event-progress');
@@ -4764,7 +4768,8 @@ function eventLiveSubtitle() {
 
 function announceGardenEvent() {
   if (!gardenHydrated || gardenEvent || Date.now() < Number(G.eventNextAt || 0)) return;
-  const keys = Object.keys(GARDEN_EVENTS).filter(key => key !== G.eventLastType);
+  const supportTypes = ['crazyshop', 'tax', 'pests'];
+  const keys = Object.keys(GARDEN_EVENTS).filter(key => !supportTypes.includes(key) && key !== G.eventLastType);
   // Mutação é especial e deve continuar surpreendente: 8% dos eventos.
   const mutationChance = keys.includes('mutation') ? 0.08 : 0;
   const regularKeys = keys.filter(key => key !== 'mutation');
@@ -4774,8 +4779,10 @@ function announceGardenEvent() {
   const type = Math.random() < mutationChance
     ? 'mutation'
     : weightedPool[Math.floor(Math.random() * weightedPool.length)];
-  gardenEvent = { type, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
-  toast(`${GARDEN_EVENTS[type].icon} ${GARDEN_EVENTS[type].name} começa em 10 segundos!`, 5000);
+  const secondaryTypes = supportTypes.filter(() => Math.random() < 0.22).slice(0, 2);
+  gardenEvent = { type, secondaryTypes, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
+  const names = [type, ...secondaryTypes].map(key => `${GARDEN_EVENTS[key].icon} ${GARDEN_EVENTS[key].name}`).join(' + ');
+  toast(`${names} começa em 10 segundos!`, 5000);
   renderGardenEvent();
 }
 
@@ -4799,17 +4806,26 @@ function startGardenEvent() {
     spawnGoldenShower();
     toast('🌟 GOLDENSHOWER! Regador cheio e +2 recargas disponíveis nesta estação.', 5200);
   }
-  if (gardenEvent.type === 'tax') {
+  if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
+  if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
+  if (gardenEvent.type === 'mutation') triggerEventMutation();
+  if (gardenEvent.type === 'crazyshop') {
+    generateCrazyShopOffers();
+    openShop();
+    switchShopTab('especial');
+  }
+  if (activeGardenEvent('tax')) {
     const points = Math.max(0, Math.floor(Number(G.pts) || 0));
     G.taxDue = points > 0 ? Math.max(1, Math.floor(points * 0.10)) : 0;
     G.taxPending = G.taxDue > 0;
     renderWateringCapacity();
     toast(G.taxPending ? `🧾 HORA DO IMPOSTO! Pague ${G.taxDue.toLocaleString('pt-BR')} pts para desbloquear o Regador.` : '🧾 HORA DO IMPOSTO! Você não tem imposto devido.', 5200);
   }
-  if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
-  if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
-  if (gardenEvent.type === 'mutation') triggerEventMutation();
-  if (gardenEvent.type === 'crazyshop') {
+  if (activeGardenEvent('pests')) {
+    spawnEventPest();
+    gardenEventPestsTimer = setInterval(spawnEventPest, 4200);
+  }
+  if (activeGardenEvent('crazyshop') && gardenEvent.type !== 'crazyshop') {
     generateCrazyShopOffers();
     openShop();
     switchShopTab('especial');
@@ -4890,14 +4906,15 @@ function triggerEventMutation() {
 function finishGardenEvent() {
   const finished=gardenEvent, def=GARDEN_EVENTS[finished.type];
   clearInterval(gardenEventRainTimer); clearInterval(gardenEventButterflyTimer);
-  gardenEventRainTimer=null; gardenEventButterflyTimer=null;
+  clearInterval(gardenEventPestsTimer);
+  gardenEventRainTimer=null; gardenEventButterflyTimer=null; gardenEventPestsTimer=null;
   document.body.classList.remove(`event-${finished.type}`);
-  if (finished.type === 'crazyshop') {
+  if (finished.type === 'crazyshop' || (finished.secondaryTypes || []).includes('crazyshop')) {
     const selected = (G.crazyShopOffers || []).filter(offer => offer.chosen).length;
     G.crazyShopEndsAt = 0;
     toast(`⭐ Loja Maluca terminou! Você escolheu ${selected}/3 ofertas.`, 3500);
   }
-  if (finished.type === 'pests') {
+  if (finished.type === 'pests' || (finished.secondaryTypes || []).includes('pests')) {
     const ignored = (finished.pests || []).filter(p => !p.removed);
     const eligiblePlots = G.plots.map((plot,index) => plot?.type && !plot.pestInfested ? index : -1).filter(index => index >= 0);
     const infestedIdx = eligiblePlots.length && Math.random() < .34 ? eligiblePlots[Math.floor(Math.random() * eligiblePlots.length)] : -1;
@@ -4945,9 +4962,14 @@ function resumeGardenEvent() {
   if (gardenEvent.type === 'pests' && !gardenEventRainTimer) {
     gardenEventRainTimer = setInterval(spawnEventPest, 4200);
   }
+  if ((gardenEvent.secondaryTypes || []).includes('pests') && !gardenEventPestsTimer) {
+    gardenEventPestsTimer = setInterval(spawnEventPest, 4200);
+  }
+  if ((gardenEvent.secondaryTypes || []).includes('tax')) renderWateringCapacity();
   if (gardenEvent.type === 'crazyshop') {
     renderCrazyShop();
   }
+  if ((gardenEvent.secondaryTypes || []).includes('crazyshop')) renderCrazyShop();
   renderGardenEvent();
 }
 function initGardenEvents(){

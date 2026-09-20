@@ -18,29 +18,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-async function buyGlobalMessage() {
-  if (globalMessagePurchaseInFlight || G.pts < GLOBAL_MESSAGE_COST) return;
-  if (Date.now() - Number(G.lastGlobalMessage?.at || 0) < 120000) { renderGlobalMessageShop(); return; }
-  const existing = document.getElementById('global-message-composer');
-  if (existing) { existing.hidden = false; existing.querySelector('textarea')?.focus(); return; }
-  const composer = document.createElement('div');
-  composer.id = 'global-message-composer'; composer.className = 'global-message-composer'; composer.setAttribute('role','dialog'); composer.setAttribute('aria-modal','true');
-  composer.innerHTML = `<div class="composer-card"><h3>📣 Mensagem Global</h3><p>Escreva uma mensagem curta para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pontos.</p><textarea maxlength="120" aria-label="Mensagem para o global" placeholder="Oi, jardim! 🌱"></textarea><span class="composer-count">0/120</span><div class="composer-actions"><button type="button" class="btn-cancel">Cancelar</button><button type="button" class="btn-ok">Comprar e enviar</button></div></div>`;
-  document.body.append(composer);
-  const input=composer.querySelector('textarea'), count=composer.querySelector('.composer-count');
-  const close=()=>composer.remove();
-  input.addEventListener('input',()=>{count.textContent=input.value.length+'/120';});
-  composer.querySelector('.btn-cancel').onclick=close;
-  composer.addEventListener('click',event=>{if(event.target===composer)close();});
-  composer.querySelector('.btn-ok').onclick=async()=>{
-    const message=String(input.value||'').trim().replace(/[\\u0000-\\u001F\\u007F]/g,'').slice(0,120);
-    if(!message){input.focus();return;}
-    close(); globalMessagePurchaseInFlight=true; renderGlobalMessageShop();
-    try { if (!(await chargeGamePoints(GLOBAL_MESSAGE_COST, 'Mensagem Global'))) return; G.lastGlobalMessage={text:message,at:Date.now()}; await saveGardenToSE(); toast('📣 Mensagem enviada para o global!',3200); }
-    finally { globalMessagePurchaseInFlight=false; renderGlobalMessageShop(); }
-  };
-  input.focus();
-}
 :root {
   --sky:    #d4ecd4;
   --grass:  #6aaa3a;
@@ -5894,6 +5871,48 @@ let SHOP_CART_OPEN = false;
 let shopPurchaseInFlight = false;
 const GLOBAL_MESSAGE_COST = 500;
 let globalMessagePurchaseInFlight = false;
+async function buyGlobalMessage() {
+  if (globalMessagePurchaseInFlight) return;
+  if (Number(G.pts) < GLOBAL_MESSAGE_COST) {
+    toast(`✨ Faltam ${GLOBAL_MESSAGE_COST - Number(G.pts || 0)} pts para concluir.`, 2400);
+    return;
+  }
+  if (Date.now() - Number(G.lastGlobalMessage?.at || 0) < 120000) { renderGlobalMessageShop(); return; }
+  const existing = document.getElementById('global-message-composer');
+  if (existing) { existing.hidden = false; existing.querySelector('textarea')?.focus(); return; }
+  const composer = document.createElement('div');
+  composer.id = 'global-message-composer'; composer.className = 'global-message-composer'; composer.setAttribute('role','dialog'); composer.setAttribute('aria-modal','true');
+  composer.innerHTML = `<div class="composer-card"><h3>📣 Mensagem Global</h3><p>Escreva uma mensagem curta para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pontos.</p><textarea maxlength="120" aria-label="Mensagem para o global" placeholder="Oi, jardim! 🌱"></textarea><span class="composer-count">0/120</span><div class="composer-actions"><button type="button" class="btn-cancel">Cancelar</button><button type="button" class="btn-ok">Comprar e enviar</button></div></div>`;
+  document.body.append(composer);
+  const input=composer.querySelector('textarea'), count=composer.querySelector('.composer-count');
+  const close=()=>composer.remove();
+  input.addEventListener('input',()=>{count.textContent=input.value.length+'/120';});
+  composer.querySelector('.btn-cancel').onclick=close;
+  composer.querySelector('.btn-ok').onclick=async()=>{
+    const message=String(input.value||'').trim().replace(/[\\u0000-\\u001F\\u007F]/g,'').slice(0,120);
+    if(!message){input.focus();return;}
+    globalMessagePurchaseInFlight=true;
+    const sendButton=composer.querySelector('.btn-ok');
+    sendButton.disabled=true;
+    sendButton.textContent='Enviando…';
+    renderGlobalMessageShop();
+    try {
+      if (!(await chargeGamePoints(GLOBAL_MESSAGE_COST, 'Mensagem Global'))) return;
+      G.lastGlobalMessage={text:message,at:Date.now()};
+      await saveGardenToSE();
+      toast('📣 Mensagem enviada para o global!',3200);
+      close();
+    } catch(error) {
+      console.error('Falha ao enviar Mensagem Global:', error);
+      toast('❌ Não foi possível enviar a mensagem. Tente novamente.', 3200);
+    } finally {
+      globalMessagePurchaseInFlight=false;
+      renderGlobalMessageShop();
+    }
+  };
+  composer.addEventListener('click',event=>{if(event.target===composer)close();});
+  input.focus();
+}
 function renderGlobalMessageShop() {
   const host = document.getElementById('global-message-shop');
   if (!host) return;
@@ -5911,24 +5930,6 @@ async function payGardenTax() {
   renderWateringCapacity();
   await saveGardenToSE();
   toast('✅ Imposto pago! O Regador foi desbloqueado.', 3200);
-}
-async function buyGlobalMessage() {
-  if (globalMessagePurchaseInFlight || G.pts < GLOBAL_MESSAGE_COST) return;
-  if (Date.now() - Number(G.lastGlobalMessage?.at || 0) < 120000) { renderGlobalMessageShop(); return; }
-  const text = window.prompt('Escreva sua mensagem para o global (até 120 caracteres):', 'Oi, jardim! 🌱');
-  const message = String(text || '').trim().replace(/[\u0000-\u001F\u007F]/g, '').slice(0, 120);
-  if (!message) return;
-  globalMessagePurchaseInFlight = true;
-  renderGlobalMessageShop();
-  try {
-    if (!(await chargeGamePoints(GLOBAL_MESSAGE_COST, 'Mensagem Global'))) return;
-    G.lastGlobalMessage = { text: message, at: Date.now() };
-    await saveGardenToSE();
-    toast('📣 Mensagem enviada para o global!', 3200);
-  } finally {
-    globalMessagePurchaseInFlight = false;
-    renderGlobalMessageShop();
-  }
 }
 function cartProduct(type) { return getPlantable(type) || (typeof FERTILIZERS !== 'undefined' ? FERTILIZERS[type] : null); }
 function cartUnitCost(type) {

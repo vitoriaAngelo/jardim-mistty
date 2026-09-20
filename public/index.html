@@ -1398,6 +1398,8 @@ body.dark-mode .plot-tooltip.out-of-season-warning { border-color:#d87575; backg
 .market-orders-btn.has-ready-order::after { content:'Pedido pronto para entregar!'; position:absolute; left:50%; top:calc(100% + 10px); transform:translateX(-50%); width:150px; padding:7px 9px; border:1px solid #dfd2b5; border-radius:10px; background:#fffdf7; color:#687052; box-shadow:0 3px 9px #4b573320; font:800 10px/1.2 'Nunito',sans-serif; text-align:center; z-index:20; pointer-events:none; }
 .competition-countdown { width:100%; box-sizing:border-box; margin-top:1px; padding:5px 6px; border:1px solid #d8dfc8; border-radius:10px; background:#f6f6e9; color:#657451; font:800 9px/1.3 'Nunito',sans-serif; text-align:center; }
 body.dark-mode .competition-countdown { border-color:#53624d; background:#2c352b; color:#cbd7a9; }
+.competition-online-count { width:100%; box-sizing:border-box; margin-top:3px; padding:4px 6px; border:1px solid #d8dfc8; border-radius:10px; background:#edf1e3; color:#61744d; font:800 9px/1.3 'Nunito',sans-serif; text-align:center; }
+body.dark-mode .competition-online-count { border-color:#53624d; background:#303a30; color:#cbd7a9; }
 .orders-list { display:grid; gap:10px; margin:14px 0; }
 .orders-status { margin:8px 0 4px; padding:8px 10px; border-radius:11px; background:#f5ead0; color:#76552c; font-size:11px; font-weight:900; line-height:1.55; text-align:center; }
 .missions-reset-info { margin:8px 0 10px; padding:8px 10px; border:1px solid var(--cozy-line); border-radius:11px; background:var(--cream2); color:var(--text2); font-size:12px; font-weight:800; line-height:1.4; text-align:center; }
@@ -3625,6 +3627,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="header-icon-wrap" style="width:100%">
       <button class="market-orders-btn" type="button" onclick="openOrders(event)" aria-label="Pedidos do jardim">📬 Pedidos</button>
       <div class="competition-countdown" id="competition-countdown" aria-live="off"></div>
+      <div class="competition-online-count" id="competition-online-count" aria-live="polite">👥 Consultando pessoas jogando…</div>
       <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Pedidos<br><span>Troque colheitas por pontos</span></div>
     </div>
 
@@ -6581,6 +6584,26 @@ function updateCompetitionCountdown() {
 }
 updateCompetitionCountdown();
 setInterval(updateCompetitionCountdown, 60000);
+let onlinePlayerCountRequest = false;
+async function updateOnlinePlayerCount() {
+  const label = document.getElementById('competition-online-count');
+  if (!label || onlinePlayerCountRequest) return;
+  onlinePlayerCountRequest = true;
+  try {
+    const response = await fetch('/.netlify/functions/online-count', { cache:'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (data.error || !Number.isFinite(Number(data.online))) throw new Error(data.error || 'Contagem indisponível');
+    const online = Math.max(0, Math.floor(Number(data.online)));
+    label.textContent = `👥 ${online.toLocaleString('pt-BR')} ${online === 1 ? 'pessoa jogando' : 'pessoas jogando'}`;
+  } catch (error) {
+    label.textContent = '👥 Contagem de jogadores indisponível';
+  } finally {
+    onlinePlayerCountRequest = false;
+  }
+}
+updateOnlinePlayerCount();
+setInterval(updateOnlinePlayerCount, 30000);
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'A',label:'Tier A',mult:1, min:1, max:12} : roll < .94 ? {id:'S',label:'Tier S',mult:2.2, min:8, max:26} : {id:'SS',label:'Tier SS',mult:4.5, min:40, max:70}; }
 function createOrder(index = 0) {
   const catalog = Object.entries({ ...PLANTS, ...FLOWERS })

@@ -7582,8 +7582,7 @@ function advanceSeasonDay() {
     G.seasonIdx = (G.seasonIdx + 1) % 4;
     G.seasonCycle = Math.max(0, Number(G.seasonCycle) || 0) + 1;
     syncWateringRefillSeason();
-    // Não apaga pedidos ao virar a estação: a jogadora pode entregar pedidos
-    // de estações anteriores. O reset só ocorre ao clicar em "Atualizar Pedidos".
+    // A virada da estação inicia uma nova cota e uma nova lista de pedidos.
     const s = currentSeason();
     toast(`${s.icon} Nova estação: ${s.name}! ${s.msg}`, 5000);
     // Re-render shop to lock/unlock plants by season
@@ -7592,15 +7591,11 @@ function advanceSeasonDay() {
     renderShopCart();
     // Check planted items that are now out of season
     checkOutOfSeasonPlants();
-    // A cota concluída pertence à estação anterior. Na nova estação,
-    // entregue novos pedidos imediatamente; pedidos ainda pendentes ficam válidos.
-    const ordersCompleted = (G.orderDeliveries || 0) >= 4;
-    if (ordersCompleted) {
-      resetOrdersForSeason(false);
-      renderOrders();
-      updateOrdersButton();
-    }
-    saveGardenToSE(ordersCompleted);
+    // Pedidos pendentes também pertencem à estação anterior e não bloqueiam a nova cota.
+    resetOrdersForSeason(false);
+    renderOrders();
+    updateOrdersButton();
+    saveGardenToSE(true);
   }
   if(wasGardenHydrated&&!seasonChanged)saveGardenToSE().catch(error=>console.warn('Dia do jogo aguardando sincronização:',error));
   renderSeasonWidget();

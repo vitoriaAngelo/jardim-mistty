@@ -22,14 +22,13 @@ test('recompensa diária pode ser recebida novamente só depois que as missões 
   assert.match(html, /G\.missions\.resetAt = Date\.now\(\) \+ MISSION_DAY_MS/);
 });
 
-test('virada da estação recria pedidos após a entrega da cota de quatro', () => {
+test('virada da estação recria pedidos e zera a cota automaticamente', () => {
   const start = html.indexOf('function advanceSeasonDay()');
   const end = html.indexOf('\nfunction checkOutOfSeasonPlants', start);
   const body = html.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(body, /const ordersCompleted = \(G\.orderDeliveries \|\| 0\) >= 4/);
-  assert.match(body, /if \(ordersCompleted\) \{\s*resetOrdersForSeason\(false\)/);
-  assert.match(body, /saveGardenToSE\(ordersCompleted\)/);
+  assert.match(body, /resetOrdersForSeason\(false\);\s*\r?\n\s*renderOrders\(\);/);
+  assert.match(body, /saveGardenToSE\(true\)/);
 });
 
 test('reinício da cota de pedidos é persistido como ação explícita', () => {

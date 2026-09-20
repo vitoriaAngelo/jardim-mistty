@@ -4913,9 +4913,25 @@ function tickGardenEvents() {
   if(Date.now()>=gardenEvent.endsAt){ if(gardenEvent.phase==='countdown')startGardenEvent(); else finishGardenEvent(); }
   else renderGardenEvent();
 }
+function resumeGardenEvent() {
+  if (!gardenEvent || gardenEvent.phase !== 'active' || Date.now() >= gardenEvent.endsAt) return;
+  document.body.classList.add(`event-${gardenEvent.type}`);
+  if (gardenEvent.type === 'rain' && !gardenEventRainTimer) {
+    gardenEventRainTimer = setInterval(() => { spawnEventRain(); applyMagicRain(); }, 3500);
+  }
+  if (gardenEvent.type === 'butterflies' && !gardenEventButterflyTimer) gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
+  if (gardenEvent.type === 'pests' && !gardenEventRainTimer) {
+    gardenEventRainTimer = setInterval(spawnEventPest, 4200);
+  }
+  if (gardenEvent.type === 'crazyshop') {
+    renderCrazyShop();
+  }
+  renderGardenEvent();
+}
 function initGardenEvents(){
   if(gardenEventTimer)clearInterval(gardenEventTimer);
   gardenEventTimer=setInterval(tickGardenEvents,500);
+  resumeGardenEvent();
   tickGardenEvents();
 }
 
@@ -10087,6 +10103,10 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     recentGoldenEggFinds: Array.isArray(G.recentGoldenEggFinds) ? G.recentGoldenEggFinds.slice(0, 20) : [],
     eventNextAt:      Number(G.eventNextAt || 0),
     eventLastType:    G.eventLastType || '',
+    activeGardenEvent: gardenEvent ? {
+      ...gardenEvent,
+      touched: [...(gardenEvent.touched || [])],
+    } : null,
     discoveredMutations: G.discoveredMutations || [],
     crazyShopOffers: Array.isArray(G.crazyShopOffers) ? G.crazyShopOffers : [],
     crazyShopChosen: Number(G.crazyShopChosen || 0),
@@ -10399,7 +10419,14 @@ async function loadGardenFromSE(username) {
     G.recentGoldenEggFinds = Array.isArray(save.recentGoldenEggFinds) ? save.recentGoldenEggFinds.slice(0, 20) : [];
     G.eventNextAt      = Number(save.eventNextAt || 0);
     G.eventLastType    = save.eventLastType || '';
-    if (G.crazyShopEndsAt > Date.now() && G.crazyShopOffers.length) {
+    const savedEvent = save.activeGardenEvent;
+    if (savedEvent && GARDEN_EVENTS[savedEvent.type] && Number(savedEvent.endsAt) > 0) {
+      gardenEvent = {
+        ...savedEvent,
+        touched: new Set(Array.isArray(savedEvent.touched) ? savedEvent.touched : []),
+        pests: Array.isArray(savedEvent.pests) ? savedEvent.pests : [],
+      };
+    } else if (G.crazyShopEndsAt > Date.now() && G.crazyShopOffers.length) {
       gardenEvent = { type:'crazyshop', phase:'active', endsAt:G.crazyShopEndsAt, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
     } else G.crazyShopEndsAt = 0;
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];

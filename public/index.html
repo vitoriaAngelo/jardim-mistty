@@ -273,7 +273,12 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .event-pest.golden { font-size:34px; border-color:#d7a62e; box-shadow:0 0 14px #f5d56a,0 3px 0 #b98122; }
 .event-pest.hit { animation:pest-hit .2s ease both; }
 .pest-danger { display:inline-block; margin-left:8px; color:#a85a43; font-weight:900; }
-.plot-pest-badge { position:absolute;right:5px;bottom:20px;z-index:5;padding:2px 5px;border:1px solid #a63b32;border-radius:99px;background:#fff0e8;color:#a32626;font-size:12px;font-weight:900;box-shadow:0 2px 4px #0003;pointer-events:auto;cursor:help; }
+.plot-pest-badge { position:absolute;left:50%;bottom:3px;transform:translateX(-50%);z-index:5;padding:2px 5px;border:1px solid #a63b32;border-radius:99px;background:#fff0e8;color:#a32626;font-size:10px;font-weight:900;box-shadow:0 2px 4px #0003;pointer-events:auto;cursor:help;white-space:nowrap; }
+.plot-pest-badge::after { content:attr(data-tooltip); display:none; position:absolute; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%); z-index:120; width:220px; padding:8px 13px; border:1px solid #53624d; border-radius:12px; background:#303a30; color:#edf2e6; box-shadow:0 8px 24px #11181166; font:700 11px/1.45 'Nunito',sans-serif; text-align:center; white-space:normal; pointer-events:none; }
+.plot-pest-badge::before { content:''; display:none; position:absolute; left:50%; bottom:calc(100% + 2px); transform:translateX(-50%); border:6px solid transparent; border-top-color:#303a30; z-index:121; }
+.plot-pest-badge:hover::after, .plot-pest-badge:focus-visible::after { display:block; }
+.plot-pest-badge:hover::before, .plot-pest-badge:focus-visible::before { display:block; }
+body.dark-mode .plot-pest-badge { background:#4a2929; border-color:#d87575; color:#ffe1d8; }
 .market-pest-tag { display:inline-block;margin:2px 0;padding:2px 6px;border-radius:8px;background:#fff0e8;color:#a32626;font-size:9px;font-weight:900;line-height:1.25; }
 .market-slot.pest-stock { border-color:#c75b4f;background:linear-gradient(145deg,#fff6ed,#fbe4dc); }
 .shop-cart-row.pest-stock { border-left:3px solid #b53636;padding-left:6px;color:#9b302c; }
@@ -8389,14 +8394,15 @@ function buildPlotEl(plot, idx) {
     if (plot.crazySeasonProtected) {
       const crazyBadge = document.createElement('div');
       crazyBadge.title = 'Semente da Loja Maluca';
-      crazyBadge.style.cssText = 'position:absolute;left:50%;bottom:3px;transform:translateX(-50%);z-index:4;border-radius:99px;background:#b53636;color:#fff;padding:2px 5px;font-size:10px;font-weight:900;pointer-events:none;';
+      crazyBadge.style.cssText = `position:absolute;left:50%;bottom:${plot.pestInfested ? '28px' : '3px'};transform:translateX(-50%);z-index:4;border-radius:99px;background:#b53636;color:#fff;padding:2px 5px;font-size:10px;font-weight:900;pointer-events:none;`;
       crazyBadge.textContent = '★ MALUCO';
       div.appendChild(crazyBadge);
     }
     if (plot.pestInfested) {
       const pestBadge = document.createElement('div');
       pestBadge.className = 'plot-pest-badge';
-      pestBadge.title = 'Praga permanente: todas as colheitas desta planta serão vendidas por 50% do preço.';
+      pestBadge.tabIndex = 0;
+      pestBadge.dataset.tooltip = 'Praga permanente: todas as colheitas desta planta serão vendidas por 50% do preço.';
       pestBadge.setAttribute('aria-label', 'Planta infestada por pragas; suas colheitas valem metade do preço');
       pestBadge.textContent = '🐛 PRAGA';
       div.appendChild(pestBadge);

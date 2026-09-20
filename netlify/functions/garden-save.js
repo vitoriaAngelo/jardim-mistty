@@ -172,7 +172,7 @@ exports.handler = async (event) => {
     
     // ── VALIDAÇÃO ANTI-FRAUDE: Crescimento de Plantas ──
     // Crescimento normal, Adubo Rápido e Chuva Mágica podem somar avanços.
-    const GROW_INTERVAL_MS = 15000;
+    const BASE_GROW_INTERVAL_MS = 15000;
     const RAIN_TICK_MS     = 3500;   // Chuva Mágica dispara applyMagicRain() a cada 3.5s
     const RAIN_DURATION_MS = 45000;  // Duração máxima do evento de chuva (45s)
     const validationRes = await fetch(
@@ -188,7 +188,9 @@ exports.handler = async (event) => {
         const oldData = rows[0].data || {};
         const lastSaveTime = new Date(rows[0].updated_at).getTime();
         const elapsedMs = Math.max(0, Date.now() - lastSaveTime);
-        const maxPossibleTicks = Math.ceil(elapsedMs / GROW_INTERVAL_MS);
+        const soloLivingLevel = Math.min(4, Math.max(0, Number(oldData.skillNodes?.solo_vivo) || 0));
+        const effectiveGrowIntervalMs = Math.max(1000, Math.round(BASE_GROW_INTERVAL_MS * (1 - soloLivingLevel * .03)));
+        const maxPossibleTicks = Math.ceil(elapsedMs / effectiveGrowIntervalMs);
 
         // Crescimento extra que a Chuva Mágica pode ter dado no período.
         // A chuva aplica +1 growCount por planta a cada RAIN_TICK_MS ms,

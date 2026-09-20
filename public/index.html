@@ -10567,7 +10567,7 @@ async function confirmGardenSaved(saved) {
   });
   if (!response.ok) throw new Error('Não foi possível confirmar o jardim no banco. Tente novamente.');
   const confirmed = await response.json();
-  const fields = ['xp', 'farmerXP', 'inventory', 'fertilizerInventory', 'plots', 'harvested', 'livestock', 'animalPremiumHabitats', 'skillNodes', 'achievements', 'missions', 'mail', 'packInventory', 'albumCards'];
+  const fields = ['xp', 'farmerXP', 'inventory', 'fertilizerInventory', 'plots', 'harvested', 'livestock', 'animalPremiumHabitats', 'orders', 'ordersSeasonKey', 'orderSearches', 'orderDeliveries', 'orderPaidReset', 'skillNodes', 'achievements', 'missions', 'mail', 'packInventory', 'albumCards'];
   if (!confirmed.data || fields.some(key => !sameGardenValue(saved.data[key], confirmed.data[key]))) {
     throw new Error('O banco ainda não confirmou todo o progresso. Tente novamente.');
   }

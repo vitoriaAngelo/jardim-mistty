@@ -3595,9 +3595,9 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
   <path d="M12 46Q6 40 8 36Q15 38 12 46M12 48L13 41" fill="#e5ebd9" stroke="#778b64" stroke-width="1.2" stroke-linecap="round"/>
 </svg>
         <div class="tool-label">Pá</div>
-      <div class="tool-cost"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> <span id="shovel-cost">50 pts</span></div>
+      <div class="tool-cost"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> <span id="shovel-cost">1.000 pts</span></div>
       </div>
-      <div class="header-btn-tip" id="shovel-tool-tip" style="left:50%;transform:translateX(-50%)">Pá<br><span>Retire uma planta do canteiro — 50 pts</span></div>
+      <div class="header-btn-tip" id="shovel-tool-tip" style="left:50%;transform:translateX(-50%)">Pá<br><span>Remove pragas antes da colheita — 1.000 pts</span></div>
     </div>
 
     <div class="header-icon-wrap" style="width:100%">
@@ -3736,7 +3736,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
           <div class="help-section-title">🪵 Canteiros</div>
           <div class="help-tip"><div class="help-tip-icon">🪵</div><div>Começa com <strong>2 canteiros</strong>. Compre os canteiros 3, 4 e 5 na loja conforme seus requisitos. O canteiro 6 é exclusivo para subscribers e vem como canteiro especial ao resgatar o Premium.</div></div>
           <div class="help-tip"><div class="help-tip-icon">🪣</div><div>O <strong>regador</strong> tem capacidade limitada: recupera 1 água a cada 5 minutos e pode chegar a 10 de capacidade. O botão <strong>Encher o reservatório</strong> custa 500 pts e recupera 5 águas imediatamente.</div></div>
-          <div class="help-tip"><div class="help-tip-icon">🛠️</div><div>A <strong>pá</strong> retira uma muda do canteiro por 50 pts (25 com Pá Premium). A colheita de plantas prontas é <strong>gratuita</strong>!</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🛠️</div><div>A <strong>pá</strong> remove pragas por 1.000 pts (500 com Pá Premium). Ela só funciona antes de a planta ficar pronta para colher.</div></div>
         </div>
       </div>
 
@@ -4131,7 +4131,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <p class="premium-copy">Resgate seus presentes exclusivos de subscriber. Cada benefício pode ser resgatado uma única vez.</p>
     <div class="premium-benefits">
       <div>💜 <strong>Regador Premium</strong><span>Regenera água mais rápido.</span><button class="premium-claim" onclick="claimPremium('watering')">Resgatar</button></div>
-      <div>🟣 <strong>Pá Premium</strong><span>Fica roxa e custa só 25 pontos.</span><button class="premium-claim" onclick="claimPremium('shovel')">Resgatar</button></div>
+      <div>🟣 <strong>Pá Premium</strong><span>Fica roxa e custa só 500 pontos.</span><button class="premium-claim" onclick="claimPremium('shovel')">Resgatar</button></div>
       <div>🌱 <strong>4 cultivos exclusivos</strong><span>Desbloqueia as novas flores e vegetais.</span><button class="premium-claim" onclick="claimPremium('plants')">Resgatar</button></div>
       <div>🧪 <strong>Kit de adubos</strong><span>Receba 4 saquinhos de cada adubo.</span><button class="premium-claim" onclick="claimPremium('fertilizers')">Resgatar</button></div>
       <div>✨ <strong>Canteiro 6 Especial</strong><span>Exclusivo para subscribers. Ao resgatar, o último canteiro é desbloqueado e já vem como Canteiro Especial.</span><button class="premium-claim" onclick="claimPremium('plot')">Resgatar</button></div>
@@ -5223,7 +5223,7 @@ function previewAccess() {
     && new URLSearchParams(window.location.search).has('preview'));
 }
 
-function effectiveShovelCost() { return G.premiumShovel ? 25 : 50; }
+function effectiveShovelCost() { return G.premiumShovel ? 500 : 1000; }
 function maxWateringCapacity() {
   const levelCapacity = currentLevel() >= 15 ? 10 : currentLevel() >= 10 ? 7 : 5;
   // O bônus dos kits pode ultrapassar o limite base de 10 águas.
@@ -5627,15 +5627,17 @@ function showOutOfSeasonModal(type) {
 function confirmRemovePlant(idx) {
   const plot = G.plots[idx];
   if (!plot) return;
+  if (!plot.pestInfested) { toast('🛠️ A pá só pode ser usada para remover pragas.'); return; }
+  if (isReady(plot)) { toast('🌾 A planta já está pronta para colher; a praga não pode mais ser removida.'); return; }
   const plant = getPlantable(plot.type);
   const modal = document.getElementById('modal');
   modal.querySelector('.modal').innerHTML = `
     <button class="popup-close-x" aria-label="Fechar confirmação" onclick="closeModal()">×</button>
-    <h2>🪴 Retirar planta?</h2>
-    <p>Deseja realmente limpar este canteiro? ${plant.emoji} ${plant.name} será descartada${plot.pestInfested ? ' e a infestação de pragas será removida por completo' : ''}. A pá custará ${effectiveShovelCost()} pontos.</p>
+    <h2>🛠️ Remover praga?</h2>
+    <p>A pá vai remover a infestação de ${plant.emoji} ${plant.name} e devolver a planta ao estado normal. A pá custará ${effectiveShovelCost()} pontos.</p>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-primary" onclick="removePlantFromPlot(${idx})">Retirar planta</button>
+      <button class="btn-primary" onclick="removePlantFromPlot(${idx})">Remover praga</button>
     </div>`;
   openModal();
 }
@@ -5643,16 +5645,14 @@ function confirmRemovePlant(idx) {
 async function removePlantFromPlot(idx) {
   closeModal();
   const plot = G.plots[idx];
-  if (!plot) return;
+  if (!plot?.pestInfested || isReady(plot)) return;
   const sCost = effectiveShovelCost();
   if (G.pts < sCost) { toast(`🌟 Você precisa de ${sCost} pts para retirar a planta!`); return; }
   if (!(await chargeGamePoints(sCost))) return;
-  G.plots[idx] = null;
+  plot.pestInfested = false;
   spawnSparkles(idx);
   saveGardenToSE();
-  toast(plot.pestInfested
-    ? `🧹 Canteiro limpo! ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} e a infestação de pragas foram removidas.`
-    : `🪴 ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} retirada do canteiro!`);
+  toast(`🧹 Praga removida! ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} voltou ao estado normal.`);
   setTimeout(() => { renderPlots(); }, 300);
 }
 
@@ -6572,7 +6572,7 @@ function renderPremiumBenefits() {
   document.getElementById('tool-shovel')?.classList.toggle('premium-tool-active', G.premiumShovel);
   const cost = document.getElementById('shovel-cost'); if (cost) cost.textContent = `${effectiveShovelCost()} pts`;
   const waterTip = document.querySelector('#water-tool-tip span'); if (waterTip) waterTip.textContent = G.premiumWateringCan ? '1 água por rega · recupera 1 a cada 2 minutos' : '1 água por rega · recupera 1 a cada 5 minutos';
-  const shovelTip = document.querySelector('#shovel-tool-tip span'); if (shovelTip) shovelTip.textContent = `Retire uma planta do canteiro — ${effectiveShovelCost()} pts${G.premiumShovel ? ' · Pá Premium' : ''}`;
+  const shovelTip = document.querySelector('#shovel-tool-tip span'); if (shovelTip) shovelTip.textContent = `Remove pragas antes da colheita — ${effectiveShovelCost()} pts${G.premiumShovel ? ' · Pá Premium' : ''}`;
   const recolor = (id, active, map) => document.querySelectorAll(`#${id} svg [fill], #${id} svg [stroke]`).forEach(el => { ['fill','stroke'].forEach(attr => { const value = el.getAttribute(attr); if (!value) return; if (active && map[value]?.premium) el.setAttribute(attr, map[value].premium); else if (!active && map[value]?.normal) el.setAttribute(attr, map[value].normal); }); });
   recolor('tool-water', G.premiumWateringCan, {'#778b64':{normal:'#778b64',premium:'#80629c'},'#586e47':{normal:'#586e47',premium:'#64497e'},'#80629c':{normal:'#778b64'},'#64497e':{normal:'#586e47'}});
   recolor('tool-shovel', G.premiumShovel, {'#778b64':{normal:'#778b64',premium:'#80629c'},'#586e47':{normal:'#586e47',premium:'#64497e'},'#e5ebd9':{normal:'#e5ebd9',premium:'#eadcf5'},'#80629c':{normal:'#80629c'},'#64497e':{normal:'#64497e'},'#eadcf5':{normal:'#e5ebd9'}});

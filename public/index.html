@@ -273,6 +273,10 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .event-pest.golden { font-size:34px; border-color:#d7a62e; box-shadow:0 0 14px #f5d56a,0 3px 0 #b98122; }
 .event-pest.hit { animation:pest-hit .2s ease both; }
 .pest-danger { display:inline-block; margin-left:8px; color:#a85a43; font-weight:900; }
+.plot-pest-badge { position:absolute;right:5px;bottom:20px;z-index:5;padding:2px 5px;border:1px solid #a63b32;border-radius:99px;background:#fff0e8;color:#a32626;font-size:12px;font-weight:900;box-shadow:0 2px 4px #0003;pointer-events:auto;cursor:help; }
+.market-pest-tag { display:inline-block;margin:2px 0;padding:2px 6px;border-radius:8px;background:#fff0e8;color:#a32626;font-size:9px;font-weight:900;line-height:1.25; }
+.market-slot.pest-stock { border-color:#c75b4f;background:linear-gradient(145deg,#fff6ed,#fbe4dc); }
+.shop-cart-row.pest-stock { border-left:3px solid #b53636;padding-left:6px;color:#9b302c; }
 body.event-pests { animation:farm-pest-shake .35s ease-in-out 3; }
 .plot.event-golden { box-shadow:0 0 0 3px #f0c95b,0 0 22px #ffd96f99 !important; animation:event-golden-pulse 1.1s ease-in-out infinite alternate; }
 .plot.event-mutated { box-shadow:0 0 0 3px #a779da,0 0 24px #b47af688 !important; }
@@ -4434,8 +4438,10 @@ const G = {
   plots: Array(6).fill(null),
   unlockedPlots: 2,
   harvested: {},
+  pestHarvested: {},
   crystalHarvested: {},
   goldenHarvested: {},
+  crazyDoublePestHarvested: {},
   upgrades: new Set(),
   upgradeLevels: {},
   waterCapacity: 5,
@@ -4518,7 +4524,7 @@ const GARDEN_EVENTS = {
   butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
   moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
   mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode mudar de cor!' },
-  pests: { icon:'🐛', name:'Invasão de Pragas', duration:55, color:'#b7794c', intro:'Algo está se mexendo nas plantações…' },
+  pests: { icon:'🐛', name:'Invasão de Pragas', duration:55, color:'#b7794c', intro:'Remova as pragas! Ao final, há 34% de chance de uma infestação ficar na sua fazenda.' },
   crazyshop: { icon:'🤪', name:'LOJA MALUCA', duration:20, color:'#d94b43', intro:'A loja vai liberar cinco ofertas malucas — escolha até três!' },
 };
 let gardenEvent = null;
@@ -4846,7 +4852,15 @@ function finishGardenEvent() {
   }
   if (finished.type === 'pests') {
     const ignored = (finished.pests || []).filter(p => !p.removed);
-    ignored.forEach(p => { const plot=G.plots[p.plot]; if (plot) plot.pestInfestedUntil=Date.now()+30*60*1000; });
+    const eligiblePlots = G.plots.map((plot,index) => plot?.type && !plot.pestInfested ? index : -1).filter(index => index >= 0);
+    const infestedIdx = eligiblePlots.length && Math.random() < .34 ? eligiblePlots[Math.floor(Math.random() * eligiblePlots.length)] : -1;
+    if (infestedIdx >= 0) {
+      const plot = G.plots[infestedIdx];
+      plot.pestInfested = true;
+      const plantName = getPlantable(plot.type)?.name || 'planta';
+      toast(`🐛 Praga instalada em ${plantName}! Todas as colheitas dela terão pragas e serão vendidas pela metade.`, 6500);
+      renderPlots();
+    } else if (eligiblePlots.length) toast('🛡️ A invasão não deixou pragas permanentes desta vez.', 3200);
     if (finished.actions >= 5) {
       creditGardenPoints(120, 'Invasão de Pragas: fazenda protegida');
       finished.bonus = 120; finished.xp += 80;
@@ -5425,7 +5439,7 @@ async function buyWaterRefillFromNotice() {
   }
 }
 function selectedSellQuantity() {
-  return Object.values(SELL || {}).reduce((sum, qty) => sum + Math.max(0, Number(qty) || 0), 0);
+  return [...Object.values(SELL || {}), ...Object.values(SELL_PEST || {})].reduce((sum, qty) => sum + Math.max(0, Number(qty) || 0), 0);
 }
 function localFairSaleBonus(itemCount) {
   const skillLevel = Math.max(0, Number(G.skillNodes?.feira_local) || 0);
@@ -5685,6 +5699,12 @@ const SELL = { potato: 0, carrot: 0, tomato: 0, beetroot: 0, lettuce: 0, cassava
                orchid: 0, hibiscus: 0, bluebell: 0, cherry: 0, poppy: 0, jasmine: 0,
                cherry_blossom: 0, orange_blossom: 0, moon_flower: 0, sun_flower: 0, guarana_flower: 0,
                purple_cabbage: 0, crystal_kale: 0, yellow_eggplant: 0, pink_cucumber: 0, green_mushroom: 0 };
+const SELL_PEST = {};
+function ensureSaleTypes() {
+  [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)].forEach(type => {
+    if (!Object.prototype.hasOwnProperty.call(SELL, type)) SELL[type] = 0;
+  });
+}
 
 // Venda base já cobre: semente (rega e colheita são gratuitas)
 // mantendo uma margem cozy de lucro para cada cultivo. (rega não tem custo)
@@ -5801,6 +5821,14 @@ function sellValueForQuantity(type, qty, epicOverride = false) {
   const unit = effectiveSellValue(type, epicOverride);
   const doubleQty = Math.min(Math.max(0, Number(qty) || 0), Math.max(0, Number(G.crazyDoubleHarvested?.[type]) || 0));
   return Math.max(0, Number(qty) || 0) * unit + doubleQty * unit;
+}
+function sellValueForSelection(type, goodQty, pestQty, epicOverride = false) {
+  const unit = effectiveSellValue(type, epicOverride);
+  const good = Math.max(0, Number(goodQty) || 0);
+  const pests = Math.max(0, Number(pestQty) || 0);
+  const doublePests = Math.min(pests, Math.max(0, Number(G.crazyDoublePestHarvested?.[type]) || 0));
+  const doubleGoods = Math.min(good, Math.max(0, (Number(G.crazyDoubleHarvested?.[type]) || 0) - (Number(G.crazyDoublePestHarvested?.[type]) || 0)));
+  return Math.round(unit * (good + pests * .5 + doubleGoods + doublePests * .5));
 }
 function setShopQtyFromInput(type, value, input) {
   const parsed=Number(value);
@@ -5939,12 +5967,13 @@ async function buyFlower(type, el) {
 }
 
 function sellTotal() {
-  const baseTotal = Object.entries(SELL).reduce((sum, [type, qty]) => sum + sellValueForQuantity(type, qty), 0);
+  ensureSaleTypes();
+  const baseTotal = Object.keys(SELL).reduce((sum, type) => sum + sellValueForSelection(type, SELL[type] || 0, SELL_PEST[type] || 0, window._epicSaleType === type), 0);
   return Math.round(baseTotal * (1 + localFairSaleBonus(selectedSellQuantity())));
 }
 
 function changeSellQty(type, delta) {
-  const max = G.harvested[type] || 0;
+  const max = Math.max(0, (G.harvested[type] || 0) - (G.pestHarvested?.[type] || 0));
   SELL[type] = Math.max(0, Math.min(max, (SELL[type] || 0) + delta));
   renderHarvested();
 }
@@ -5952,9 +5981,12 @@ function changeSellQty(type, delta) {
 let saleInFlight = false;
 async function sellSelected() {
   if (saleInFlight) return;
+  ensureSaleTypes();
   // Nunca venda mais do que o estoque confirmado na tela.
   for (const [type, qty] of Object.entries(SELL)) {
-    if (!Number.isInteger(qty) || qty < 0 || qty > (G.harvested[type] || 0)) {
+    const cleanStock = Math.max(0, (G.harvested[type] || 0) - (G.pestHarvested?.[type] || 0));
+    const pestQty = Number(SELL_PEST[type] || 0);
+    if (!Number.isInteger(qty) || qty < 0 || qty > cleanStock || !Number.isInteger(pestQty) || pestQty < 0 || pestQty > (G.pestHarvested?.[type] || 0)) {
       toast('❌ A quantidade mudou. Confira os itens antes de vender.', 4000);
       return;
     }
@@ -5969,9 +6001,12 @@ async function sellSelected() {
 
   const saleSnapshot = {
     harvested: JSON.parse(JSON.stringify(G.harvested || {})),
+    pestHarvested: JSON.parse(JSON.stringify(G.pestHarvested || {})),
     crystalHarvested: JSON.parse(JSON.stringify(G.crystalHarvested || {})),
     crazyDoubleHarvested: JSON.parse(JSON.stringify(G.crazyDoubleHarvested || {})),
+    crazyDoublePestHarvested: JSON.parse(JSON.stringify(G.crazyDoublePestHarvested || {})),
     sellSelection: { ...SELL },
+    pestSellSelection: { ...SELL_PEST },
     pts: G.pts,
     pointsHistory: JSON.parse(JSON.stringify(G.pointsHistory || [])),
     lastSale: G.lastSale,
@@ -5984,16 +6019,25 @@ async function sellSelected() {
   const sold = [];
   let soldQty = 0;
   let flowersSold = 0;
-  Object.entries(SELL).forEach(([type, qty]) => {
-    if (qty > 0) {
-      G.harvested[type] = (G.harvested[type] || 0) - qty;
-      if (G.crystalHarvested?.[type]) G.crystalHarvested[type] = Math.max(0, G.crystalHarvested[type] - Math.min(qty, G.crystalHarvested[type]));
-      if (G.crazyDoubleHarvested?.[type]) G.crazyDoubleHarvested[type] = Math.max(0, G.crazyDoubleHarvested[type] - Math.min(qty, G.crazyDoubleHarvested[type]));
-      soldQty += qty;
-      sold.push(`${qty}× ${getPlantable(type).emoji}`);
+  Object.keys(SELL).forEach(type => {
+    const qty = Number(SELL[type] || 0);
+    const pestQty = Number(SELL_PEST[type] || 0);
+    if (qty > 0 || pestQty > 0) {
+      const crazyPestStock = Math.max(0, Number(G.crazyDoublePestHarvested?.[type]) || 0);
+      const crazyGoodStock = Math.max(0, (Number(G.crazyDoubleHarvested?.[type]) || 0) - crazyPestStock);
+      const crazyGoodSold = Math.min(qty, crazyGoodStock);
+      const crazyPestSold = Math.min(pestQty, crazyPestStock);
+      G.harvested[type] = (G.harvested[type] || 0) - qty - pestQty;
+      if (pestQty) G.pestHarvested[type] = Math.max(0, (G.pestHarvested[type] || 0) - pestQty);
+      if (crazyPestSold) G.crazyDoublePestHarvested[type] = Math.max(0, crazyPestStock - crazyPestSold);
+      if (G.crazyDoubleHarvested?.[type]) G.crazyDoubleHarvested[type] = Math.max(0, G.crazyDoubleHarvested[type] - crazyGoodSold - crazyPestSold);
+      if (G.crystalHarvested?.[type]) G.crystalHarvested[type] = Math.max(0, G.crystalHarvested[type] - Math.min(qty + pestQty, G.crystalHarvested[type]));
+      soldQty += qty + pestQty;
+      sold.push(`${qty ? `${qty}× ${getPlantable(type).emoji}` : ''}${pestQty ? ` ${pestQty}× 🐛${getPlantable(type).emoji}` : ''}`.trim());
       // Contabilizar flores ANTES de zerar SELL
-      if (FLOWERS[type]) flowersSold += qty;
+      if (FLOWERS[type]) flowersSold += qty + pestQty;
       SELL[type] = 0;
+      SELL_PEST[type] = 0;
     }
   });
 
@@ -6021,9 +6065,12 @@ async function sellSelected() {
     let pointsReversed = true;
     if (pointsCredited) pointsReversed = await spendSEPoints(total).catch(() => false);
     G.harvested = saleSnapshot.harvested;
+    G.pestHarvested = saleSnapshot.pestHarvested;
     G.crystalHarvested = saleSnapshot.crystalHarvested;
     G.crazyDoubleHarvested = saleSnapshot.crazyDoubleHarvested;
+    G.crazyDoublePestHarvested = saleSnapshot.crazyDoublePestHarvested;
     Object.keys(SELL).forEach(type => { SELL[type] = saleSnapshot.sellSelection[type] || 0; });
+    Object.keys(SELL_PEST).forEach(type => { SELL_PEST[type] = saleSnapshot.pestSellSelection[type] || 0; });
     G.pts = saleSnapshot.pts;
     G.pointsHistory = saleSnapshot.pointsHistory;
     G.lastSale = saleSnapshot.lastSale;
@@ -6599,8 +6646,8 @@ function renderOrders() {
     ? '<div class="market-empty">✅ Você entregou todos os pedidos desta estação.<br><small>Espere a estação terminar para receber novos pedidos.</small></div>'
     : pastSeasonBanner + gardenOrders.map(order => {
     const item = getPlantable(order.type);
-    const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
-    const stock = G.harvested[order.type] || 0;
+    const stock = Math.max(0, (G.harvested[order.type] || 0) - (G.pestHarvested?.[order.type] || 0));
+    const canDeliver = stock >= order.qty;
     const normalized = normalizeOrderTier(order);
     const canRefresh = (G.orderSearches || 0) < 3 && (G.orderDeliveries || 0) < 4;
     return `<div class="order-card tier-${String(normalized.rarity).toLowerCase()}${canDeliver ? ' ready-to-deliver' : ''}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${normalized.name} pediu ${normalized.qty}× ${item?.name || normalized.type}<span class="order-rarity">${normalized.rarityLabel}</span></strong><small>${canDeliver ? `Você tem ${stock}/${normalized.qty} itens — pronto para entregar!` : `Você tem ${stock}/${normalized.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${normalized.reward} pontos <span class="order-xp">+${normalized.xp || Math.round(normalized.qty * 10)} XP</span></span></div><div class="order-actions"><button class="order-deliver" onclick="deliverOrder('${normalized.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button><button class="order-refresh" onclick="refreshSingleOrder('${normalized.id}')" ${canRefresh ? '' : 'disabled'}>🔄 Atualizar</button></div></div>`;
@@ -6637,9 +6684,19 @@ function closeOrderResetConfirm() { document.getElementById('orders-reset-confir
 async function deliverOrder(id) {
   const order = gardenOrders.find(item => item.id === id);
   if (!order || (G.orderDeliveries || 0) >= 4) { toast('🌿 Você já entregou 4 pedidos nesta estação.', 2800); return; }
-  if ((G.harvested[order.type] || 0) < order.qty) return;
+  const availableClean = Math.max(0, (G.harvested[order.type] || 0) - (G.pestHarvested?.[order.type] || 0));
+  if (availableClean < order.qty) return;
+  const pestStock = Math.min(G.harvested[order.type] || 0, G.pestHarvested?.[order.type] || 0);
+  const cleanStock = (G.harvested[order.type] || 0) - pestStock;
+  const pestUsed = Math.max(0, order.qty - cleanStock);
+  const doublePestStock = Math.max(0, Number(G.crazyDoublePestHarvested?.[order.type]) || 0);
+  const doubleCleanStock = Math.max(0, (Number(G.crazyDoubleHarvested?.[order.type]) || 0) - doublePestStock);
+  const doubleUsed = Math.min(Math.min(cleanStock, order.qty), doubleCleanStock);
+  const doublePestUsed = Math.min(pestUsed, doublePestStock);
   G.harvested[order.type] -= order.qty;
-  if (G.crazyDoubleHarvested?.[order.type]) G.crazyDoubleHarvested[order.type] = Math.max(0, G.crazyDoubleHarvested[order.type] - Math.min(order.qty, G.crazyDoubleHarvested[order.type]));
+  if (pestUsed) G.pestHarvested[order.type] = Math.max(0, pestStock - pestUsed);
+  if (doublePestUsed) G.crazyDoublePestHarvested[order.type] = Math.max(0, doublePestStock - doublePestUsed);
+  if (G.crazyDoubleHarvested?.[order.type]) G.crazyDoubleHarvested[order.type] = Math.max(0, G.crazyDoubleHarvested[order.type] - doubleUsed - doublePestUsed);
   G.pts += order.reward;
   recordPointsHistory(order.reward, `Pedido entregue para ${order.name}`);
   G.lastOrder = { type:'order', item:`${order.qty}× ${getPlantable(order.type)?.name || order.type}`, reward:order.reward, at:Date.now() };
@@ -6671,6 +6728,7 @@ async function openOrders(event) {
 function closeOrders() { document.getElementById('orders-overlay')?.classList.add('hidden'); }
 
 function renderHarvested() {
+  ensureSaleTypes();
   updateOrdersReadyBadge();
   const bag = document.getElementById('harvest-bag');
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
@@ -6693,33 +6751,36 @@ function renderHarvested() {
   // Only show types that have been harvested
   const harvestedTypes = allTypes.filter(t => (G.harvested[t] || 0) > 0);
 
-  const slots = harvestedTypes.map(type => {
-    const count  = G.harvested[type] || 0;
+  const slots = harvestedTypes.flatMap(type => {
+    const totalCount = G.harvested[type] || 0;
+    const pestCount = Math.min(totalCount, G.pestHarvested?.[type] || 0);
+    const goodCount = Math.max(0, totalCount - pestCount);
     const crystalCount = G.crystalHarvested?.[type] || 0;
-    const qty    = SELL[type] || 0;
-    const unitVal = effectiveSellValue(type);
-    const selected = qty > 0;
-
-    const sellQty = selected ? `
-      <div class="market-slot-sell-qty" style="display:flex;align-items:center;gap:3px;padding:0 4px">
-        ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',-1)" ${qty <= 1 ? 'disabled' : ''}>−</button>` : ''}
-        <span><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${sellValueForQuantity(type, qty)}</span>
-        ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',1)" ${qty >= count ? 'disabled' : ''}>+</button>` : ''}
-      </div>` : '';
-
-    return `
-      <div class="market-slot ${selected ? 'selected' : ''}" onclick="toggleSellSlot('${type}')">
+    return [
+      { infested:false, count:goodCount, qty:SELL[type] || 0 },
+      { infested:true, count:pestCount, qty:SELL_PEST[type] || 0 },
+    ].filter(row => row.count > 0).map(({ infested, count, qty }) => {
+      const selected = qty > 0;
+      const saleValue = sellValueForSelection(type, infested ? 0 : qty, infested ? qty : 0);
+      const sellQty = selected ? `
+        <div class="market-slot-sell-qty" style="display:flex;align-items:center;gap:3px;padding:0 4px">
+          ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',-1,${infested})" ${qty <= 1 ? 'disabled' : ''}>−</button>` : ''}
+          <span><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${saleValue}</span>
+          ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',1,${infested})" ${qty >= count ? 'disabled' : ''}>+</button>` : ''}
+        </div>` : '';
+      return `<div class="market-slot ${selected ? 'selected' : ''} ${infested ? 'pest-stock' : ''}" onclick="toggleSellSlot('${type}',${infested})">
         <div class="market-slot-svg">${harvestedProduceArt(type)}</div>
         <div class="market-slot-name">${getPlantable(type).name}</div>
-        ${crystalCount > 0 ? `<div class="market-crystal-tag">💎 Cristalina${crystalCount > 1 ? ` · ${crystalCount}x` : ''}</div>` : ''}
+        ${infested ? '<span class="market-pest-tag">🐛 COM PRAGAS · VENDA POR METADE</span>' : ''}
+        ${crystalCount > 0 && !infested ? `<div class="market-crystal-tag">💎 Cristalina${crystalCount > 1 ? ` · ${crystalCount}x` : ''}</div>` : ''}
         <div class="market-slot-stock">×${count}</div>
         ${sellQty}
       </div>`;
+    });
   }).join('');
 
   const total = sellTotal();
-  const anySelected = allTypes.some(t => (SELL[t] || 0) > 0);
-  const grandTotal = harvestedTypes.reduce((sum, t) => sum + sellValueForQuantity(t, G.harvested[t] || 0), 0);
+  const grandTotal = harvestedTypes.reduce((sum, t) => sum + sellValueForSelection(t, (G.harvested[t] || 0) - (G.pestHarvested?.[t] || 0), G.pestHarvested?.[t] || 0), 0);
 
   bag.innerHTML = `
     <div class="market-slots">${slots}</div>
@@ -7686,6 +7747,7 @@ function updateFertilizerCursor() {
 }
 
 function sellAll() {
+  ensureSaleTypes();
   // Skill: Venda Épica — escolhe um item aleatório para valer o dobro
   const epicChance = skillEpicSaleChance();
   let epicType = null;
@@ -7699,7 +7761,11 @@ function sellAll() {
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
   if (!hasAny) return;
-  allTypes.forEach(type => { SELL[type] = G.harvested[type] || 0; });
+  allTypes.forEach(type => {
+    const pests = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+    SELL_PEST[type] = pests;
+    SELL[type] = Math.max(0, (G.harvested[type] || 0) - pests);
+  });
   renderSellAllConfirm();
 }
 
@@ -7740,13 +7806,14 @@ function applyOfflineProgress(savedAt) {
 }
 
 function renderSellAllConfirm() {
+  ensureSaleTypes();
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const available = allTypes.filter(type => (G.harvested[type] || 0) > 0);
-  const selectedCount = available.reduce((sum, type) => sum + (SELL[type] || 0), 0);
+  const selectedCount = available.reduce((sum, type) => sum + (SELL[type] || 0) + (SELL_PEST[type] || 0), 0);
   const fairBonus = localFairSaleBonus(selectedCount);
   const baseTotal = available.reduce((sum, type) => {
     const isEpic = window._epicSaleType === type;
-    return sum + sellValueForQuantity(type, SELL[type] || 0, isEpic);
+    return sum + sellValueForSelection(type, SELL[type] || 0, SELL_PEST[type] || 0, isEpic);
   }, 0);
   const total = Math.round(baseTotal * (1 + fairBonus));
   const fairBonusPoints = Math.max(0, total - baseTotal);
@@ -7755,11 +7822,17 @@ function renderSellAllConfirm() {
   const fairLabel = fairUnlocked
     ? `🎪 Feira Local: +${fairBonusPoints} pts · ${fairStatus}`
     : `🎪 Feira Local: habilidade não desbloqueada · ${selectedCount}/300 itens`;
-  const rows = available.map(type => {
+  const rows = available.flatMap(type => {
     const item = getPlantable(type);
-    const qty = SELL[type] || 0;
-    const max = G.harvested[type] || 0;
-    return `<div class="shop-cart-row"><span>${item.emoji} ${item.name}</span><div class="shop-cart-row-controls"><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',false)" aria-label="Remover ${item.name} da venda">⇤</button><button onclick="adjustSellAllQty('${type}',-1)" aria-label="Diminuir ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1)" aria-label="Aumentar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',true)" aria-label="Adicionar todo o estoque de ${item.name} à venda">⇥</button></div></div>`;
+    const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+    const goodMax = Math.max(0, (G.harvested[type] || 0) - pestMax);
+    return [{ infested:false, max:goodMax, qty:SELL[type] || 0 }, { infested:true, max:pestMax, qty:SELL_PEST[type] || 0 }]
+      .filter(row => row.max > 0)
+      .map(({ infested,max,qty }) => {
+        const label = `${item.emoji} ${item.name}${infested ? ' · 🐛 COM PRAGAS · 50% DO PREÇO' : ''}`;
+        const pestClass = infested ? ' pest-stock' : '';
+        return `<div class="shop-cart-row${pestClass}"><span>${label}</span><div class="shop-cart-row-controls"><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',false,${infested})" aria-label="Remover todo ${item.name} ${infested ? 'com pragas' : ''} da venda">⇤</button><button onclick="adjustSellAllQty('${type}',-1,${infested})" aria-label="Diminuir ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1,${infested})" aria-label="Aumentar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',true,${infested})" aria-label="Adicionar todo o estoque de ${item.name} à venda">⇥</button></div></div>`;
+      });
   }).join('');
   document.getElementById('sell-all-confirm-overlay')?.remove();
   const overlay = document.createElement('div');
@@ -7777,31 +7850,38 @@ function renderSellAllConfirm() {
   document.body.appendChild(overlay);
 }
 
-function adjustSellAllQty(type, delta) {
-  const max = G.harvested[type] || 0;
-  SELL[type] = Math.max(0, Math.min(max, (SELL[type] || 0) + delta));
+function adjustSellAllQty(type, delta, infested = false) {
+  const target = infested ? SELL_PEST : SELL;
+  const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+  const max = infested ? pestMax : Math.max(0, (G.harvested[type] || 0) - pestMax);
+  target[type] = Math.max(0, Math.min(max, (target[type] || 0) + delta));
   renderSellAllConfirm();
 }
 
-function closeSellAllConfirm() {
+function closeSellAllConfirm(clearEpicSale = true) {
   document.getElementById('sell-all-confirm-overlay')?.remove();
+  if (clearEpicSale) window._epicSaleType = null;
 }
 
 function confirmSellAll() {
-  closeSellAllConfirm();
+  closeSellAllConfirm(false);
   sellSelected();
 }
 
-function toggleSellSlot(type) {
-  const count = G.harvested[type] || 0;
+function toggleSellSlot(type, infested = false) {
+  const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+  const count = infested ? pestMax : Math.max(0, (G.harvested[type] || 0) - pestMax);
+  const target = infested ? SELL_PEST : SELL;
   if (!count) return;
-  SELL[type] = (SELL[type] || 0) >= count ? 0 : count;
+  target[type] = (target[type] || 0) >= count ? 0 : count;
   renderHarvested();
 }
 
-function changeMarketQty(type, delta) {
-  const count = G.harvested[type] || 0;
-  SELL[type] = Math.max(1, Math.min(count, (SELL[type] || 0) + delta));
+function changeMarketQty(type, delta, infested = false) {
+  const target = infested ? SELL_PEST : SELL;
+  const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+  const count = infested ? pestMax : Math.max(0, (G.harvested[type] || 0) - pestMax);
+  target[type] = Math.max(0, Math.min(count, (target[type] || 0) + delta));
   renderHarvested();
 }
 
@@ -8166,7 +8246,8 @@ function buildPlotEl(plot, idx) {
       ${plot.quickGrow ? '<br>⚡ Adubo Rápido ativo' : ''}
       ${plot.goldenSoil ? '<br>✨ Terra Dourada ativa' : ''}
     ${plot.aquaticWater ? '<br>💧 Adubo Aquático ativo até terminar as colheitas desta planta' : ''}
-    ${plot.crazySeasonProtected ? `<br><strong style="color:#b53636">★ MALUCO</strong>${plot.crazyNoWater ? '<br>🚿 Não precisa de rega' : plot.crazyWaterReduction ? `<br>💧 ${plot.crazyWaterReduction} rega a menos` : ''}${plot.crazyGrowReduction ? `<br>⏱️ Cresce mais rápido` : ''}${plot.crazyExtraHarvests ? `<br>🧺 +${plot.crazyExtraHarvests} colheitas` : ''}${plot.crazyDoubleSale ? '<br>💰 Venda pelo dobro' : ''}` : ''}
+      ${plot.crazySeasonProtected ? `<br><strong style="color:#b53636">★ MALUCO</strong>${plot.crazyNoWater ? '<br>🚿 Não precisa de rega' : plot.crazyWaterReduction ? `<br>💧 ${plot.crazyWaterReduction} rega a menos` : ''}${plot.crazyGrowReduction ? `<br>⏱️ Cresce mais rápido` : ''}${plot.crazyExtraHarvests ? `<br>🧺 +${plot.crazyExtraHarvests} colheitas` : ''}${plot.crazyDoubleSale ? '<br>💰 Venda pelo dobro' : ''}` : ''}
+      ${plot.pestInfested ? '<br><strong style="color:#a32626">🐛 PRAGA NA PLANTA</strong><br>Infestação permanente: todas as colheitas desta planta irão para o estoque com pragas e serão vendidas pela metade do valor.' : ''}
       ${plot.goldenPlot ? '<br>✨ Canteiro Especial · plantas valem 3× mais' : ''}
     `;
     div.appendChild(tooltip);
@@ -8185,6 +8266,14 @@ function buildPlotEl(plot, idx) {
       crazyBadge.style.cssText = 'position:absolute;left:5px;bottom:22px;z-index:4;border-radius:99px;background:#b53636;color:#fff;padding:2px 5px;font-size:10px;font-weight:900;pointer-events:none;';
       crazyBadge.textContent = '★ MALUCO';
       div.appendChild(crazyBadge);
+    }
+    if (plot.pestInfested) {
+      const pestBadge = document.createElement('div');
+      pestBadge.className = 'plot-pest-badge';
+      pestBadge.title = 'Praga permanente: todas as colheitas desta planta serão vendidas por 50% do preço.';
+      pestBadge.setAttribute('aria-label', 'Planta infestada por pragas; suas colheitas valem metade do preço');
+      pestBadge.textContent = '🐛 PRAGA';
+      div.appendChild(pestBadge);
     }
     if (plot.goldenPlot || isSpecialPlotActive(idx)) {
       const specialBadge = document.createElement('div');
@@ -8340,7 +8429,9 @@ async function onPlotClick(idx) {
           : `🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
       }
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
+      if (plot.pestInfested) G.pestHarvested[type] = (G.pestHarvested[type] || 0) + finalQty;
       if (plot.crazyDoubleSale) G.crazyDoubleHarvested[type] = (G.crazyDoubleHarvested[type] || 0) + finalQty;
+      if (plot.pestInfested && plot.crazyDoubleSale) G.crazyDoublePestHarvested[type] = (G.crazyDoublePestHarvested[type] || 0) + finalQty;
       if (plot.mutated) G.crystalHarvested[type] = (G.crystalHarvested[type] || 0) + finalQty;
       if (gotDouble) {
         spawnSkillEffect(idx, '🧺🧺', '×2 Colheita Dupla!', '#778b64');
@@ -9321,8 +9412,11 @@ function specialLevelReward(lv) {
   return rewards[lv] ? { ...rewards[lv] } : null;
 }
 
-function setSellAllItemQty(type, addAll) {
-  SELL[type] = addAll ? (G.harvested[type] || 0) : 0;
+function setSellAllItemQty(type, addAll, infested = false) {
+  const target = infested ? SELL_PEST : SELL;
+  const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+  const max = infested ? pestMax : Math.max(0, (G.harvested[type] || 0) - pestMax);
+  target[type] = addAll ? max : 0;
   renderSellAllConfirm();
 }
 
@@ -9813,8 +9907,10 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     plots:            G.plots,
     unlockedPlots:    G.unlockedPlots,
     harvested:        G.harvested,
+    pestHarvested:     G.pestHarvested || {},
     crystalHarvested: G.crystalHarvested || {},
     crazyDoubleHarvested: G.crazyDoubleHarvested || {},
+    crazyDoublePestHarvested: G.crazyDoublePestHarvested || {},
     crazySeedModifiers: G.crazySeedModifiers || {},
     goldenHarvested:   G.goldenHarvested || {},
     upgrades:         [...G.upgrades],
@@ -10103,7 +10199,9 @@ async function loadGardenFromSE(username) {
     G.plots           = (save.plots || Array(6).fill(null)).map(p => p || null);
     G.unlockedPlots   = save.unlockedPlots    || 2;
     G.harvested       = save.harvested        || {};
+    G.pestHarvested   = save.pestHarvested    || {};
     G.crazyDoubleHarvested = save.crazyDoubleHarvested || {};
+    G.crazyDoublePestHarvested = save.crazyDoublePestHarvested || {};
     G.crazySeedModifiers = save.crazySeedModifiers || {};
     G.crazyShopOffers = Array.isArray(save.crazyShopOffers) ? save.crazyShopOffers : [];
     G.crazyShopChosen = Number(save.crazyShopChosen || 0);

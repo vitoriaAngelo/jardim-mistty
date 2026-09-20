@@ -243,22 +243,41 @@ exports.handler = async (event) => {
     if (existingRes.ok) {
       const existingRows = await existingRes.json();
       const existingData = existingRows[0]?.data || {};
-      safeData.extraMascotSlotPurchased = safeData.extraMascotSlotPurchased === true || existingData.extraMascotSlotPurchased === true;
-      if (!Object.prototype.hasOwnProperty.call(safeData, 'secondaryMascot')) {
-        safeData.secondaryMascot = safeData.selectedMascot === 'premium' ? (existingData.secondaryMascot || null) : null;
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'ownedMascots') && existingData.ownedMascots) {
+        safeData.ownedMascots = existingData.ownedMascots;
       }
-      if (!Object.prototype.hasOwnProperty.call(safeData, 'tertiaryMascot')) {
-        safeData.tertiaryMascot = safeData.selectedMascot === 'premium' ? (existingData.tertiaryMascot || null) : null;
+      safeData.extraMascotSlotPurchased = safeData.extraMascotSlotPurchased === true || existingData.extraMascotSlotPurchased === true;
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'selectedMascot')) safeData.selectedMascot = existingData.selectedMascot || null;
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'secondaryMascot')) {
+        safeData.secondaryMascot = safeData.selectedMascot === 'premium'
+          ? (existingData.secondaryMascot || existingData.tertiaryMascot || null)
+          : null;
       }
       const validCompanion = mascot => mascot === null || mascot === 'prismatic' || mascot === 'rainbow';
-      if (!validCompanion(safeData.secondaryMascot) || !validCompanion(safeData.tertiaryMascot)
-        || (safeData.secondaryMascot && safeData.secondaryMascot === safeData.tertiaryMascot)
-        || [...new Set([safeData.secondaryMascot, safeData.tertiaryMascot].filter(Boolean))].some(mascot =>
-          safeData.selectedMascot !== 'premium'
-          || safeData.extraMascotSlotPurchased !== true
-          || safeData.ownedMascots?.[mascot] !== true)) {
+      safeData.tertiaryMascot = null;
+      const validPrimary = mascot => mascot === null || ['orange','apple','strawberry','premium','twitchzinho'].includes(mascot);
+      if (!validPrimary(safeData.selectedMascot) || !validCompanion(safeData.secondaryMascot)
+        || (safeData.secondaryMascot && (safeData.selectedMascot !== 'premium'
+          || safeData.ownedMascots?.[safeData.secondaryMascot] !== true))) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Combinação de mascotes inválida' }) };
       }
+      const seasonKey = `${Math.max(0, Number(safeData.seasonCycle) || 0)}:${Math.max(0, Number(safeData.seasonIdx) || 0)}`;
+      let previousPrimary = existingData.selectedMascot || null;
+      let previousCompanion = existingData.secondaryMascot || existingData.tertiaryMascot || null;
+      if (['prismatic','rainbow'].includes(previousPrimary)) {
+        previousCompanion = existingData.ownedMascots?.premium === true ? previousPrimary : null;
+        previousPrimary = existingData.ownedMascots?.premium === true ? 'premium' : null;
+      }
+      if (previousPrimary !== 'premium' || !validCompanion(previousCompanion)
+        || existingData.ownedMascots?.[previousCompanion] !== true) previousCompanion = null;
+      const loadoutChanged = previousPrimary !== safeData.selectedMascot || previousCompanion !== safeData.secondaryMascot;
+      const storedSeasonKey = String(existingData.mascotSwitchSeasonKey || `${Math.max(0, Number(existingData.seasonCycle) || 0)}:${Math.max(0, Number(existingData.seasonIdx) || 0)}`);
+      const switchedThisSeason = storedSeasonKey === seasonKey && existingData.mascotSwitchUsed === true;
+      if (loadoutChanged && switchedThisSeason) {
+        return { statusCode: 409, headers, body: JSON.stringify({ error: 'A troca de mascote desta estação já foi usada.', code: 'MASCOT_SWITCH_LIMIT' }) };
+      }
+      safeData.mascotSwitchSeasonKey = seasonKey;
+      safeData.mascotSwitchUsed = switchedThisSeason || loadoutChanged;
 
       const storedXP = Number(existingData.xp || 0);
       const incomingXP = Number(safeData.xp || 0);

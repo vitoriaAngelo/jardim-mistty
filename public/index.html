@@ -6139,6 +6139,7 @@ function mascotOpeningAnimation(kind) {
   });
 }
 function closeShop() {
+  if (activeGardenEvent('crazyshop')) finishGardenEvent();
   document.getElementById('shop-overlay')?.classList.add('hidden');
   document.getElementById('shop-cart')?.classList.remove('side-cart');
   document.getElementById('shop-cart')?.classList.add('shop-cart-closed');

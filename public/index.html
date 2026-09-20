@@ -255,6 +255,9 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .watering-refill-offer::before { content:''; position:absolute; right:100%; top:50%; border:6px solid transparent; border-right-color:#e3c98f; transform:translateY(-50%); }
 .watering-refill-offer.visible { display:block; }
 .watering-refill-offer img { width:13px; height:13px; vertical-align:-3px; }
+.watering-tax-notice { display:none; margin-top:5px; padding:5px 7px; border:1px solid #b7794c; border-radius:9px; background:#fff0e8; color:#8f3028; font:900 9px/1.2 'Nunito',sans-serif; text-align:center; cursor:pointer; }
+.watering-tax-notice.visible { display:block; }
+body.dark-mode .watering-tax-notice { background:#4a2929; border-color:#d87575; color:#ffe1d8; }
 .latest-sales-feed .latest-sales-content.sales-slide-in { animation:sales-slide-in .35s ease both; }
 .garden-event-banner { display:none; position:relative; overflow:hidden; margin:0 0 10px; padding:12px 16px; border:1px solid #c9b98f; border-radius:16px; background:linear-gradient(135deg,#fff9e9,#eef5dc); box-shadow:0 3px 0 #d7c8a7,0 8px 20px rgba(71,84,53,.12); color:#526342; }
 .garden-event-banner.visible { display:flex; align-items:center; gap:12px; animation:event-pop .35s ease both; }
@@ -3585,6 +3588,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <span class="watering-caption" id="water-caption">cheinho de água</span>
       <span class="watering-season-refills" id="watering-season-refills" aria-live="polite"></span>
       <div class="watering-refill-offer" id="watering-refill-offer" role="button" tabindex="0" onclick="event.stopPropagation();buyWaterRefillFromNotice()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();buyWaterRefillFromNotice()}">Regador quase vazio<br>Clique para gastar <img src="points-sprout.svg" alt="" aria-hidden="true"> 500 pontos e encher</div>
+      <div class="watering-tax-notice" id="watering-tax-notice" role="button" tabindex="0" onclick="event.stopPropagation();payGardenTax()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();payGardenTax()}"></div>
       </div>
       <div class="header-btn-tip" id="water-tool-tip" style="left:50%;transform:translateX(-50%)">Regador<br><span>1 água por rega · recupera 1 a cada 5 minutos</span></div>
     </div>
@@ -4480,6 +4484,8 @@ const G = {
   wateringRefillsUsed: 0,
   wateringRefillsBonus: 0,
   wateringRefillsSeasonCycle: 0,
+  taxDue: 0,
+  taxPending: false,
   missions: null,
   achievements: null,
   achievStats: null,
@@ -4546,6 +4552,7 @@ const GARDEN_EVENTS = {
   rain: { icon:'🌧️', name:'Chuva Mágica', duration:45, color:'#67a9c9', intro:'A chuva vai regar suas plantas automaticamente!' },
   goldenshower: { icon:'🌟', name:'GOLDENSHOWER', duration:5, color:'#e5bd43', intro:'Chuva dourada! Enche o regador e concede +2 recargas nesta estação.' },
   golden: { icon:'☀️', name:'Hora Dourada', duration:60, color:'#d9a82f', intro:'Colheitas feitas durante o evento rendem o dobro!' },
+  tax: { icon:'🧾', name:'HORA DO IMPOSTO', duration:45, color:'#b7794c', intro:'Pague 10% dos seus pontos para desbloquear o Regador.' },
   butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
   moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
   mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode mudar de cor!' },
@@ -4744,6 +4751,7 @@ function eventLiveSubtitle() {
   const n = gardenEvent.actions || 0;
   if (gardenEvent.type === 'rain') return `${n} planta${n===1?'':'s'} recebeu${n===1?'':'ram'} água mágica`;
   if (gardenEvent.type === 'goldenshower') return 'Regador cheio · +2 recargas nesta estação';
+  if (gardenEvent.type === 'tax') return G.taxPending ? `Imposto devido: ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts · Regador bloqueado` : 'Imposto pago · Regador liberado';
   if (gardenEvent.type === 'crazyshop') return `⭐ ${G.crazyShopOffers.filter(offer => offer.chosen).length}/3 ofertas escolhidas`;
   if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
   if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
@@ -4788,6 +4796,13 @@ function startGardenEvent() {
     applyGoldenShowerReward();
     spawnGoldenShower();
     toast('🌟 GOLDENSHOWER! Regador cheio e +2 recargas disponíveis nesta estação.', 5200);
+  }
+  if (gardenEvent.type === 'tax') {
+    const points = Math.max(0, Math.floor(Number(G.pts) || 0));
+    G.taxDue = points > 0 ? Math.max(1, Math.floor(points * 0.10)) : 0;
+    G.taxPending = G.taxDue > 0;
+    renderWateringCapacity();
+    toast(G.taxPending ? `🧾 HORA DO IMPOSTO! Pague ${G.taxDue.toLocaleString('pt-BR')} pts para desbloquear o Regador.` : '🧾 HORA DO IMPOSTO! Você não tem imposto devido.', 5200);
   }
   if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
   if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
@@ -5268,6 +5283,18 @@ function refillWateringCapacity() {
 }
 function renderWateringCapacity() {
   syncWateringRefillSeason();
+  const taxBlocked = G.taxPending === true;
+  const waterTool = document.getElementById('tool-water');
+  if (waterTool) {
+    waterTool.classList.toggle('disabled', taxBlocked);
+    waterTool.setAttribute('aria-disabled', taxBlocked ? 'true' : 'false');
+  }
+  const taxNotice = document.getElementById('watering-tax-notice');
+  if (taxNotice) {
+    taxNotice.classList.toggle('visible', taxBlocked);
+    taxNotice.textContent = taxBlocked ? `🧾 Pagar imposto: ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts` : '';
+    taxNotice.tabIndex = taxBlocked ? 0 : -1;
+  }
   const amount = G.waterCapacity ?? 5;
   const max = maxWateringCapacity();
   const el = document.getElementById('water-capacity');
@@ -5496,6 +5523,11 @@ function localFairSaleBonus(itemCount) {
 
 // ─── TOOLS ───────────────────────────────────────────────
 function selectTool(t) {
+  if (t === 'water' && G.taxPending) {
+    toast(`🧾 Regador bloqueado: pague ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts de imposto.`, 3200);
+    renderWateringCapacity();
+    return;
+  }
   if (t === 'shovel' && !G.plots.some(Boolean)) return;
   G.selectedTool = t;
   document.getElementById('tool-water').classList.toggle('active', t === 'water');
@@ -5794,6 +5826,16 @@ function renderGlobalMessageShop() {
   const cooldown = remaining > 0;
   const label = cooldown ? `Aguarde ${Math.ceil(remaining / 1000)}s` : (globalMessagePurchaseInFlight ? 'Confirmando…' : 'Comprar e enviar');
   host.innerHTML = `<div><strong>📣 Mensagem Global</strong><p>Compre o destaque e envie uma mensagem para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pts. Limite: 1 a cada 2 minutos.</p></div><button type="button" onclick="buyGlobalMessage()" ${globalMessagePurchaseInFlight || cooldown || G.pts < GLOBAL_MESSAGE_COST ? 'disabled' : ''}>${label}</button>`;
+}
+async function payGardenTax() {
+  const due = Math.max(0, Math.floor(Number(G.taxDue) || 0));
+  if (!G.taxPending || !due) return;
+  if (!(await chargeGamePoints(due, 'Hora do Imposto'))) return;
+  G.taxDue = 0;
+  G.taxPending = false;
+  renderWateringCapacity();
+  await saveGardenToSE();
+  toast('✅ Imposto pago! O Regador foi desbloqueado.', 3200);
 }
 async function buyGlobalMessage() {
   if (globalMessagePurchaseInFlight || G.pts < GLOBAL_MESSAGE_COST) return;
@@ -8525,6 +8567,11 @@ async function onPlotClick(idx) {
   if (idx >= G.unlockedPlots && !(idx === 5 && premiumSpecialPlotAccess())) return;
   const plot = G.plots[idx];
   const tool = G.selectedTool;
+  if (tool === 'water' && G.taxPending) {
+    toast(`🧾 Regador bloqueado: pague ${Number(G.taxDue || 0).toLocaleString('pt-BR')} pts de imposto.`, 3200);
+    renderWateringCapacity();
+    return;
+  }
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);
   if (plot && plot.outOfSeason && isInSeason(plot.type)) plot.outOfSeason = false;
   const outOfSeason = plot ? (!plot.crazySeasonProtected && (plot.outOfSeason || !isInSeason(plot.type))) : false;
@@ -10090,6 +10137,8 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     wateringRefillsUsed: Number(G.wateringRefillsUsed) || 0,
     wateringRefillsBonus: Number(G.wateringRefillsBonus) || 0,
     wateringRefillsSeasonCycle: Number(G.wateringRefillsSeasonCycle) || 0,
+    taxDue: Math.max(0, Math.floor(Number(G.taxDue) || 0)),
+    taxPending: G.taxPending === true,
     albumPacks:       Number(G.albumPacks || 0),
     packInventory:   G.packInventory || { normal:0, prismatic:0 },
     albumCards:       G.albumCards || {},
@@ -10397,6 +10446,8 @@ async function loadGardenFromSE(username) {
     G.wateringRefillsSeasonCycle = Number.isFinite(Number(save.wateringRefillsSeasonCycle))
       ? Number(save.wateringRefillsSeasonCycle)
       : G.seasonCycle;
+    G.taxDue = Math.max(0, Math.floor(Number(save.taxDue) || 0));
+    G.taxPending = save.taxPending === true && G.taxDue > 0;
     syncWateringRefillSeason();
     G.albumPacks      = Number(save.albumPacks || 0);
     G.packInventory   = { normal:Number(save.packInventory?.normal || 0), prismatic:Number(save.packInventory?.prismatic || 0) };

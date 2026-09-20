@@ -1,11 +1,11 @@
 (function (root) {
   'use strict';
   const catalog = {
-    chicken: { name:'Galinha', home:'Galinheiro', product:'farm_egg', cost:450, level:1, feed:1, minutes:4, color:'#e9d5a5' },
-    cow: { name:'Vaca', home:'Estábulo', product:'farm_milk', cost:1800, level:5, feed:4, minutes:9, color:'#c4d5bd' },
-    pig: { name:'Porco', home:'Chiqueirinho', product:'farm_bacon', cost:1200, level:4, feed:3, minutes:7, color:'#e2b9b8' },
-    sheep: { name:'Ovelha', home:'Aprisco', product:'farm_wool', cost:1600, level:5, feed:3, minutes:8, color:'#d4c9e4' },
-    duck: { name:'Pato', home:'Laguinho', product:'farm_duck_egg', cost:800, level:3, feed:1, minutes:5, color:'#b8d4d2' },
+    chicken: { name:'Galinha', home:'Galinheiro', product:'farm_egg', cost:2250, level:1, feed:1, minutes:4, color:'#e9d5a5' },
+    cow: { name:'Vaca', home:'Estábulo', product:'farm_milk', cost:9000, level:5, feed:4, minutes:9, color:'#c4d5bd' },
+    pig: { name:'Porco', home:'Chiqueirinho', product:'farm_bacon', cost:6000, level:4, feed:3, minutes:7, color:'#e2b9b8' },
+    sheep: { name:'Ovelha', home:'Aprisco', product:'farm_wool', cost:8000, level:5, feed:3, minutes:8, color:'#d4c9e4' },
+    duck: { name:'Pato', home:'Laguinho', product:'farm_duck_egg', cost:4000, level:3, feed:1, minutes:5, color:'#b8d4d2' },
   };
   const products = {
     farm_egg: { name:'Ovo', emoji:'🥚', sell:65 },
@@ -22,7 +22,16 @@
     booster:{name:'Booster',cost:30,color:'#9cc8bc',description:'Dura 30 minutos e dá chance de produto dourado, que vale o dobro.'},
   };
   const MIN_HEALTH_TO_PRODUCE = 15;
+  const ITEMS_PER_CYCLE = 5;
   const HEALTH_MS = 60000; // Um ponto por minuto, sem arredondar o estado salvo.
+  const AGE_STAGE_DAYS = 30;
+  const MAX_AGE_DAYS = AGE_STAGE_DAYS * 4;
+  const AGE_STAGES = [
+    { name:'Filhote', icon:'🐣' },
+    { name:'Jovem', icon:'🐤' },
+    { name:'Adulto', icon:'🐓' },
+    { name:'Velho', icon:'🪶' },
+  ];
   const level = (skills, key, max) => Math.min(max, Math.max(0, Number(skills[key]) || 0));
   function duration(id, skills = {}) {
     const reducedBySkills = catalog[id].minutes * 60000 * (1 - level(skills,'rotina_rural',5)*.04);
@@ -30,7 +39,7 @@
   }
   function count(n) { return Number.isFinite(Number(n)) ? Math.max(0, Math.floor(Number(n))) : 0; }
   function normalize(raw, now = Date.now()) {
-    const state = {feed:count(raw?.feed), pets:{}, rations:{}};
+    const state = {feed:count(raw?.feed), pets:{}, rations:{}, deaths:[]};
     for (const key of ['premium','super','booster']) state.rations[key]=count(raw?.rations?.[key]);
     for (const id of Object.keys(catalog)) {
       const source=raw?.pets?.[id]; if (!source) continue;
@@ -40,6 +49,7 @@
         name:typeof source.name==='string'?source.name.slice(0,15):'',
         health:Number.isFinite(health)?Math.max(0,Math.min(100,health)):100,
         healthUpdatedAt:Number.isFinite(stamp)&&stamp>=0?stamp:now,
+        ageDays:Math.max(0,Number(source.ageDays)||(Number(source.ageMs)||0)/86400000),
         readyAt:Math.max(0,Number(source.readyAt)||0),
         cycleDuration:Math.max(1000,Number(source.cycleDuration)||duration(id)),
         ration:['normal','premium','super'].includes(source.ration)?source.ration:'normal',
@@ -61,22 +71,33 @@
     return state;
   }
   function status(pet) { return !pet?'empty':pet.health<15?'hungry':'producing'; }
+  function lifeStage(pet) {
+    const ageDays=Math.max(0,Number(pet?.ageDays)||0);
+    const index=Math.min(AGE_STAGES.length-1,Math.floor(ageDays/AGE_STAGE_DAYS));
+    const start=index*AGE_STAGE_DAYS, end=Math.min(MAX_AGE_DAYS,start+AGE_STAGE_DAYS);
+    return { ...AGE_STAGES[index], index, ageDays, maxAgeDays:MAX_AGE_DAYS, progress:Math.min(100,ageDays/MAX_AGE_DAYS*100), stageProgress:Math.min(100,(ageDays-start)/(end-start)*100), remainingDays:Math.max(0,end-ageDays), next:index===AGE_STAGES.length-1?'fim da vida':'próxima fase' };
+  }
+  function itemsAtAge(ageDays) {
+    const stage=Math.min(AGE_STAGES.length-1,Math.floor(Math.max(0,Number(ageDays)||0)/AGE_STAGE_DAYS));
+    return [2,5,7,12][stage];
+  }
   function advance(raw, now=Date.now(), skills={}, random=Math.random) {
     const state=normalize(raw,now);
     for (const [id,pet] of Object.entries(state.pets)) {
       const start=pet.healthUpdatedAt, end=Math.max(start,now);
       const healthAt=time=>Math.max(0,pet.health-Math.max(0,time-start)/HEALTH_MS);
-      const productionEnd=start+Math.max(0,pet.health-15)*HEALTH_MS;
+      const healthDeathAt=start+pet.health*HEALTH_MS;
+      const productionEnd=Math.min(start+Math.max(0,pet.health-15)*HEALTH_MS,healthDeathAt);
       const ms=duration(id,skills);
       const previousCycleDuration=Number(pet.cycleDuration)||duration(id);
       if(pet.readyAt>0&&previousCycleDuration!==ms){pet.readyAt+=ms-previousCycleDuration;pet.cycleDuration=ms;}
       if (!pet.readyAt && pet.health>=15) {pet.readyAt=start+ms;pet.cycleDuration=ms;}
       // Avalia os bônus no instante de cada produto, inclusive durante ausência.
-      while (pet.readyAt>0 && pet.readyAt<=end && pet.readyAt<=productionEnd) {
+      while (pet.readyAt>0 && pet.readyAt<=end && pet.readyAt<=productionEnd && pet.readyAt<healthDeathAt) {
         const time=pet.readyAt;
         const extra=pet.superUntil>time && healthAt(time)>=80 && random()<.34;
         const golden=pet.boosterUntil>time && random()<(.2+level(skills,'criador_dourado',5)*.04);
-        pet[golden?'goldStock':'stock']+=extra?2:1;
+        pet[golden?'goldStock':'stock']+=itemsAtAge(pet.ageDays)+(extra?1:0);
         pet.readyAt+=ms;pet.cycleDuration=ms;
       }
       pet.health=healthAt(end);pet.healthUpdatedAt=end;
@@ -85,7 +106,15 @@
       pet.booster=pet.boosterUntil>end;
       if(!pet.booster)pet.boosterUntil=0;
       if(pet.health<15)pet.readyAt=0;
-      if(pet.health<=0)delete state.pets[id];
+      if(pet.health<=0){state.deaths.push({id,name:pet.name,reason:'health',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
+    }
+    return state;
+  }
+  function advanceGameDay(raw) {
+    const state=normalize(raw);
+    for(const [id,pet] of Object.entries(state.pets)){
+      pet.ageDays=Math.min(MAX_AGE_DAYS,pet.ageDays+1);
+      if(pet.ageDays>=MAX_AGE_DAYS){state.deaths.push({id,name:pet.name,reason:'old-age',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
     }
     return state;
   }
@@ -123,7 +152,7 @@
     const state=advance(raw),pet=state.pets[id];if(!pet)throw new Error('Compre este animal primeiro.');
     pet.name=String(name||'').trim().slice(0,15);return state;
   }
-  const api={catalog,products,rations,normalize,advance,status,feed,boost,collect,rename,duration,feedCost:20};
+  const api={catalog,products,rations,normalize,advance,advanceGameDay,status,lifeStage,itemsAtAge,feed,boost,collect,rename,duration,feedCost:20,itemsPerCycle:ITEMS_PER_CYCLE,ageStageDays:AGE_STAGE_DAYS,maxAgeDays:MAX_AGE_DAYS};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.FarmAnimals=api;
 })(globalThis);

@@ -80,6 +80,15 @@ body.dark-mode .animal-feed-tooltip::after { border-color:#65725b; background:#3
 .animal-health { position:relative; height:14px; border-radius:99px; background:#c98b8b55; overflow:hidden; margin:4px 0 7px; }
 .animal-health span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#c56f6f,#d7a45c 55%,#8ba66d); transition:width .3s ease; }
 .animal-health b { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fffdf5; font:800 9px/1 Nunito,sans-serif; text-shadow:0 1px 2px #303b2c99; }
+.animal-age-summary { margin:5px 0 8px; padding:6px 8px; border:1px solid #c9cfb9; border-radius:11px; background:var(--cream2); text-align:left; }
+.animal-age-heading { display:flex; justify-content:space-between; gap:5px; color:var(--text); font:800 10px/1.2 Nunito,sans-serif; }
+.animal-age-heading b { color:var(--text2); font-size:9px; }
+.animal-age-bar { height:6px; margin-top:5px; overflow:hidden; border-radius:99px; background:#9cac8733; }
+.animal-age-bar span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#9fc779,#718b5b); transition:width .4s ease; }
+.animal-age-summary.age-stage-1 .animal-age-bar span { background:linear-gradient(90deg,#8bb7d0,#638aaa); }
+.animal-age-summary.age-stage-2 .animal-age-bar span { background:linear-gradient(90deg,#a8c76e,#668a43); }
+.animal-age-summary.age-stage-3 .animal-age-bar span { background:linear-gradient(90deg,#d4ad69,#9c7541); }
+.animal-age-summary small { display:block; margin-top:4px; color:var(--text2); font:700 9px/1.2 Nunito,sans-serif; }
 .animal-product-art { display:inline-flex; width:60px; height:60px; align-items:center; justify-content:center; }
 .animal-product-art svg { width:100%; height:100%; }
 .animal-shop-details { font-size:12px; line-height:1.65; min-height:76px; margin-bottom:10px; }
@@ -90,6 +99,9 @@ body.dark-mode .animal-scene { background:linear-gradient(#364330,#44533d); }
 body.dark-mode .animal-pen,body.dark-mode .animal-shop-card { background:#2d372b; border-color:#57624c; color:#eef0df; }
 body.dark-mode .animal-note,body.dark-mode .animal-intro p,body.dark-mode .animal-home { color:#cbd4c0; }
 body.dark-mode .animal-feed-stock,body.dark-mode .animal-feed-shop { background:#3d4735; color:#eef0df; }
+body.dark-mode .animal-age-summary { background:#394434; border-color:#65725b; }
+body.dark-mode .animal-age-heading { color:#eef0df; }
+body.dark-mode .animal-age-heading b,body.dark-mode .animal-age-summary small { color:#cbd4c0; }
 body.dark-mode .animal-meta span,body.dark-mode .animal-feed-choice { background:#3d4735; border-color:#65725b; color:#eef0df; }
 body.dark-mode .animal-feed-choice.ration-normal { background:#514a39; }
 body.dark-mode .animal-feed-choice.ration-premium { background:#655b35; }

@@ -273,6 +273,10 @@ body.dark-mode .presence-title { color:#e1ecd9; }
 .event-pest.golden { font-size:34px; border-color:#d7a62e; box-shadow:0 0 14px #f5d56a,0 3px 0 #b98122; }
 .event-pest.hit { animation:pest-hit .2s ease both; }
 .pest-danger { display:inline-block; margin-left:8px; color:#a85a43; font-weight:900; }
+.plot-pest-badge { position:absolute;right:5px;bottom:20px;z-index:5;padding:2px 5px;border:1px solid #a63b32;border-radius:99px;background:#fff0e8;color:#a32626;font-size:12px;font-weight:900;box-shadow:0 2px 4px #0003;pointer-events:auto;cursor:help; }
+.market-pest-tag { display:inline-block;margin:2px 0;padding:2px 6px;border-radius:8px;background:#fff0e8;color:#a32626;font-size:9px;font-weight:900;line-height:1.25; }
+.market-slot.pest-stock { border-color:#c75b4f;background:linear-gradient(145deg,#fff6ed,#fbe4dc); }
+.shop-cart-row.pest-stock { border-left:3px solid #b53636;padding-left:6px;color:#9b302c; }
 body.event-pests { animation:farm-pest-shake .35s ease-in-out 3; }
 .plot.event-golden { box-shadow:0 0 0 3px #f0c95b,0 0 22px #ffd96f99 !important; animation:event-golden-pulse 1.1s ease-in-out infinite alternate; }
 .plot.event-mutated { box-shadow:0 0 0 3px #a779da,0 0 24px #b47af688 !important; }
@@ -864,6 +868,18 @@ body .card-title { font-family:'Nunito', sans-serif !important; font-weight:800 
   background: #508030; border-color: #306010;
   box-shadow: 0 3px 0 #306010;
 }
+.shop-tab.crazy-shop-tab { display:none; color:#a43131; }
+.shop-tab.crazy-shop-tab.unlocked { display:block; }
+.shop-tab.crazy-shop-tab.active { background:#8f3434;color:#fff;border-color:#702424;box-shadow:0 3px 0 #702424; }
+.crazy-shop-intro { padding:12px 14px;margin-bottom:12px;border:1px solid #d99a8e;border-radius:14px;background:linear-gradient(120deg,#fff7e7,#f8e4df);color:#643838;font-size:12px; }
+.crazy-shop-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px; }
+.crazy-shop-card { position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border:2px solid #d7cdb2;border-radius:16px;background:var(--cream2);text-align:center; }
+.crazy-shop-card .crazy-stamp { position:absolute;top:7px;right:7px;border-radius:99px;padding:3px 7px;background:#b53636;color:white;font-size:10px;font-weight:900; }
+.crazy-shop-card .crazy-item-icon { font-size:32px; }
+.crazy-shop-card .crazy-traits { min-height:46px;color:var(--text2);font-size:10px;line-height:1.4; }
+.crazy-shop-card.chosen { opacity:.65;border-color:#82966c; }
+.crazy-shop-card button { width:100%;padding:7px;border:0;border-radius:10px;background:var(--grass);color:#fff;font-weight:800;cursor:pointer; }
+.crazy-shop-card button:disabled { opacity:.55;cursor:not-allowed; }
 
 /* ─── UPGRADE CARDS ──────────────────────── */
 .upgrade-grid { display: flex; flex-direction: column; gap: 8px; }
@@ -1382,6 +1398,8 @@ body.dark-mode .plot-tooltip.out-of-season-warning { border-color:#d87575; backg
 .market-orders-btn.has-ready-order::after { content:'Pedido pronto para entregar!'; position:absolute; left:50%; top:calc(100% + 10px); transform:translateX(-50%); width:150px; padding:7px 9px; border:1px solid #dfd2b5; border-radius:10px; background:#fffdf7; color:#687052; box-shadow:0 3px 9px #4b573320; font:800 10px/1.2 'Nunito',sans-serif; text-align:center; z-index:20; pointer-events:none; }
 .competition-countdown { width:100%; box-sizing:border-box; margin-top:1px; padding:5px 6px; border:1px solid #d8dfc8; border-radius:10px; background:#f6f6e9; color:#657451; font:800 9px/1.3 'Nunito',sans-serif; text-align:center; }
 body.dark-mode .competition-countdown { border-color:#53624d; background:#2c352b; color:#cbd7a9; }
+.competition-online-count { width:100%; box-sizing:border-box; margin-top:3px; padding:4px 6px; border:1px solid #d8dfc8; border-radius:10px; background:#edf1e3; color:#61744d; font:800 9px/1.3 'Nunito',sans-serif; text-align:center; }
+body.dark-mode .competition-online-count { border-color:#53624d; background:#303a30; color:#cbd7a9; }
 .orders-list { display:grid; gap:10px; margin:14px 0; }
 .orders-status { margin:8px 0 4px; padding:8px 10px; border-radius:11px; background:#f5ead0; color:#76552c; font-size:11px; font-weight:900; line-height:1.55; text-align:center; }
 .missions-reset-info { margin:8px 0 10px; padding:8px 10px; border:1px solid var(--cozy-line); border-radius:11px; background:var(--cream2); color:var(--text2); font-size:12px; font-weight:800; line-height:1.4; text-align:center; }
@@ -2379,6 +2397,7 @@ body.dark-mode .exclusive-store-launcher { border-color:#887343; background:line
   box-shadow: 0 4px 0 #a07000, 0 0 0 3px rgba(212,160,0,.3) !important;
   animation: pulse-golden 1s ease-in-out infinite;
 }
+.plot.ready-aquatic { border-color:#63b8d2 !important; box-shadow:0 4px 0 #428da7,0 0 0 3px rgba(99,184,210,.24) !important; }
 @keyframes pulse-golden {
   0%,100% { box-shadow: 0 4px 0 #a07000, 0 0 0 3px rgba(212,160,0,.3); }
   50%      { box-shadow: 0 4px 0 #a07000, 0 0 0 8px rgba(212,160,0,.12); }
@@ -3610,6 +3629,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="header-icon-wrap" style="width:100%">
       <button class="market-orders-btn" type="button" onclick="openOrders(event)" aria-label="Pedidos do jardim">📬 Pedidos</button>
       <div class="competition-countdown" id="competition-countdown" aria-live="off"></div>
+      <div class="competition-online-count" id="competition-online-count" aria-live="polite">👥 Consultando pessoas jogando…</div>
       <div class="header-btn-tip" style="left:50%;transform:translateX(-50%)">Pedidos<br><span>Troque colheitas por pontos</span></div>
     </div>
 
@@ -3701,7 +3721,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
         </div>
         <div class="help-section">
           <div class="help-section-title">🐾 Animais</div>
-          <div class="help-tip"><div class="help-tip-icon">🌾</div><div>Na aba <strong>Animais</strong>, ao lado de Canteiros, cada bichinho tem seu cercadinho. Compre o animal e ração em <strong>Loja → Animais</strong>. Cada refeição produz 1 item, mesmo enquanto você está fora. Recolha e venda no Mercado; depois alimente novamente.</div></div>
+          <div class="help-tip"><div class="help-tip-icon">🌾</div><div>Na aba <strong>Animais</strong>, ao lado de Canteiros, cada bichinho tem seu cercadinho. Compre o animal e ração em <strong>Loja → Animais</strong>. A produção aumenta com a idade — de 2 a 12 itens por ciclo — mesmo enquanto você está fora. Recolha e venda no Mercado.</div></div>
           <div class="help-tip"><div class="help-tip-icon">🧺</div><div>Galinha: ovo · Vaca: leite · Porco: bacon mágico · Ovelha: lã · Pato: ovo de pato. A loja mostra os níveis, preços, tempos e a ração necessária.</div></div>
           <div class="help-section-title">🪵 Canteiros</div>
           <div class="help-tip"><div class="help-tip-icon">🪵</div><div>Começa com <strong>2 canteiros</strong>. Compre os canteiros 3, 4 e 5 na loja conforme seus requisitos. O canteiro 6 é exclusivo para subscribers e vem como canteiro especial ao resgatar o Premium.</div></div>
@@ -4053,6 +4073,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <button class="shop-tab" id="tab-animais" onclick="switchShopTab('animais')">🐾 Animais</button>
       <button class="shop-tab" id="tab-racoes" onclick="switchShopTab('racoes')">🌾 Rações</button>
       <button class="shop-tab cards-tab" id="tab-packs" onclick="switchShopTab('packs')">🃏 Packs</button>
+      <button class="shop-tab crazy-shop-tab" id="tab-especial" onclick="switchShopTab('especial')">⭐ Especial</button>
     </div>
     <div class="shop-panel visible" id="panel-vegetais"><div class="shop-items" id="shop-items"></div></div>
     <div class="shop-panel" id="panel-flores"><div class="shop-items" id="flower-items"></div></div>
@@ -4061,6 +4082,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
     <div class="shop-panel" id="panel-animais"><div id="animal-shop"></div></div>
     <div class="shop-panel" id="panel-racoes"><div id="ration-shop"></div></div>
     <div class="shop-panel" id="panel-packs"><div id="card-pack-shop"></div></div>
+    <div class="shop-panel" id="panel-especial"><div id="crazy-shop-items"></div></div>
   </div>
 </div>
 <div class="shop-cart empty shop-cart-closed" id="shop-cart"></div>
@@ -4421,8 +4443,10 @@ const G = {
   plots: Array(6).fill(null),
   unlockedPlots: 2,
   harvested: {},
+  pestHarvested: {},
   crystalHarvested: {},
   goldenHarvested: {},
+  crazyDoublePestHarvested: {},
   upgrades: new Set(),
   upgradeLevels: {},
   waterCapacity: 5,
@@ -4491,6 +4515,10 @@ const G = {
   eventNextAt: 0,
   eventLastType: '',
   discoveredMutations: [],
+  crazyShopOffers: [],
+  crazyShopChosen: 0,
+  crazyShopEndsAt: 0,
+  crazyDoubleHarvested: {},
 };
 
 // ─── EVENTOS VIVOS DO JARDIM ─────────────────────────────
@@ -4501,7 +4529,8 @@ const GARDEN_EVENTS = {
   butterflies: { icon:'🦋', name:'Invasão de Borboletas', duration:30, color:'#9b6dc2', intro:'Clique nas borboletas para ganhar XP!' },
   moon: { icon:'🌙', name:'Lua Cheia', duration:90, color:'#735c9e', intro:'Colha sob a lua para encontrar sementes extras.' },
   mutation: { icon:'🧬', name:'Energia de Mutação', duration:45, color:'#6f9a73', intro:'Uma planta pode mudar de cor!' },
-  pests: { icon:'🐛', name:'Invasão de Pragas', duration:55, color:'#b7794c', intro:'Algo está se mexendo nas plantações…' },
+  pests: { icon:'🐛', name:'Invasão de Pragas', duration:55, color:'#b7794c', intro:'Remova as pragas! Ao final, há 34% de chance de uma infestação ficar na sua fazenda.' },
+  crazyshop: { icon:'🤪', name:'LOJA MALUCA', duration:20, color:'#d94b43', intro:'A loja vai liberar cinco ofertas malucas — escolha até três!' },
 };
 let gardenEvent = null;
 let gardenEventTimer = null;
@@ -4596,6 +4625,7 @@ function eventFastMode() {
 }
 function nextEventDelay() { return eventFastMode() ? 8000 + Math.random()*5000 : 300000 + Math.random()*180000; }
 function gardenEventDuration(type) {
+  if (type === 'crazyshop') return 20;
   const base = eventFastMode() ? 12 : GARDEN_EVENTS[type].duration;
   if (type === 'goldenshower' && !eventFastMode()) return GARDEN_EVENTS[type].duration;
   return base + (skillBranchBonusActive('colheita') ? 15 : 0);
@@ -4619,6 +4649,74 @@ function renderGardenEvent() {
   const progress = document.getElementById('garden-event-progress');
   progress.style.background = def.color;
   progress.style.transform = `scaleX(${Math.max(0,Math.min(1,left/total))})`;
+  syncCrazyShopTab();
+}
+
+function syncCrazyShopTab() {
+  const tab = document.getElementById('tab-especial');
+  if (!tab) return;
+  const available = activeGardenEvent('crazyshop');
+  tab.classList.toggle('unlocked', available);
+  if (!available && document.getElementById('panel-especial')?.classList.contains('visible')) switchShopTab('vegetais');
+  if (available && !document.getElementById('crazy-shop-items')?.children.length) renderCrazyShop();
+}
+
+function generateCrazyShopOffers() {
+  const pool = Object.keys(PLANTS).filter(type => !PLANTS[type].eventOnly && !PLANTS[type].subscriberOnly && PLANTS[type].cost > 0);
+  const chosen = [];
+  while (chosen.length < Math.min(5, pool.length)) {
+    const index = Math.floor(Math.random() * pool.length);
+    chosen.push(pool.splice(index, 1)[0]);
+  }
+  G.crazyShopChosen = 0;
+  G.crazyShopOffers = chosen.map(type => {
+    const traits = [];
+    const noWater = Math.random() < .16;
+    const waterReduction = noWater ? 0 : (Math.random() < .48 ? 1 : 0);
+    const growReduction = Math.random() < .58 ? Math.max(1, Math.round(effectiveMaxGrow(type) * .25)) : 0;
+    const extraHarvests = Math.random() < .30 ? 1 + Math.floor(Math.random() * 2) : 0;
+    const doubleSale = Math.random() < .28;
+    const discount = 0.15 + Math.random() * .26;
+    if (noWater) traits.push('🚿 Não precisa de rega');
+    else if (waterReduction) traits.push(`💧 ${waterReduction} rega a menos`);
+    if (growReduction) traits.push(`⏱️ Colhe ${growReduction} estágio${growReduction > 1 ? 's' : ''} antes`);
+    if (extraHarvests) traits.push(`🧺 +${extraHarvests} colheita${extraHarvests > 1 ? 's' : ''}`);
+    if (doubleSale) traits.push('💰 Venda pelo dobro');
+    return { type, price: Math.max(1, Math.floor(PLANTS[type].cost * (1 - discount))), discountPercent:Math.round(discount * 100), noWater, waterReduction, growReduction, extraHarvests, doubleSale, chosen:false, traits };
+  });
+  saveGardenToSE();
+}
+
+function renderCrazyShop() {
+  const host = document.getElementById('crazy-shop-items');
+  if (!host || !activeGardenEvent('crazyshop')) return;
+  const offers = Array.isArray(G.crazyShopOffers) ? G.crazyShopOffers : [];
+  const chosen = offers.filter(offer => offer.chosen).length;
+  host.innerHTML = `<div class="crazy-shop-intro">⭐ <strong>LOJA MALUCA</strong> · Escolha até 3 das 5 ofertas durante o evento. As sementes especiais mantêm seus efeitos até o fim das colheitas.<br><strong>Escolhidas: ${chosen}/3</strong></div><div class="crazy-shop-grid">${offers.map((offer,index) => {
+    const item = PLANTS[offer.type];
+    return `<article class="crazy-shop-card ${offer.chosen ? 'chosen' : ''}"><span class="crazy-stamp">★ MALUCO</span><span class="crazy-item-icon">${item.emoji}</span><strong>${item.name}</strong><span class="crazy-traits">${offer.traits.join('<br>') || '✨ Oferta surpresa'}</span><span style="font-size:10px;color:var(--text2)"><s>${item.cost} pts</s> · -${offer.discountPercent}%</span><strong>🏷️ ${offer.price} pts</strong><button onclick="buyCrazyShopOffer(${index})" ${offer.chosen || chosen >= 3 || G.pts < offer.price ? 'disabled' : ''}>${offer.chosen ? 'Escolhida ✓' : chosen >= 3 ? 'Limite atingido' : 'Escolher oferta'}</button></article>`;
+  }).join('')}</div>`;
+}
+
+const crazyShopPurchasesInFlight = new Set();
+async function buyCrazyShopOffer(index) {
+  const offer = G.crazyShopOffers?.[index];
+  if (!activeGardenEvent('crazyshop') || !offer || offer.chosen || crazyShopPurchasesInFlight.has(index) || !PLANTS[offer.type]) return;
+  const chosen = G.crazyShopOffers.filter(item => item.chosen).length;
+  if (chosen + crazyShopPurchasesInFlight.size >= 3) { toast('⭐ Você já escolheu as 3 ofertas desta Loja Maluca.'); return; }
+  if (G.pts < offer.price) { toast('✨ Pontos insuficientes para essa oferta.'); return; }
+  crazyShopPurchasesInFlight.add(index);
+  try {
+    if (!(await chargeGamePoints(offer.price))) return;
+    offer.chosen = true;
+    G.crazyShopChosen = Number(G.crazyShopChosen || 0) + 1;
+    G.inventory[offer.type] = (G.inventory[offer.type] || 0) + 1;
+    G.crazySeedModifiers ||= {};
+    G.crazySeedModifiers[offer.type] ||= [];
+    G.crazySeedModifiers[offer.type].push({ noWater:offer.noWater, waterReduction:offer.waterReduction, growReduction:offer.growReduction, extraHarvests:offer.extraHarvests, doubleSale:offer.doubleSale });
+    updatePts(); renderInventory(); renderCrazyShop(); saveGardenToSE();
+    toast(`⭐ ${PLANTS[offer.type].name} maluco foi para seu inventário!`, 2800);
+  } finally { crazyShopPurchasesInFlight.delete(index); }
 }
 
 function eventLiveSubtitle() {
@@ -4626,6 +4724,7 @@ function eventLiveSubtitle() {
   const n = gardenEvent.actions || 0;
   if (gardenEvent.type === 'rain') return `${n} planta${n===1?'':'s'} recebeu${n===1?'':'ram'} água mágica`;
   if (gardenEvent.type === 'goldenshower') return 'Regador cheio · +2 recargas nesta estação';
+  if (gardenEvent.type === 'crazyshop') return `⭐ ${G.crazyShopOffers.filter(offer => offer.chosen).length}/3 ofertas escolhidas`;
   if (gardenEvent.type === 'golden') return `${n} colheita${n===1?'':'s'} dourada${n===1?'':'s'} realizada${n===1?'':'s'}`;
   if (gardenEvent.type === 'butterflies') return `${n} borboleta${n===1?'':'s'} encontrada${n===1?'':'s'}`;
   if (gardenEvent.type === 'pests') return `${n} praga${n===1?'':'s'} removida${n===1?'':'s'} · 🐛 Infestação: ${Math.min(100, gardenEvent.danger || 0)}%`;
@@ -4654,6 +4753,7 @@ function startGardenEvent() {
   const def = GARDEN_EVENTS[gardenEvent.type];
   gardenEvent.skillHarvestBonusApplied = skillBranchBonusActive('colheita');
   gardenEvent.phase = 'active'; gardenEvent.endsAt = Date.now() + gardenEventDuration(gardenEvent.type)*1000;
+  if (gardenEvent.type === 'crazyshop') G.crazyShopEndsAt = gardenEvent.endsAt;
   G.eventLastType = gardenEvent.type;
   G.eventNextAt = gardenEvent.endsAt + nextEventDelay();
   document.body.classList.add(`event-${gardenEvent.type}`);
@@ -4672,19 +4772,24 @@ function startGardenEvent() {
   if (gardenEvent.type === 'butterflies') gardenEventButterflyTimer = setInterval(spawnEventButterfly, 1400);
   if (gardenEvent.type === 'pests') { spawnEventPest(); gardenEventRainTimer = setInterval(spawnEventPest, 4200); }
   if (gardenEvent.type === 'mutation') triggerEventMutation();
+  if (gardenEvent.type === 'crazyshop') {
+    generateCrazyShopOffers();
+    openShop();
+    switchShopTab('especial');
+  }
   renderPlots(); renderGardenEvent(); saveGardenToSE();
 }
 
 function applyMagicRain() {
   G.plots.forEach((plot, idx) => {
     if (!plot) return;
-    const max = effectiveMaxWater(plot.type);
+    const max = effectivePlotMaxWater(plot);
     if (plot.waterCount < max) {
       plot.waterCount = Math.min(max, plot.waterCount + 1);
       if (!gardenEvent.touched.has(idx)) { gardenEvent.touched.add(idx); gardenEvent.actions++; gardenEvent.xp += 5; }
       spawnSkillEffect(idx, '💧', '+ água mágica', '#67a9c9');
     } else {
-      const maxGrow = effectiveMaxGrow(plot.type);
+      const maxGrow = effectivePlotMaxGrow(plot);
       if (Number(plot.growCount || 0) < maxGrow) {
         plot.growCount = Math.min(maxGrow, Number(plot.growCount || 0) + 1);
         spawnSkillEffect(idx, '🌱', '+1 crescimento', '#7fa66c');
@@ -4738,7 +4843,8 @@ function triggerEventMutation() {
   if(!choices.length)return;
   const idx=choices[Math.floor(Math.random()*choices.length)];
   G.plots[idx].mutated=true;
-  G.plots[idx].harvestsRemaining = Number(G.plots[idx].harvestsRemaining || harvestCyclesFor(G.plots[idx].type)) + 1;
+  G.plots[idx].harvestsRemaining = Number(G.plots[idx].harvestsRemaining ?? legacyHarvestCyclesFor(G.plots[idx].type)) + 1;
+  G.plots[idx].harvestsTotal = Number(G.plots[idx].harvestsTotal ?? legacyHarvestCyclesFor(G.plots[idx].type)) + 1;
   gardenEvent.actions=1;
   const name=getPlantable(G.plots[idx].type)?.name||'planta'; if(!G.discoveredMutations.includes(G.plots[idx].type))G.discoveredMutations.push(G.plots[idx].type);
   setTimeout(()=>toast(`🧬 Sua ${name} sofreu uma mutação de cor!`,4500),700);
@@ -4749,9 +4855,22 @@ function finishGardenEvent() {
   clearInterval(gardenEventRainTimer); clearInterval(gardenEventButterflyTimer);
   gardenEventRainTimer=null; gardenEventButterflyTimer=null;
   document.body.classList.remove(`event-${finished.type}`);
+  if (finished.type === 'crazyshop') {
+    const selected = (G.crazyShopOffers || []).filter(offer => offer.chosen).length;
+    G.crazyShopEndsAt = 0;
+    toast(`⭐ Loja Maluca terminou! Você escolheu ${selected}/3 ofertas.`, 3500);
+  }
   if (finished.type === 'pests') {
     const ignored = (finished.pests || []).filter(p => !p.removed);
-    ignored.forEach(p => { const plot=G.plots[p.plot]; if (plot) plot.pestInfestedUntil=Date.now()+30*60*1000; });
+    const eligiblePlots = G.plots.map((plot,index) => plot?.type && !plot.pestInfested ? index : -1).filter(index => index >= 0);
+    const infestedIdx = eligiblePlots.length && Math.random() < .34 ? eligiblePlots[Math.floor(Math.random() * eligiblePlots.length)] : -1;
+    if (infestedIdx >= 0) {
+      const plot = G.plots[infestedIdx];
+      plot.pestInfested = true;
+      const plantName = getPlantable(plot.type)?.name || 'planta';
+      toast(`🐛 Praga instalada em ${plantName}! Todas as colheitas dela terão pragas e serão vendidas pela metade.`, 6500);
+      renderPlots();
+    } else if (eligiblePlots.length) toast('🛡️ A invasão não deixou pragas permanentes desta vez.', 3200);
     if (finished.actions >= 5) {
       creditGardenPoints(120, 'Invasão de Pragas: fazenda protegida');
       finished.bonus = 120; finished.xp += 80;
@@ -4986,13 +5105,15 @@ async function refreshPoints() {
 
 // ─── SHOP TABS ───────────────────────────────────────────
 function switchShopTab(tab) {
-  ['vegetais','flores','adubos','canteiros','animais','racoes','packs'].forEach(t => {
+  if (tab === 'especial' && !activeGardenEvent('crazyshop')) { toast('⭐ A aba Especial aparece somente durante a Loja Maluca.'); return; }
+  ['vegetais','flores','adubos','canteiros','animais','racoes','packs','especial'].forEach(t => {
     document.getElementById(`tab-${t}`)?.classList.toggle('active', t === tab);
     document.getElementById(`panel-${t}`)?.classList.toggle('visible', t === tab);
   });
   if (tab === 'animais') renderAnimalShop();
   if (tab === 'racoes') renderRationShop();
   if (tab === 'packs') renderCardPackShop();
+  if (tab === 'especial') renderCrazyShop();
 }
 
 // ─── PLOT SHOP DATA ───────────────────────────────────────
@@ -5162,6 +5283,11 @@ function effectiveMaxWater(type) {
   val = Math.max(1, val - skillWaterReduction());
   return val;
 }
+function effectivePlotMaxWater(plot) {
+  if (!plot) return 0;
+  if (plot.crazyNoWater) return 0;
+  return Math.max(1, effectiveMaxWater(plot.type) - Math.max(0, Number(plot.crazyWaterReduction) || 0));
+}
 function effectiveMaxGrow(type) {
   // Todas as plantas e flores agora exigem o dobro de estágios.
   return getPlantable(type).maxGrow * 2;
@@ -5323,7 +5449,7 @@ async function buyWaterRefillFromNotice() {
   }
 }
 function selectedSellQuantity() {
-  return Object.values(SELL || {}).reduce((sum, qty) => sum + Math.max(0, Number(qty) || 0), 0);
+  return [...Object.values(SELL || {}), ...Object.values(SELL_PEST || {})].reduce((sum, qty) => sum + Math.max(0, Number(qty) || 0), 0);
 }
 function localFairSaleBonus(itemCount) {
   const skillLevel = Math.max(0, Number(G.skillNodes?.feira_local) || 0);
@@ -5341,7 +5467,7 @@ function selectTool(t) {
 }
 function isReady(plot) {
   if (!plot) return false;
-  return plot.growCount >= effectiveMaxGrowWithSkill(plot.type);
+  return plot.growCount >= effectivePlotMaxGrow(plot);
 }
 function premiumSpecialPlotAccess() {
   return G.premiumSpecialPlotClaimed === true && hasSubscriberBadge();
@@ -5449,7 +5575,8 @@ function selectSeed(type) {
   });
   if (G.selectedSeed) {
     const p = getPlantable(G.selectedSeed);
-    if (isOutOfSeason(G.selectedSeed)) {
+    const hasCrazySeed=(G.crazySeedModifiers?.[G.selectedSeed]||[]).length>0;
+    if (isOutOfSeason(G.selectedSeed) && !hasCrazySeed) {
       G.selectedSeed = null;
       renderInventory();
       document.querySelectorAll('.plot.empty').forEach(el => el.classList.remove('ready-to-plant'));
@@ -5494,7 +5621,7 @@ function confirmRemovePlant(idx) {
   modal.querySelector('.modal').innerHTML = `
     <button class="popup-close-x" aria-label="Fechar confirmação" onclick="closeModal()">×</button>
     <h2>🪴 Retirar planta?</h2>
-    <p>Deseja realmente retirar ${plant.emoji} ${plant.name} do canteiro? A planta será descartada e a pá custará 50 pontos.</p>
+    <p>Deseja realmente limpar este canteiro? ${plant.emoji} ${plant.name} será descartada${plot.pestInfested ? ' e a infestação de pragas será removida por completo' : ''}. A pá custará ${effectiveShovelCost()} pontos.</p>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
       <button class="btn-primary" onclick="removePlantFromPlot(${idx})">Retirar planta</button>
@@ -5512,7 +5639,9 @@ async function removePlantFromPlot(idx) {
   G.plots[idx] = null;
   spawnSparkles(idx);
   saveGardenToSE();
-  toast(`🪴 ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} retirada do canteiro!`);
+  toast(plot.pestInfested
+    ? `🧹 Canteiro limpo! ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} e a infestação de pragas foram removidas.`
+    : `🪴 ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} retirada do canteiro!`);
   setTimeout(() => { renderPlots(); }, 300);
 }
 
@@ -5532,7 +5661,7 @@ function renderInventory() {
   if (inventorySeasonFilter !== 'all') {
     const season = SEASONS.find(item => item.id === inventorySeasonFilter);
     const seasonTypes = season ? [...season.vegetables, ...season.flowers] : [];
-    entries = allEntries.filter(([type]) => seasonTypes.includes(type));
+    entries = allEntries.filter(([type]) => seasonTypes.includes(type) || (G.crazySeedModifiers?.[type] || []).length > 0);
   }
 
   if (!allEntries.length) {
@@ -5562,10 +5691,12 @@ function renderInventory() {
         <div class="inv-slot ${sel ? 'selected' : ''}" onclick="selectSeed('${type}')">
           <div class="inv-slot-svg">${seedBagSVG(type)}</div>
           <div class="inv-slot-name">${p.name}</div>
+          ${(G.crazySeedModifiers?.[type] || []).length ? `<div style="color:#b53636;font-size:10px;font-weight:900">★ MALUCO ×${G.crazySeedModifiers[type].length}</div>` : ''}
           <div class="inv-slot-count">×${count}</div>
           <div class="inv-tip">
             <strong>${p.name}</strong><br>
             💧 ${p.maxWater} regas · 🌱 ${effectiveMaxGrow(type)} crescimentos<br>
+            ${crazySeedBonusLines(type)}
             <img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> Venda: ${SELL_VALUE[type]} pts
           </div>
           </div>`;
@@ -5581,6 +5712,25 @@ const SELL = { potato: 0, carrot: 0, tomato: 0, beetroot: 0, lettuce: 0, cassava
                orchid: 0, hibiscus: 0, bluebell: 0, cherry: 0, poppy: 0, jasmine: 0,
                cherry_blossom: 0, orange_blossom: 0, moon_flower: 0, sun_flower: 0, guarana_flower: 0,
                purple_cabbage: 0, crystal_kale: 0, yellow_eggplant: 0, pink_cucumber: 0, green_mushroom: 0 };
+const SELL_PEST = {};
+function ensureSaleTypes() {
+  [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)].forEach(type => {
+    if (!Object.prototype.hasOwnProperty.call(SELL, type)) SELL[type] = 0;
+  });
+}
+
+function crazySeedBonusLines(type) {
+  const modifiers=G.crazySeedModifiers?.[type]||[];
+  return modifiers.map((modifier,index)=>{
+    const bonuses=[];
+    if(modifier.noWater)bonuses.push('🚿 Não precisa de rega');
+    else if(Number(modifier.waterReduction)>0)bonuses.push(`💧 ${modifier.waterReduction} rega${Number(modifier.waterReduction)>1?'s':''} a menos`);
+    if(Number(modifier.growReduction)>0)bonuses.push(`⏱️ ${Math.max(1,effectiveMaxGrow(type)-Number(modifier.growReduction))} crescimentos (${modifier.growReduction} a menos)`);
+    if(Number(modifier.extraHarvests)>0)bonuses.push(`🧺 +${modifier.extraHarvests} colheita${Number(modifier.extraHarvests)>1?'s':''}`);
+    if(modifier.doubleSale)bonuses.push('💰 Venda pelo dobro');
+    return `<strong style="color:#b53636">★ Bônus da Loja Maluca · muda ${index+1}</strong><br>🌦️ Pode plantar em qualquer estação<br>${bonuses.length?bonuses.join('<br>'):'✨ Semente especial'}`;
+  }).join('<br><br>');
+}
 
 // Venda base já cobre: semente (rega e colheita são gratuitas)
 // mantendo uma margem cozy de lucro para cada cultivo. (rega não tem custo)
@@ -5593,8 +5743,7 @@ const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce:
                      ruby_kale: 335, star_radish: 338, moon_lily: 1000, royal_dahlia: 383 };
 
 function cultivationCost(type) {
-  const item = getPlantable(type);
-  return item.cost + 10;
+  return seasonPrice(type) + 10;
 }
 const SHOP_QTY = {};
 const SHOP_CART = {};
@@ -5689,6 +5838,23 @@ function adjustShopQty(type, delta) {
   else renderShop();
   renderShopCart();
 }
+function effectivePlotMaxGrow(plot) {
+  if (!plot) return 0;
+  return Math.max(1, effectiveMaxGrowWithSkill(plot.type) - Math.max(0, Number(plot.crazyGrowReduction) || 0));
+}
+function sellValueForQuantity(type, qty, epicOverride = false) {
+  const unit = effectiveSellValue(type, epicOverride);
+  const doubleQty = Math.min(Math.max(0, Number(qty) || 0), Math.max(0, Number(G.crazyDoubleHarvested?.[type]) || 0));
+  return Math.max(0, Number(qty) || 0) * unit + doubleQty * unit;
+}
+function sellValueForSelection(type, goodQty, pestQty, epicOverride = false) {
+  const unit = effectiveSellValue(type, epicOverride);
+  const good = Math.max(0, Number(goodQty) || 0);
+  const pests = Math.max(0, Number(pestQty) || 0);
+  const doublePests = Math.min(pests, Math.max(0, Number(G.crazyDoublePestHarvested?.[type]) || 0));
+  const doubleGoods = Math.min(good, Math.max(0, (Number(G.crazyDoubleHarvested?.[type]) || 0) - (Number(G.crazyDoublePestHarvested?.[type]) || 0)));
+  return Math.round(unit * (good + pests * .5 + doubleGoods + doublePests * .5));
+}
 function setShopQtyFromInput(type, value, input) {
   const parsed=Number(value);
   if(!Number.isInteger(parsed)||parsed<1){if(input&&value==='')input.value=SHOP_QTY[type]||1;return;}
@@ -5751,7 +5917,7 @@ function renderFlowerShop() {
     const fs = SEASONS.find(s => s.id === shopSeasonFilter);
     if (fs) entries = entries.filter(([type]) => fs.flowers.includes(type));
   }
-  if (shopSort === 'price_asc')  entries.sort(([,a],[,b]) => a.cost - b.cost);
+  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => seasonPrice(a) - seasonPrice(b));
   if (shopSort === 'grow_asc')   entries.sort(([,a],[,b]) => a.maxGrow - b.maxGrow);
   if (shopSort === 'water_asc')  entries.sort(([,a],[,b]) => a.maxWater - b.maxWater);
   if (shopSort === 'sell_desc')  entries.sort(([a],[b]) => SELL_VALUE[b] - SELL_VALUE[a]);
@@ -5792,7 +5958,7 @@ function renderFlowerShop() {
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
-      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
+      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheitas · até ${harvestCyclesFor(type)} itens por muda</div>
       <div class="shop-item-price" data-shop-total="${type}">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
@@ -5826,12 +5992,13 @@ async function buyFlower(type, el) {
 }
 
 function sellTotal() {
-  const baseTotal = Object.entries(SELL).reduce((sum, [type, qty]) => sum + qty * effectiveSellValue(type), 0);
+  ensureSaleTypes();
+  const baseTotal = Object.keys(SELL).reduce((sum, type) => sum + sellValueForSelection(type, SELL[type] || 0, SELL_PEST[type] || 0, window._epicSaleType === type), 0);
   return Math.round(baseTotal * (1 + localFairSaleBonus(selectedSellQuantity())));
 }
 
 function changeSellQty(type, delta) {
-  const max = G.harvested[type] || 0;
+  const max = Math.max(0, (G.harvested[type] || 0) - (G.pestHarvested?.[type] || 0));
   SELL[type] = Math.max(0, Math.min(max, (SELL[type] || 0) + delta));
   renderHarvested();
 }
@@ -5839,9 +6006,12 @@ function changeSellQty(type, delta) {
 let saleInFlight = false;
 async function sellSelected() {
   if (saleInFlight) return;
+  ensureSaleTypes();
   // Nunca venda mais do que o estoque confirmado na tela.
   for (const [type, qty] of Object.entries(SELL)) {
-    if (!Number.isInteger(qty) || qty < 0 || qty > (G.harvested[type] || 0)) {
+    const cleanStock = Math.max(0, (G.harvested[type] || 0) - (G.pestHarvested?.[type] || 0));
+    const pestQty = Number(SELL_PEST[type] || 0);
+    if (!Number.isInteger(qty) || qty < 0 || qty > cleanStock || !Number.isInteger(pestQty) || pestQty < 0 || pestQty > (G.pestHarvested?.[type] || 0)) {
       toast('❌ A quantidade mudou. Confira os itens antes de vender.', 4000);
       return;
     }
@@ -5856,8 +6026,12 @@ async function sellSelected() {
 
   const saleSnapshot = {
     harvested: JSON.parse(JSON.stringify(G.harvested || {})),
+    pestHarvested: JSON.parse(JSON.stringify(G.pestHarvested || {})),
     crystalHarvested: JSON.parse(JSON.stringify(G.crystalHarvested || {})),
+    crazyDoubleHarvested: JSON.parse(JSON.stringify(G.crazyDoubleHarvested || {})),
+    crazyDoublePestHarvested: JSON.parse(JSON.stringify(G.crazyDoublePestHarvested || {})),
     sellSelection: { ...SELL },
+    pestSellSelection: { ...SELL_PEST },
     pts: G.pts,
     pointsHistory: JSON.parse(JSON.stringify(G.pointsHistory || [])),
     lastSale: G.lastSale,
@@ -5870,15 +6044,25 @@ async function sellSelected() {
   const sold = [];
   let soldQty = 0;
   let flowersSold = 0;
-  Object.entries(SELL).forEach(([type, qty]) => {
-    if (qty > 0) {
-      G.harvested[type] = (G.harvested[type] || 0) - qty;
-      if (G.crystalHarvested?.[type]) G.crystalHarvested[type] = Math.max(0, G.crystalHarvested[type] - Math.min(qty, G.crystalHarvested[type]));
-      soldQty += qty;
-      sold.push(`${qty}× ${getPlantable(type).emoji}`);
+  Object.keys(SELL).forEach(type => {
+    const qty = Number(SELL[type] || 0);
+    const pestQty = Number(SELL_PEST[type] || 0);
+    if (qty > 0 || pestQty > 0) {
+      const crazyPestStock = Math.max(0, Number(G.crazyDoublePestHarvested?.[type]) || 0);
+      const crazyGoodStock = Math.max(0, (Number(G.crazyDoubleHarvested?.[type]) || 0) - crazyPestStock);
+      const crazyGoodSold = Math.min(qty, crazyGoodStock);
+      const crazyPestSold = Math.min(pestQty, crazyPestStock);
+      G.harvested[type] = (G.harvested[type] || 0) - qty - pestQty;
+      if (pestQty) G.pestHarvested[type] = Math.max(0, (G.pestHarvested[type] || 0) - pestQty);
+      if (crazyPestSold) G.crazyDoublePestHarvested[type] = Math.max(0, crazyPestStock - crazyPestSold);
+      if (G.crazyDoubleHarvested?.[type]) G.crazyDoubleHarvested[type] = Math.max(0, G.crazyDoubleHarvested[type] - crazyGoodSold - crazyPestSold);
+      if (G.crystalHarvested?.[type]) G.crystalHarvested[type] = Math.max(0, G.crystalHarvested[type] - Math.min(qty + pestQty, G.crystalHarvested[type]));
+      soldQty += qty + pestQty;
+      sold.push(`${qty ? `${qty}× ${getPlantable(type).emoji}` : ''}${pestQty ? ` ${pestQty}× 🐛${getPlantable(type).emoji}` : ''}`.trim());
       // Contabilizar flores ANTES de zerar SELL
-      if (FLOWERS[type]) flowersSold += qty;
+      if (FLOWERS[type]) flowersSold += qty + pestQty;
       SELL[type] = 0;
+      SELL_PEST[type] = 0;
     }
   });
 
@@ -5906,8 +6090,12 @@ async function sellSelected() {
     let pointsReversed = true;
     if (pointsCredited) pointsReversed = await spendSEPoints(total).catch(() => false);
     G.harvested = saleSnapshot.harvested;
+    G.pestHarvested = saleSnapshot.pestHarvested;
     G.crystalHarvested = saleSnapshot.crystalHarvested;
+    G.crazyDoubleHarvested = saleSnapshot.crazyDoubleHarvested;
+    G.crazyDoublePestHarvested = saleSnapshot.crazyDoublePestHarvested;
     Object.keys(SELL).forEach(type => { SELL[type] = saleSnapshot.sellSelection[type] || 0; });
+    Object.keys(SELL_PEST).forEach(type => { SELL_PEST[type] = saleSnapshot.pestSellSelection[type] || 0; });
     G.pts = saleSnapshot.pts;
     G.pointsHistory = saleSnapshot.pointsHistory;
     G.lastSale = saleSnapshot.lastSale;
@@ -6023,6 +6211,7 @@ function mascotOpeningAnimation(kind) {
   });
 }
 function closeShop() {
+  if (activeGardenEvent('crazyshop')) finishGardenEvent();
   document.getElementById('shop-overlay')?.classList.add('hidden');
   document.getElementById('shop-cart')?.classList.remove('side-cart');
   document.getElementById('shop-cart')?.classList.add('shop-cart-closed');
@@ -6411,6 +6600,26 @@ function updateCompetitionCountdown() {
 }
 updateCompetitionCountdown();
 setInterval(updateCompetitionCountdown, 60000);
+let onlinePlayerCountRequest = false;
+async function updateOnlinePlayerCount() {
+  const label = document.getElementById('competition-online-count');
+  if (!label || onlinePlayerCountRequest) return;
+  onlinePlayerCountRequest = true;
+  try {
+    const response = await fetch('/.netlify/functions/online-count', { cache:'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (data.error || !Number.isFinite(Number(data.online))) throw new Error(data.error || 'Contagem indisponível');
+    const online = Math.max(0, Math.floor(Number(data.online)));
+    label.textContent = `👥 ${online.toLocaleString('pt-BR')} ${online === 1 ? 'pessoa jogando' : 'pessoas jogando'}`;
+  } catch (error) {
+    label.textContent = '👥 Contagem de jogadores indisponível';
+  } finally {
+    onlinePlayerCountRequest = false;
+  }
+}
+updateOnlinePlayerCount();
+setInterval(updateOnlinePlayerCount, 30000);
 function orderRarity() { const roll = Math.random(); return roll < .72 ? {id:'A',label:'Tier A',mult:1, min:1, max:12} : roll < .94 ? {id:'S',label:'Tier S',mult:2.2, min:8, max:26} : {id:'SS',label:'Tier SS',mult:4.5, min:40, max:70}; }
 function createOrder(index = 0) {
   const catalog = Object.entries({ ...PLANTS, ...FLOWERS })
@@ -6482,8 +6691,8 @@ function renderOrders() {
     ? '<div class="market-empty">✅ Você entregou todos os pedidos desta estação.<br><small>Espere a estação terminar para receber novos pedidos.</small></div>'
     : pastSeasonBanner + gardenOrders.map(order => {
     const item = getPlantable(order.type);
-    const canDeliver = (G.harvested[order.type] || 0) >= order.qty;
-    const stock = G.harvested[order.type] || 0;
+    const stock = Math.max(0, (G.harvested[order.type] || 0) - (G.pestHarvested?.[order.type] || 0));
+    const canDeliver = stock >= order.qty;
     const normalized = normalizeOrderTier(order);
     const canRefresh = (G.orderSearches || 0) < 3 && (G.orderDeliveries || 0) < 4;
     return `<div class="order-card tier-${String(normalized.rarity).toLowerCase()}${canDeliver ? ' ready-to-deliver' : ''}"><div style="font-size:30px;text-align:center">${item?.emoji || '🌱'}</div><div><strong>${normalized.name} pediu ${normalized.qty}× ${item?.name || normalized.type}<span class="order-rarity">${normalized.rarityLabel}</span></strong><small>${canDeliver ? `Você tem ${stock}/${normalized.qty} itens — pronto para entregar!` : `Você tem ${stock}/${normalized.qty} itens — colha mais para atender`}</small><span class="order-reward"><img src="points-sprout.svg" alt=""> +${normalized.reward} pontos <span class="order-xp">+${normalized.xp || Math.round(normalized.qty * 10)} XP</span></span></div><div class="order-actions"><button class="order-deliver" onclick="deliverOrder('${normalized.id}')" ${canDeliver && (G.orderDeliveries || 0) < 4 ? '' : 'disabled'}>Entregar</button><button class="order-refresh" onclick="refreshSingleOrder('${normalized.id}')" ${canRefresh ? '' : 'disabled'}>🔄 Atualizar</button></div></div>`;
@@ -6520,8 +6729,19 @@ function closeOrderResetConfirm() { document.getElementById('orders-reset-confir
 async function deliverOrder(id) {
   const order = gardenOrders.find(item => item.id === id);
   if (!order || (G.orderDeliveries || 0) >= 4) { toast('🌿 Você já entregou 4 pedidos nesta estação.', 2800); return; }
-  if ((G.harvested[order.type] || 0) < order.qty) return;
+  const availableClean = Math.max(0, (G.harvested[order.type] || 0) - (G.pestHarvested?.[order.type] || 0));
+  if (availableClean < order.qty) return;
+  const pestStock = Math.min(G.harvested[order.type] || 0, G.pestHarvested?.[order.type] || 0);
+  const cleanStock = (G.harvested[order.type] || 0) - pestStock;
+  const pestUsed = Math.max(0, order.qty - cleanStock);
+  const doublePestStock = Math.max(0, Number(G.crazyDoublePestHarvested?.[order.type]) || 0);
+  const doubleCleanStock = Math.max(0, (Number(G.crazyDoubleHarvested?.[order.type]) || 0) - doublePestStock);
+  const doubleUsed = Math.min(Math.min(cleanStock, order.qty), doubleCleanStock);
+  const doublePestUsed = Math.min(pestUsed, doublePestStock);
   G.harvested[order.type] -= order.qty;
+  if (pestUsed) G.pestHarvested[order.type] = Math.max(0, pestStock - pestUsed);
+  if (doublePestUsed) G.crazyDoublePestHarvested[order.type] = Math.max(0, doublePestStock - doublePestUsed);
+  if (G.crazyDoubleHarvested?.[order.type]) G.crazyDoubleHarvested[order.type] = Math.max(0, G.crazyDoubleHarvested[order.type] - doubleUsed - doublePestUsed);
   G.pts += order.reward;
   recordPointsHistory(order.reward, `Pedido entregue para ${order.name}`);
   G.lastOrder = { type:'order', item:`${order.qty}× ${getPlantable(order.type)?.name || order.type}`, reward:order.reward, at:Date.now() };
@@ -6553,6 +6773,7 @@ async function openOrders(event) {
 function closeOrders() { document.getElementById('orders-overlay')?.classList.add('hidden'); }
 
 function renderHarvested() {
+  ensureSaleTypes();
   updateOrdersReadyBadge();
   const bag = document.getElementById('harvest-bag');
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
@@ -6575,33 +6796,36 @@ function renderHarvested() {
   // Only show types that have been harvested
   const harvestedTypes = allTypes.filter(t => (G.harvested[t] || 0) > 0);
 
-  const slots = harvestedTypes.map(type => {
-    const count  = G.harvested[type] || 0;
+  const slots = harvestedTypes.flatMap(type => {
+    const totalCount = G.harvested[type] || 0;
+    const pestCount = Math.min(totalCount, G.pestHarvested?.[type] || 0);
+    const goodCount = Math.max(0, totalCount - pestCount);
     const crystalCount = G.crystalHarvested?.[type] || 0;
-    const qty    = SELL[type] || 0;
-    const unitVal = effectiveSellValue(type);
-    const selected = qty > 0;
-
-    const sellQty = selected ? `
-      <div class="market-slot-sell-qty" style="display:flex;align-items:center;gap:3px;padding:0 4px">
-        ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',-1)" ${qty <= 1 ? 'disabled' : ''}>−</button>` : ''}
-        <span><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${qty * unitVal}</span>
-        ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',1)" ${qty >= count ? 'disabled' : ''}>+</button>` : ''}
-      </div>` : '';
-
-    return `
-      <div class="market-slot ${selected ? 'selected' : ''}" onclick="toggleSellSlot('${type}')">
+    return [
+      { infested:false, count:goodCount, qty:SELL[type] || 0 },
+      { infested:true, count:pestCount, qty:SELL_PEST[type] || 0 },
+    ].filter(row => row.count > 0).map(({ infested, count, qty }) => {
+      const selected = qty > 0;
+      const saleValue = sellValueForSelection(type, infested ? 0 : qty, infested ? qty : 0);
+      const sellQty = selected ? `
+        <div class="market-slot-sell-qty" style="display:flex;align-items:center;gap:3px;padding:0 4px">
+          ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',-1,${infested})" ${qty <= 1 ? 'disabled' : ''}>−</button>` : ''}
+          <span><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${saleValue}</span>
+          ${count > 1 ? `<button class="market-qty-btn" onclick="event.stopPropagation();changeMarketQty('${type}',1,${infested})" ${qty >= count ? 'disabled' : ''}>+</button>` : ''}
+        </div>` : '';
+      return `<div class="market-slot ${selected ? 'selected' : ''} ${infested ? 'pest-stock' : ''}" onclick="toggleSellSlot('${type}',${infested})">
         <div class="market-slot-svg">${harvestedProduceArt(type)}</div>
         <div class="market-slot-name">${getPlantable(type).name}</div>
-        ${crystalCount > 0 ? `<div class="market-crystal-tag">💎 Cristalina${crystalCount > 1 ? ` · ${crystalCount}x` : ''}</div>` : ''}
+        ${infested ? '<span class="market-pest-tag">🐛 COM PRAGAS · VENDA POR METADE</span>' : ''}
+        ${crystalCount > 0 && !infested ? `<div class="market-crystal-tag">💎 Cristalina${crystalCount > 1 ? ` · ${crystalCount}x` : ''}</div>` : ''}
         <div class="market-slot-stock">×${count}</div>
         ${sellQty}
       </div>`;
+    });
   }).join('');
 
   const total = sellTotal();
-  const anySelected = allTypes.some(t => (SELL[t] || 0) > 0);
-  const grandTotal = harvestedTypes.reduce((sum, t) => sum + (G.harvested[t] || 0) * effectiveSellValue(t), 0);
+  const grandTotal = harvestedTypes.reduce((sum, t) => sum + sellValueForSelection(t, (G.harvested[t] || 0) - (G.pestHarvested?.[t] || 0), G.pestHarvested?.[t] || 0), 0);
 
   bag.innerHTML = `
     <div class="market-slots">${slots}</div>
@@ -7314,8 +7538,12 @@ function animateSeasonDay() {
 }
 
 function advanceSeasonDay() {
+  const wasGardenHydrated=gardenHydrated;
+  if(wasGardenHydrated&&typeof advanceAnimalGameDay==='function')advanceAnimalGameDay(Date.now(),{persist:false});
+  let seasonChanged=false;
   G.seasonDay++;
   if (G.seasonDay > SEASON_DAYS_LEN) {
+    seasonChanged=true;
     G.seasonDay = 1;
     G.seasonIdx = (G.seasonIdx + 1) % 4;
     G.seasonCycle = Math.max(0, Number(G.seasonCycle) || 0) + 1;
@@ -7327,6 +7555,7 @@ function advanceSeasonDay() {
     // Re-render shop to lock/unlock plants by season
     renderShop();
     renderFlowerShop();
+    renderShopCart();
     // Check planted items that are now out of season
     checkOutOfSeasonPlants();
     // A cota concluída pertence à estação anterior. Na nova estação,
@@ -7339,6 +7568,7 @@ function advanceSeasonDay() {
     }
     saveGardenToSE(ordersCompleted);
   }
+  if(wasGardenHydrated&&!seasonChanged)saveGardenToSE().catch(error=>console.warn('Dia do jogo aguardando sincronização:',error));
   renderSeasonWidget();
   animateSeasonDay();
 }
@@ -7346,7 +7576,7 @@ function advanceSeasonDay() {
 function checkOutOfSeasonPlants() {
   G.plots.forEach((plot, idx) => {
     if (!plot) return;
-    if (!isInSeason(plot.type)) {
+    if (!plot.crazySeasonProtected && !isInSeason(plot.type)) {
       plot.outOfSeason = true;
       // Visual feedback
       const el = document.querySelector(`[data-idx="${idx}"]`);
@@ -7396,7 +7626,17 @@ const FERTILIZERS = {
     minLevel: 8,
     color: '#e0a020',
   },
+  aquatic: {
+    id: 'aquatic', name: 'Adubo Aquático', emoji: '💧', icon: '🫧',
+    desc: 'Enquanto a planta tiver colheitas restantes, cada rega adiciona 2 níveis de água gastando apenas 1 carga do regador.',
+    effect: 'Rega em dobro durante as colheitas', cost: 300, minLevel: 1, color: '#63b8d2',
+  },
 };
+
+function fertilizersOnPlot(index) {
+  const value = G.plotFertilizers?.[index];
+  return Array.isArray(value) ? value : value ? [value] : [];
+}
 
 function renderFertilizerInventory() {
   const bar = document.getElementById('fertilizer-inv-bar');
@@ -7409,7 +7649,8 @@ function renderFertilizerInventory() {
 
   bar.innerHTML = `<section class="inventory-group fertilizer-group"><h3 class="inventory-group-title">🧪 Adubos</h3><div class="fert-inv-slots">${validEntries.map(([id, f]) => {
     const count = G.fertilizerInventory[id] || 0;
-    const currentEffect = id === 'golden_soil'
+    const currentEffect = id === 'aquatic' ? 'Rega em dobro enquanto houver colheitas'
+      : id === 'golden_soil'
       ? '+1 unidade extra'
       : id === 'quick_grow' ? 'Cresce 2× mais rápido' : f.effect;
     const selClass = G.selectedFertilizer === id
@@ -7429,8 +7670,8 @@ function renderFertilizerInventory() {
 
 function selectFertilizer(id) {
   const target = G.inventoryTargetPlot;
-  if (target !== null && G.plotFertilizers?.[target]) {
-    toast('🌱 Este canteiro já tem adubo. Escolha uma planta para ele!', 3000);
+  if (target !== null && (fertilizersOnPlot(target).length >= 2 || fertilizersOnPlot(target).includes(id))) {
+    toast(fertilizersOnPlot(target).length >= 2 ? '🌱 Este canteiro já tem dois adubos. Escolha uma planta para ele!' : '🌱 Esse adubo já foi aplicado. Escolha outro ou plante!', 3000);
     return;
   }
   G.selectedFertilizer = G.selectedFertilizer === id ? null : id;
@@ -7509,8 +7750,9 @@ function applyFertilizer(plotIdx, fertilizerId) {
     toast('⚠️ Aplique o adubo num canteiro vazio — ele ficará preparado para a próxima planta!');
     return;
   }
-  if (G.plotFertilizers?.[plotIdx]) {
-    toast('🌱 Este canteiro já está adubado. Agora escolha uma planta!');
+  const applied = fertilizersOnPlot(plotIdx);
+  if (applied.length >= 2 || applied.includes(fertilizerId)) {
+    toast(applied.length >= 2 ? '🌱 Este canteiro já tem dois adubos. Agora escolha uma planta!' : '🌱 Esse adubo já está aplicado. Escolha outro ou plante!');
     return;
   }
   const f = FERTILIZERS[fertilizerId];
@@ -7520,7 +7762,7 @@ function applyFertilizer(plotIdx, fertilizerId) {
 
   // Mark the empty plot with the fertilizer for the next plant
   if (!G.plotFertilizers) G.plotFertilizers = {};
-  G.plotFertilizers[plotIdx] = fertilizerId;
+  G.plotFertilizers[plotIdx] = [...applied, fertilizerId];
 
   // Mantém o adubo selecionado para permitir aplicar em vários canteiros.
   // A seleção só termina quando o estoque chega a zero.
@@ -7537,22 +7779,26 @@ function applyFertilizer(plotIdx, fertilizerId) {
     toast(`⚡ Adubo Rápido aplicado no canteiro ${plotIdx + 1}! A próxima planta crescerá 2× mais rápido.`);
   } else if (fertilizerId === 'golden_soil') {
     toast(`✨ Terra Dourada aplicada no canteiro ${plotIdx + 1}! A próxima colheita renderá +1 unidade.`);
+  } else if (fertilizerId === 'aquatic') {
+    toast(`💧 Adubo Aquático aplicado no canteiro ${plotIdx + 1}! As regas contarão em dobro até acabar as colheitas desta planta.`);
   }
 }
 
 function updateFertilizerCursor() {
   document.querySelectorAll('.plot').forEach(el => {
-    el.classList.remove('ready-quick-grow', 'ready-golden-soil', 'fertilizer-ready');
+    el.classList.remove('ready-quick-grow', 'ready-golden-soil', 'ready-aquatic', 'fertilizer-ready');
     if (!G.selectedFertilizer) return;
     const idx = parseInt(el.dataset.idx);
     const isEmpty = !G.plots[idx];
     if (!isEmpty) return; // only empty plots
     if (G.selectedFertilizer === 'quick_grow') el.classList.add('ready-quick-grow');
     if (G.selectedFertilizer === 'golden_soil') el.classList.add('ready-golden-soil');
+    if (G.selectedFertilizer === 'aquatic') el.classList.add('ready-aquatic');
   });
 }
 
 function sellAll() {
+  ensureSaleTypes();
   // Skill: Venda Épica — escolhe um item aleatório para valer o dobro
   const epicChance = skillEpicSaleChance();
   let epicType = null;
@@ -7566,30 +7812,36 @@ function sellAll() {
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const hasAny = allTypes.some(t => (G.harvested[t] || 0) > 0);
   if (!hasAny) return;
-  allTypes.forEach(type => { SELL[type] = G.harvested[type] || 0; });
+  allTypes.forEach(type => {
+    const pests = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+    SELL_PEST[type] = pests;
+    SELL[type] = Math.max(0, (G.harvested[type] || 0) - pests);
+  });
   renderSellAllConfirm();
 }
 
 function applyOfflineProgress(savedAt) {
   if (!savedAt || !Number.isFinite(Number(savedAt))) return;
   const elapsed = Math.max(0, Math.min(Date.now() - Number(savedAt), 7 * 86400000));
-  if (elapsed < 1000) return;
-
-  // Avança a estação pelo tempo real decorrido, mesmo com a página fechada.
-  const seasonDays = Math.floor(elapsed / SEASON_DAY_MS);
-  const elapsedInDay = elapsed % SEASON_DAY_MS;
-  const persistedEnd = Number(seasonDayEndsAt);
-  const remainingToNextDay = Number.isFinite(persistedEnd) ? persistedEnd - Date.now() : (SEASON_DAY_MS - elapsedInDay);
-  scheduleSeasonDayTick(Math.max(1000, remainingToNextDay));
-  G.dayChangedWhileAway = seasonDays > 0;
-  for (let i = 0; i < seasonDays; i++) {
+  const offlineEnd=Number(savedAt)+elapsed;
+  const persistedEnd=Number(seasonDayEndsAt);
+  let nextDayAt=Number.isFinite(persistedEnd)&&persistedEnd>Number(savedAt)?persistedEnd:Number(savedAt)+SEASON_DAY_MS;
+  const maxDayTicks=Math.ceil(elapsed/SEASON_DAY_MS);
+  let seasonDays=0;
+  while(seasonDays<maxDayTicks&&nextDayAt<=offlineEnd){
+    if(typeof advanceAnimalGameDay==='function')advanceAnimalGameDay(nextDayAt,{persist:false,notify:false});
     G.seasonDay++;
-    if (G.seasonDay > SEASON_DAYS_LEN) {
-      G.seasonDay = 1;
-      G.seasonIdx = (G.seasonIdx + 1) % SEASONS.length;
-      G.seasonCycle = Math.max(0, Number(G.seasonCycle) || 0) + 1;
+    if(G.seasonDay>SEASON_DAYS_LEN){
+      G.seasonDay=1;
+      G.seasonIdx=(G.seasonIdx+1)%SEASONS.length;
+      G.seasonCycle=Math.max(0,Number(G.seasonCycle)||0)+1;
     }
+    nextDayAt+=SEASON_DAY_MS;
+    seasonDays++;
   }
+  if(typeof animalState==='function')animalState(Date.now(),{persist:false,notify:false});
+  scheduleSeasonDayTick(Math.max(1000,nextDayAt-Date.now()));
+  G.dayChangedWhileAway = seasonDays > 0;
   syncWateringRefillSeason();
 
   // Cada planta usa seu próprio maxGrow, então plantas com mais estágios
@@ -7597,8 +7849,8 @@ function applyOfflineProgress(savedAt) {
   const growTicks = Math.floor(elapsed / GROW_INTERVAL_MS);
   if (growTicks <= 0) return;
   G.plots.forEach(plot => {
-    if (!plot || plot.waterCount < effectiveMaxWater(plot.type) || plot.growCount >= effectiveMaxGrowWithSkill(plot.type)) return;
-    const maxG = effectiveMaxGrowWithSkill(plot.type);
+    if (!plot || plot.waterCount < effectivePlotMaxWater(plot) || plot.growCount >= effectivePlotMaxGrow(plot)) return;
+    const maxG = effectivePlotMaxGrow(plot);
     const bonus = plot.quickGrow ? 1 : 0; // quick_grow_plus removido
     const steps = growTicks * (effectiveGrowStep() + bonus);
     plot.growCount = Math.min(maxG, plot.growCount + steps);
@@ -7607,13 +7859,14 @@ function applyOfflineProgress(savedAt) {
 }
 
 function renderSellAllConfirm() {
+  ensureSaleTypes();
   const allTypes = [...Object.keys(PLANTS), ...Object.keys(FLOWERS), ...Object.keys(FarmAnimals.products)];
   const available = allTypes.filter(type => (G.harvested[type] || 0) > 0);
-  const selectedCount = available.reduce((sum, type) => sum + (SELL[type] || 0), 0);
+  const selectedCount = available.reduce((sum, type) => sum + (SELL[type] || 0) + (SELL_PEST[type] || 0), 0);
   const fairBonus = localFairSaleBonus(selectedCount);
   const baseTotal = available.reduce((sum, type) => {
     const isEpic = window._epicSaleType === type;
-    return sum + (SELL[type] || 0) * effectiveSellValue(type, isEpic);
+    return sum + sellValueForSelection(type, SELL[type] || 0, SELL_PEST[type] || 0, isEpic);
   }, 0);
   const total = Math.round(baseTotal * (1 + fairBonus));
   const fairBonusPoints = Math.max(0, total - baseTotal);
@@ -7622,11 +7875,17 @@ function renderSellAllConfirm() {
   const fairLabel = fairUnlocked
     ? `🎪 Feira Local: +${fairBonusPoints} pts · ${fairStatus}`
     : `🎪 Feira Local: habilidade não desbloqueada · ${selectedCount}/300 itens`;
-  const rows = available.map(type => {
+  const rows = available.flatMap(type => {
     const item = getPlantable(type);
-    const qty = SELL[type] || 0;
-    const max = G.harvested[type] || 0;
-    return `<div class="shop-cart-row"><span>${item.emoji} ${item.name}</span><div class="shop-cart-row-controls"><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',false)" aria-label="Remover ${item.name} da venda">⇤</button><button onclick="adjustSellAllQty('${type}',-1)" aria-label="Diminuir ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1)" aria-label="Aumentar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',true)" aria-label="Adicionar todo o estoque de ${item.name} à venda">⇥</button></div></div>`;
+    const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+    const goodMax = Math.max(0, (G.harvested[type] || 0) - pestMax);
+    return [{ infested:false, max:goodMax, qty:SELL[type] || 0 }, { infested:true, max:pestMax, qty:SELL_PEST[type] || 0 }]
+      .filter(row => row.max > 0)
+      .map(({ infested,max,qty }) => {
+        const label = `${item.emoji} ${item.name}${infested ? ' · 🐛 COM PRAGAS · 50% DO PREÇO' : ''}`;
+        const pestClass = infested ? ' pest-stock' : '';
+        return `<div class="shop-cart-row${pestClass}"><span>${label}</span><div class="shop-cart-row-controls"><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',false,${infested})" aria-label="Remover todo ${item.name} ${infested ? 'com pragas' : ''} da venda">⇤</button><button onclick="adjustSellAllQty('${type}',-1,${infested})" aria-label="Diminuir ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1,${infested})" aria-label="Aumentar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',true,${infested})" aria-label="Adicionar todo o estoque de ${item.name} à venda">⇥</button></div></div>`;
+      });
   }).join('');
   document.getElementById('sell-all-confirm-overlay')?.remove();
   const overlay = document.createElement('div');
@@ -7644,31 +7903,38 @@ function renderSellAllConfirm() {
   document.body.appendChild(overlay);
 }
 
-function adjustSellAllQty(type, delta) {
-  const max = G.harvested[type] || 0;
-  SELL[type] = Math.max(0, Math.min(max, (SELL[type] || 0) + delta));
+function adjustSellAllQty(type, delta, infested = false) {
+  const target = infested ? SELL_PEST : SELL;
+  const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+  const max = infested ? pestMax : Math.max(0, (G.harvested[type] || 0) - pestMax);
+  target[type] = Math.max(0, Math.min(max, (target[type] || 0) + delta));
   renderSellAllConfirm();
 }
 
-function closeSellAllConfirm() {
+function closeSellAllConfirm(clearEpicSale = true) {
   document.getElementById('sell-all-confirm-overlay')?.remove();
+  if (clearEpicSale) window._epicSaleType = null;
 }
 
 function confirmSellAll() {
-  closeSellAllConfirm();
+  closeSellAllConfirm(false);
   sellSelected();
 }
 
-function toggleSellSlot(type) {
-  const count = G.harvested[type] || 0;
+function toggleSellSlot(type, infested = false) {
+  const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+  const count = infested ? pestMax : Math.max(0, (G.harvested[type] || 0) - pestMax);
+  const target = infested ? SELL_PEST : SELL;
   if (!count) return;
-  SELL[type] = (SELL[type] || 0) >= count ? 0 : count;
+  target[type] = (target[type] || 0) >= count ? 0 : count;
   renderHarvested();
 }
 
-function changeMarketQty(type, delta) {
-  const count = G.harvested[type] || 0;
-  SELL[type] = Math.max(1, Math.min(count, (SELL[type] || 0) + delta));
+function changeMarketQty(type, delta, infested = false) {
+  const target = infested ? SELL_PEST : SELL;
+  const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+  const count = infested ? pestMax : Math.max(0, (G.harvested[type] || 0) - pestMax);
+  target[type] = Math.max(0, Math.min(count, (target[type] || 0) + delta));
   renderHarvested();
 }
 
@@ -7697,8 +7963,20 @@ function harvestCyclesFor(type) {
   const item = getPlantable(type);
   if (!item) return 1;
   if (Number.isFinite(Number(item.harvests))) return Number(item.harvests);
-  // Cultivos mais baratos compensam com mais ciclos de colheita.
-  return Number(item.cost) <= 60 ? 3 : 2;
+  // Cultivos mais demorados compensam com mais ciclos de colheita.
+  const growStages=Number(item.maxGrow)||0;
+  if(growStages<=7)return 3;
+  if(growStages<=11)return 4;
+  if(growStages<=15)return 5;
+  if(growStages<=19)return 6;
+  if(growStages<=22)return 7;
+  return 8;
+}
+function legacyHarvestCyclesFor(type) {
+  const item=getPlantable(type);
+  if(!item)return 1;
+  if(Number.isFinite(Number(item.harvests)))return Number(item.harvests);
+  return Number(item.cost)<=60?3:2;
 }
 
 function updateHeldItemCursor() {
@@ -7713,7 +7991,7 @@ function updateHeldItemCursor() {
 
 function clearSelectionIfNoAvailablePlots() {
   const hasFreePlot = Array.from({ length: G.unlockedPlots || 0 }, (_, idx) => idx)
-    .some(idx => !G.plots[idx] && (!G.selectedFertilizer || !G.plotFertilizers?.[idx]));
+    .some(idx => !G.plots[idx] && (!G.selectedFertilizer || !fertilizersOnPlot(idx).includes(G.selectedFertilizer)) && fertilizersOnPlot(idx).length < 2);
   if (hasFreePlot || (!G.selectedSeed && !G.selectedFertilizer)) return;
   G.selectedSeed = null;
   G.selectedFertilizer = null;
@@ -7748,16 +8026,29 @@ function seasonDiscountRate(type) {
   const seed = [...type].reduce((sum, char) => sum + char.charCodeAt(0), G.seasonIdx * 17);
   return choices[seed % choices.length];
 }
+function seasonMarketRate(type) {
+  const rates=[.85,.90,.95,1,1.05,1.10,1.15];
+  const key=Math.max(0,Math.floor(Number(G.seasonCycle)||0))*SEASONS.length+Math.max(0,Math.floor(Number(G.seasonIdx)||0));
+  let hash=0;
+  for(const char of String(type))hash=(hash*31+char.charCodeAt(0))%rates.length;
+  return rates[(hash+key*3)%rates.length];
+}
 function seasonPrice(type) {
   const p = getPlantable(type);
   if (!p) return 0;
-  return isOutOfSeason(type) ? Math.max(1, Math.floor(p.cost * (1 - seasonDiscountRate(type)))) : p.cost;
+  const marketPrice=Math.max(1,Math.round(p.cost*seasonMarketRate(type)));
+  return isOutOfSeason(type) ? Math.max(1, Math.floor(marketPrice * (1 - seasonDiscountRate(type)))) : marketPrice;
 }
 function seasonPriceLabel(type, qty = 1) {
   const p = getPlantable(type);
   const price = seasonPrice(type) * qty;
-  if (!p || !isOutOfSeason(type)) return `<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
-  return `<s style="opacity:.55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${p.cost * qty}</s> <strong style="color:#6f8e55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}</strong> <span class="cozy-promo-chip">-${Math.round(seasonDiscountRate(type) * 100)}%</span>`;
+  if (!p) return `<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
+  const marketRate=seasonMarketRate(type),marketPrice=Math.max(1,Math.round(p.cost*marketRate));
+  const changed=marketPrice!==p.cost||isOutOfSeason(type);
+  const priceMarkup=changed?`<s style="opacity:.55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${p.cost*qty}</s> <strong style="color:#6f8e55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}</strong>`:`<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
+  const trend=marketRate===1?'':` <span class="cozy-promo-chip" title="Preço sazonal da feira">🏪 ${marketRate>1?'+':''}${Math.round((marketRate-1)*100)}%</span>`;
+  const promo=isOutOfSeason(type)?` <span class="cozy-promo-chip" title="Desconto de fora de estação">-${Math.round(seasonDiscountRate(type)*100)}%</span>`:'';
+  return priceMarkup+trend+promo;
 }
 
 // ─── SEED BAG SVG ────────────────────────────────────────
@@ -7835,7 +8126,7 @@ function renderShop() {
   }
 
   // sort order
-  if (shopSort === 'price_asc')  entries.sort(([,a],[,b]) => a.cost - b.cost);
+  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => seasonPrice(a) - seasonPrice(b));
   if (shopSort === 'grow_asc')   entries.sort(([,a],[,b]) => a.maxGrow - b.maxGrow);
   if (shopSort === 'water_asc')  entries.sort(([,a],[,b]) => a.maxWater - b.maxWater);
   if (shopSort === 'sell_desc')  entries.sort(([a],[b]) => SELL_VALUE[b] - SELL_VALUE[a]);
@@ -7883,7 +8174,7 @@ function renderShop() {
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
       <div class="shop-item-xp">✨ +${harvestXP(type)} XP ao colher</div>
-      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheita${harvestCyclesFor(type) > 1 ? 's' : ''}</div>
+      <div class="shop-item-harvests">🧺 ${harvestCyclesFor(type)} colheitas · até ${harvestCyclesFor(type)} itens por muda</div>
       <div class="shop-item-price" data-shop-total="${type}">${seasonPriceLabel(type, SHOP_QTY[type] || 1)}</div>
       ${shopQtyControls(type)}
       <div style="font-size:10px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:3px;margin-top:1px">
@@ -7922,8 +8213,8 @@ function updatePlotTooltip(idx) {
   const el = document.querySelector(`[data-idx="${idx}"] .plot-tooltip`);
   if (!el) return;
   const p = getPlantable(plot.type);
-  const maxW = effectiveMaxWater(plot.type);
-  const maxG = effectiveMaxGrowWithSkill(plot.type);
+  const maxW = effectivePlotMaxWater(plot);
+  const maxG = effectivePlotMaxGrow(plot);
   const ready = plot.growCount >= maxG;
   el.innerHTML = `
     <strong>${p.emoji} ${p.name}</strong><br>
@@ -7978,7 +8269,8 @@ function buildPlotEl(plot, idx) {
   inner.className = 'plot-inner';
 
   if (!plot) {
-    const prepFert = G.plotFertilizers && G.plotFertilizers[idx];
+    const prepFerts = fertilizersOnPlot(idx);
+    const prepFert = prepFerts[0];
     inner.innerHTML = `<div class="empty-slot-hint">
       <svg viewBox="0 0 32 32" fill="none">
         <circle cx="16" cy="16" r="13" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-dasharray="4 3"/>
@@ -7986,15 +8278,13 @@ function buildPlotEl(plot, idx) {
       </svg>
       <span>${prepFert ? 'adubado!' : 'plantar'}</span>
     </div>`;
-    if (prepFert) {
+    if (prepFerts.length) {
       const badge = document.createElement('div');
-      badge.className = 'fertilizer-status-badge ' + (prepFert === 'quick_grow' ? 'quick' : 'golden');
-      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;';
-      badge.innerHTML = prepFert === 'quick_grow'
-        ? `<span class="fert-effect-quick">⚡</span>`
-        : `<span class="fert-effect-golden">✨</span>`;
+      badge.className = 'fertilizer-status-badge fertilizer-stack';
+      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;display:flex;gap:2px;width:auto;height:auto;padding:3px;';
+      badge.innerHTML = prepFerts.map(id => `<span title="${FERTILIZERS[id]?.name || id}">${FERTILIZERS[id]?.emoji || '🧪'}</span>`).join('');
       div.appendChild(badge);
-      div.style.borderColor = prepFert === 'quick_grow' ? '#f0a020' : '#d4a000';
+      div.style.borderColor = prepFerts.includes('aquatic') ? '#63b8d2' : prepFert === 'quick_grow' ? '#f0a020' : '#d4a000';
     }
     if (isSpecialPlotActive(idx)) {
       const specialBadge = document.createElement('div');
@@ -8007,8 +8297,8 @@ function buildPlotEl(plot, idx) {
       div.appendChild(tooltip);
     }
   } else {
-    const maxW = effectiveMaxWater(plot.type);
-    const maxG = effectiveMaxGrowWithSkill(plot.type);
+    const maxW = effectivePlotMaxWater(plot);
+    const maxG = effectivePlotMaxGrow(plot);
     const growProgress = plot.growCount / maxG;
     const plantEl = document.createElement('div');
     plantEl.className = 'plant-container';
@@ -8019,7 +8309,7 @@ function buildPlotEl(plot, idx) {
     // Tooltip
     const p = getPlantable(plot.type);
     const isReady = plot.growCount >= maxG;
-    const outOfSeason = plot.outOfSeason || !isInSeason(plot.type);
+    const outOfSeason = !plot.crazySeasonProtected && (plot.outOfSeason || !isInSeason(plot.type));
     const tooltip = document.createElement('div');
     tooltip.className = `plot-tooltip${outOfSeason ? ' out-of-season-warning' : ''}`;
     tooltip.innerHTML = `
@@ -8029,23 +8319,39 @@ function buildPlotEl(plot, idx) {
         ? '⚠️ FORA DE ESTAÇÃO!<br><strong>Se colher, você perderá esta planta.</strong>'
         : isReady
         ? '🌸 Pronta para colher!'
-        : `💧 ${plot.waterCount}/${maxW} regas · 🌱 ${plot.growCount}/${maxG} estágios`
+        : `${plot.crazyNoWater ? '🚿 Não precisa de rega' : `💧 ${plot.waterCount}/${maxW} regas`} · 🌱 ${plot.growCount}/${maxG} estágios`
       }
       ${plot.quickGrow ? '<br>⚡ Adubo Rápido ativo' : ''}
       ${plot.goldenSoil ? '<br>✨ Terra Dourada ativa' : ''}
+    ${plot.aquaticWater ? '<br>💧 Adubo Aquático ativo até terminar as colheitas desta planta' : ''}
+      ${plot.crazySeasonProtected ? `<br><strong style="color:#b53636">★ MALUCO</strong>${plot.crazyNoWater ? '<br>🚿 Não precisa de rega' : plot.crazyWaterReduction ? `<br>💧 ${plot.crazyWaterReduction} rega a menos` : ''}${plot.crazyGrowReduction ? `<br>⏱️ Cresce mais rápido` : ''}${plot.crazyExtraHarvests ? `<br>🧺 +${plot.crazyExtraHarvests} colheitas` : ''}${plot.crazyDoubleSale ? '<br>💰 Venda pelo dobro' : ''}` : ''}
+      ${plot.pestInfested ? '<br><strong style="color:#a32626">🐛 PRAGA NA PLANTA</strong><br>Infestação permanente: todas as colheitas desta planta irão para o estoque com pragas e serão vendidas pela metade do valor.' : ''}
       ${plot.goldenPlot ? '<br>✨ Canteiro Especial · plantas valem 3× mais' : ''}
     `;
     div.appendChild(tooltip);
 
     // Show fertilizer badge on growing plant
-    if (plot.quickGrow || plot.goldenSoil) {
+    if (plot.quickGrow || plot.goldenSoil || plot.aquaticWater) {
       const badge = document.createElement('div');
-      badge.className = 'fertilizer-status-badge ' + (plot.quickGrow ? 'quick' : 'golden');
-      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;';
-      badge.innerHTML = plot.quickGrow
-        ? `<span class="fert-effect-quick">⚡</span>`
-        : `<span class="fert-effect-golden">✨</span>`;
+      badge.className = 'fertilizer-status-badge fertilizer-stack';
+      badge.style.cssText = 'position:absolute;top:6px;right:6px;z-index:4;display:flex;gap:2px;width:auto;height:auto;padding:3px;';
+      badge.innerHTML = [plot.quickGrow && '⚡', plot.goldenSoil && '✨', plot.aquaticWater && '💧'].filter(Boolean).join('');
       div.appendChild(badge);
+    }
+    if (plot.crazySeasonProtected) {
+      const crazyBadge = document.createElement('div');
+      crazyBadge.title = 'Semente da Loja Maluca';
+      crazyBadge.style.cssText = 'position:absolute;left:5px;bottom:22px;z-index:4;border-radius:99px;background:#b53636;color:#fff;padding:2px 5px;font-size:10px;font-weight:900;pointer-events:none;';
+      crazyBadge.textContent = '★ MALUCO';
+      div.appendChild(crazyBadge);
+    }
+    if (plot.pestInfested) {
+      const pestBadge = document.createElement('div');
+      pestBadge.className = 'plot-pest-badge';
+      pestBadge.title = 'Praga permanente: todas as colheitas desta planta serão vendidas por 50% do preço.';
+      pestBadge.setAttribute('aria-label', 'Planta infestada por pragas; suas colheitas valem metade do preço');
+      pestBadge.textContent = '🐛 PRAGA';
+      div.appendChild(pestBadge);
     }
     if (plot.goldenPlot || isSpecialPlotActive(idx)) {
       const specialBadge = document.createElement('div');
@@ -8058,9 +8364,9 @@ function buildPlotEl(plot, idx) {
   div.appendChild(inner);
 
   if (plot) {
-    const maxW = effectiveMaxWater(plot.type);
-    const maxG = effectiveMaxGrowWithSkill(plot.type);
-    const waterPct = Math.min(1, plot.waterCount / maxW);
+    const maxW = effectivePlotMaxWater(plot);
+    const maxG = effectivePlotMaxGrow(plot);
+    const waterPct = maxW === 0 ? 1 : Math.min(1, plot.waterCount / maxW);
     const waterFull = plot.waterCount >= maxW;
 
     // Water bar
@@ -8090,11 +8396,11 @@ function buildPlotEl(plot, idx) {
   const lbl = document.createElement('div');
   lbl.className = 'plot-label';
   if (plot) {
-    const maxW = effectiveMaxWater(plot.type);
-    const maxG = effectiveMaxGrowWithSkill(plot.type);
+    const maxW = effectivePlotMaxWater(plot);
+    const maxG = effectivePlotMaxGrow(plot);
     const waterFull = plot.waterCount >= maxW;
     const growReady = plot.growCount >= maxG;
-    const harvestTotal = harvestCyclesFor(plot.type);
+    const harvestTotal = Number(plot.harvestsTotal) || (legacyHarvestCyclesFor(plot.type) + Math.max(0, Number(plot.crazyExtraHarvests) || 0));
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestTotal);
     const harvestInfo = harvestTotal > 1 ? `<div class="plot-harvest-count">🧺 ${harvestsRemaining} colheita${harvestsRemaining > 1 ? 's' : ''} restante${harvestsRemaining > 1 ? 's' : ''}</div>` : '';
     const mutationInfo = plot.mutated ? '<div class="plot-mutation-label">🧬 mutação cristalina ativa</div>' : '';
@@ -8104,7 +8410,7 @@ function buildPlotEl(plot, idx) {
     if (growReady) {
       lbl.innerHTML = `✅ pronto!${mutationInfo}${harvestInfo}${specialInfo}`;
     } else {
-      lbl.innerHTML = `${mutationInfo}<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}${specialInfo}`;
+      lbl.innerHTML = `${mutationInfo}<span style="color:#9dd8f8">${plot.crazyNoWater ? '🚿' : `💧 ${plot.waterCount}/${maxW}`}</span>${waterFull ? '' : ' <span style="opacity:.5;font-size:9px">· regar primeiro</span>'}${harvestInfo}${specialInfo}`;
       const growLbl = document.createElement('div');
       growLbl.className = 'plot-grow-label';
       growLbl.style.cssText = 'font-size:10px;font-weight:800;color:rgba(160,220,120,.95);margin-top:1px;';
@@ -8133,7 +8439,7 @@ async function onPlotClick(idx) {
   const tool = G.selectedTool;
   const plotEl = document.querySelector(`[data-idx="${idx}"]`);
   if (plot && plot.outOfSeason && isInSeason(plot.type)) plot.outOfSeason = false;
-  const outOfSeason = plot ? (plot.outOfSeason || !isInSeason(plot.type)) : false;
+  const outOfSeason = plot ? (!plot.crazySeasonProtected && (plot.outOfSeason || !isInSeason(plot.type))) : false;
 
   if (G.specialPlotPending) {
     if (plot) { toast('Escolha um canteiro vazio para o upgrade.'); return; }
@@ -8156,7 +8462,7 @@ async function onPlotClick(idx) {
   if (plot && isReady(plot) && G.selectedTool !== 'shovel') {
     const type = plot.type;
     const plant = getPlantable(type);
-    const harvestsTotal = harvestCyclesFor(type);
+    const harvestsTotal = Number(plot.harvestsTotal) || legacyHarvestCyclesFor(type);
     const harvestsRemaining = Number(plot.harvestsRemaining ?? harvestsTotal);
     const mutationProtectsSeason = outOfSeason && plot.mutated === true;
     const lostToSeason = outOfSeason && !mutationProtectsSeason;
@@ -8201,6 +8507,9 @@ async function onPlotClick(idx) {
           : `🧬 Mutação aproveitada! +1 ${getPlantable(type).name}`, 3000);
       }
       G.harvested[type] = (G.harvested[type] || 0) + finalQty;
+      if (plot.pestInfested) G.pestHarvested[type] = (G.pestHarvested[type] || 0) + finalQty;
+      if (plot.crazyDoubleSale) G.crazyDoubleHarvested[type] = (G.crazyDoubleHarvested[type] || 0) + finalQty;
+      if (plot.pestInfested && plot.crazyDoubleSale) G.crazyDoublePestHarvested[type] = (G.crazyDoublePestHarvested[type] || 0) + finalQty;
       if (plot.mutated) G.crystalHarvested[type] = (G.crystalHarvested[type] || 0) + finalQty;
       if (gotDouble) {
         spawnSkillEffect(idx, '🧺🧺', '×2 Colheita Dupla!', '#778b64');
@@ -8264,12 +8573,12 @@ async function onPlotClick(idx) {
 
   // APLICAR ADUBO: se um adubo estiver selecionado e o canteiro estiver VAZIO
   if (!plot && G.selectedFertilizer) {
-    if (G.plotFertilizers?.[idx]) {
+    const applied = fertilizersOnPlot(idx);
+    if (applied.length >= 2 || applied.includes(G.selectedFertilizer)) {
       G.selectedFertilizer = null;
       updateFertilizerCursor();
-      G.inventoryTargetPlot = idx;
-      openInventory();
-      toast('🌱 Este canteiro já está adubado. Escolha uma planta!', 2600);
+      if (applied.length >= 2) { G.inventoryTargetPlot = idx; openInventory(); }
+      toast(applied.length >= 2 ? '🌱 Este canteiro já tem dois adubos. Escolha uma planta!' : '🌱 Esse adubo já está aplicado. Escolha outro ou plante!', 2600);
       return;
     }
     applyFertilizer(idx, G.selectedFertilizer);
@@ -8292,7 +8601,8 @@ async function onPlotClick(idx) {
       return;
     }
     const type = G.selectedSeed;
-    if (isOutOfSeason(type)) {
+    const hasCrazySeed = (G.crazySeedModifiers?.[type] || []).length > 0;
+    if (isOutOfSeason(type) && !hasCrazySeed) {
       G.selectedSeed = null;
       renderInventory();
       showOutOfSeasonModal(type);
@@ -8301,12 +8611,17 @@ async function onPlotClick(idx) {
     G.inventory[type]--;
     if (G.inventory[type] <= 0) G.selectedSeed = null;
     updateHeldItemCursor();
-    const newPlot = { type, waterCount: activeGardenEvent('rain') ? 1 : 0, growCount: 0, harvestsRemaining: harvestCyclesFor(type), goldenPlot: isSpecialPlotActive(idx) };
+    const crazyModifier = G.crazySeedModifiers?.[type]?.shift() || null;
+    const crazyNoWater = crazyModifier?.noWater === true;
+    const harvestsTotal=harvestCyclesFor(type)+Math.max(0,Number(crazyModifier?.extraHarvests)||0);
+    const newPlot = { type, waterCount: crazyNoWater ? 0 : (activeGardenEvent('rain') ? 1 : 0), growCount: 0, harvestsTotal, harvestsRemaining:harvestsTotal, goldenPlot: isSpecialPlotActive(idx), ...(crazyModifier ? { crazySeasonProtected:true, crazyNoWater, crazyWaterReduction:Math.max(0,Number(crazyModifier.waterReduction)||0), crazyGrowReduction:Math.max(0,Number(crazyModifier.growReduction)||0), crazyExtraHarvests:Math.max(0,Number(crazyModifier.extraHarvests)||0), crazyDoubleSale:crazyModifier.doubleSale===true } : {}) };
     // Apply any pre-applied fertilizer on this slot
     if (G.plotFertilizers && G.plotFertilizers[idx]) {
-      const fid = G.plotFertilizers[idx];
-      if (fid === 'quick_grow') newPlot.quickGrow = true;
-      if (fid === 'golden_soil') newPlot.goldenSoil = true;
+      const stored = G.plotFertilizers[idx];
+      const applied = Array.isArray(stored) ? stored : [stored];
+      if (applied.includes('quick_grow')) newPlot.quickGrow = true;
+      if (applied.includes('golden_soil')) newPlot.goldenSoil = true;
+      if (applied.includes('aquatic')) newPlot.aquaticWater = true;
       delete G.plotFertilizers[idx];
     }
     G.plots[idx] = newPlot;
@@ -8338,29 +8653,31 @@ async function onPlotClick(idx) {
   if (tool === 'water') {
     refillWateringCapacity();
     if ((G.waterCapacity || 0) <= 0) { toast('💧 O regador está vazio! Ele recupera 1 capacidade a cada 5 minutos.'); return; }
-    const maxW = effectiveMaxWater(plot.type);
+    const maxW = effectivePlotMaxWater(plot);
     if (plot.waterCount >= maxW) { toast('Regador cheio! Aguarde a planta crescer 🌱'); return; }
     G.waterCapacity--;
     G.waterCapacityLastRefill = G.waterCapacityLastRefill || Date.now();
     renderWateringCapacity();
     updatePts();
 
-    plot.waterCount = Math.min(maxW, plot.waterCount + 1);
+    const aquaticWater = plot.aquaticWater === true;
+    const directWaterSteps = Math.min(aquaticWater ? 2 : 1, maxW - plot.waterCount);
+    plot.waterCount = Math.min(maxW, plot.waterCount + directWaterSteps);
     let bonusWateredIdx = null;
     if (skillBranchBonusActive('cultivo') && Math.random() < 0.5) {
       const candidates = G.plots.map((candidate, candidateIdx) => ({ candidate, candidateIdx }))
-        .filter(({ candidate, candidateIdx }) => candidateIdx !== idx && candidate && candidate.waterCount < effectiveMaxWater(candidate.type));
+        .filter(({ candidate, candidateIdx }) => candidateIdx !== idx && candidate && candidate.waterCount < effectivePlotMaxWater(candidate));
       if (candidates.length) {
         const target = candidates[Math.floor(Math.random() * candidates.length)];
-        target.candidate.waterCount = Math.min(effectiveMaxWater(target.candidate.type), target.candidate.waterCount + 1);
-        if (isLocalPreview && target.candidate.waterCount >= effectiveMaxWater(target.candidate.type)) target.candidate.growCount = effectiveMaxGrowWithSkill(target.candidate.type);
+        target.candidate.waterCount = Math.min(effectivePlotMaxWater(target.candidate), target.candidate.waterCount + 1);
+        if (isLocalPreview && target.candidate.waterCount >= effectivePlotMaxWater(target.candidate)) target.candidate.growCount = effectivePlotMaxGrow(target.candidate);
         bonusWateredIdx = target.candidateIdx;
       }
     }
-    const waterPct = plot.waterCount / maxW;
+    const waterPct = maxW === 0 ? 1 : plot.waterCount / maxW;
     const justFull = plot.waterCount >= maxW;
     if (isLocalPreview && justFull) {
-      plot.growCount = effectiveMaxGrowWithSkill(plot.type);
+      plot.growCount = effectivePlotMaxGrow(plot);
       renderPlots();
     }
 
@@ -8387,7 +8704,7 @@ async function onPlotClick(idx) {
     const plotDiv = document.querySelector(`[data-idx="${idx}"]`);
     if (plotDiv) {
       const lbl = plotDiv.querySelector('.plot-label');
-      const maxG = effectiveMaxGrowWithSkill(plot.type);
+      const maxG = effectivePlotMaxGrow(plot);
       if (lbl) lbl.innerHTML = `<span style="color:#9dd8f8">💧 ${plot.waterCount}/${maxW}</span>`;
       const glbl = plotDiv.querySelector('.plot-grow-label');
       if (glbl) {
@@ -8397,12 +8714,12 @@ async function onPlotClick(idx) {
 
     spawnDrops(idx);
     if (bonusWateredIdx !== null) { spawnDrops(bonusWateredIdx); renderPlots(); }
-    missionProgress('water5');
+    for (let i = 0; i < directWaterSteps; i++) missionProgress('water5');
     if (bonusWateredIdx !== null) missionProgress('water5');
-    initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + (bonusWateredIdx !== null ? 2 : 1); checkAchievements();
+    initAchievements(); G.achievStats.totalWater = (G.achievStats.totalWater||0) + directWaterSteps + (bonusWateredIdx !== null ? 1 : 0); checkAchievements();
     updatePlotTooltip(idx);
 
-    toast(bonusWateredIdx !== null ? '💧✨ Rega em dobro! Uma segunda planta também recebeu água sem gastar mais do regador.' : '💧 Planta regada com sucesso!');
+    toast(aquaticWater ? `💧🫧 Adubo Aquático: ${directWaterSteps} regas aplicadas com 1 carga do regador!` : bonusWateredIdx !== null ? '💧✨ Rega em dobro! Uma segunda planta também recebeu água sem gastar mais do regador.' : '💧 Planta regada com sucesso!');
     return;
   }
 
@@ -9174,8 +9491,11 @@ function specialLevelReward(lv) {
   return rewards[lv] ? { ...rewards[lv] } : null;
 }
 
-function setSellAllItemQty(type, addAll) {
-  SELL[type] = addAll ? (G.harvested[type] || 0) : 0;
+function setSellAllItemQty(type, addAll, infested = false) {
+  const target = infested ? SELL_PEST : SELL;
+  const pestMax = Math.min(G.harvested[type] || 0, G.pestHarvested?.[type] || 0);
+  const max = infested ? pestMax : Math.max(0, (G.harvested[type] || 0) - pestMax);
+  target[type] = addAll ? max : 0;
   renderSellAllConfirm();
 }
 
@@ -9666,7 +9986,11 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     plots:            G.plots,
     unlockedPlots:    G.unlockedPlots,
     harvested:        G.harvested,
+    pestHarvested:     G.pestHarvested || {},
     crystalHarvested: G.crystalHarvested || {},
+    crazyDoubleHarvested: G.crazyDoubleHarvested || {},
+    crazyDoublePestHarvested: G.crazyDoublePestHarvested || {},
+    crazySeedModifiers: G.crazySeedModifiers || {},
     goldenHarvested:   G.goldenHarvested || {},
     upgrades:         [...G.upgrades],
     upgradeLevels:    G.upgradeLevels || {},
@@ -9697,6 +10021,9 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     eventNextAt:      Number(G.eventNextAt || 0),
     eventLastType:    G.eventLastType || '',
     discoveredMutations: G.discoveredMutations || [],
+    crazyShopOffers: Array.isArray(G.crazyShopOffers) ? G.crazyShopOffers : [],
+    crazyShopChosen: Number(G.crazyShopChosen || 0),
+    crazyShopEndsAt: Number(G.crazyShopEndsAt || 0),
     missions:         G.missions,
     achievements:     [...(G.achievements || [])],
     achievStats:      G.achievStats || {},
@@ -9951,6 +10278,13 @@ async function loadGardenFromSE(username) {
     G.plots           = (save.plots || Array(6).fill(null)).map(p => p || null);
     G.unlockedPlots   = save.unlockedPlots    || 2;
     G.harvested       = save.harvested        || {};
+    G.pestHarvested   = save.pestHarvested    || {};
+    G.crazyDoubleHarvested = save.crazyDoubleHarvested || {};
+    G.crazyDoublePestHarvested = save.crazyDoublePestHarvested || {};
+    G.crazySeedModifiers = save.crazySeedModifiers || {};
+    G.crazyShopOffers = Array.isArray(save.crazyShopOffers) ? save.crazyShopOffers : [];
+    G.crazyShopChosen = Number(save.crazyShopChosen || 0);
+    G.crazyShopEndsAt = Number(save.crazyShopEndsAt || 0);
     G.livestock       = FarmAnimals.normalize(save.livestock);
     G.crystalHarvested = save.crystalHarvested || {};
   G.upgrades        = new Set(save.upgrades || []);
@@ -9981,7 +10315,7 @@ async function loadGardenFromSE(username) {
     // realmente não combinar com a planta.
     G.plots = G.plots.map(plot => {
       if (!plot) return plot;
-      plot.outOfSeason = !isInSeason(plot.type);
+      plot.outOfSeason = !plot.crazySeasonProtected && !isInSeason(plot.type);
       return plot;
     });
     G.orders          = Array.isArray(save.orders) ? save.orders : [];
@@ -9997,6 +10331,9 @@ async function loadGardenFromSE(username) {
     G.recentGoldenEggFinds = Array.isArray(save.recentGoldenEggFinds) ? save.recentGoldenEggFinds.slice(0, 20) : [];
     G.eventNextAt      = Number(save.eventNextAt || 0);
     G.eventLastType    = save.eventLastType || '';
+    if (G.crazyShopEndsAt > Date.now() && G.crazyShopOffers.length) {
+      gardenEvent = { type:'crazyshop', phase:'active', endsAt:G.crazyShopEndsAt, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
+    } else G.crazyShopEndsAt = 0;
     G.discoveredMutations = Array.isArray(save.discoveredMutations) ? save.discoveredMutations : [];
     gardenOrders      = G.orders;
     G.missions        = save.missions         || null;
@@ -11112,14 +11449,14 @@ function updateGrowthCountdowns() {
   document.querySelectorAll('[data-growth-countdown]').forEach(el => {
     const idx = Number(el.dataset.growthCountdown);
     const plot = G.plots[idx];
-    if (!plot || plot.waterCount < effectiveMaxWater(plot.type) || isReady(plot)) {
+    if (!plot || plot.waterCount < effectivePlotMaxWater(plot) || isReady(plot)) {
       el.textContent = '';
       const fill = document.querySelector(`[data-growth-progress="${idx}"]`);
-      if (fill && plot) fill.style.width = `${Math.min(100, plot.growCount / effectiveMaxGrowWithSkill(plot.type) * 100)}%`;
+      if (fill && plot) fill.style.width = `${Math.min(100, plot.growCount / effectivePlotMaxGrow(plot) * 100)}%`;
       return;
     }
     el.textContent = `· ${seconds}s`;
-    const maxG = effectiveMaxGrowWithSkill(plot.type);
+    const maxG = effectivePlotMaxGrow(plot);
     const visualProgress = Math.min(maxG, plot.growCount + cycleProgress);
     const fill = document.querySelector(`[data-growth-progress="${idx}"]`);
     if (fill) fill.style.width = `${Math.min(100, visualProgress / maxG * 100)}%`;
@@ -11132,8 +11469,8 @@ function growTick() {
   let anyGrew = false;
   G.plots.forEach((plot, idx) => {
     if (!plot) return;
-    const maxW = effectiveMaxWater(plot.type);
-    const maxG = effectiveMaxGrowWithSkill(plot.type);
+    const maxW = effectivePlotMaxWater(plot);
+    const maxG = effectivePlotMaxGrow(plot);
     if (plot.waterCount < maxW) return;
     if (plot.growCount >= maxG) return;
     // quick_grow fertilizer: advance 2 extra steps

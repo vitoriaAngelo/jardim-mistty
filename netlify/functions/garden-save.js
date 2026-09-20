@@ -272,16 +272,20 @@ exports.handler = async (event) => {
       }
       // O limite base é sete. Só uma transição real para o evento dourado
       // concede mais duas recargas; a bonificação reinicia ao mudar de estação.
-      const oldRefillCycle = Number(existingData.wateringRefillsSeasonCycle || 0);
-      const incomingRefillCycle = Number(safeData.wateringRefillsSeasonCycle || 0);
+      const oldRefillCycle = Math.max(0, Number(existingData.seasonCycle ?? existingData.wateringRefillsSeasonCycle) || 0);
+      const incomingRefillCycle = Math.max(0, Number(safeData.seasonCycle ?? safeData.wateringRefillsSeasonCycle) || 0);
+      const refillSeasonChanged = incomingRefillCycle > oldRefillCycle;
       const oldRefillBonus = Math.max(0, Math.min(10000, Math.floor(Number(existingData.wateringRefillsBonus) || 0)));
       const goldenShowerStarted = safeData.eventLastType === 'goldenshower'
         && existingData.eventLastType !== 'goldenshower'
         && Number(existingData.eventNextAt || 0) <= Date.now();
-      safeData.wateringRefillsBonus = incomingRefillCycle !== oldRefillCycle
+      safeData.wateringRefillsSeasonCycle = incomingRefillCycle;
+      safeData.wateringRefillsBonus = refillSeasonChanged
         ? 0
         : Math.min(10000, oldRefillBonus + (goldenShowerStarted ? 2 : 0));
-      safeData.wateringRefillsUsed = Math.max(0, Math.min(7 + safeData.wateringRefillsBonus, Math.floor(Number(safeData.wateringRefillsUsed) || 0)));
+      safeData.wateringRefillsUsed = refillSeasonChanged
+        ? 0
+        : Math.max(0, Math.min(7 + safeData.wateringRefillsBonus, Math.floor(Number(safeData.wateringRefillsUsed) || 0)));
       // Pedidos antigos podem ter sido gerados por fórmulas anteriores. Eles
       // só precisam ser revalidados quando o estado dos pedidos realmente muda;
       // colher, plantar ou sair da conta não deve bloquear o jardim inteiro.

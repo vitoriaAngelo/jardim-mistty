@@ -5610,7 +5610,7 @@ function confirmRemovePlant(idx) {
   modal.querySelector('.modal').innerHTML = `
     <button class="popup-close-x" aria-label="Fechar confirmação" onclick="closeModal()">×</button>
     <h2>🪴 Retirar planta?</h2>
-    <p>Deseja realmente retirar ${plant.emoji} ${plant.name} do canteiro? A planta será descartada e a pá custará 50 pontos.</p>
+    <p>Deseja realmente limpar este canteiro? ${plant.emoji} ${plant.name} será descartada${plot.pestInfested ? ' e a infestação de pragas será removida por completo' : ''}. A pá custará ${effectiveShovelCost()} pontos.</p>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
       <button class="btn-primary" onclick="removePlantFromPlot(${idx})">Retirar planta</button>
@@ -5628,7 +5628,9 @@ async function removePlantFromPlot(idx) {
   G.plots[idx] = null;
   spawnSparkles(idx);
   saveGardenToSE();
-  toast(`🪴 ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} retirada do canteiro!`);
+  toast(plot.pestInfested
+    ? `🧹 Canteiro limpo! ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} e a infestação de pragas foram removidas.`
+    : `🪴 ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} retirada do canteiro!`);
   setTimeout(() => { renderPlots(); }, 300);
 }
 

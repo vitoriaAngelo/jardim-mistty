@@ -8039,7 +8039,7 @@ function renderSellAllConfirm() {
       .filter(row => row.max > 0)
       .map(({ infested,max,qty }) => {
         const crazyCount = infested ? crazyPestMax : crazyGoodMax;
-        const label = `${item.emoji} ${item.name}${infested ? ' · 🐛 COM PRAGAS · 50% DO PREÇO' : ''}${crazyCount > 0 ? ` · 🤪 ${crazyCount}x da Loja Maluca · 2×` : ''}`;
+        const label = `${item.emoji} ${item.name}${infested ? ' · 🐛' : ''}${crazyCount > 0 ? ` · 🤪 ${crazyCount}x · 2×` : ''}`;
         const pestClass = infested ? ' pest-stock' : '';
         return `<div class="shop-cart-row${pestClass}"><span>${label}</span><div class="shop-cart-row-controls"><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',false,${infested})" aria-label="Remover todo ${item.name} ${infested ? 'com pragas' : ''} da venda">⇤</button><button onclick="adjustSellAllQty('${type}',-1,${infested})" aria-label="Diminuir ${item.name}" ${qty === 0 ? 'disabled' : ''}>−</button><span>×${qty}</span><button onclick="adjustSellAllQty('${type}',1,${infested})" aria-label="Aumentar ${item.name}" ${qty >= max ? 'disabled' : ''}>+</button><button class="sell-qty-all" onclick="setSellAllItemQty('${type}',true,${infested})" aria-label="Adicionar todo o estoque de ${item.name} à venda">⇥</button></div></div>`;
       });

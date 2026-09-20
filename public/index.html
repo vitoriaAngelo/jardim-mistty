@@ -8431,7 +8431,7 @@ function seasonPriceLabel(type, qty = 1) {
   const changed=marketPrice!==p.cost||isOutOfSeason(type)||skillDiscount>0;
   const priceMarkup=changed?`<s style="opacity:.55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${p.cost*qty}</s> <strong style="color:#6f8e55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}</strong>`:`<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
   const trend=marketRate===1?'':` <span class="cozy-promo-chip" title="Preço sazonal da feira">🏪 ${marketRate>1?'+':''}${Math.round((marketRate-1)*100)}%</span>`;
-  const promo=isOutOfSeason(type)?` <span class="cozy-promo-chip" title="Desconto de fora de estação">-${Math.round(seasonDiscountRate(type)*100)}%</span>`:'';
+  const promo='';
   const negotiator=skillDiscount>0?` <span class="cozy-promo-chip" title="Desconto da habilidade Negociador">🤝 -${Math.round(skillDiscount*100)}%</span>`:'';
   return priceMarkup+trend+promo+negotiator;
 }

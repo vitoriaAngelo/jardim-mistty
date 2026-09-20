@@ -285,14 +285,23 @@ exports.handler = async (event) => {
       const incomingXP = Number(safeData.xp || 0);
       const oldGlobalMessage = existingData.lastGlobalMessage;
       const nextGlobalMessage = safeData.lastGlobalMessage;
-      const changedGlobalMessage = JSON.stringify(oldGlobalMessage || null) !== JSON.stringify(nextGlobalMessage || null);
-      if (changedGlobalMessage && nextGlobalMessage) {
-        const text = String(nextGlobalMessage.text || '').trim();
-        const at = Number(nextGlobalMessage.at);
-        if (!text || text.length > 120 || !Number.isFinite(at) || Math.abs(Date.now() - at) > 120000 || (Number(oldGlobalMessage?.at || 0) + 120000 > Date.now())) {
+      const oldGlobalMessageText = typeof oldGlobalMessage?.text === 'string' ? oldGlobalMessage.text.trim() : '';
+      const oldGlobalMessageAt = Number(oldGlobalMessage?.at) || 0;
+      const nextGlobalMessageText = typeof nextGlobalMessage?.text === 'string' ? nextGlobalMessage.text.trim() : '';
+      const nextGlobalMessageAt = Number(nextGlobalMessage?.at);
+      const changedGlobalMessage = Boolean(nextGlobalMessage)
+        && (nextGlobalMessageText !== oldGlobalMessageText || nextGlobalMessageAt !== oldGlobalMessageAt);
+      if (changedGlobalMessage) {
+        const text = nextGlobalMessageText;
+        const at = nextGlobalMessageAt;
+        if (!text || text.length > 120 || !Number.isFinite(at) || Math.abs(Date.now() - at) > 120000 || (oldGlobalMessageAt + 120000 > Date.now())) {
           return { statusCode: 429, headers, body: JSON.stringify({ error: 'Aguarde 2 minutos entre mensagens globais.' }) };
         }
         safeData.lastGlobalMessage = { text, at };
+      } else if (oldGlobalMessage && nextGlobalMessage) {
+        // Mantém a última mensagem salva nos autosaves. Comparar os objetos
+        // inteiros não é seguro, pois o banco pode mudar a ordem das chaves.
+        safeData.lastGlobalMessage = { text:oldGlobalMessageText, at:oldGlobalMessageAt };
       }
       if (Number.isFinite(storedXP) && storedXP > 0 && (!Number.isFinite(incomingXP) || incomingXP < storedXP)) {
         return { statusCode: 409, headers, body: JSON.stringify({ error: 'O banco possui mais XP que esta tela. Atualize o jardim antes de salvar.', code: 'PROGRESS_REGRESSION' }) };

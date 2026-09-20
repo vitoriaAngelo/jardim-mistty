@@ -5927,7 +5927,7 @@ async function buyGlobalMessage() {
   input.addEventListener('input',()=>{count.textContent=input.value.length+'/120';});
   composer.querySelector('.btn-cancel').onclick=close;
   composer.querySelector('.btn-ok').onclick=async()=>{
-    const message=String(input.value||'').trim().replace(/[\\u0000-\\u001F\\u007F]/g,'').slice(0,120);
+    const message=String(input.value||'').trim().replace(/[\u0000-\u001F\u007F]/g,'').slice(0,120);
     if(!message){input.focus();return;}
     const cooldownRemaining=120000-(Date.now()-Number(G.lastGlobalMessage?.at||0));
     if(cooldownRemaining>0){toast(`⏳ Aguarde ${Math.ceil(cooldownRemaining/1000)}s para enviar outra mensagem.`,2800);renderGlobalMessageShop();input.focus();return;}

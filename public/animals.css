@@ -15,6 +15,11 @@
 .animal-pens,.animal-shop-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
 .animal-pen,.animal-shop-card { border:1px solid var(--cozy-line,#c9cfb9); border-radius:22px; background:var(--cream); padding:13px; text-align:center; box-shadow:0 4px 0 #71815c22; min-width:0; }
 .animal-pen { position:relative; }
+.animal-pen.premium-habitat { border-color:#c6a34b; box-shadow:0 4px 0 #9b7c3422,0 0 18px #e6c85b66; }
+.animal-pen.premium-habitat .animal-scene { border:2px solid #d8b84f; background:linear-gradient(135deg,#fff1b7,#e8d9ff 48%,#d8f1e4); }
+.premium-habitat-badge { display:block; width:max-content; max-width:100%; margin:5px auto 7px; padding:4px 8px; border-radius:999px; background:linear-gradient(90deg,#f0cf6b,#d7b7e9,#9fd8c5); color:#594d30; font:900 10px Nunito,sans-serif; box-shadow:0 2px 0 #9d824344; }
+.animal-pen.premium-habitat .animal-scene::after { content:'✦'; position:absolute; top:7px; right:9px; color:#d6ad43; font-size:18px; animation:premium-sparkle 2s ease-in-out infinite; }
+@keyframes premium-sparkle { 50% { transform:scale(1.25) rotate(15deg); opacity:.55; } }
 .animal-product-collect { position:absolute; top:9px; right:9px; z-index:2; display:block; width:38px; height:38px; border:0; border-radius:50%; background:transparent; padding:0; color:#725b2d; cursor:pointer; animation:product-pop .6s ease both; }
 .animal-product-collect:hover { transform:translateY(-2px) scale(1.08); }
 .animal-product-collect .animal-product-art { width:38px; height:38px; }
@@ -104,6 +109,8 @@ body.dark-mode .animal-habitat-premium small { color:#d5ddc8; }
 .animal-shop-card .animal-scene svg { height:120px; }
 body.dark-mode .animal-scene { background:linear-gradient(#364330,#44533d); }
 body.dark-mode .animal-pen,body.dark-mode .animal-shop-card { background:#2d372b; border-color:#57624c; color:#eef0df; }
+body.dark-mode .animal-pen.premium-habitat { border-color:#d2b45b; box-shadow:0 4px 0 #9d803522,0 0 18px #d5b45055; }
+body.dark-mode .animal-pen.premium-habitat .animal-scene { background:linear-gradient(135deg,#554b2d,#4a3b59,#315247); }
 body.dark-mode .animal-note,body.dark-mode .animal-intro p,body.dark-mode .animal-home { color:#cbd4c0; }
 body.dark-mode .animal-feed-stock,body.dark-mode .animal-feed-shop { background:#3d4735; color:#eef0df; }
 body.dark-mode .animal-age-summary { background:#394434; border-color:#65725b; }

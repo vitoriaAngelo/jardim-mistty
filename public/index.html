@@ -5880,7 +5880,7 @@ const SELL_VALUE = { potato: 52, carrot: 70, tomato: 88, beetroot: 112, lettuce:
                      ruby_kale: 335, star_radish: 338, moon_lily: 1000, royal_dahlia: 383 };
 
 function cultivationCost(type) {
-  return seasonPrice(type) + 10;
+  return cartUnitCost(type) + 10;
 }
 const SHOP_QTY = {};
 const SHOP_CART = {};
@@ -5928,7 +5928,9 @@ function cartProduct(type) { return getPlantable(type) || (typeof FERTILIZERS !=
 function cartUnitCost(type) {
   const p = cartProduct(type); if (!p) return 0;
   if (typeof FERTILIZERS !== 'undefined' && FERTILIZERS[type]) return p.cost + (type === 'golden_soil' ? upgradeLevel('golden_soil_plus') * 100 : type === 'quick_grow' ? upgradeLevel('quick_grow_plus') * 100 : 0);
-  return seasonPrice(type);
+  const basePrice=seasonPrice(type);
+  const discount=isOutOfSeason(type)?0:skillBuyDiscount();
+  return Math.max(1,Math.round(basePrice*(1-discount)));
 }
 function addToShopCart(type, sourceEvent) {
   const product = cartProduct(type);
@@ -6044,7 +6046,7 @@ function setShopQtyFromInput(type, value, input) {
   }else total.innerHTML=seasonPriceLabel(type,qty);
   const addButton=card.querySelector('.fertilizer-buy-btn');
   if(addButton)addButton.disabled=G.pts<cartUnitCost(type)*qty;
-  card.classList.toggle('cant-afford',G.pts<(card.classList.contains('fertilizer-item')?cartUnitCost(type):seasonPrice(type))*qty);
+  card.classList.toggle('cant-afford',G.pts<cartUnitCost(type)*qty);
 }
 function shopQtyControls(type) {
   const qty = SHOP_QTY[type] || 1;
@@ -6092,7 +6094,7 @@ function renderFlowerShop() {
     const fs = SEASONS.find(s => s.id === shopSeasonFilter);
     if (fs) entries = entries.filter(([type]) => fs.flowers.includes(type));
   }
-  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => seasonPrice(a) - seasonPrice(b));
+  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => cartUnitCost(a) - cartUnitCost(b));
   if (shopSort === 'grow_asc')   entries.sort(([,a],[,b]) => a.maxGrow - b.maxGrow);
   if (shopSort === 'water_asc')  entries.sort(([,a],[,b]) => a.maxWater - b.maxWater);
   if (shopSort === 'sell_desc')  entries.sort(([a],[b]) => SELL_VALUE[b] - SELL_VALUE[a]);
@@ -6113,7 +6115,7 @@ function renderFlowerShop() {
     const subscriberLocked = p.subscriberOnly && !hasSubscriberBadge();
     const locked = subscriberLocked || (!previewAccess() && lv < p.minLevel);
     const outOfSeason = !isInSeason(type);
-    const canAfford = G.pts >= seasonPrice(type) * (SHOP_QTY[type] || 1);
+    const canAfford = G.pts >= cartUnitCost(type) * (SHOP_QTY[type] || 1);
     const sellVal = SELL_VALUE[type];
     const profit = sellVal - cultivationCost(type);
     const profitLabel = profit >= 0
@@ -6148,10 +6150,7 @@ function renderFlowerShop() {
 async function buyFlower(type, el) {
   const p = FLOWERS[type];
   const qty = SHOP_QTY[type] || 1;
-  // Skill: Negociador (-3% por nível, não se aplica a itens em promoção)
-  const basePrice = seasonPrice(type);
-  const discount = isOutOfSeason(type) ? 0 : skillBuyDiscount();
-  const total = Math.round(basePrice * (1 - discount)) * qty;
+  const total = cartUnitCost(type) * qty;
   if (!p) return;
   if (p.subscriberOnly && !hasSubscriberBadge()) { toast('✦ Esta flor é exclusiva para subscribers.'); return; }
   if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para esta flor!`); return; }
@@ -8297,14 +8296,16 @@ function seasonPrice(type) {
 }
 function seasonPriceLabel(type, qty = 1) {
   const p = getPlantable(type);
-  const price = seasonPrice(type) * qty;
+  const price = cartUnitCost(type) * qty;
   if (!p) return `<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
   const marketRate=seasonMarketRate(type),marketPrice=Math.max(1,Math.round(p.cost*marketRate));
-  const changed=marketPrice!==p.cost||isOutOfSeason(type);
+  const skillDiscount=isOutOfSeason(type)?0:skillBuyDiscount();
+  const changed=marketPrice!==p.cost||isOutOfSeason(type)||skillDiscount>0;
   const priceMarkup=changed?`<s style="opacity:.55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${p.cost*qty}</s> <strong style="color:#6f8e55"><img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}</strong>`:`<img class="points-token" src="points-sprout.svg" alt="" aria-hidden="true"> ${price}`;
   const trend=marketRate===1?'':` <span class="cozy-promo-chip" title="Preço sazonal da feira">🏪 ${marketRate>1?'+':''}${Math.round((marketRate-1)*100)}%</span>`;
   const promo=isOutOfSeason(type)?` <span class="cozy-promo-chip" title="Desconto de fora de estação">-${Math.round(seasonDiscountRate(type)*100)}%</span>`:'';
-  return priceMarkup+trend+promo;
+  const negotiator=skillDiscount>0?` <span class="cozy-promo-chip" title="Desconto da habilidade Negociador">🤝 -${Math.round(skillDiscount*100)}%</span>`:'';
+  return priceMarkup+trend+promo+negotiator;
 }
 
 // ─── SEED BAG SVG ────────────────────────────────────────
@@ -8384,7 +8385,7 @@ function renderShop() {
   }
 
   // sort order
-  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => seasonPrice(a) - seasonPrice(b));
+  if (shopSort === 'price_asc')  entries.sort(([a],[b]) => cartUnitCost(a) - cartUnitCost(b));
   if (shopSort === 'grow_asc')   entries.sort(([,a],[,b]) => a.maxGrow - b.maxGrow);
   if (shopSort === 'water_asc')  entries.sort(([,a],[,b]) => a.maxWater - b.maxWater);
   if (shopSort === 'sell_desc')  entries.sort(([a],[b]) => SELL_VALUE[b] - SELL_VALUE[a]);
@@ -8412,7 +8413,7 @@ function renderShop() {
     const subscriberLocked = p.subscriberOnly && !hasSubscriberBadge();
     const locked = subscriberLocked || (!previewAccess() && lv < p.minLevel);
     const outOfSeason = !isInSeason(type);
-    const canAfford = G.pts >= seasonPrice(type) * (SHOP_QTY[type] || 1);
+    const canAfford = G.pts >= cartUnitCost(type) * (SHOP_QTY[type] || 1);
     const sellVal = effectiveSellValue(type);
     const profit = sellVal - cultivationCost(type);
     const profitLabel = profit >= 0
@@ -8447,10 +8448,7 @@ async function buyPlant(type, el) {
   const p = getPlantable(type);
   const qty = SHOP_QTY[type] || 1;
   if (p?.eventOnly) { toast('🌙 O Lírio Lunar só pode ser encontrado durante a Lua Cheia.', 3000); return; }
-  // Skill: Negociador (-3% por nível, não se aplica a itens em promoção)
-  const basePrice = seasonPrice(type);
-  const discount = isOutOfSeason(type) ? 0 : skillBuyDiscount();
-  const total = Math.round(basePrice * (1 - discount)) * qty;
+  const total = cartUnitCost(type) * qty;
   if (p.subscriberOnly && !hasSubscriberBadge()) { toast('✦ Este cultivo é exclusivo para subscribers.'); return; }
   if (!previewAccess() && currentLevel() < p.minLevel) { toast(`🔒 Precisa ser nível ${p.minLevel} para comprar!`); return; }
   if (G.pts < total) { toast('✨ Pontos insuficientes!'); return; }
@@ -11739,6 +11737,9 @@ async function upgradeSkillNode(nodeId, branchId) {
   updatePts();
   await saveGardenToSE();
   renderSkillTree();
+  renderShop();
+  renderFlowerShop();
+  renderShopCart();
 
   toast(maxed
     ? `${node.emoji} ${node.name} chegou ao máximo! ✨`

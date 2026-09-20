@@ -6223,7 +6223,7 @@ function renderFlowerShop() {
 
     return `<div class="shop-item shop-add-tooltip ${canAfford ? '' : 'cant-afford'} ${outOfSeason ? 'promo-item' : ''}" onclick="addToShopCart('${type}', event)">
       ${seedBagSVG(type)}
-      ${outOfSeason ? '<span class="promo-corner">Promoção</span>' : ''}
+      ${outOfSeason ? `<span class="promo-corner">Promoção · -${Math.round(seasonDiscountRate(type) * 100)}%</span>` : ''}
       <div class="shop-item-name">${p.name}</div>
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>
@@ -8556,7 +8556,7 @@ function renderShop() {
 
     return `<div class="shop-item shop-add-tooltip ${canAfford ? '' : 'cant-afford'} ${outOfSeason ? 'promo-item' : ''}" onclick="addToShopCart('${type}', event)">
       ${seedBagSVG(type)}
-      ${outOfSeason ? '<span class="promo-corner">Promoção</span>' : ''}
+      ${outOfSeason ? `<span class="promo-corner">Promoção · -${Math.round(seasonDiscountRate(type) * 100)}%</span>` : ''}
       <div class="shop-item-name">${p.name}</div>
       ${p.subscriberOnly ? '<span class="subscriber-exclusive-chip">✦ Exclusivo Sub</span>' : ''}
       <div style="font-size:10px;color:var(--text2);font-weight:700;opacity:.7">💧 ${p.maxWater} · 🌱 ${effectiveMaxGrow(type)}</div>

@@ -49,7 +49,7 @@
   }
   modal.addEventListener('cancel',event=>{if(busy)event.preventDefault();});
   modal.querySelector('.close').onclick=()=>{if(!busy)modal.close();};
-  document.getElementById('combine').onclick=async()=>{if(busy)return;picked=[];busy=true;try{await refreshAvailable();busy=false;workshop();}catch(error){busy=false;body.textContent=error.message;if(!modal.open)modal.showModal();}};
+  document.getElementById('combine')?.addEventListener('click',async()=>{if(busy)return;picked=[];busy=true;try{await refreshAvailable();busy=false;workshop();}catch(error){busy=false;body.textContent=error.message;if(!modal.open)modal.showModal();}});
   document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));render();});
   window.addEventListener('message',e=>{if(e.source!==window.parent)return;if(e.data?.type==='album-theme')document.body.classList.toggle('dark-mode',e.data.dark===true);});
   window.parent.postMessage({type:'album-theme-ready'},location.origin);

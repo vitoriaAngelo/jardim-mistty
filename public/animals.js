@@ -54,10 +54,11 @@ function switchFarmTab(tab) {
   if (animals) renderAnimalYard();
 }
 function openAnimalShop() { openShop(); switchShopTab('animais'); }
-function animalState() {
-  G.livestock = FarmAnimals.advance(G.livestock, Date.now(), effectiveAnimalSkills());
-  let delivered = false;
-  const deaths = G.livestock.deaths || [];
+function settleAnimalState(next, options = {}) {
+  G.livestock=next;
+  let delivered=false;
+  const deaths=G.livestock.deaths||[];
+  const notify=options.notify!==false;
   deaths.forEach(death => {
     const animal=FarmAnimals.catalog[death.id], name=death.name||animal?.name||'Seu animal';
     const reason=death.reason==='old-age'?'chegou ao fim da vida e faleceu de idade avançada':'faleceu: a vida chegou a 0%';
@@ -65,9 +66,13 @@ function animalState() {
     if(animal&&(normal||golden)){
       G.harvested[animal.product]=(G.harvested[animal.product]||0)+normal;
       G.harvested[animal.product+'_golden']=(G.harvested[animal.product+'_golden']||0)+golden;
+      if(golden>0&&['farm_egg','farm_duck_egg'].includes(animal.product)){
+        const eggType=animal.product==='farm_duck_egg'?'duck_egg':'egg';
+        G.recentGoldenEggFinds=[{animalName:String(name).trim().slice(0,40),eggType,quantity:Math.min(1000,golden),at:Date.now()},...(Array.isArray(G.recentGoldenEggFinds)?G.recentGoldenEggFinds:[]).filter(item=>Number(item?.at)>Date.now()-86400000)].slice(0,20);
+      }
       delivered=true;
     }
-    toast(`🕊️ ${name} ${reason}.${normal+golden?` ${normal+golden} produtos que já havia produzido foram enviados ao Mercado.`:''}`,5500);
+    if(notify)toast(`🕊️ ${name} ${reason}.${normal+golden?` ${normal+golden} produtos que já havia produzido foram enviados ao Mercado.`:''}`,5500);
   });
   for (const [id, pet] of Object.entries(G.livestock.pets || {})) {
     const animal = FarmAnimals.catalog[id];
@@ -83,14 +88,20 @@ function animalState() {
     }
     pet.stock = 0; pet.goldStock = 0;
     delivered = true;
-    toast(`🐾 ${pet.name || animal.name} produziu ${produced} ${FarmAnimals.products[animal.product].name}${golden ? ' · ✨ dourado!' : ''}`, 3500);
+    if(notify)toast(`🐾 ${pet.name || animal.name} produziu ${produced} ${FarmAnimals.products[animal.product].name}${golden ? ' · ✨ dourado!' : ''}`, 3500);
   }
   if (delivered) {
     renderHarvested();
-    saveGardenToSE().catch(error => console.warn('Produto animal aguardando sincronização:', error));
   }
-  else if (deaths.length) saveGardenToSE().catch(error => console.warn('Falecimento aguardando sincronização:', error));
+  if(options.persist!==false&&(delivered||deaths.length))saveGardenToSE().catch(error=>console.warn('Progresso animal aguardando sincronização:',error));
   return G.livestock;
+}
+function animalState(at=Date.now(),options={}) { return settleAnimalState(FarmAnimals.advance(G.livestock,at,effectiveAnimalSkills()),options); }
+function advanceAnimalGameDay(at=Date.now(),options={}) {
+  animalState(at,{...options,persist:false});
+  const next=settleAnimalState(FarmAnimals.advanceGameDay(G.livestock),{...options,persist:false});
+  if(options.persist!==false)saveGardenToSE().catch(error=>console.warn('Idade dos animais aguardando sincronização:',error));
+  return next;
 }
 function animalTime(ms) { const seconds = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(seconds/60)}min ${String(seconds%60).padStart(2,'0')}s`; }
 function renderAnimalYard() {
@@ -114,14 +125,14 @@ function renderAnimalYard() {
     const boosterStatus=pet?`<div class="animal-booster-status ${pet.booster?'active':''}"><div class="animal-booster-heading"><span>✦ Booster</span><b class="animal-booster-time">${pet.booster?`ativo · ${animalTime(boosterRemaining)}`:'inativo'}</b></div><div class="animal-booster-bar"><span style="width:${pet.booster?Math.max(0,Math.min(100,boosterRemaining/(30*60000)*100)):0}%"></span></div></div>`:'';
     const superStatus=pet?`<div class="animal-super-status ${pet.superActive?'active':superRemaining?'paused':''}"><div class="animal-booster-heading"><span>✦ Super Premium</span><b class="animal-super-time">${superRemaining?`${pet.superActive?'ativo':'pausado'} · ${animalTime(superRemaining)}`:'inativo'}</b></div><div class="animal-booster-bar animal-super-bar"><span style="width:${Math.max(0,Math.min(100,superRemaining/(30*60000)*100))}%"></span></div></div>`:'';
     const productionLabel=pet?(status==='producing'?`Próximo ${product.name.toLowerCase()} em ${animalTime(pet.readyAt-now)}`:'Produção pausada'):'';
-    const ageSummary=pet?`<div class="animal-age-summary age-stage-${life.index}" title="${life.name}: ${Math.floor(life.ageDays)} de 120 dias de vida"><div class="animal-age-heading"><span>${life.icon} ${life.name} · ${FarmAnimals.itemsAtAge(pet.ageMs)} itens/ciclo</span><b>${Math.floor(life.ageDays)} / 120 dias</b></div><div class="animal-age-bar"><span style="width:${life.progress}%"></span></div><small>${life.index===3?`Fim da vida em ${Math.ceil(life.remainingDays)} dias`:`Próxima fase em ${Math.ceil(life.remainingDays)} dias`}</small></div>`:'';
+    const ageSummary=pet?`<div class="animal-age-summary age-stage-${life.index}" title="${life.name}: ${Math.floor(life.ageDays)} de 120 dias do jogo"><div class="animal-age-heading"><span>${life.icon} ${life.name} · ${FarmAnimals.itemsAtAge(pet.ageDays)} itens/ciclo</span><b>${Math.floor(life.ageDays)} / 120 dias do jogo</b></div><div class="animal-age-bar"><span style="width:${life.progress}%"></span></div><small>${life.index===3?`Fim da vida em ${Math.ceil(life.remainingDays)} dias do jogo`:`Próxima fase em ${Math.ceil(life.remainingDays)} dias do jogo`}</small></div>`:'';
     return `<article class="animal-pen ${status}${pet?.booster?' booster-active':''}">${collect}<span class="animal-home">${a.home}</span>${pet?`<input class="animal-name-input" maxlength="15" value="${petName.replace(/"/g,'&quot;')}" aria-label="Nome do animal" onchange="animalAction('rename','${id}',this.value)" />${ageSummary}${boosterStatus}${superStatus}<div class="animal-production-summary"><div class="animal-production-bar"><span style="width:${Math.max(0,progress)}%"></span></div><small>${productionLabel}</small></div>`:`<h4>${a.name}</h4>`}<div class="animal-scene ${status}">${animalArt(id)}</div>${pet?`<div class="animal-health" title="Vida do animal: ${health}%"><span style="width:${health}%"></span><b>${health}%</b></div>`:''}${pet||message?`<div class="animal-status" data-animal-status="${id}" data-cycle="${pet?`${pet.readyAt}:${health}:${life.index}:${pet.booster?'booster':''}:${pet.boosterUntil||0}:${pet.superActive?'super':''}:${pet.superUntil||0}`:''}">${message}</div>`:''}${reserve}${choice}${status==='empty'?`<button class="animal-action" onclick="${action}">Conhecer na loja</button>`:''}</article>`;
-  }).join('')}</div><p class="animal-note">As fases duram 30 dias cada: Filhote produz 2 itens, Jovem 5, Adulto 7 e Velho 12 por ciclo. O animal cresce enquanto estiver vivo e falece ao completar 120 dias ou se a vida chegar a 0%. Super Premium pode adicionar 1 item ao rendimento da fase quando o bônus ativar. O estoque já produzido permanece no Mercado.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
+  }).join('')}</div><p class="animal-note">As fases duram 30 dias do jogo cada: Filhote produz 2 itens, Jovem 5, Adulto 7 e Velho 12 por ciclo. O animal cresce enquanto estiver vivo e falece ao completar 120 dias do jogo ou se a vida chegar a 0%. Super Premium pode adicionar 1 item ao rendimento da fase quando o bônus ativar. O estoque já produzido permanece no Mercado.</p><button class="animal-action" onclick="openRationShop()">Comprar rações e Booster</button>`;
 }
 function renderAnimalShop() {
   const root = document.getElementById('animal-shop'); if (!root) return;
   const state = animalState();
-  root.innerHTML = `<p class="animal-note">Cada compra inclui o animal e seu cercadinho. Um de cada espécie por fazenda. A produção cresce com a idade: 2, 5, 7 e 12 itens por ciclo. Compre comida na aba Rações; os produtos recolhidos ficam no Mercado.</p><div class="animal-shop-grid">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
+  root.innerHTML = `<p class="animal-note">Cada compra inclui o animal e seu cercadinho. Um de cada espécie por fazenda. A produção cresce com a idade: 2, 5, 7 e 12 itens por ciclo, conforme os dias do jogo. Compre comida na aba Rações; os produtos recolhidos ficam no Mercado.</p><div class="animal-shop-grid">${Object.entries(FarmAnimals.catalog).map(([id,a]) => {
     const owned = !!state.pets[id], locked = currentLevel() < a.level, p = FarmAnimals.products[a.product];
     return `<article class="animal-shop-card"><div class="animal-scene">${animalArt(id)}</div><h4>${a.name}</h4><span class="animal-home">${a.home} incluído</span><div>${animalProductArt(a.product)}</div><div class="animal-shop-details">Produção por ciclo: 2 / 5 / 7 / 12 itens conforme a idade · ${a.minutes} min<br>Ração recupera a saúde do animal<br>Venda base: ${p.sell} pts cada · Nível ${a.level}</div><button class="animal-action" onclick="animalAction('buy','${id}')" ${owned||locked||animalActionInFlight?'disabled':''}>${owned?'Já mora na fazenda':locked?`Libera no nível ${a.level}`:`Comprar · ${a.cost.toLocaleString('pt-BR')} pts`}</button></article>`;
   }).join('')}</div>`;

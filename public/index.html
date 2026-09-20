@@ -7522,8 +7522,12 @@ function animateSeasonDay() {
 }
 
 function advanceSeasonDay() {
+  const wasGardenHydrated=gardenHydrated;
+  if(wasGardenHydrated&&typeof advanceAnimalGameDay==='function')advanceAnimalGameDay(Date.now(),{persist:false});
+  let seasonChanged=false;
   G.seasonDay++;
   if (G.seasonDay > SEASON_DAYS_LEN) {
+    seasonChanged=true;
     G.seasonDay = 1;
     G.seasonIdx = (G.seasonIdx + 1) % 4;
     G.seasonCycle = Math.max(0, Number(G.seasonCycle) || 0) + 1;
@@ -7547,6 +7551,7 @@ function advanceSeasonDay() {
     }
     saveGardenToSE(ordersCompleted);
   }
+  if(wasGardenHydrated&&!seasonChanged)saveGardenToSE().catch(error=>console.warn('Dia do jogo aguardando sincronização:',error));
   renderSeasonWidget();
   animateSeasonDay();
 }
@@ -7801,23 +7806,25 @@ function sellAll() {
 function applyOfflineProgress(savedAt) {
   if (!savedAt || !Number.isFinite(Number(savedAt))) return;
   const elapsed = Math.max(0, Math.min(Date.now() - Number(savedAt), 7 * 86400000));
-  if (elapsed < 1000) return;
-
-  // Avança a estação pelo tempo real decorrido, mesmo com a página fechada.
-  const seasonDays = Math.floor(elapsed / SEASON_DAY_MS);
-  const elapsedInDay = elapsed % SEASON_DAY_MS;
-  const persistedEnd = Number(seasonDayEndsAt);
-  const remainingToNextDay = Number.isFinite(persistedEnd) ? persistedEnd - Date.now() : (SEASON_DAY_MS - elapsedInDay);
-  scheduleSeasonDayTick(Math.max(1000, remainingToNextDay));
-  G.dayChangedWhileAway = seasonDays > 0;
-  for (let i = 0; i < seasonDays; i++) {
+  const offlineEnd=Number(savedAt)+elapsed;
+  const persistedEnd=Number(seasonDayEndsAt);
+  let nextDayAt=Number.isFinite(persistedEnd)&&persistedEnd>Number(savedAt)?persistedEnd:Number(savedAt)+SEASON_DAY_MS;
+  const maxDayTicks=Math.ceil(elapsed/SEASON_DAY_MS);
+  let seasonDays=0;
+  while(seasonDays<maxDayTicks&&nextDayAt<=offlineEnd){
+    if(typeof advanceAnimalGameDay==='function')advanceAnimalGameDay(nextDayAt,{persist:false,notify:false});
     G.seasonDay++;
-    if (G.seasonDay > SEASON_DAYS_LEN) {
-      G.seasonDay = 1;
-      G.seasonIdx = (G.seasonIdx + 1) % SEASONS.length;
-      G.seasonCycle = Math.max(0, Number(G.seasonCycle) || 0) + 1;
+    if(G.seasonDay>SEASON_DAYS_LEN){
+      G.seasonDay=1;
+      G.seasonIdx=(G.seasonIdx+1)%SEASONS.length;
+      G.seasonCycle=Math.max(0,Number(G.seasonCycle)||0)+1;
     }
+    nextDayAt+=SEASON_DAY_MS;
+    seasonDays++;
   }
+  if(typeof animalState==='function')animalState(Date.now(),{persist:false,notify:false});
+  scheduleSeasonDayTick(Math.max(1000,nextDayAt-Date.now()));
+  G.dayChangedWhileAway = seasonDays > 0;
   syncWateringRefillSeason();
 
   // Cada planta usa seu próprio maxGrow, então plantas com mais estágios

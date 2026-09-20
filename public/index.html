@@ -2494,6 +2494,11 @@ button:focus-visible, [role="button"]:focus-visible { outline: 3px solid #94774d
 .shop-cart-total { display:flex; align-items:center; gap:4px; color:var(--text2); margin-top:2px; }
 .shop-cart-total .points-token { width:20px; height:20px; }
 .shop-cart-buy { border:0; border-radius:10px; padding:8px 13px; background:var(--grass); color:#fff; font:800 11px 'Nunito',sans-serif; cursor:pointer; box-shadow:0 2px 0 var(--grass2); }
+.global-message-shop { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 14px; padding:13px 15px; border:1px solid #d8c59d; border-radius:16px; background:linear-gradient(135deg,#fff8e8,#f4ead4); color:var(--text); }
+.global-message-shop p { margin:3px 0 0; color:var(--text2); font-size:11px; line-height:1.4; }
+.global-message-shop button { flex:none; border:0; border-radius:10px; padding:9px 12px; background:#8b6a3f; color:#fff; font:800 11px 'Nunito',sans-serif; cursor:pointer; }
+.global-message-shop button:disabled { opacity:.55; cursor:not-allowed; }
+body.dark-mode .global-message-shop { border-color:#756342; background:linear-gradient(135deg,#403a2b,#35352b); }
 .shop-cart-buy:hover { filter:brightness(1.08); }
 .shop-cart-toggle { border:0; background:transparent; color:var(--text); font:800 12px 'Nunito',sans-serif; cursor:pointer; padding:0; text-align:left; }
 .shop-cart-items { display:flex; flex-direction:column; gap:5px; max-height:0; overflow:hidden; margin:0; border-top:1px solid transparent; padding-top:0; opacity:0; transition:max-height .25s ease, margin .25s ease, padding .25s ease, opacity .2s ease, border-color .25s ease; }
@@ -4075,6 +4080,7 @@ body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc
       <button class="shop-tab cards-tab" id="tab-packs" onclick="switchShopTab('packs')">🃏 Packs</button>
       <button class="shop-tab crazy-shop-tab" id="tab-especial" onclick="switchShopTab('especial')">⭐ Especial</button>
     </div>
+    <div id="global-message-shop" class="global-message-shop"></div>
     <div class="shop-panel visible" id="panel-vegetais"><div class="shop-items" id="shop-items"></div></div>
     <div class="shop-panel" id="panel-flores"><div class="shop-items" id="flower-items"></div></div>
     <div class="shop-panel" id="panel-adubos"><div id="fertilizer-items"></div></div>
@@ -5749,6 +5755,34 @@ const SHOP_QTY = {};
 const SHOP_CART = {};
 let SHOP_CART_OPEN = false;
 let shopPurchaseInFlight = false;
+const GLOBAL_MESSAGE_COST = 500;
+let globalMessagePurchaseInFlight = false;
+function renderGlobalMessageShop() {
+  const host = document.getElementById('global-message-shop');
+  if (!host) return;
+  const remaining = Math.max(0, 120000 - (Date.now() - Number(G.lastGlobalMessage?.at || 0)));
+  const cooldown = remaining > 0;
+  const label = cooldown ? `Aguarde ${Math.ceil(remaining / 1000)}s` : (globalMessagePurchaseInFlight ? 'Confirmando…' : 'Comprar e enviar');
+  host.innerHTML = `<div><strong>📣 Mensagem Global</strong><p>Compre o destaque e envie uma mensagem para todo o jardim. Custa ${GLOBAL_MESSAGE_COST.toLocaleString('pt-BR')} pts. Limite: 1 a cada 2 minutos.</p></div><button type="button" onclick="buyGlobalMessage()" ${globalMessagePurchaseInFlight || cooldown || G.pts < GLOBAL_MESSAGE_COST ? 'disabled' : ''}>${label}</button>`;
+}
+async function buyGlobalMessage() {
+  if (globalMessagePurchaseInFlight || G.pts < GLOBAL_MESSAGE_COST) return;
+  if (Date.now() - Number(G.lastGlobalMessage?.at || 0) < 120000) { renderGlobalMessageShop(); return; }
+  const text = window.prompt('Escreva sua mensagem para o global (até 120 caracteres):', 'Oi, jardim! 🌱');
+  const message = String(text || '').trim().replace(/[\u0000-\u001F\u007F]/g, '').slice(0, 120);
+  if (!message) return;
+  globalMessagePurchaseInFlight = true;
+  renderGlobalMessageShop();
+  try {
+    if (!(await chargeGamePoints(GLOBAL_MESSAGE_COST, 'Mensagem Global'))) return;
+    G.lastGlobalMessage = { text: message, at: Date.now() };
+    await saveGardenToSE();
+    toast('📣 Mensagem enviada para o global!', 3200);
+  } finally {
+    globalMessagePurchaseInFlight = false;
+    renderGlobalMessageShop();
+  }
+}
 function cartProduct(type) { return getPlantable(type) || (typeof FERTILIZERS !== 'undefined' ? FERTILIZERS[type] : null); }
 function cartUnitCost(type) {
   const p = cartProduct(type); if (!p) return 0;
@@ -8115,6 +8149,7 @@ function seedBagSVG(type, locked = false) {
 
 function renderShop() {
   const container = document.getElementById('shop-items');
+  renderGlobalMessageShop();
 
   // season filter
   let entries = Object.entries(PLANTS);
@@ -10063,6 +10098,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     supporterFrameUnlocked: G.supporterFrameUnlocked === true,
     dailyPhrase:       G.dailyPhrase || '',
     lastSale:          G.lastSale || null,
+    lastGlobalMessage: G.lastGlobalMessage || null,
     isSubscriber:      hasSubscriberBadge(),
     welcomeBonusClaimed: G.welcomeBonusClaimed === true,
     skillPoints: G.skillPoints || 0,
@@ -10391,6 +10427,7 @@ async function loadGardenFromSE(username) {
     G.supporterFrameUnlocked = save.supporterFrameUnlocked === true;
     G.dailyPhrase = save.dailyPhrase || '';
     G.lastSale = save.lastSale || null;
+    G.lastGlobalMessage = save.lastGlobalMessage || null;
     G.isSubscriber = save.isSubscriber === true;
     if (seUser && !seUser.subscriptionChecked && G.isSubscriber) {
       seUser.isSubscriber = true;
@@ -10846,7 +10883,9 @@ function renderLatestSale() {
   const sale = latestSalesItems[latestSalesIndex % Math.max(1, latestSalesItems.length)];
   if (!feed || !sale) { if (feed) feed.innerHTML = '<span class="latest-sales-content">Nenhuma novidade recente</span>'; return; }
   const who = String(sale.farmName || `Jardim de @${sale.username || ''}`).trim();
-  feed.innerHTML = sale.activityType === 'card'
+  feed.innerHTML = sale.activityType === 'global-message'
+    ? `<span class="latest-sales-content sales-slide-in">📣 <strong>${escapeLatestFeedText(who)}</strong>: “${escapeLatestFeedText(sale.text)}”</span>`
+    : sale.activityType === 'card'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${escapeLatestFeedText(who)}</strong> conseguiu a carta <b class="latest-sales-card-name ${sale.card.prismatic ? 'prismatic' : String(sale.card.rarity).toLocaleLowerCase('pt-BR') === 'lendária' ? 'legendary' : 'rare'}">${escapeLatestFeedText(sale.card.name)}</b></span>`
     : sale.activityType === 'event'
     ? `<span class="latest-sales-content sales-slide-in"><strong>${who}</strong> participou do evento <b>${sale.event || 'do jardim'}</b></span>`
@@ -10883,7 +10922,8 @@ async function updateLatestSales() {
 checkLiveStatus();
 setInterval(() => { if (!document.hidden) checkLiveStatus(); }, 120000);
 updateLatestSales();
-setInterval(() => { if (!document.hidden) updateLatestSales(); }, 120000);
+setInterval(() => { if (!document.hidden) updateLatestSales(); }, 10000);
+setInterval(() => { if (!document.hidden) renderGlobalMessageShop(); }, 1000);
 setInterval(() => {
   if (!document.hidden && latestSalesItems.length > 1) {
     latestSalesIndex = (latestSalesIndex + 1) % latestSalesItems.length;

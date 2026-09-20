@@ -255,6 +255,17 @@ exports.handler = async (event) => {
       }
       const storedXP = Number(existingData.xp || 0);
       const incomingXP = Number(safeData.xp || 0);
+      const oldGlobalMessage = existingData.lastGlobalMessage;
+      const nextGlobalMessage = safeData.lastGlobalMessage;
+      const changedGlobalMessage = JSON.stringify(oldGlobalMessage || null) !== JSON.stringify(nextGlobalMessage || null);
+      if (changedGlobalMessage && nextGlobalMessage) {
+        const text = String(nextGlobalMessage.text || '').trim();
+        const at = Number(nextGlobalMessage.at);
+        if (!text || text.length > 120 || !Number.isFinite(at) || Math.abs(Date.now() - at) > 120000 || (Number(oldGlobalMessage?.at || 0) + 120000 > Date.now())) {
+          return { statusCode: 429, headers, body: JSON.stringify({ error: 'Aguarde 2 minutos entre mensagens globais.' }) };
+        }
+        safeData.lastGlobalMessage = { text, at };
+      }
       if (Number.isFinite(storedXP) && storedXP > 0 && (!Number.isFinite(incomingXP) || incomingXP < storedXP)) {
         return { statusCode: 409, headers, body: JSON.stringify({ error: 'O banco possui mais XP que esta tela. Atualize o jardim antes de salvar.', code: 'PROGRESS_REGRESSION' }) };
       }

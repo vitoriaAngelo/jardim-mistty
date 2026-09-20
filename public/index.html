@@ -3346,6 +3346,15 @@ body.dark-mode .support-dev-link { background:linear-gradient(135deg,#e4c76b99,#
 body.dark-mode .site-footer-credit { background:linear-gradient(135deg,#354332cc,#202a21cc); border-color:#687d5f; color:#dce8d4; box-shadow:0 5px 20px #11181166, inset 0 1px 0 #dce8d41c; backdrop-filter:blur(10px); }
 @media (max-width:650px) { .site-footer { padding-top:10px; } .site-footer-actions { width:100%; } .support-dev-link, .live-status-link { flex:1 1 145px; justify-content:center; } .site-footer-credit { width:calc(100% - 18px); box-sizing:border-box; } }
 
+/* Molduras cozy: detalhes externos deixam o rosto livre. */
+:is(.subscriber-frame,.ranking-frame)[data-frame="purple"] { background:linear-gradient(145deg,#edddfa,#bc9cd9 55%,#a783c1); border-color:#b399cf; box-shadow:0 3px 0 #775b8f,0 0 0 2px #f4e8ff; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="pink"] { background:linear-gradient(145deg,#ffe5e9,#edbdd0 55%,#d894af); border-color:#dda4bb; box-shadow:0 3px 0 #aa758d,0 0 0 2px #fff0e7; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="purple"]::before,:is(.subscriber-frame,.ranking-frame)[data-frame="pink"]::before { content:''; inset:-13%; width:auto; height:auto; background:center/100% 100% no-repeat; z-index:2; pointer-events:none; }
+:is(.subscriber-frame,.ranking-frame)[data-frame="purple"]::before { background-image:url('purple-cozy-frame.svg'); }
+:is(.subscriber-frame,.ranking-frame)[data-frame="pink"]::before { background-image:url('pink-cozy-frame.svg'); }
+:is(.subscriber-frame,.ranking-frame)[data-frame="purple"]::after,:is(.subscriber-frame,.ranking-frame)[data-frame="pink"]::after { content:none; }
+body .frame-picker-btn[data-frame="purple"],body.dark-mode .frame-picker-btn[data-frame="purple"] { background:url('purple-cozy-frame.svg') center/contain no-repeat,#e6d7f5; border-color:#f8edff; }
+body .frame-picker-btn[data-frame="pink"],body.dark-mode .frame-picker-btn[data-frame="pink"] { background:url('pink-cozy-frame.svg') center/contain no-repeat,#f8dbe5; border-color:#fff1e9; }
 /* Recompensas do primeiro álbum: guirlanda ilustrada e jardim de primavera. */
 :is(.subscriber-frame,.ranking-frame)[data-frame="spring_album"] { background:linear-gradient(145deg,#fff5df,#d8e5bd 55%,#efcad8); border-color:#a9bc8d; box-shadow:0 3px 0 #82966c,0 0 0 2px #fff0db; }
 :is(.subscriber-frame,.ranking-frame)[data-frame="spring_album"]::before { content:''; inset:-13%; width:auto; height:auto; background:url('spring-floral-frame.svg') center/100% 100% no-repeat; z-index:2; pointer-events:none; }

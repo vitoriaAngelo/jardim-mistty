@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+<defs><linearGradient id="r" x2="1" y2="1"><stop stop-color="#ffe8eb"/><stop offset=".5" stop-color="#ecaec5"/><stop offset="1" stop-color="#d78da9"/></linearGradient><g id="flower"><path d="M0-3C-10-16-19-3-8 2C-19 11-6 19 0 9C7 20 19 9 8 2C20-5 8-17 0-3Z" fill="#ffe5e9" stroke="#bf819b" stroke-width="1.2"/><circle cy="3" r="3.2" fill="#f6d692"/></g></defs>
+<rect x="11" y="11" width="98" height="98" rx="29" stroke="#b2778d" stroke-width="10"/>
+<rect x="11" y="10" width="98" height="98" rx="29" stroke="url(#r)" stroke-width="7"/>
+<rect x="16" y="15" width="88" height="88" rx="24" stroke="#fff5e6" stroke-width="1.3"/>
+<path d="M9 43V73M108 42V75" stroke="#fff6e6" stroke-width="2" stroke-dasharray="1 6" stroke-linecap="round"/>
+<g stroke="#b87895" stroke-width="1.2" stroke-linejoin="round"><path d="m91 13-10 15 11-2 5-11 7 13 8 2-7-17" fill="#eab3c9"/><path d="M97 11Q72-7 78 12Q82 24 97 15Q116 27 117 10Q115-3 97 11Z" fill="#f8d0df"/><path d="m82 8 13 5M112 9l-11 4" stroke="#d99bb6"/><ellipse cx="98" cy="13" rx="4" ry="5" fill="#ffece8"/></g>
+<path d="M17 23Q-1 18 5 9Q19 9 17 23M23 18Q19 0 30 4Q35 14 23 18M96 102Q104 85 113 91Q115 103 96 102" fill="#bbcfaa" stroke="#869e79"/>
+<use href="#flower" transform="translate(17 22) scale(.85)"/><use href="#flower" transform="translate(96 104) scale(.8)"/>
+<path d="M20 94C10 83 5 95 20 104C36 94 28 83 20 94Z" fill="#f8c9d8" stroke="#b97c98"/>
+<g fill="#fff2cc" stroke="#cba57e" stroke-width=".7"><circle cx="51" cy="10" r="2"/><circle cx="65" cy="108" r="2.3"/></g>
+</svg>

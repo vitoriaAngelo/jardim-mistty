@@ -4565,6 +4565,7 @@ const G = {
   isPremium: false,
   selectedMascot: null,
   secondaryMascot: null,
+  tertiaryMascot: null,
   extraMascotSlotPurchased: false,
   ownedMascots: {},
   twitchzinhoNextRewardAt: 0,
@@ -5431,7 +5432,7 @@ function effectiveSellValue(type, epicOverride) {
   if (epicOverride) val *= 2;
   return val;
 }
-function activeMascots() { return [G.selectedMascot, G.secondaryMascot].filter(Boolean); }
+function activeMascots() { return [G.selectedMascot, G.secondaryMascot, G.tertiaryMascot].filter(Boolean); }
 function hasActiveMascot(id) { return activeMascots().includes(id); }
 function effectiveHarvestBonus() { return hasActiveMascot('orange') || hasActiveMascot('premium') ? 1 : 0; }
 function effectiveWaterRefillAmount() {
@@ -6551,25 +6552,33 @@ if (window.location.hostname === 'localhost' && new URLSearchParams(window.locat
 }
 function renderMascotShop() {
   RainbowRewards.grant(G);
-  if(!document.getElementById('rainbow-mascot-card')){
-    const card=document.createElement('article');card.id='rainbow-mascot-card';card.className='rainbow-mascot-card';
-    card.innerHTML=RainbowRewards.art('mascot')+'<h3>Brotinho Arco-Íris</h3><p>+1 rega aleatória a cada 5 segundos sem gastar água. Chance de 0,01% por ciclo de regar todas as plantas sedentas e 1% de colher uma pronta para o Mercado.</p><button class="mascot-buy" data-mascot="rainbow" onclick="buyMascot(\'rainbow\')">Complete o álbum Arco-Íris</button>';
-    document.querySelector('.mascot-grid')?.append(card);
+  if(!document.getElementById('rainbow-mascot-option')){
+    const option=document.createElement('div');
+    option.id='rainbow-mascot-option';
+    option.className='mascot-option mascot-rainbow-option';
+    option.innerHTML='<div class="mascot-option-art rainbow-mascot-art" aria-hidden="true">'+RainbowRewards.art('mascot')+'</div><div><strong>Brotinho Arco-Íris</strong><small>+1 rega aleatória a cada 5 segundos, sem gastar água · 0,01% para regar todas as plantas sedentas.</small></div><div class="mascot-actions"><button type="button" class="mascot-preview" onclick="previewMascot(\'rainbow\')">Prévia</button><button type="button" class="mascot-buy" data-mascot="rainbow" onclick="buyMascot(\'rainbow\')">Complete o álbum Arco-Íris</button></div>';
+    document.querySelector('.mascot-grid')?.append(option);
   }
-  const labels = { orange:'Comprar · 2.500 pts', apple:'Comprar · 7.500 pts', strawberry:'Comprar · 15.000 pts', premium:'Comprar · 75.000 pts', twitchzinho:'✦ Resgate no Premium', prismatic:'Complete o álbum' };
+  const labels = { orange:'Comprar · 2.500 pts', apple:'Comprar · 7.500 pts', strawberry:'Comprar · 15.000 pts', premium:'Comprar · 75.000 pts', twitchzinho:'✦ Resgate no Premium', prismatic:'Complete o álbum', rainbow:'Complete o álbum Arco-Íris' };
   const levels = { orange:1, apple:10, strawberry:15, premium:25 };
   const albumComplete = hasCompletePrismaticAlbum();
   if (albumComplete && G.ownedMascots?.prismatic !== true) G.ownedMascots.prismatic = true;
+  const slotCard=document.querySelector('.mascot-slot-card');
+  if(slotCard){
+    const title=slotCard.querySelector('strong'),description=slotCard.querySelector('small');
+    if(title)title.textContent='🐾 +2 espaços de mascote';
+    if(description)description.textContent='Com o Premium, use até dois mascotes de álbum que você já desbloqueou. Compra única.';
+  }
   const slotButton=document.getElementById('mascot-slot-buy');
-  if(slotButton){slotButton.textContent=G.extraMascotSlotPurchased?'✓ Espaço adquirido':'Obter · 200.000 pts';slotButton.disabled=G.extraMascotSlotPurchased;}
+  if(slotButton){slotButton.textContent=G.extraMascotSlotPurchased?'✓ Espaços adquiridos':'Obter · 200.000 pts';slotButton.disabled=G.extraMascotSlotPurchased;}
   document.querySelectorAll('.mascot-buy[data-mascot]').forEach(btn => {
-    const id=btn.dataset.mascot, owned=G.ownedMascots?.[id]===true, selected=G.selectedMascot===id, selectedExtra=G.secondaryMascot===id;
+    const id=btn.dataset.mascot, owned=G.ownedMascots?.[id]===true, selected=G.selectedMascot===id, selectedExtra=G.secondaryMascot===id, selectedThird=G.tertiaryMascot===id;
     const required=levels[id], locked=required!==undefined && currentLevel()<required && !owned;
     const prismaticLocked=(id==='prismatic'&&!albumComplete)||(id==='rainbow'&&!owned);
     const premiumOnly=id==='twitchzinho';
-    btn.classList.toggle('selected',selected||selectedExtra); btn.classList.toggle('locked',locked||prismaticLocked);
-    btn.textContent=selected?'Selecionado':selectedExtra?'Desequipar extra':premiumOnly&&!owned?'✦ Resgate no Premium':locked?`🔒 Nível ${required}`:prismaticLocked?'🔒 Complete o álbum':owned?'Selecionar':labels[id];
-    btn.disabled=(selected&&!selectedExtra)||(premiumOnly&&!owned)||locked||prismaticLocked;
+    btn.classList.toggle('selected',selected||selectedExtra||selectedThird); btn.classList.toggle('locked',locked||prismaticLocked);
+    btn.textContent=selected?'Selecionado':selectedExtra?'Retirar do espaço extra':selectedThird?'Retirar do 2º espaço':premiumOnly&&!owned?'✦ Resgate no Premium':locked?`🔒 Nível ${required}`:prismaticLocked?'🔒 Complete o álbum':owned?'Selecionar':labels[id];
+    btn.disabled=(selected&&!selectedExtra&&!selectedThird)||(premiumOnly&&!owned)||locked||prismaticLocked;
     // O botão começa desabilitado no HTML; atribuir a ação durante a renderização
     // garante que ele continue clicável depois de o Twitchzinho ser resgatado.
     if (id === 'twitchzinho') btn.onclick = () => buyMascot('twitchzinho');
@@ -6580,7 +6589,7 @@ function renderMascotShop() {
   if (panel) { panel.classList.toggle('empty', !active.length); panel.innerHTML=active.length ? active.map(data=>`<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">${data[0]}</span><div><strong>${data[1]} ativo</strong><small>${data[2]}</small></div></div>`).join('') : '<div class="mascot-benefit-card"><span class="mascot-active-benefit-icon">🐾</span><div><strong>Nenhum mascote selecionado</strong><small>Escolha um companheiro para ver o que você está ganhando.</small></div></div>'; }
 }
 function previewMascot(id) {
-  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(id, true);
+  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(id, true, null, null);
   if (id === 'twitchzinho' || id === 'premium') {
     updateTwitchzinhoPouch(id);
   } else {
@@ -6588,7 +6597,7 @@ function previewMascot(id) {
     if (pouch) pouch.dataset.preview = 'false';
     updateTwitchzinhoPouch();
   }
-  toast(`👀 Prévia de ${id === 'orange' ? 'Laranjinha' : id === 'apple' ? 'Maçanzinha' : id === 'strawberry' ? 'Moranguinho' : id === 'twitchzinho' ? 'Twitchzinho' : id === 'prismatic' ? 'Brotinho Prismático' : 'Brotinho Premium'} — escolha quando quiser!`, 2200);
+  toast(`👀 Prévia de ${id === 'orange' ? 'Laranjinha' : id === 'apple' ? 'Maçanzinha' : id === 'strawberry' ? 'Moranguinho' : id === 'twitchzinho' ? 'Twitchzinho' : id === 'prismatic' ? 'Brotinho Prismático' : id === 'rainbow' ? 'Brotinho Arco-Íris' : 'Brotinho Premium'} — escolha quando quiser!`, 2200);
 }
 function applySelectedMascotAppearance(animate=false) {
   const premium = G.selectedMascot === 'premium';
@@ -6596,7 +6605,7 @@ function applySelectedMascotAppearance(animate=false) {
   document.body.classList.toggle('mascot-prismatic-active', hasActiveMascot('prismatic'));
   document.body.classList.toggle('mascot-orange-active', G.selectedMascot === 'orange');
   document.body.classList.toggle('mascot-twitchzinho-active', G.selectedMascot === 'twitchzinho');
-  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(G.selectedMascot, animate, G.secondaryMascot);
+  if (typeof window.setGardenMascot === 'function') window.setGardenMascot(G.selectedMascot, animate, G.secondaryMascot, G.tertiaryMascot);
   else if (typeof window.setMascotPremium === 'function') window.setMascotPremium(premium, animate);
   const pouch = document.getElementById('twitchzinho-pouch');
   if (pouch) pouch.dataset.preview = 'false';
@@ -6666,7 +6675,17 @@ async function buyMascot(id) {
   if(id==='rainbow'&&!alreadyOwned){toast('🌈 Complete as 10 figurinhas Arco-Íris para desbloquear este Brotinho.');return;}
   if (id === 'twitchzinho' && !alreadyOwned) { toast('💜 Resgate o Twitchzinho no benefício Premium.'); return; }
   const cost=MASCOT_COSTS[id]||0;
-  if (G.secondaryMascot === id) { G.secondaryMascot=null; applySelectedMascotAppearance(); renderMascotShop(); saveGardenToSE(); toast('🐾 Brotinho Prismático retirado do espaço extra.'); return; }
+  const isCompanion=id==='prismatic'||id==='rainbow';
+  if (isCompanion && G.selectedMascot==='premium' && G.extraMascotSlotPurchased && alreadyOwned) {
+    if(G.secondaryMascot===id){G.secondaryMascot=G.tertiaryMascot;G.tertiaryMascot=null;}
+    else if(G.tertiaryMascot===id)G.tertiaryMascot=null;
+    else if(!G.secondaryMascot)G.secondaryMascot=id;
+    else if(!G.tertiaryMascot)G.tertiaryMascot=id;
+    else {toast('🐾 Os dois espaços extras já estão ocupados.');return;}
+    applySelectedMascotAppearance();renderMascotShop();saveGardenToSE();
+    toast(`🐾 ${id==='rainbow'?'Brotinho Arco-Íris':'Brotinho Prismático'} atualizado nos companheiros do Premium.`);
+    return;
+  }
   if (G.selectedMascot === id) { toast('🐾 Este mascote já está selecionado!'); return; }
   if (!alreadyOwned) {
     if (id==='prismatic') { toast('🌈 Este mascote é uma recompensa do álbum, não pode ser comprado.'); return; }
@@ -6674,25 +6693,34 @@ async function buyMascot(id) {
     if (!(await chargeGamePoints(cost))) return;
     G.ownedMascots[id] = true;
   }
-  if ((id==='prismatic' && G.selectedMascot==='premium') || (id==='premium' && G.selectedMascot==='prismatic')) {
-    if (G.extraMascotSlotPurchased) {
-      G.selectedMascot='premium'; G.secondaryMascot='prismatic';
-    } else {
-      G.selectedMascot=id; G.secondaryMascot=null;
+  const previousPrimary=G.selectedMascot;
+  if(id==='premium'){
+    G.selectedMascot='premium';
+    if(!G.extraMascotSlotPurchased){G.secondaryMascot=null;G.tertiaryMascot=null;}
+    else if(['prismatic','rainbow'].includes(previousPrimary) && G.ownedMascots[previousPrimary]){
+      G.secondaryMascot=previousPrimary;
+      G.tertiaryMascot=null;
     }
-  } else {
-    G.selectedMascot=id; G.secondaryMascot=null;
+  }else if(isCompanion&&previousPrimary==='premium'&&G.extraMascotSlotPurchased){
+    G.selectedMascot='premium';G.secondaryMascot=id;G.tertiaryMascot=null;
+  }else{
+    G.selectedMascot=id;G.secondaryMascot=null;G.tertiaryMascot=null;
   }
-  applySelectedMascotAppearance(true); updatePts(); renderMascotShop(); renderWateringCapacity(); saveGardenToSE(); toast(G.secondaryMascot ? '✨ Brotinho Premium e Brotinho Prismático estão ativos juntos!' : id === 'premium' ? '✨ O Brotinho se transformou! Todos os benefícios Premium estão ativos.' : id==='prismatic' ? '🌈 Brotinho Prismático selecionado! A chance de Chuva Mágica aumentou.' : '🐾 Mascote selecionado! Seus benefícios já estão ativos.', 3500);
+  applySelectedMascotAppearance(true); updatePts(); renderMascotShop(); renderWateringCapacity(); saveGardenToSE();
+  toast(G.secondaryMascot||G.tertiaryMascot ? '✨ Premium e mascotes extras selecionados juntos!' : id==='premium' ? '✨ O Brotinho se transformou! Todos os benefícios Premium estão ativos.' : id==='prismatic' ? '🌈 Brotinho Prismático selecionado! A chance de Chuva Mágica aumentou.' : '🐾 Mascote selecionado! Seus benefícios já estão ativos.',3500);
 }
 window.buyMascot = buyMascot;
 async function buyExtraMascotSlot() {
-  if(G.extraMascotSlotPurchased){toast('🐾 O espaço extra já foi adquirido.');return;}
+  if(G.extraMascotSlotPurchased){toast('🐾 Os espaços extras já foram adquiridos.');return;}
   if(!(await chargeGamePoints(MASCOT_COSTS.extraSlot,'Espaço extra de mascote')))return;
   G.extraMascotSlotPurchased=true;
-  if(G.selectedMascot==='premium'&&G.ownedMascots?.prismatic&&hasCompletePrismaticAlbum())G.secondaryMascot='prismatic';
+  if(G.selectedMascot==='premium'){
+    if(!G.secondaryMascot&&G.ownedMascots?.prismatic&&hasCompletePrismaticAlbum())G.secondaryMascot='prismatic';
+    if(G.secondaryMascot&&G.ownedMascots?.rainbow)G.tertiaryMascot='rainbow';
+    else if(!G.secondaryMascot&&G.ownedMascots?.rainbow)G.secondaryMascot='rainbow';
+  }
   applySelectedMascotAppearance();renderMascotShop();updatePts();await saveGardenToSE();
-  toast('🐾 Espaço extra adquirido! Agora você pode usar o Brotinho Premium junto com o Prismático.');
+  toast('🐾 Espaços extras adquiridos! Use até dois mascotes de álbum junto com o Premium.');
 }
 window.buyExtraMascotSlot=buyExtraMascotSlot;
 function renderPremiumBenefits() {
@@ -6744,7 +6772,7 @@ function claimPremium(kind) {
     renderPlots();
     renderPlotShop();
   }
-  if (kind === 'mascot') { G.ownedMascots = G.ownedMascots || {}; G.ownedMascots.twitchzinho = true; G.selectedMascot = 'twitchzinho'; G.secondaryMascot = null; applySelectedMascotAppearance(true); renderMascotShop(); }
+  if (kind === 'mascot') { G.ownedMascots = G.ownedMascots || {}; G.ownedMascots.twitchzinho = true; G.selectedMascot = 'twitchzinho'; G.secondaryMascot = null; G.tertiaryMascot=null; applySelectedMascotAppearance(true); renderMascotShop(); }
   updatePts(); renderPremiumBenefits(); renderWateringCapacity(); refreshShovelTool(); saveGardenToSE(); toast('✦ Presente Premium resgatado! Aproveite seu mimo do jardim 💜', 3200);
 }
 function claimAllPremium() {
@@ -10306,6 +10334,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     isPremium: G.isPremium === true,
     selectedMascot: G.selectedMascot || null,
     secondaryMascot: G.secondaryMascot || null,
+    tertiaryMascot: G.tertiaryMascot || null,
     extraMascotSlotPurchased: G.extraMascotSlotPurchased === true,
     ownedMascots: G.ownedMascots || {},
     rainbowMascotPulseAt:Number(G.rainbowMascotPulseAt||0),
@@ -10638,11 +10667,17 @@ async function loadGardenFromSE(username) {
     G.isPremium = save.isPremium === true || G.premiumWateringCan || G.premiumShovel || G.premiumPlantsUnlocked || G.premiumFertilizersClaimed || G.premiumSpecialPlotClaimed;
     restorePremiumClaimsCache(username);
     G.selectedMascot = save.selectedMascot || null;
-    G.secondaryMascot = save.secondaryMascot === 'prismatic' ? 'prismatic' : null;
+    G.secondaryMascot = ['prismatic','rainbow'].includes(save.secondaryMascot) ? save.secondaryMascot : null;
+    G.tertiaryMascot = ['prismatic','rainbow'].includes(save.tertiaryMascot) ? save.tertiaryMascot : null;
     G.extraMascotSlotPurchased = save.extraMascotSlotPurchased === true;
     G.ownedMascots = save.ownedMascots || (G.selectedMascot ? {[G.selectedMascot]: true} : {});
     G.rainbowMascotPulseAt=Number(save.rainbowMascotPulseAt)||Date.now();
-    if (!G.extraMascotSlotPurchased || G.selectedMascot !== 'premium' || G.ownedMascots.prismatic !== true) G.secondaryMascot = null;
+    if (!G.extraMascotSlotPurchased || G.selectedMascot !== 'premium') G.secondaryMascot = G.tertiaryMascot = null;
+    else {
+      if (!G.ownedMascots[G.secondaryMascot]) G.secondaryMascot = null;
+      if (!G.ownedMascots[G.tertiaryMascot] || G.tertiaryMascot === G.secondaryMascot) G.tertiaryMascot = null;
+      if (!G.secondaryMascot && G.tertiaryMascot) { G.secondaryMascot = G.tertiaryMascot; G.tertiaryMascot = null; }
+    }
     syncPrismaticMascotUnlock();
     G.twitchzinhoNextRewardAt = Number(save.twitchzinhoNextRewardAt || 0);
     G.twitchzinhoPendingCoins = Number(save.twitchzinhoPendingCoins || 0);
@@ -11191,6 +11226,7 @@ if (isLocalPreview) {
   G.premiumSpecialPlotClaimed = false;
   G.selectedMascot = null;
   G.secondaryMascot = null;
+  G.tertiaryMascot = null;
   G.extraMascotSlotPurchased = false;
   G.bonusRefillDiscount = false;
   G.bonusWateringCapacity = 0;

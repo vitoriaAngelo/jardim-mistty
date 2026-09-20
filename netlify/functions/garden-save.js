@@ -247,12 +247,19 @@ exports.handler = async (event) => {
       if (!Object.prototype.hasOwnProperty.call(safeData, 'secondaryMascot')) {
         safeData.secondaryMascot = safeData.selectedMascot === 'premium' ? (existingData.secondaryMascot || null) : null;
       }
-      if (safeData.secondaryMascot && (safeData.secondaryMascot !== 'prismatic'
-        || safeData.selectedMascot !== 'premium'
-        || safeData.extraMascotSlotPurchased !== true
-        || safeData.ownedMascots?.prismatic !== true)) {
+      if (!Object.prototype.hasOwnProperty.call(safeData, 'tertiaryMascot')) {
+        safeData.tertiaryMascot = safeData.selectedMascot === 'premium' ? (existingData.tertiaryMascot || null) : null;
+      }
+      const validCompanion = mascot => mascot === null || mascot === 'prismatic' || mascot === 'rainbow';
+      if (!validCompanion(safeData.secondaryMascot) || !validCompanion(safeData.tertiaryMascot)
+        || (safeData.secondaryMascot && safeData.secondaryMascot === safeData.tertiaryMascot)
+        || [...new Set([safeData.secondaryMascot, safeData.tertiaryMascot].filter(Boolean))].some(mascot =>
+          safeData.selectedMascot !== 'premium'
+          || safeData.extraMascotSlotPurchased !== true
+          || safeData.ownedMascots?.[mascot] !== true)) {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Combinação de mascotes inválida' }) };
       }
+
       const storedXP = Number(existingData.xp || 0);
       const incomingXP = Number(safeData.xp || 0);
       const oldGlobalMessage = existingData.lastGlobalMessage;

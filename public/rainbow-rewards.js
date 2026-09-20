@@ -19,7 +19,7 @@
   }
   const harvestQuantity=(random=Math.random)=>1+Math.min(99,Math.max(0,Math.floor(random()*100)));
   function pulse(state,{now=Date.now(),random=Math.random,maxWater,ready,accessible=()=>true}={}){
-    if(state.selectedMascot!=='rainbow'||state.ownedMascots?.rainbow!==true)return {changed:false,harvest:-1,wateredPlot:-1,wateredAll:false};
+    if(![state.selectedMascot,state.secondaryMascot,state.tertiaryMascot].includes('rainbow')||state.ownedMascots?.rainbow!==true)return {changed:false,harvest:-1,wateredPlot:-1,wateredAll:false};
     if(now-Number(state.rainbowMascotPulseAt||0)<5000)return {changed:false,harvest:-1,wateredPlot:-1,wateredAll:false};
     state.rainbowMascotPulseAt=now;
     const candidates=[],needsWater=[];

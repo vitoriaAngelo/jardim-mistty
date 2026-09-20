@@ -143,7 +143,8 @@ body.dark-mode .season-showcase-card.winter::before { background:linear-gradient
 .season-widget.day-changed { animation: season-day-pop .8s ease-out; }
 
 /* RIGHT */
-.header-right { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.header-right { display: flex; align-items: center; gap: 8px; justify-content: flex-end; position: relative; z-index: 10; }
+.header-right:has(#user-menu:not(.hidden)) { z-index: 1000; }
 
 .pts-block { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 .pts-badge { 
@@ -504,7 +505,7 @@ body.dark-mode .shop-add-tooltip::after { background:#303a30; border-color:#5360
   position: absolute; top: calc(100% + 6px); right: 0;
   background: var(--cream); border: 2px solid #e0cfb0;
   border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.15);
-  min-width: 130px; z-index: 300; overflow: hidden;
+  min-width: 130px; z-index: 2000; overflow: hidden;
 }
 .user-menu.hidden { display: none; }
 .user-menu-item {

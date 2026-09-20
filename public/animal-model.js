@@ -24,6 +24,14 @@
   const MIN_HEALTH_TO_PRODUCE = 15;
   const ITEMS_PER_CYCLE = 5;
   const HEALTH_MS = 60000; // Um ponto por minuto, sem arredondar o estado salvo.
+  const AGE_STAGE_MS = 30 * 24 * 60 * 60 * 1000;
+  const MAX_AGE_MS = AGE_STAGE_MS * 4;
+  const AGE_STAGES = [
+    { name:'Filhote', icon:'🐣' },
+    { name:'Jovem', icon:'🐤' },
+    { name:'Adulto', icon:'🐓' },
+    { name:'Velho', icon:'🪶' },
+  ];
   const level = (skills, key, max) => Math.min(max, Math.max(0, Number(skills[key]) || 0));
   function duration(id, skills = {}) {
     const reducedBySkills = catalog[id].minutes * 60000 * (1 - level(skills,'rotina_rural',5)*.04);
@@ -31,16 +39,19 @@
   }
   function count(n) { return Number.isFinite(Number(n)) ? Math.max(0, Math.floor(Number(n))) : 0; }
   function normalize(raw, now = Date.now()) {
-    const state = {feed:count(raw?.feed), pets:{}, rations:{}};
+    const state = {feed:count(raw?.feed), pets:{}, rations:{}, deaths:[]};
     for (const key of ['premium','super','booster']) state.rations[key]=count(raw?.rations?.[key]);
     for (const id of Object.keys(catalog)) {
       const source=raw?.pets?.[id]; if (!source) continue;
       const stamp=Number(source.healthUpdatedAt);
+      const ageStamp=Number(source.ageUpdatedAt);
       const health=Number(source.health);
       state.pets[id]={
         name:typeof source.name==='string'?source.name.slice(0,15):'',
         health:Number.isFinite(health)?Math.max(0,Math.min(100,health)):100,
         healthUpdatedAt:Number.isFinite(stamp)&&stamp>=0?stamp:now,
+        ageMs:Math.max(0,Number(source.ageMs)||0),
+        ageUpdatedAt:Number.isFinite(ageStamp)&&ageStamp>=0?ageStamp:(Number.isFinite(stamp)&&stamp>=0?stamp:now),
         readyAt:Math.max(0,Number(source.readyAt)||0),
         cycleDuration:Math.max(1000,Number(source.cycleDuration)||duration(id)),
         ration:['normal','premium','super'].includes(source.ration)?source.ration:'normal',
@@ -62,31 +73,48 @@
     return state;
   }
   function status(pet) { return !pet?'empty':pet.health<15?'hungry':'producing'; }
+  function lifeStage(pet) {
+    const ageMs=Math.max(0,Number(pet?.ageMs)||0);
+    const index=Math.min(AGE_STAGES.length-1,Math.floor(ageMs/AGE_STAGE_MS));
+    const start=index*AGE_STAGE_MS, end=Math.min(MAX_AGE_MS,start+AGE_STAGE_MS);
+    return { ...AGE_STAGES[index], index, ageMs, maxAgeMs:MAX_AGE_MS, ageDays:ageMs/86400000, progress:Math.min(100,ageMs/MAX_AGE_MS*100), stageProgress:Math.min(100,(ageMs-start)/(end-start)*100), remainingDays:Math.max(0,(end-ageMs)/86400000), next:index===AGE_STAGES.length-1?'fim da vida':'próxima fase' };
+  }
+  function itemsAtAge(ageMs) {
+    const stage=Math.min(AGE_STAGES.length-1,Math.floor(Math.max(0,ageMs)/AGE_STAGE_MS));
+    return [2,5,7,12][stage];
+  }
   function advance(raw, now=Date.now(), skills={}, random=Math.random) {
     const state=normalize(raw,now);
     for (const [id,pet] of Object.entries(state.pets)) {
       const start=pet.healthUpdatedAt, end=Math.max(start,now);
       const healthAt=time=>Math.max(0,pet.health-Math.max(0,time-start)/HEALTH_MS);
-      const productionEnd=start+Math.max(0,pet.health-15)*HEALTH_MS;
+      const healthDeathAt=start+pet.health*HEALTH_MS;
+      const ageDeathAt=pet.ageUpdatedAt+Math.max(0,MAX_AGE_MS-pet.ageMs);
+      const productionEnd=Math.min(start+Math.max(0,pet.health-15)*HEALTH_MS,healthDeathAt,ageDeathAt);
       const ms=duration(id,skills);
       const previousCycleDuration=Number(pet.cycleDuration)||duration(id);
       if(pet.readyAt>0&&previousCycleDuration!==ms){pet.readyAt+=ms-previousCycleDuration;pet.cycleDuration=ms;}
       if (!pet.readyAt && pet.health>=15) {pet.readyAt=start+ms;pet.cycleDuration=ms;}
       // Avalia os bônus no instante de cada produto, inclusive durante ausência.
-      while (pet.readyAt>0 && pet.readyAt<=end && pet.readyAt<=productionEnd) {
+      while (pet.readyAt>0 && pet.readyAt<=end && pet.readyAt<=productionEnd && pet.readyAt<healthDeathAt && pet.readyAt<ageDeathAt) {
         const time=pet.readyAt;
         const extra=pet.superUntil>time && healthAt(time)>=80 && random()<.34;
         const golden=pet.boosterUntil>time && random()<(.2+level(skills,'criador_dourado',5)*.04);
-        pet[golden?'goldStock':'stock']+=ITEMS_PER_CYCLE+(extra?1:0);
+        const ageAtCycle=pet.ageMs+Math.max(0,time-pet.ageUpdatedAt);
+        pet[golden?'goldStock':'stock']+=itemsAtAge(ageAtCycle)+(extra?1:0);
         pet.readyAt+=ms;pet.cycleDuration=ms;
       }
+      const livedUntil=Math.min(end,healthDeathAt);
+      pet.ageMs=Math.min(MAX_AGE_MS,pet.ageMs+Math.max(0,livedUntil-pet.ageUpdatedAt));
+      pet.ageUpdatedAt=end;
       pet.health=healthAt(end);pet.healthUpdatedAt=end;
       pet.superActive=pet.superUntil>end&&pet.health>=80;
       if(pet.superUntil<=end)pet.superUntil=0;
       pet.booster=pet.boosterUntil>end;
       if(!pet.booster)pet.boosterUntil=0;
       if(pet.health<15)pet.readyAt=0;
-      if(pet.health<=0)delete state.pets[id];
+      if(pet.ageMs>=MAX_AGE_MS){state.deaths.push({id,name:pet.name,reason:'old-age',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
+      else if(pet.health<=0){state.deaths.push({id,name:pet.name,reason:'health',stock:pet.stock,goldStock:pet.goldStock});delete state.pets[id];}
     }
     return state;
   }
@@ -124,7 +152,7 @@
     const state=advance(raw),pet=state.pets[id];if(!pet)throw new Error('Compre este animal primeiro.');
     pet.name=String(name||'').trim().slice(0,15);return state;
   }
-  const api={catalog,products,rations,normalize,advance,status,feed,boost,collect,rename,duration,feedCost:20,itemsPerCycle:ITEMS_PER_CYCLE};
+  const api={catalog,products,rations,normalize,advance,status,lifeStage,itemsAtAge,feed,boost,collect,rename,duration,feedCost:20,itemsPerCycle:ITEMS_PER_CYCLE,ageStageMs:AGE_STAGE_MS,maxAgeMs:MAX_AGE_MS};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
   else root.FarmAnimals=api;
 })(globalThis);

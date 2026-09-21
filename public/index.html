@@ -7143,7 +7143,9 @@ async function deliverOrder(id) {
   G.orderDeliveries = (G.orderDeliveries || 0) + 1;
   G.totalOrderDeliveries = Number(G.totalOrderDeliveries || 0) + 1;
   checkProfileBackgroundUnlocks();
-  if (G.orderDeliveries < 4) gardenOrders.push(createOrder(gardenOrders.length));
+  // O pedido entregue nunca deve voltar como o próximo pedido, mesmo que o
+  // sorteio aleatório produza a mesma combinação de cliente/item/quantidade.
+  if (G.orderDeliveries < 4) gardenOrders.push(createDifferentOrder(order, gardenOrders.length));
   G.orders = gardenOrders;
   updatePts(); renderHarvested(); renderOrders();
   try { await saveGardenToSE(true); }

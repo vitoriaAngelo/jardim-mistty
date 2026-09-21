@@ -12,7 +12,7 @@
   const rarities = ['Comum','Comum','Comum','Incomum','Incomum','Rara','Rara','Épica','Épica','Lendária'];
   const packPrices = { normal:300, prismatic:750, rainbow:1500 };
   const largePackPrices = { normal:1000, prismatic:2500, rainbow:7500 };
-  const rainbowPackOdds = { normal:99.87, prismatic:0, rainbow:.13 };
+  const rainbowPackOdds = { normal:98.37, prismatic:1.5, rainbow:.13 };
   let busy = false;
   function draw(kind) {
     const normalShare = kind==='rainbow' ? rainbowPackOdds.normal/100 : kind!=='normal' ? (100-totalPrismOdds)/100 : 1;
@@ -28,7 +28,7 @@
   }
   window.renderCardPackShop=function(){
     const el=document.getElementById('card-pack-shop');if(!el)return;
-    el.innerHTML=['normal','prismatic','rainbow'].map(kind=>'<section class="pack-product '+kind+'"><div class="pack-envelope"><span>✦</span><strong>'+(kind==='normal'?'PRIMAVERA':kind==='rainbow'?'ARCO-ÍRIS':'PRISMAS')+'</strong><small>3 FIGURINHAS</small></div><div><h3>'+(kind==='normal'?'Primavera Encantada':kind==='rainbow'?'Além do Arco-Íris':'Prismas da Primavera')+'</h3><p>'+(kind==='normal'?'Três cartas do álbum normal.':kind==='rainbow'?'Dez encontros Arco-Íris, com chance especial de 0,13%.':'Três cartas com 1% de chance total de raridades especiais.')+'</p><small>'+(kind==='normal'?'Comum 70% · Incomum 25% · Rara 4% · Épica 0,8% · Lendária 0,2%':kind==='rainbow'?'Normais 99,87% · Arco-Íris 0,13%':'Normais 99% · Prismáticas 0,46% · Raras prismáticas 0,31% · Épicas prismáticas 0,15% · Arco-Íris 0,08%')+'</small></div><div><strong>'+packPrices[kind].toLocaleString('pt-BR')+' pontos</strong><button data-buy-pack="'+kind+'" '+(busy?'disabled':'')+'>Comprar pack</button></div></section>').join('');
+    el.innerHTML=['normal','prismatic','rainbow'].map(kind=>'<section class="pack-product '+kind+'"><div class="pack-envelope"><span>✦</span><strong>'+(kind==='normal'?'PRIMAVERA':kind==='rainbow'?'ARCO-ÍRIS':'PRISMAS')+'</strong><small>3 FIGURINHAS</small></div><div><h3>'+(kind==='normal'?'Primavera Encantada':kind==='rainbow'?'Além do Arco-Íris':'Prismas da Primavera')+'</h3><p>'+(kind==='normal'?'Três cartas do álbum normal.':kind==='rainbow'?'Dez encontros Arco-Íris, com 1,5% de chance de Prismática e 0,13% de chance de Arco-Íris.':'Três cartas com 1% de chance total de raridades especiais.')+'</p><small>'+(kind==='normal'?'Comum 70% · Incomum 25% · Rara 4% · Épica 0,8% · Lendária 0,2%':kind==='rainbow'?'Normais 98,37% · Prismáticas 1,5% · Arco-Íris 0,13%':'Normais 99% · Prismáticas 0,46% · Raras prismáticas 0,31% · Épicas prismáticas 0,15% · Arco-Íris 0,08%')+'</small></div><div><strong>'+packPrices[kind].toLocaleString('pt-BR')+' pontos</strong><button data-buy-pack="'+kind+'" '+(busy?'disabled':'')+'>Comprar pack</button></div></section>').join('');
     el.querySelectorAll('[data-buy-pack]').forEach(b=>{
       b.textContent='Comprar 3 cartas';
       b.onclick=()=>buyCardPack(b.dataset.buyPack);

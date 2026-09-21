@@ -10634,15 +10634,19 @@ function sameGardenValue(left, right) {
 
 async function confirmGardenSaved(saved) {
   if (isLocalPreview) return;
-  const response = await fetch(`/.netlify/functions/garden-load?username=${encodeURIComponent(seUser.username)}`, {
-    cache: 'no-store', headers: authenticatedHeaders(),
-  });
-  if (!response.ok) throw new Error('Não foi possível confirmar o jardim no banco. Tente novamente.');
-  const confirmed = await response.json();
   const fields = ['xp', 'farmerXP', 'inventory', 'fertilizerInventory', 'plots', 'harvested', 'livestock', 'animalPremiumHabitats', 'orders', 'ordersSeasonKey', 'orderSearches', 'orderDeliveries', 'orderPaidReset', 'skillNodes', 'achievements', 'missions', 'mail', 'packInventory', 'albumCards'];
-  if (!confirmed.data || fields.some(key => !sameGardenValue(saved.data[key], confirmed.data[key]))) {
-    throw new Error('O banco ainda não confirmou todo o progresso. Tente novamente.');
+  let lastMismatch = true;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt) await new Promise(resolve => setTimeout(resolve, 700 * attempt));
+    const response = await fetch(`/.netlify/functions/garden-load?username=${encodeURIComponent(seUser.username)}`, {
+      cache: 'no-store', headers: authenticatedHeaders(),
+    });
+    if (!response.ok) continue;
+    const confirmed = await response.json();
+    lastMismatch = !confirmed.data || fields.some(key => !sameGardenValue(saved.data[key], confirmed.data[key]));
+    if (!lastMismatch) return;
   }
+  throw new Error('O banco ainda não confirmou todo o progresso. Tente novamente.');
 }
 
 // ── Sync G.pts back to SE points balance ──────────────────

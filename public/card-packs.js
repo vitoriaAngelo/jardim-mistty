@@ -6,13 +6,13 @@
   // Odds are per card drawn. Rare tiers and every prismatic tier are intentionally scarce.
   const rarityOdds = { common:70, uncommon:25, rare:4, epic:.8, legendary:.2 };
   const weights = [rarityOdds.common/3,rarityOdds.common/3,rarityOdds.common/3,rarityOdds.uncommon/2,rarityOdds.uncommon/2,rarityOdds.rare/2,rarityOdds.rare/2,rarityOdds.epic/2,rarityOdds.epic/2,rarityOdds.legendary];
-  const prismOdds = { base:.06, rare:.04, epic:.02, rainbow:.01 };
+  const prismOdds = { base:.461538, rare:.307692, epic:.153846, rainbow:.076924 };
   const prismWeights = [prismOdds.base/4,prismOdds.base/4,prismOdds.base/4,prismOdds.base/4,prismOdds.rare/3,prismOdds.rare/3,prismOdds.rare/3,prismOdds.epic/2,prismOdds.epic/2,prismOdds.rainbow];
   const totalPrismOdds = Object.values(prismOdds).reduce((sum,odds)=>sum+odds,0);
   const rarities = ['Comum','Comum','Comum','Incomum','Incomum','Rara','Rara','Épica','Épica','Lendária'];
   const packPrices = { normal:300, prismatic:750, rainbow:1500 };
   const largePackPrices = { normal:1000, prismatic:2500, rainbow:7500 };
-  const rainbowPackOdds = { normal:97, prismatic:2, rainbow:1 };
+  const rainbowPackOdds = { normal:99.87, prismatic:0, rainbow:.13 };
   let busy = false;
   function draw(kind) {
     const normalShare = kind==='rainbow' ? rainbowPackOdds.normal/100 : kind!=='normal' ? (100-totalPrismOdds)/100 : 1;

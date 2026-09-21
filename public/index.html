@@ -4548,6 +4548,7 @@ const G = {
   wateringRefillsSeasonCycle: 0,
   taxDue: 0,
   taxPending: false,
+  taxEventSeasonKey: '',
   missions: null,
   achievements: null,
   achievStats: null,
@@ -4844,7 +4845,10 @@ function announceGardenEvent() {
     ? 'mutation'
     : weightedPool[Math.floor(Math.random() * weightedPool.length)];
   const secondaryChance = { crazyshop:0.035, tax:0.10, pests:0.22 };
-  const secondaryTypes = supportTypes.filter(key => Math.random() < secondaryChance[key]).slice(0, 2);
+  const currentTaxSeasonKey = `${Math.max(0,Number(G.seasonCycle)||0)}:${Math.max(0,Number(G.seasonIdx)||0)}`;
+  const taxAvailable = !G.taxPending && G.taxEventSeasonKey !== currentTaxSeasonKey;
+  const secondaryTypes = supportTypes.filter(key => key !== 'tax' || taxAvailable).filter(key => Math.random() < secondaryChance[key]).slice(0, 2);
+  if (secondaryTypes.includes('tax')) G.taxEventSeasonKey = currentTaxSeasonKey;
   gardenEvent = { type, secondaryTypes, phase:'countdown', endsAt:Date.now()+10000, actions:0, xp:0, bonus:0, touched:new Set(), pests:[], danger:0, pestsSpawned:0, goldenPests:0 };
   const names = [type, ...secondaryTypes].map(key => `${GARDEN_EVENTS[key].icon} ${GARDEN_EVENTS[key].name}`).join(' + ');
   toast(`${names} começa em 10 segundos!`, 5000);
@@ -10408,6 +10412,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     wateringRefillsSeasonCycle: Number(G.wateringRefillsSeasonCycle) || 0,
     taxDue: Math.max(0, Math.floor(Number(G.taxDue) || 0)),
     taxPending: G.taxPending === true,
+    taxEventSeasonKey: G.taxEventSeasonKey || '',
     albumPacks:       Number(G.albumPacks || 0),
     packInventory:   G.packInventory || { normal:0, prismatic:0 },
     albumCards:       G.albumCards || {},
@@ -10723,6 +10728,7 @@ async function loadGardenFromSE(username) {
       : G.seasonCycle;
     G.taxDue = Math.max(0, Math.floor(Number(save.taxDue) || 0));
     G.taxPending = save.taxPending === true && G.taxDue > 0;
+    G.taxEventSeasonKey = String(save.taxEventSeasonKey || '');
     syncWateringRefillSeason();
     G.albumPacks      = Number(save.albumPacks || 0);
     G.packInventory   = { normal:Number(save.packInventory?.normal || 0), prismatic:Number(save.packInventory?.prismatic || 0) };

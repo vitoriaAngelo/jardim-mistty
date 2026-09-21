@@ -7009,7 +7009,7 @@ async function refreshOrders() {
   G.orders = gardenOrders;
   renderOrders();
   updateOrdersButton();
-  try { const saved=await saveGardenToSE(true); await confirmGardenSaved(saved); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
+  try { await saveGardenToSE(true); } catch (error) { toast('❌ Não foi possível confirmar a atualização dos pedidos.', 3200); }
 }
 async function refreshSingleOrder(id) {
   if (G.ordersSeasonKey !== orderSeasonKey()) { resetOrdersForSeason(false); }
@@ -7107,7 +7107,7 @@ async function deliverOrder(id) {
   if (G.orderDeliveries < 4) gardenOrders.push(createOrder(gardenOrders.length));
   G.orders = gardenOrders;
   updatePts(); renderHarvested(); renderOrders();
-  try { const saved=await saveGardenToSE(true); await confirmGardenSaved(saved); }
+  try { await saveGardenToSE(true); }
   catch (error) {
     Object.assign(G, deliverySnapshot);
     G.achievements = new Set(deliverySnapshot.achievements || []);

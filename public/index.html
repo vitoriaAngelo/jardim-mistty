@@ -10351,6 +10351,11 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     // recalcular o crescimento que ocorreu enquanto a pessoa esteve ausente.
     saveTimer = setInterval(() => { if (seUser && gardenHydrated) saveGardenToSE(); }, 15000);
     if (!hadSave) await saveGardenToSE();
+    if (G.ordersGlobalResetPending) {
+      G.ordersGlobalResetPending = false;
+      await saveGardenToSE(true);
+      toast('Pedidos resetados! Novos pedidos e 3 rolls disponiveis.', 4200);
+    }
     if (G.orderRollCompensationPending) {
       G.orderRollCompensationPending = false;
       await saveGardenToSE(true);
@@ -10797,6 +10802,16 @@ async function loadGardenFromSE(username) {
       G.orderRollCompensationPending = true;
     }
     G.ordersGlobalResetVersion = Number(save.ordersGlobalResetVersion || 0);
+    if (G.ordersGlobalResetVersion < 4) {
+      G.ordersGlobalResetVersion = 4;
+      G.ordersSeasonKey = orderSeasonKey();
+      G.orderSearches = 0;
+      G.orderDeliveries = 0;
+      G.orderPaidReset = false;
+      gardenOrders = Array.from({ length: 3 }, (_, i) => createOrder(i));
+      G.orders = gardenOrders;
+      G.ordersGlobalResetPending = true;
+    }
     G.lastOrder        = save.lastOrder || null;
     G.lastEvent        = save.lastEvent || null;
     G.recentCardFinds  = Array.isArray(save.recentCardFinds) ? save.recentCardFinds.slice(0, 20) : [];

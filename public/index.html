@@ -4601,6 +4601,7 @@ const G = {
   orderSearches: 0,
   orderDeliveries: 0,
   orderPaidReset: false,
+  orderRollCompensationVersion: 0,
   ordersGlobalResetVersion: 0,
   lastOrder: null,
   lastEvent: null,
@@ -10316,6 +10317,11 @@ async function initSEUser(username, displayName, twitchAccessToken = '', twitchU
     // recalcular o crescimento que ocorreu enquanto a pessoa esteve ausente.
     saveTimer = setInterval(() => { if (seUser && gardenHydrated) saveGardenToSE(); }, 15000);
     if (!hadSave) await saveGardenToSE();
+    if (G.orderRollCompensationPending) {
+      G.orderRollCompensationPending = false;
+      await saveGardenToSE(true);
+      toast('🎁 Seus 3 rolls de pedidos foram devolvidos!', 4200);
+    }
 
     // O primeiro acesso só continua depois que o nome obrigatório for salvo.
     if (G.farmNameChosen !== true) setTimeout(() => openFirstLoginBonus(), 500);
@@ -10425,6 +10431,7 @@ async function saveGardenToSENow(retryStale = true, orderAction = false) {
     orderSearches:    G.orderSearches || 0,
     orderDeliveries:  G.orderDeliveries || 0,
     orderPaidReset:   G.orderPaidReset === true,
+    orderRollCompensationVersion: Number(G.orderRollCompensationVersion || 0),
     lastOrder:        G.lastOrder || null,
     lastEvent:        G.lastEvent || null,
     recentCardFinds:  Array.isArray(G.recentCardFinds) ? G.recentCardFinds.slice(0, 20) : [],
@@ -10749,6 +10756,12 @@ async function loadGardenFromSE(username) {
     G.orderSearches   = Math.min(3, Number(save.orderSearches || 0));
     G.orderDeliveries  = Number(save.orderDeliveries || 0);
     G.orderPaidReset   = save.orderPaidReset === true;
+    G.orderRollCompensationVersion = Number(save.orderRollCompensationVersion || 0);
+    if (G.orderRollCompensationVersion < 1 && G.orderSearches >= 3) {
+      G.orderSearches = 0;
+      G.orderRollCompensationVersion = 1;
+      G.orderRollCompensationPending = true;
+    }
     G.ordersGlobalResetVersion = Number(save.ordersGlobalResetVersion || 0);
     G.lastOrder        = save.lastOrder || null;
     G.lastEvent        = save.lastEvent || null;

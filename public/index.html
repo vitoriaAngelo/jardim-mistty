@@ -8170,24 +8170,30 @@ async function buyFertilizer(id) {
 }
 
 function applyFertilizer(plotIdx, fertilizerId) {
-  // Only apply to EMPTY plots
-  if (G.plots[plotIdx] !== null) {
-    toast('⚠️ Aplique o adubo num canteiro vazio — ele ficará preparado para a próxima planta!');
-    return;
-  }
+  const plot = G.plots[plotIdx];
   const applied = fertilizersOnPlot(plotIdx);
-  if (applied.length >= 2 || applied.includes(fertilizerId)) {
-    toast(applied.length >= 2 ? '🌱 Este canteiro já tem dois adubos. Agora escolha uma planta!' : '🌱 Esse adubo já está aplicado. Escolha outro ou plante!');
+  const activeOnPlant = plot ? ({ quick_grow: plot.quickGrow, golden_soil: plot.goldenSoil, aquatic: plot.aquaticWater }[fertilizerId] === true) : false;
+  if (applied.length >= 2 || applied.includes(fertilizerId) || activeOnPlant) {
+    toast('🌱 Esse adubo já está aplicado neste canteiro.');
     return;
   }
   const f = FERTILIZERS[fertilizerId];
   if (!f || !(G.fertilizerInventory[fertilizerId] > 0)) return;
 
+  if (plot) {
+    if (isReady(plot)) { toast('🌾 Colha a planta antes de aplicar adubo.'); return; }
+    if (fertilizerId === 'quick_grow') plot.quickGrow = true;
+    if (fertilizerId === 'golden_soil') plot.goldenSoil = true;
+    if (fertilizerId === 'aquatic') plot.aquaticWater = true;
+  }
+
   G.fertilizerInventory[fertilizerId]--;
 
-  // Mark the empty plot with the fertilizer for the next plant
-  if (!G.plotFertilizers) G.plotFertilizers = {};
-  G.plotFertilizers[plotIdx] = [...applied, fertilizerId];
+  // Canteiros vazios guardam o adubo; plantas existentes recebem o efeito acima.
+  if (!plot) {
+    if (!G.plotFertilizers) G.plotFertilizers = {};
+    G.plotFertilizers[plotIdx] = [...applied, fertilizerId];
+  }
 
   // Mantém o adubo selecionado para permitir aplicar em vários canteiros.
   // A seleção só termina quando o estoque chega a zero.
@@ -8215,7 +8221,9 @@ function updateFertilizerCursor() {
     if (!G.selectedFertilizer) return;
     const idx = parseInt(el.dataset.idx);
     const isEmpty = !G.plots[idx];
-    if (!isEmpty) return; // only empty plots
+    if (!isEmpty) {
+      if (isReady(G.plots[idx])) return;
+    }
     if (G.selectedFertilizer === 'quick_grow') el.classList.add('ready-quick-grow');
     if (G.selectedFertilizer === 'golden_soil') el.classList.add('ready-golden-soil');
     if (G.selectedFertilizer === 'aquatic') el.classList.add('ready-aquatic');
@@ -8884,9 +8892,11 @@ async function onPlotClick(idx, rainbowAutoHarvest = false) {
     return;
   }
 
-  // Se adubo selecionado mas canteiro TEM planta → avisar
+  // Adubo pode ser aplicado antes ou depois do plantio.
   if (G.selectedFertilizer && plot && !rainbowAutoHarvest) {
-    toast(`⚠️ O ${FERTILIZERS[G.selectedFertilizer].name} precisa ser aplicado num canteiro VAZIO antes de plantar!`, 3000);
+    applyFertilizer(idx, G.selectedFertilizer);
+    renderPlots();
+    saveGardenToSE();
     return;
   }
 

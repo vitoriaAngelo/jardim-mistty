@@ -4519,6 +4519,7 @@ const G = {
   pointsHistory: [],
   xp: 0,
   selectedTool: 'water',
+  shovelMode: 'pest',
   selectedSeed: null,
   selectedFertilizer: null,
   inventoryTargetPlot: null,
@@ -5631,6 +5632,17 @@ function selectTool(t) {
   G.selectedTool = t;
   document.getElementById('tool-water').classList.toggle('active', t === 'water');
   document.getElementById('tool-shovel').classList.toggle('active', t === 'shovel');
+  if (t === 'shovel') openShovelModeModal();
+}
+function openShovelModeModal() {
+  const modal=document.getElementById('modal');
+  modal.querySelector('.modal').innerHTML=`<button class="popup-close-x" aria-label="Fechar seleção" onclick="closeModal()">×</button><h2>🛠️ Como usar a pá?</h2><p>Escolha o que a pá deve fazer antes de clicar no canteiro.</p><div class="modal-actions"><button class="btn-primary" onclick="chooseShovelMode('plant')">🌱 Tirar planta</button><button class="btn-primary" onclick="chooseShovelMode('pest')">🐛 Tirar praga</button></div>`;
+  openModal();
+}
+function chooseShovelMode(mode) {
+  G.shovelMode=mode==='plant'?'plant':'pest';
+  closeModal();
+  toast(G.shovelMode==='plant'?'🛠️ Pá configurada para tirar plantas.':'🛠️ Pá configurada para tirar pragas.',2200);
 }
 function isReady(plot) {
   if (!plot) return false;
@@ -5780,7 +5792,7 @@ function showOutOfSeasonModal(type) {
   openModal();
 }
 
-function confirmRemovePlant(idx) {
+function confirmRemovePest(idx) {
   const plot = G.plots[idx];
   if (!plot) return;
   if (!plot.pestInfested) { toast('🛠️ A pá só pode ser usada para remover pragas.'); return; }
@@ -5793,12 +5805,12 @@ function confirmRemovePlant(idx) {
     <p>A pá vai remover a infestação de ${plant.emoji} ${plant.name} e devolver a planta ao estado normal. A pá custará ${effectiveShovelCost()} pontos.</p>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-primary" onclick="removePlantFromPlot(${idx})">Remover praga</button>
+      <button class="btn-primary" onclick="removePestFromPlot(${idx})">Remover praga</button>
     </div>`;
   openModal();
 }
 
-async function removePlantFromPlot(idx) {
+async function removePestFromPlot(idx) {
   closeModal();
   const plot = G.plots[idx];
   if (!plot?.pestInfested || isReady(plot)) return;
@@ -5810,6 +5822,27 @@ async function removePlantFromPlot(idx) {
   saveGardenToSE();
   toast(`🧹 Praga removida! ${getPlantable(plot.type).emoji} ${getPlantable(plot.type).name} voltou ao estado normal.`);
   setTimeout(() => { renderPlots(); }, 300);
+}
+
+function confirmRemovePlant(idx) {
+  const plot=G.plots[idx];
+  if (!plot) return;
+  const plant=getPlantable(plot.type);
+  const modal=document.getElementById('modal');
+  modal.querySelector('.modal').innerHTML=`<button class="popup-close-x" aria-label="Fechar confirmação" onclick="closeModal()">×</button><h2>🌱 Tirar planta?</h2><p>A pá vai remover ${plant.emoji} <strong>${plant.name}</strong> do canteiro. A planta e o progresso dela serão perdidos. A pá custará ${effectiveShovelCost()} pontos.</p><div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-primary" onclick="removePlantFromPlot(${idx})">Tirar planta</button></div>`;
+  openModal();
+}
+async function removePlantFromPlot(idx) {
+  closeModal();
+  const plot=G.plots[idx];
+  if (!plot) return;
+  const cost=effectiveShovelCost();
+  if (G.pts<cost) { toast(`🌟 Você precisa de ${cost} pts para usar a pá!`); return; }
+  if (!(await chargeGamePoints(cost))) return;
+  G.plots[idx]=null;
+  saveGardenToSE();
+  renderPlots();
+  toast('🛠️ Planta removida do canteiro.');
 }
 
 function renderInventory() {
@@ -9125,7 +9158,8 @@ async function onPlotClick(idx, rainbowAutoHarvest = false) {
   }
 
   if (tool === 'shovel') {
-    confirmRemovePlant(idx);
+    if (G.shovelMode === 'plant') confirmRemovePlant(idx);
+    else confirmRemovePest(idx);
     return;
   }
 }

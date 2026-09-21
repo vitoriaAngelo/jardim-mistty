@@ -6321,7 +6321,10 @@ function epicSaleDetails() {
     const pestQty = Number(SELL_PEST[type]) || 0;
     if (goodQty + pestQty <= 0) return null;
     const item = getPlantable(type);
-    return { type, name:item?.name || type, emoji:item?.emoji || '✨', quantity:goodQty + pestQty };
+    const regularValue = sellValueForSelection(type, goodQty, pestQty, false);
+    const epicValue = sellValueForSelection(type, goodQty, pestQty, true);
+    const extraValue = Math.max(0, Math.round((epicValue - regularValue) * (1 + localFairSaleBonus(goodQty + pestQty))));
+    return { type, name:item?.name || type, emoji:item?.emoji || '✨', quantity:goodQty + pestQty, extraValue };
   }).filter(Boolean);
 }
 
@@ -6332,8 +6335,9 @@ function showEpicSalePopup(details) {
   overlay.id = 'epic-sale-result-overlay';
   overlay.className = 'modal-overlay';
   overlay.onclick = event => { if (event.target === overlay) overlay.remove(); };
-  const rows = details.map(item => `<div class="epic-sale-result-item"><span>${item.emoji} ${item.name} · pacote ×${item.quantity}</span><b>dobro</b></div>`).join('');
-  overlay.innerHTML = `<div class="modal epic-sale-result-modal" role="dialog" aria-modal="true" aria-labelledby="epic-sale-result-title"><button class="popup-close-x" type="button" aria-label="Fechar" onclick="document.getElementById('epic-sale-result-overlay')?.remove()">×</button><div class="epic-sale-sparkle">💎✨</div><h2 id="epic-sale-result-title">VOCÊ FEZ UMA VENDA ÉPICA!</h2><p>Todos os itens destes pacotes foram vendidos pelo dobro:</p><div class="epic-sale-result-list">${rows}</div><div class="modal-actions" style="justify-content:center"><button type="button" class="btn-ok" onclick="document.getElementById('epic-sale-result-overlay')?.remove()">Que incrível!</button></div></div>`;
+  const extraTotal = details.reduce((sum, item) => sum + (Number(item.extraValue) || 0), 0);
+  const rows = details.map(item => `<div class="epic-sale-result-item"><span>${item.emoji} ${item.name} · pacote ×${item.quantity}</span><b>+${Number(item.extraValue || 0).toLocaleString('pt-BR')} pts</b></div>`).join('');
+  overlay.innerHTML = `<div class="modal epic-sale-result-modal" role="dialog" aria-modal="true" aria-labelledby="epic-sale-result-title"><button class="popup-close-x" type="button" aria-label="Fechar" onclick="document.getElementById('epic-sale-result-overlay')?.remove()">×</button><div class="epic-sale-sparkle">💎✨</div><h2 id="epic-sale-result-title">VOCÊ FEZ UMA VENDA ÉPICA!</h2><p>Todos os itens destes pacotes foram vendidos pelo dobro.</p><div class="epic-sale-result-list">${rows}</div><p><strong>Você recebeu ${extraTotal.toLocaleString('pt-BR')} pontos a mais pelo dobro!</strong></p><div class="modal-actions" style="justify-content:center"><button type="button" class="btn-ok" onclick="document.getElementById('epic-sale-result-overlay')?.remove()">Que incrível!</button></div></div>`;
   document.body.appendChild(overlay);
 }
 
